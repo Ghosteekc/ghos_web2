@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cr-bg text-cr-text antialiased overflow-x-hidden;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: -1px -1px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-cr-card/70 backdrop-blur-xl border border-cr-border rounded-cr shadow-card;
+  }
+
+  .glass-card {
+    @apply bg-cr-card/80 backdrop-blur-lg border border-cr-border rounded-cr-lg shadow-card transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    @apply bg-cr-card-hover border-cr-border/80 shadow-glow;
+  }
+
+  .btn-gold {
+    @apply bg-gradient-to-r from-cr-gold to-yellow-500 text-cr-bg font-semibold px-6 py-3 rounded-cr shadow-glow hover:shadow-glow-blue transition-all duration-300 active:scale-95;
+  }
+
+  .btn-blue {
+    @apply bg-cr-blue/20 text-cr-blue border border-cr-blue/30 px-4 py-2 rounded-cr hover:bg-cr-blue/30 transition-all duration-300 active:scale-95;
+  }
+
+  .sidebar-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-cr-muted hover:text-cr-text hover:bg-white/5 transition-all duration-200 cursor-pointer;
+  }
+
+  .sidebar-item.active {
+    @apply text-cr-gold bg-cr-gold/10 border border-cr-gold/20;
+  }
+}

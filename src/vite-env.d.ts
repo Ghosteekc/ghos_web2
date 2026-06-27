@@ -1,0 +1,38 @@
+/// <reference types="vite/client" />
+
+interface ImportMeta {
+  readonly env: Record<string, string | undefined>;
+}
+
+export interface TelegramWebApp {
+  initData: string;
+  initDataUnsafe: {
+    user?: {
+      id: number;
+      first_name: string;
+      last_name?: string;
+      username?: string;
+      language_code?: string;
+      is_premium?: boolean;
+    };
+  };
+  ready: () => void;
+  expand: () => void;
+  close: () => void;
+  openTelegramLink: (url: string) => void;
+  themeParams: Record<string, string>;
+  colorScheme: "light" | "dark";
+  HapticFeedback?: {
+    impactOccurred: (style: "light" | "medium" | "heavy" | "rigid" | "soft") => void;
+  };
+  showAlert: (message: string) => void;
+  showConfirm: (message: string) => void;
+}
+
+declare global {
+  interface Window {
+    Telegram?: { WebApp: TelegramWebApp };
+  }
+}
+
+export {};
