@@ -60,9 +60,11 @@ export function DecksPage() {
       {loading ? (
         <SkeletonGroup count={4} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
           {decks.map((deck, i) => (
-            <DeckCard key={deck.id} deck={deck} index={i} onOpen={() => navigate(`/decks/${deck.id}`)} />
+            <div key={deck.id} className="w-full">
+              <DeckCard deck={deck} index={i} onOpen={() => navigate(`/decks/${deck.id}`)} />
+            </div>
           ))}
           {decks.length === 0 && (
             <Card className="col-span-full text-center">

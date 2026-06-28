@@ -74,7 +74,7 @@ export function SettingsPage() {
                     <p className="text-xs text-cr-muted">Выбор цветовой схемы</p>
                   </div>
                 </div>
-                <div className="flex bg-cr-bg rounded-lg p-1">
+                <div className="flex bg-cr-bg rounded-lg p-1 flex-shrink-0">
                   <button
                     onClick={() => update({ theme: "dark" })}
                     className={
@@ -189,20 +189,21 @@ export function SettingsPage() {
 
 export { SettingsPage as default };
 
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <button
-      onClick={() => onChange(!checked)}
-      className={
-        "relative w-12 h-7 rounded-full transition-colors duration-200 " +
-        (checked ? "bg-cr-gold" : "bg-cr-border")
-      }
-    >
-      <motion.span
-        animate={{ x: checked ? 20 : 2 }}
-        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-        className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
-      />
-    </button>
-  );
-}
+  function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+    return (
+      <button
+        type="button"
+        onClick={() => onChange(!checked)}
+        className={
+          "relative w-12 h-7 rounded-full transition-colors duration-200 flex-shrink-0 " +
+          (checked ? "bg-cr-gold" : "bg-cr-border")
+        }
+      >
+        <motion.span
+          animate={{ x: checked ? 20 : 2 }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          className="absolute top-1 w-5 h-5 rounded-full bg-white shadow-md"
+        />
+      </button>
+    );
+  }
