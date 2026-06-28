@@ -22,6 +22,7 @@ export interface TelegramWebApp {
   openTelegramLink: (url: string) => void;
   themeParams: Record<string, string>;
   colorScheme: "light" | "dark";
+  platform?: "ios" | "android" | "macos" | "tdesktop" | "weba" | "webk" | "unigram" | "unknown";
   safeAreaInset?: { top: number; bottom: number; left: number; right: number };
   contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
   onEvent?: (eventType: string, callback: () => void) => void;

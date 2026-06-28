@@ -5,31 +5,38 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/utils";
 import { PageRefreshProvider } from "@/hooks";
 
+function getTelegramChromeTop(webApp: NonNullable<typeof window.Telegram>["WebApp"]) {
+  if (webApp.platform === "ios") return 56;
+  if (webApp.platform === "android") return 48;
+  return 44;
+}
+
 function applyTelegramSafeArea() {
   const webApp = window.Telegram?.WebApp;
   if (!webApp) return;
 
   const root = document.documentElement;
-  const inset = webApp.safeAreaInset;
-  const contentInset = webApp.contentSafeAreaInset;
+  const device = webApp.safeAreaInset ?? { top: 0, bottom: 0, left: 0, right: 0 };
+  const content = webApp.contentSafeAreaInset;
 
-  if (inset) {
-    root.style.setProperty("--tg-safe-top", `${inset.top}px`);
-    root.style.setProperty("--tg-safe-bottom", `${inset.bottom}px`);
-    root.style.setProperty("--tg-safe-left", `${inset.left}px`);
-    root.style.setProperty("--tg-safe-right", `${inset.right}px`);
-  }
+  root.style.setProperty("--tg-device-safe-top", `${device.top}px`);
+  root.style.setProperty("--tg-device-safe-bottom", `${device.bottom}px`);
+  root.style.setProperty("--tg-device-safe-left", `${device.left}px`);
+  root.style.setProperty("--tg-device-safe-right", `${device.right}px`);
 
-  if (contentInset) {
-    const top = Math.max(inset?.top ?? 0, contentInset.top);
-    const bottom = Math.max(inset?.bottom ?? 0, contentInset.bottom);
-    const left = Math.max(inset?.left ?? 0, contentInset.left);
-    const right = Math.max(inset?.right ?? 0, contentInset.right);
-    root.style.setProperty("--tg-safe-top", `${top}px`);
-    root.style.setProperty("--tg-safe-bottom", `${bottom}px`);
-    root.style.setProperty("--tg-safe-left", `${left}px`);
-    root.style.setProperty("--tg-safe-right", `${right}px`);
-  }
+  const chromeTop = getTelegramChromeTop(webApp);
+  let contentTop = content?.top ?? 0;
+  const contentBottom = content?.bottom ?? device.bottom;
+  const contentLeft = content?.left ?? device.left;
+  const contentRight = content?.right ?? device.right;
+
+  // Всегда ниже шапки Telegram («Закрыть» / меню)
+  contentTop = Math.max(contentTop, device.top + chromeTop);
+
+  root.style.setProperty("--tg-content-safe-top", `${contentTop}px`);
+  root.style.setProperty("--tg-content-safe-bottom", `${contentBottom}px`);
+  root.style.setProperty("--tg-content-safe-left", `${contentLeft}px`);
+  root.style.setProperty("--tg-content-safe-right", `${contentRight}px`);
 }
 
 export function Layout() {
