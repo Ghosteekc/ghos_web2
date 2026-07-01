@@ -27,6 +27,12 @@ export function CardCatalogProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    const base = import.meta.env.VITE_API_URL?.trim();
+    if (!base) {
+      setReady(true);
+      return;
+    }
+
     let cancelled = false;
     void (async () => {
       try {
@@ -70,10 +76,15 @@ export function CardCatalogProvider({ children }: { children: ReactNode }) {
   return <CardCatalogContext.Provider value={value}>{children}</CardCatalogContext.Provider>;
 }
 
-export function useCardCatalog() {
+export function useCardCatalog(): CardCatalogContextValue {
   const ctx = useContext(CardCatalogContext);
   if (!ctx) {
-    throw new Error("useCardCatalog must be used within CardCatalogProvider");
+    return {
+      ready: true,
+      getCard: () => undefined,
+      nameRu: (name: string) => name,
+      iconUrl: () => undefined,
+    };
   }
   return ctx;
 }

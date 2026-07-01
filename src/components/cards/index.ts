@@ -1,1 +1,1 @@
-export { CardTile, CardDeckGrid, CardUsageList, CardUsageGrid } from "./CardTile";
+export { CardTile, CardDeckGrid, CardUsageList, CardUsageGrid, CardUsageCompactGrid } from "./CardTile";

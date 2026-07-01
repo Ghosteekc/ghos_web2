@@ -1,13 +1,14 @@
 import { cn } from "@/utils";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 
-type CardTileSize = "xs" | "sm" | "md" | "lg";
+type CardTileSize = "xs" | "sm" | "md" | "grid" | "lg";
 
 const sizeClasses: Record<CardTileSize, string> = {
   xs: "w-9 h-11",
   sm: "w-11 h-[3.25rem] min-w-[2.75rem]",
   md: "w-14 h-16",
-  lg: "w-full aspect-square",
+  grid: "w-14 h-[4.25rem] max-w-[4.5rem]",
+  lg: "w-full max-w-[5rem] aspect-[4/5]",
 };
 
 interface CardTileProps {
@@ -16,6 +17,7 @@ interface CardTileProps {
   size?: CardTileSize;
   showLabel?: boolean;
   labelOverride?: string;
+  labelClassName?: string;
   className?: string;
   badge?: string | number;
 }
@@ -26,6 +28,7 @@ export function CardTile({
   size = "md",
   showLabel = false,
   labelOverride,
+  labelClassName,
   className,
   badge,
 }: CardTileProps) {
@@ -34,10 +37,10 @@ export function CardTile({
   const label = labelOverride ?? nameRu(name);
 
   return (
-    <div className={cn("flex flex-col items-center gap-1 min-w-0", className)}>
+    <div className={cn("flex flex-col items-center gap-1 min-w-0 shrink-0", className)}>
       <div
         className={cn(
-          "relative rounded-lg overflow-hidden border border-cr-border/80 bg-cr-bg shadow-sm",
+          "relative rounded-lg overflow-hidden border border-cr-border/80 bg-cr-bg shadow-sm shrink-0",
           sizeClasses[size],
         )}
         title={label}
@@ -46,7 +49,7 @@ export function CardTile({
           <img
             src={src}
             alt={label}
-            className="w-full h-full object-cover object-center scale-110"
+            className="w-full h-full object-cover object-center scale-105"
             loading="lazy"
           />
         ) : (
@@ -61,7 +64,12 @@ export function CardTile({
         )}
       </div>
       {showLabel && (
-        <span className="text-[10px] leading-tight text-cr-muted text-center line-clamp-2 max-w-full px-0.5">
+        <span
+          className={cn(
+            "text-[10px] leading-tight text-center line-clamp-2 max-w-full px-0.5",
+            labelClassName ?? "text-cr-muted",
+          )}
+        >
           {label}
         </span>
       )}
@@ -103,7 +111,7 @@ export function CardDeckGrid({
       {hidden > 0 && (
         <div
           className={cn(
-            "rounded-lg border border-cr-border bg-cr-surface flex items-center justify-center text-xs font-semibold text-cr-muted",
+            "rounded-lg border border-cr-border bg-cr-surface flex items-center justify-center text-xs font-semibold text-cr-muted shrink-0",
             sizeClasses[size],
           )}
         >
@@ -121,29 +129,34 @@ interface CardUsageItem {
 }
 
 export function CardUsageList({ items }: { items: CardUsageItem[] }) {
+  return <CardUsageCompactGrid items={items} />;
+}
+
+export function CardUsageCompactGrid({ items }: { items: CardUsageItem[] }) {
   const { nameRu } = useCardCatalog();
-  const maxCount = items[0]?.count ?? 1;
+  const maxCount = Math.max(...items.map((i) => i.count), 1);
 
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-2 gap-3">
       {items.map((item, i) => (
-        <div key={item.name} className="flex items-center gap-3">
-          <span className="text-xs text-cr-muted w-5 shrink-0">#{i + 1}</span>
-          <CardTile name={item.name} size="sm" showLabel />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1 gap-2">
-              <span className="text-sm font-medium text-cr-text truncate">{nameRu(item.name)}</span>
-              <span className="text-xs text-cr-muted shrink-0">
-                {item.count} игр
-                {item.winrate != null ? ` · ${item.winrate.toFixed(1)}%` : ""}
-              </span>
-            </div>
-            <div className="h-1.5 bg-cr-border rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-cr-blue to-cr-gold"
-                style={{ width: `${Math.min((item.count / maxCount) * 100, 100)}%` }}
-              />
-            </div>
+        <div
+          key={item.name}
+          className="relative flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-cr-bg/50 border border-cr-border"
+        >
+          <span className="absolute top-2 left-2 text-[10px] font-semibold text-cr-muted">
+            #{i + 1}
+          </span>
+          <CardTile name={item.name} size="grid" className="mt-3" />
+          <p className="card-name-glow text-xs text-center line-clamp-2 px-1">{nameRu(item.name)}</p>
+          <p className="text-[10px] text-cr-muted">
+            {item.count} игр
+            {item.winrate != null ? ` · ${item.winrate.toFixed(0)}%` : ""}
+          </p>
+          <div className="w-full h-1 bg-cr-border rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-cr-blue to-cr-gold"
+              style={{ width: `${Math.min((item.count / maxCount) * 100, 100)}%` }}
+            />
           </div>
         </div>
       ))}
@@ -151,36 +164,14 @@ export function CardUsageList({ items }: { items: CardUsageItem[] }) {
   );
 }
 
+/** @deprecated use CardUsageCompactGrid */
 export function CardUsageGrid({ items }: { items: CardUsageItem[] }) {
-  const maxCount = Math.max(...items.map((i) => i.count), 1);
-
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-      {items.map((item) => (
-        <div
-          key={item.name}
-          className="flex flex-col items-center gap-2 p-3 rounded-xl bg-cr-bg/50 border border-cr-border"
-        >
-          <CardTile name={item.name} size="md" badge={item.count} />
-          <p className="text-xs font-medium text-cr-text text-center line-clamp-2">
-            <CardNameRu name={item.name} />
-          </p>
-          <div className="w-full h-1.5 bg-cr-border rounded-full overflow-hidden">
-            <div
-              className="h-full bg-cr-gold rounded-full"
-              style={{ width: `${(item.count / maxCount) * 100}%` }}
-            />
-          </div>
-          {item.winrate != null && (
-            <p className="text-[10px] text-cr-muted">WR {item.winrate.toFixed(1)}%</p>
-          )}
-        </div>
-      ))}
-    </div>
-  );
+  return <CardUsageCompactGrid items={items} />;
 }
 
 function CardNameRu({ name }: { name: string }) {
   const { nameRu } = useCardCatalog();
   return <>{nameRu(name)}</>;
 }
+
+export { CardNameRu };

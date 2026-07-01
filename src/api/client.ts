@@ -36,20 +36,44 @@ function buildRequestHeaders(extra?: HeadersInit): HeadersInit {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  if (!API_BASE.trim()) {
+    throw new ApiError(
+      "VITE_API_URL не задан. На Vercel укажите URL localtunnel (https://....loca.lt) и пересоберите проект.",
+      0,
+    );
+  }
+
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: buildRequestHeaders(options?.headers),
   });
+
+  const contentType = res.headers.get("content-type") ?? "";
+
   if (!res.ok) {
     if (res.status === 511) {
       throw new ApiError(
-        "localtunnel требует авторизацию. Обновите Mini App или откройте URL туннеля в браузере.",
+        "localtunnel требует авторизацию. Откройте URL туннеля в браузере один раз, затем обновите Mini App.",
+        res.status,
+      );
+    }
+    if (res.status === 503 || res.status === 502) {
+      throw new ApiError(
+        "Backend недоступен (туннель offline). Перезапустите: npx localtunnel --port 8080 и обновите VITE_API_URL на Vercel.",
         res.status,
       );
     }
     const body = await res.json().catch(() => ({ detail: res.statusText }));
     throw new ApiError(body.detail ?? `HTTP ${res.status}`, res.status);
   }
+
+  if (!contentType.includes("application/json")) {
+    throw new ApiError(
+      "Ответ не JSON — проверьте VITE_API_URL (должен быть URL backend-туннеля, не Vercel).",
+      res.status,
+    );
+  }
+
   return res.json();
 }
 
@@ -73,6 +97,10 @@ export const api = {
     request<Settings>("/api/settings", {
       method: "PUT",
       body: JSON.stringify(settings),
+    }),
+  clearCache: () =>
+    request<{ ok: boolean }>("/api/cache/clear", {
+      method: "POST",
     }),
   getFavorites: () => request<{ cards: CardInfo[]; decks: string[][]; entries?: { cards: string[]; deck_link?: string | null }[] }>("/api/favorites"),
   addFavoriteDeck: (deck: string[]) => request<{ ok: true }>("/api/favorites", {

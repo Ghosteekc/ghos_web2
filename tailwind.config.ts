@@ -8,17 +8,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        "cr-bg": "#0b0b14",
-        "cr-surface": "#111128",
-        "cr-card": "#181830",
-        "cr-card-hover": "#1e1e38",
-        "cr-gold": "#fbbf24",
-        "cr-blue": "#60a5fa",
-        "cr-win": "#22c55e",
-        "cr-loss": "#ef4444",
-        "cr-text": "#f3f4f6",
-        "cr-muted": "#9ca3af",
-        "cr-border": "rgba(255, 255, 255, 0.06)",
+        "cr-bg": "rgb(var(--cr-bg) / <alpha-value>)",
+        "cr-surface": "rgb(var(--cr-surface) / <alpha-value>)",
+        "cr-card": "rgb(var(--cr-card) / <alpha-value>)",
+        "cr-card-hover": "rgb(var(--cr-card-hover) / <alpha-value>)",
+        "cr-gold": "rgb(var(--cr-gold) / <alpha-value>)",
+        "cr-blue": "rgb(var(--cr-blue) / <alpha-value>)",
+        "cr-win": "rgb(var(--cr-win) / <alpha-value>)",
+        "cr-loss": "rgb(var(--cr-loss) / <alpha-value>)",
+        "cr-text": "rgb(var(--cr-text) / <alpha-value>)",
+        "cr-muted": "rgb(var(--cr-muted) / <alpha-value>)",
+        "cr-border": "rgb(var(--cr-border) / var(--cr-border-alpha))",
+      },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
       },
       borderRadius: {
         "cr": "1.25rem",

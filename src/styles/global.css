@@ -3,6 +3,39 @@
 @tailwind utilities;
 
 @layer base {
+  :root,
+  [data-theme="dark"] {
+    --cr-bg: 11 11 20;
+    --cr-surface: 17 17 40;
+    --cr-card: 24 24 48;
+    --cr-card-hover: 30 30 56;
+    --cr-gold: 251 191 36;
+    --cr-blue: 96 165 250;
+    --cr-win: 34 197 94;
+    --cr-loss: 239 68 68;
+    --cr-text: 243 244 246;
+    --cr-muted: 156 163 175;
+    --cr-border: 255 255 255;
+    --cr-border-alpha: 0.06;
+    --cr-grid-line: rgba(255, 255, 255, 0.025);
+  }
+
+  [data-theme="light"] {
+    --cr-bg: 238 240 246;
+    --cr-surface: 255 255 255;
+    --cr-card: 255 255 255;
+    --cr-card-hover: 244 245 249;
+    --cr-gold: 217 119 6;
+    --cr-blue: 37 99 235;
+    --cr-win: 22 163 74;
+    --cr-loss: 220 38 38;
+    --cr-text: 17 24 39;
+    --cr-muted: 107 114 128;
+    --cr-border: 0 0 0;
+    --cr-border-alpha: 0.08;
+    --cr-grid-line: rgba(0, 0, 0, 0.04);
+  }
+
   :root {
     --tg-device-safe-top: 0px;
     --tg-device-safe-bottom: 0px;
@@ -33,10 +66,10 @@
   }
 
   body {
-    @apply bg-cr-bg text-cr-text antialiased overflow-x-hidden;
+    @apply bg-cr-bg text-cr-text antialiased overflow-x-hidden font-sans font-medium;
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      linear-gradient(var(--cr-grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--cr-grid-line) 1px, transparent 1px);
     background-size: 24px 24px;
     background-position: -1px -1px;
     -webkit-tap-highlight-color: transparent;
@@ -156,6 +189,30 @@
 
   .page-title {
     @apply text-2xl font-bold text-cr-text tracking-tight;
+    font-weight: 700;
+  }
+
+  .card-name-glow {
+    @apply text-cr-gold font-semibold leading-tight;
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
+  }
+
+  [data-theme="light"] .card-name-glow {
+    text-shadow: 0 0 8px rgba(217, 119, 6, 0.25);
+  }
+
+  .settings-data-btn {
+    @apply w-full flex flex-col items-center justify-center gap-2 py-4 px-4 rounded-cr-lg
+      border border-cr-border bg-cr-bg/40 text-cr-text font-semibold text-sm
+      transition-colors active:scale-[0.98];
+  }
+
+  .settings-data-btn:hover {
+    @apply bg-cr-card-hover;
+  }
+
+  .settings-data-btn:disabled {
+    @apply opacity-50 pointer-events-none;
   }
 
   .toggle-switch {
@@ -186,6 +243,6 @@
   }
 
   .settings-action-row {
-    @apply w-full justify-start !py-2.5 !px-3 min-h-[2.75rem];
+    @apply w-full justify-center !py-2.5 !px-3 min-h-[2.75rem];
   }
 }

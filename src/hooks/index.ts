@@ -5,6 +5,8 @@ import type { TelegramWebApp } from "@/vite-env";
 export { PageRefreshProvider, usePageRefresh } from "./PageRefreshProvider";
 export { CardCatalogProvider, useCardCatalog } from "./CardCatalogProvider";
 export { usePullToRefresh } from "./usePullToRefresh";
+export { applyTheme, loadStoredTheme, resolveTheme, initTheme } from "./useTheme";
+export type { AppTheme } from "./useTheme";
 export function useTelegram() {
   const [tg, setTg] = useState<TelegramWebApp | null>(null);
   const [isReady, setIsReady] = useState(false);
