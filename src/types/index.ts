@@ -53,13 +53,17 @@ export interface BattleDetail {
 
 export interface Deck {
   id: number;
+  name: string;
   cards: { id: string; name: string; icon: string; rarity: string; cost: number }[];
   winrate: number;
   total_games: number;
   avg_elixir: number;
   best_matchups: BattleSummary[];
   worst_matchups: BattleSummary[];
-  type: "rated" | "classic" | "2v2" | "tournament" | "legend_path";
+  type: "meta" | "mine" | "rated" | "classic" | "2v2" | "tournament" | "legend_path";
+  category?: string;
+  deck_link?: string | null;
+  description?: string;
 }
 
 export interface CardInfo {

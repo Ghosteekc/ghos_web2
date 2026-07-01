@@ -20,6 +20,7 @@ export interface TelegramWebApp {
   expand: () => void;
   close: () => void;
   openTelegramLink: (url: string) => void;
+  openLink: (url: string) => void;
   themeParams: Record<string, string>;
   colorScheme: "light" | "dark";
   platform?: "ios" | "android" | "macos" | "tdesktop" | "weba" | "webk" | "unigram" | "unknown";

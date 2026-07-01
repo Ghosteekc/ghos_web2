@@ -27,6 +27,14 @@ export function useTelegram() {
     initDataUnsafe: tg?.initDataUnsafe ?? {},
     user: tg?.initDataUnsafe?.user,
     openTelegramLink: (path: string) => tg?.openTelegramLink(`https://t.me/${path}`),
+    openLink: (url: string) => {
+      const webApp = tg as (TelegramWebApp & { openLink?: (u: string) => void }) | null;
+      if (webApp?.openLink) {
+        webApp.openLink(url);
+      } else {
+        window.open(url, "_blank");
+      }
+    },
     hapticFeedback: (style: "light" | "medium" | "heavy" | "rigid" | "soft") => {
       tg?.HapticFeedback?.impactOccurred(style);
     },

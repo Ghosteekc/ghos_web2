@@ -70,7 +70,7 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(settings),
     }),
-  getFavorites: () => request<{ cards: CardInfo[]; decks: string[][] }>("/api/favorites"),
+  getFavorites: () => request<{ cards: CardInfo[]; decks: string[][]; entries?: { cards: string[]; deck_link?: string | null }[] }>("/api/favorites"),
   addFavoriteDeck: (deck: string[]) => request<{ ok: true }>("/api/favorites", {
     method: "POST",
     body: JSON.stringify({ deck }),

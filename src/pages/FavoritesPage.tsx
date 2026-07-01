@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import { Star, Copy, Trash2 } from "lucide-react";
+import { Star, ExternalLink } from "lucide-react";
 import { Card, Button, Loader } from "@/components/ui";
 import { api, ApiError } from "@/api/client";
-import { usePageRefresh } from "@/hooks";
+import { usePageRefresh, useTelegram } from "@/hooks";
+
+interface FavoriteEntry {
+  cards: string[];
+  deck_link?: string | null;
+}
 
 export function FavoritesPage() {
-  const [favorites, setFavorites] = useState<{ cards: any[]; decks: string[][] } | null>(null);
+  const { openLink } = useTelegram();
+  const [entries, setEntries] = useState<FavoriteEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,9 +19,9 @@ export function FavoritesPage() {
     try {
       setError(null);
       const res = await api.getFavorites();
-      setFavorites(res);
+      setEntries(res.entries ?? res.decks.map((deck) => ({ cards: deck })));
     } catch (e) {
-      setFavorites({ cards: [], decks: [] });
+      setEntries([]);
       setError(e instanceof ApiError ? e.message : "Ошибка загрузки");
     } finally {
       setLoading(false);
@@ -28,6 +34,10 @@ export function FavoritesPage() {
     void load();
   }, [load]);
 
+  const importDeck = (link: string) => {
+    openLink(link);
+  };
+
   if (loading) return <Loader />;
 
   return (
@@ -36,28 +46,29 @@ export function FavoritesPage() {
 
       {error && <Card className="text-center text-cr-loss text-sm">{error}</Card>}
 
-      {favorites && favorites.decks.length > 0 ? (
+      {entries.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {favorites.decks.map((deck, i) => (
+          {entries.map((entry, i) => (
             <Card key={i}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-cr-gold/10">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 rounded-lg bg-cr-gold/10 shrink-0">
                     <Star className="w-5 h-5 text-cr-gold" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-medium text-cr-text">Колода #{i + 1}</p>
-                    <p className="text-xs text-cr-muted">{deck.length} карт</p>
+                    <p className="text-xs text-cr-muted truncate">{entry.cards.join(", ")}</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="ghost" className="!p-2">
-                    <Copy className="w-4 h-4" />
+                {entry.deck_link && (
+                  <Button
+                    variant="ghost"
+                    className="!p-2 shrink-0"
+                    onClick={() => importDeck(entry.deck_link!)}
+                  >
+                    <ExternalLink className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" className="!p-2">
-                    <Trash2 className="w-4 h-4 text-cr-loss" />
-                  </Button>
-                </div>
+                )}
               </div>
             </Card>
           ))}
@@ -66,7 +77,7 @@ export function FavoritesPage() {
         <Card className="text-center">
           <Star className="w-12 h-12 text-cr-muted mx-auto mb-3 opacity-50" />
           <p className="text-cr-muted">Нет избранных колод</p>
-          <p className="text-xs text-cr-muted mt-1">Добавляйте колоды из анализатора</p>
+          <p className="text-xs text-cr-muted mt-1">Добавляйте колоды из раздела «Колоды»</p>
         </Card>
       )}
     </div>
