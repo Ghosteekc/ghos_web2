@@ -23,17 +23,30 @@ function getInitData(): string {
   return typeof window !== "undefined" ? window.Telegram?.WebApp?.initData ?? "" : "";
 }
 
+function buildRequestHeaders(extra?: HeadersInit): HeadersInit {
+  const headers: Record<string, string> = {
+    "X-Telegram-Init-Data": getInitData(),
+    "Content-Type": "application/json",
+  };
+  // localtunnel (loca.lt) returns 511 without this header
+  if (API_BASE.includes("loca.lt")) {
+    headers["Bypass-Tunnel-Reminder"] = "true";
+  }
+  return { ...headers, ...(extra as Record<string, string> | undefined) };
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const initData = getInitData();
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers: {
-      "X-Telegram-Init-Data": initData,
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
+    headers: buildRequestHeaders(options?.headers),
   });
   if (!res.ok) {
+    if (res.status === 511) {
+      throw new ApiError(
+        "localtunnel требует авторизацию. Обновите Mini App или откройте URL туннеля в браузере.",
+        res.status,
+      );
+    }
     const body = await res.json().catch(() => ({ detail: res.statusText }));
     throw new ApiError(body.detail ?? `HTTP ${res.status}`, res.status);
   }
