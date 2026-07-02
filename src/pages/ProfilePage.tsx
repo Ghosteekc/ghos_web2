@@ -12,7 +12,8 @@ import { Card, Button, Loader } from "@/components/ui";
 import { useTelegram, usePageRefresh } from "@/hooks";
 import { api } from "@/api/client";
 import { Profile } from "@/types";
-import { formatNumber, getWinColor } from "@/utils";
+import { formatNumber, getWinColor, formatPlayerTag } from "@/utils";
+import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 
 function formatSubscription(subscription: Profile["subscription"]) {
   if (!subscription.active) {
@@ -27,6 +28,7 @@ function formatSubscription(subscription: Profile["subscription"]) {
 export function ProfilePage() {
   const navigate = useNavigate();
   const { user } = useTelegram();
+  const { nameRu } = useCardCatalog();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,29 +71,40 @@ export function ProfilePage() {
       {profile && (
         <Card>
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 shrink-0 rounded-full bg-gradient-to-br from-cr-blue to-cr-gold p-[3px] shadow-glow">
+            <div className="w-20 h-20 shrink-0 rounded-full bg-gradient-to-br from-cr-blue to-cr-gold p-[3px] shadow-glow overflow-hidden">
               {profile.avatar_url ? (
                 <img
                   src={profile.avatar_url}
                   alt={profile.player_name ?? "Player"}
-                  className="w-full h-full rounded-full object-cover bg-cr-surface"
+                  className="w-full h-full rounded-full object-cover bg-cr-surface scale-110"
+                />
+              ) : profile.favorite_card_icon ? (
+                <img
+                  src={profile.favorite_card_icon}
+                  alt={profile.favorite_card ?? "Card"}
+                  className="w-full h-full rounded-full object-contain bg-cr-surface p-1.5"
                 />
               ) : (
-                <div className="w-full h-full rounded-full bg-cr-surface flex items-center justify-center">
-                  <User className="w-8 h-8 text-cr-muted" />
+                <div className="w-full h-full rounded-full bg-cr-surface flex items-center justify-center text-2xl font-extrabold text-cr-gold">
+                  {(profile.player_name ?? "?").charAt(0).toUpperCase()}
                 </div>
               )}
             </div>
             <div className="min-w-0">
-              <h2 className="text-xl font-bold text-cr-text truncate">
+              <h2 className="text-xl font-extrabold text-cr-text truncate">
                 {profile.player_name ?? "Игрок"}
               </h2>
-              <p className="text-cr-muted text-sm font-mono mt-1">
-                #{profile.player_tag ?? "—"}
+              <p className="text-cr-accent text-sm font-bold font-mono mt-1">
+                {formatPlayerTag(profile.player_tag)}
               </p>
-              <p className="text-xs text-cr-muted mt-2 truncate">
+              <p className="text-xs text-cr-accent font-semibold mt-2 truncate">
                 {profile.arena_name ?? "Арена не указана"}
               </p>
+              {profile.favorite_card && (
+                <p className="text-xs text-cr-gold font-bold mt-1 truncate">
+                  ★ {nameRu(profile.favorite_card)}
+                </p>
+              )}
             </div>
           </div>
         </Card>
@@ -103,12 +116,12 @@ export function ProfilePage() {
             <User className="w-7 h-7 text-cr-muted" />
           </div>
           <div className="min-w-0">
-            <p className="text-xs text-cr-muted uppercase tracking-wider mb-1">Telegram</p>
-            <h2 className="text-base font-semibold text-cr-text truncate">
-              {user?.first_name ?? user?.username ?? "—"}
-            </h2>
-            <p className="text-cr-muted text-sm mt-0.5 truncate">@{user?.username ?? "—"}</p>
-            <p className="text-xs text-cr-muted mt-1">ID: {user?.id ?? "—"}</p>
+          <p className="text-label mb-1">Telegram</p>
+          <h2 className="text-base font-bold text-cr-text truncate">
+            {user?.first_name ?? user?.username ?? "—"}
+          </h2>
+          <p className="text-cr-accent text-sm font-semibold mt-0.5 truncate">@{user?.username ?? "—"}</p>
+          <p className="text-xs text-cr-accent font-medium mt-1">ID: {user?.id ?? "—"}</p>
           </div>
         </div>
       </Card>
@@ -122,7 +135,7 @@ export function ProfilePage() {
           <p className="text-2xl font-bold text-cr-text">
             {profile?.max_trophies != null ? formatNumber(profile.max_trophies) : "—"}
           </p>
-          <p className="text-xs text-cr-muted mt-1">Лучший результат</p>
+          <p className="text-label mt-1">Лучший результат</p>
         </Card>
 
         <Card>
@@ -133,7 +146,7 @@ export function ProfilePage() {
           <p className="text-2xl font-bold text-cr-text">
             {profile?.trophies != null ? formatNumber(profile.trophies) : "—"}
           </p>
-          <p className="text-xs text-cr-muted mt-1">Текущий рейтинг</p>
+          <p className="text-label mt-1">Текущий рейтинг</p>
         </Card>
 
         <Card>
@@ -144,7 +157,7 @@ export function ProfilePage() {
           <p className={"text-2xl font-bold " + getWinColor(profile?.winrate ?? 50)}>
             {profile?.winrate != null ? `${profile.winrate.toFixed(1)}%` : "—"}
           </p>
-          <p className="text-xs text-cr-muted mt-1">Процент побед</p>
+          <p className="text-label mt-1">Процент побед</p>
         </Card>
 
         <Card>
@@ -153,7 +166,7 @@ export function ProfilePage() {
             <h3 className="text-sm font-semibold text-cr-text">Подписка</h3>
           </div>
           <p className="text-lg font-bold text-cr-text">{subscription?.label ?? "—"}</p>
-          <p className="text-xs text-cr-muted mt-1">{subscription?.hint ?? "—"}</p>
+          <p className="text-label mt-1">{subscription?.hint ?? "—"}</p>
         </Card>
       </div>
 

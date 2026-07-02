@@ -9,11 +9,6 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
 } from "recharts";
 import { TrendingUp, Flame, Target, Clock, Brain, Trophy, Swords } from "lucide-react";
 import { StatsOverview, InsightsData } from "@/types";
@@ -65,9 +60,18 @@ export function AnalyticsPage() {
     [stats?.last_results],
   );
 
-  const winrateByDay = useMemo(() => stats?.winrate_by_day ?? [], [stats?.winrate_by_day]);
+  const winrateByDay = useMemo(() => {
+    const items = stats?.winrate_by_day ?? [];
+    return [...items].sort((a, b) => {
+      const parse = (d: string) => {
+        const [day, month] = d.split(".").map(Number);
+        if (!day || !month) return 0;
+        return month * 100 + day;
+      };
+      return parse(a.date) - parse(b.date);
+    });
+  }, [stats?.winrate_by_day]);
   const mostUsedCards = useMemo(() => stats?.most_used_cards ?? [], [stats?.most_used_cards]);
-  const archetypes = useMemo(() => stats?.archetypes ?? [], [stats?.archetypes]);
 
   if (loading) {
     return (
@@ -97,7 +101,7 @@ export function AnalyticsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="page-title">Аналитика</h1>
-        <p className="text-sm text-cr-muted mt-1">Подробная статистика по вашим боям</p>
+        <p className="page-subtitle mt-1">Подробная статистика по вашим боям</p>
       </div>
 
       {(insights?.patterns.length || insights?.insights.length) ? (
@@ -133,14 +137,14 @@ export function AnalyticsPage() {
                     <Swords className="w-4 h-4 text-cr-loss shrink-0 mt-0.5" />
                   )}
                   <div className="min-w-0">
-                    <p className="text-xs text-cr-muted mb-0.5">vs {item.opponent_name}</p>
+                    <p className="text-xs text-cr-accent font-semibold mb-0.5">vs {item.opponent_name}</p>
                     <p className="text-sm text-cr-text leading-snug">{item.summary}</p>
                   </div>
                 </div>
                 {item.details.length > 0 && (
                   <ul className="mt-2 space-y-1 pl-6">
                     {item.details.slice(0, 2).map((d, i) => (
-                      <li key={i} className="text-[11px] text-cr-muted leading-snug">
+                      <li key={i} className="text-[11px] text-cr-accent/90 font-medium leading-snug">
                         {d.replace(/^[^\w\u0400-\u04FF]+/, "")}
                       </li>
                     ))}
@@ -164,7 +168,7 @@ export function AnalyticsPage() {
           <Card key={i} className="text-center">
             <item.icon className={"w-6 h-6 mx-auto mb-2 " + item.color} />
             <p className="text-2xl font-bold text-cr-text">{item.value}</p>
-            <p className="text-xs text-cr-muted">{item.label}</p>
+            <p className="text-label">{item.label}</p>
           </Card>
         ))}
       </div>
@@ -230,23 +234,42 @@ export function AnalyticsPage() {
         </Card>
 
         <Card>
-          <h3 className="text-sm font-semibold text-cr-text mb-4">Сводка</h3>
-          <div className="h-[280px]">
-            {archetypes.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={archetypes}>
-                  <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                  <PolarAngleAxis dataKey="name" stroke="#9ca3af" fontSize={12} />
-                  <PolarRadiusAxis stroke="#9ca3af" fontSize={12} />
-                  <Radar name="Значение" dataKey="value" stroke="#60a5fa" fill="#60a5fa" fillOpacity={0.3} />
-                </RadarChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-cr-muted text-sm text-center pt-24">Нет данных</p>
-            )}
-          </div>
+          <h3 className="text-sm font-bold text-cr-text mb-4">Сводка</h3>
+          <SummaryStats
+            total={stats.total_battles}
+            wins={stats.wins}
+            losses={stats.losses}
+          />
         </Card>
       </div>
+    </div>
+  );
+}
+
+function SummaryStats({ total, wins, losses }: { total: number; wins: number; losses: number }) {
+  const max = Math.max(total, wins, losses, 1);
+  const items = [
+    { label: "Игры", value: total, bar: "bg-cr-blue", text: "text-cr-blue", glow: "shadow-glow-blue" },
+    { label: "Победы", value: wins, bar: "bg-cr-win", text: "text-cr-win", glow: "shadow-[0_0_16px_rgba(34,197,94,0.25)]" },
+    { label: "Поражения", value: losses, bar: "bg-cr-loss", text: "text-cr-loss", glow: "shadow-[0_0_16px_rgba(239,68,68,0.2)]" },
+  ];
+
+  return (
+    <div className="space-y-5 py-2">
+      {items.map((item) => (
+        <div key={item.label}>
+          <div className="flex items-center justify-between mb-2">
+            <span className={`text-sm font-bold ${item.text}`}>{item.label}</span>
+            <span className="text-lg font-extrabold text-cr-text">{item.value}</span>
+          </div>
+          <div className="h-3 rounded-full bg-cr-bg/80 overflow-hidden border border-cr-border">
+            <div
+              className={`h-full rounded-full ${item.bar} ${item.glow} transition-all duration-500`}
+              style={{ width: `${Math.max((item.value / max) * 100, item.value > 0 ? 8 : 0)}%` }}
+            />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

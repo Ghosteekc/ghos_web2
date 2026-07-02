@@ -2,11 +2,12 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { api } from "@/api/client";
 import { lsGet, lsSet, TTL } from "@/api/cache";
 
-const CATALOG_LS_KEY = "card-catalog";
+const CATALOG_LS_KEY = "card-catalog-v2";
 
 export interface CardCatalogItem {
   name: string;
   name_ru: string;
+  name_short?: string;
   icon: string;
   id?: number | null;
   elixir?: number | null;
@@ -16,6 +17,7 @@ interface CardCatalogContextValue {
   ready: boolean;
   getCard: (name: string) => CardCatalogItem | undefined;
   nameRu: (name: string) => string;
+  nameShort: (name: string) => string;
   iconUrl: (name: string) => string | undefined;
 }
 
@@ -80,14 +82,19 @@ export function CardCatalogProvider({ children }: { children: ReactNode }) {
     [getCard],
   );
 
+  const nameShort = useCallback(
+    (name: string) => getCard(name)?.name_short || getCard(name)?.name_ru || name,
+    [getCard],
+  );
+
   const iconUrl = useCallback(
     (name: string) => getCard(name)?.icon || undefined,
     [getCard],
   );
 
   const value = useMemo(
-    () => ({ ready, getCard, nameRu, iconUrl }),
-    [ready, getCard, nameRu, iconUrl],
+    () => ({ ready, getCard, nameRu, nameShort, iconUrl }),
+    [ready, getCard, nameRu, nameShort, iconUrl],
   );
 
   return <CardCatalogContext.Provider value={value}>{children}</CardCatalogContext.Provider>;
@@ -100,6 +107,7 @@ export function useCardCatalog(): CardCatalogContextValue {
       ready: true,
       getCard: () => undefined,
       nameRu: (name: string) => name,
+      nameShort: (name: string) => name,
       iconUrl: () => undefined,
     };
   }

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Profile } from "@/types";
 import { CircularProgress, LinearProgress } from "@/components/ui/Progress";
 import { Trophy, Crown, Flame, Sword, Clock, Zap, TrendingUp, TrendingDown } from "lucide-react";
-import { formatNumber, getWinColor, getTrophyChangeColor, cn } from "@/utils";
+import { formatNumber, getWinColor, getTrophyChangeColor, cn, formatPlayerTag } from "@/utils";
 import { Card, Skeleton } from "@/components/ui";
 
 interface PlayerCardProps {
@@ -32,10 +32,24 @@ export function PlayerCard({ profile, loading }: PlayerCardProps) {
       <div className="relative flex flex-col lg:flex-row items-start lg:items-center gap-6">
         <div className="flex items-center gap-5">
           <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cr-blue to-cr-gold p-[3px] shadow-glow">
-              <div className="w-full h-full rounded-full bg-cr-surface flex items-center justify-center text-2xl font-bold text-cr-gold">
-                {(profile.player_name ?? "?").charAt(0).toUpperCase()}
-              </div>
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-cr-blue to-cr-gold p-[3px] shadow-glow overflow-hidden">
+              {profile.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.player_name ?? "Player"}
+                  className="w-full h-full rounded-full object-cover bg-cr-surface scale-110"
+                />
+              ) : profile.favorite_card_icon ? (
+                <img
+                  src={profile.favorite_card_icon}
+                  alt={profile.favorite_card ?? "Card"}
+                  className="w-full h-full rounded-full object-contain bg-cr-surface p-1"
+                />
+              ) : (
+                <div className="w-full h-full rounded-full bg-cr-surface flex items-center justify-center text-2xl font-extrabold text-cr-gold">
+                  {(profile.player_name ?? "?").charAt(0).toUpperCase()}
+                </div>
+              )}
             </div>
             <div className="absolute -bottom-1 -right-1 bg-cr-bg rounded-full p-1 border-2 border-cr-card">
               <Crown className="w-4 h-4 text-cr-gold" />
@@ -45,8 +59,8 @@ export function PlayerCard({ profile, loading }: PlayerCardProps) {
             <h2 className="text-xl font-bold text-cr-text tracking-tight">
               {profile.player_name ?? "Игрок"}
             </h2>
-            <p className="text-cr-muted text-sm font-mono mt-0.5">
-              #{profile.player_tag}
+            <p className="text-cr-accent text-sm font-bold font-mono mt-0.5">
+              {formatPlayerTag(profile.player_tag)}
             </p>
             <span className="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-cr-blue/10 border border-cr-blue/20 text-cr-blue text-xs font-medium">
               <Flame className="w-3 h-3" />

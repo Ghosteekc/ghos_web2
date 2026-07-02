@@ -278,7 +278,7 @@ export const api = {
 
   getCardCatalog: () =>
 
-    cachedGet<{ cards: { name: string; name_ru: string; icon: string; id?: number; elixir?: number }[] }>(
+    cachedGet<{ cards: { name: string; name_ru: string; name_short?: string; icon: string; id?: number; elixir?: number }[] }>(
 
       "catalog",
 

@@ -27,6 +27,12 @@ export const formatTime = (seconds: number): string => {
   return `${m}:${s.toString().padStart(2, "0")}`;
 };
 
+export const formatPlayerTag = (tag: string | null | undefined): string => {
+  if (!tag) return "—";
+  const clean = tag.replace(/^#+/, "").trim();
+  return clean ? `#${clean}` : "—";
+};
+
 export const getWinColor = (winrate: number): string => {
   if (winrate >= 60) return "text-cr-win";
   if (winrate <= 40) return "text-cr-loss";

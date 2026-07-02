@@ -16,6 +16,7 @@ interface CardTileProps {
   icon?: string;
   size?: CardTileSize;
   showLabel?: boolean;
+  compactLabel?: boolean;
   labelOverride?: string;
   labelClassName?: string;
   className?: string;
@@ -27,14 +28,15 @@ export function CardTile({
   icon,
   size = "md",
   showLabel = false,
+  compactLabel = true,
   labelOverride,
   labelClassName,
   className,
   badge,
 }: CardTileProps) {
-  const { nameRu, iconUrl } = useCardCatalog();
+  const { nameRu, nameShort, iconUrl } = useCardCatalog();
   const src = icon || iconUrl(name);
-  const label = labelOverride ?? nameRu(name);
+  const label = labelOverride ?? (compactLabel && showLabel ? nameShort(name) : nameRu(name));
 
   return (
     <div className={cn("flex flex-col items-center gap-1 min-w-0 shrink-0", className)}>
@@ -61,9 +63,10 @@ export function CardTile({
       {showLabel && (
         <span
           className={cn(
-            "text-[10px] leading-tight text-center line-clamp-2 max-w-full px-0.5",
-            labelClassName ?? "text-cr-muted",
+            "card-name-glow text-[9px] leading-none text-center truncate max-w-[4.75rem] px-0.5 font-bold",
+            labelClassName,
           )}
+          title={nameRu(name)}
         >
           {label}
         </span>
@@ -128,7 +131,7 @@ export function CardUsageList({ items }: { items: CardUsageItem[] }) {
 }
 
 export function CardUsageCompactGrid({ items }: { items: CardUsageItem[] }) {
-  const { nameRu } = useCardCatalog();
+  const { nameRu, nameShort } = useCardCatalog();
   const maxCount = Math.max(...items.map((i) => i.count), 1);
 
   return (
@@ -136,8 +139,10 @@ export function CardUsageCompactGrid({ items }: { items: CardUsageItem[] }) {
       {items.map((item) => (
         <div key={item.name} className="flex flex-col items-center gap-1.5 py-1">
           <CardTile name={item.name} size="grid" />
-          <p className="card-name-glow text-xs text-center line-clamp-2 px-1">{nameRu(item.name)}</p>
-          <p className="text-[10px] text-cr-muted">
+          <p className="card-name-glow text-xs text-center truncate max-w-[5rem] px-0.5" title={nameRu(item.name)}>
+            {nameShort(item.name)}
+          </p>
+          <p className="text-[10px] text-cr-accent font-semibold">
             {item.count} игр
             {item.winrate != null ? ` · ${item.winrate.toFixed(0)}%` : ""}
           </p>

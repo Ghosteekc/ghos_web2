@@ -18,10 +18,11 @@ const config: Config = {
         "cr-loss": "rgb(var(--cr-loss) / <alpha-value>)",
         "cr-text": "rgb(var(--cr-text) / <alpha-value>)",
         "cr-muted": "rgb(var(--cr-muted) / <alpha-value>)",
+        "cr-accent": "rgb(var(--cr-accent) / <alpha-value>)",
         "cr-border": "rgb(var(--cr-border) / var(--cr-border-alpha))",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
       },
       borderRadius: {
         "cr": "1.25rem",

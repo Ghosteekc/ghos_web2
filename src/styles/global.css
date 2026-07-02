@@ -14,7 +14,8 @@
     --cr-win: 34 197 94;
     --cr-loss: 239 68 68;
     --cr-text: 243 244 246;
-    --cr-muted: 156 163 175;
+    --cr-muted: 176 192 214;
+    --cr-accent: 186 211 255;
     --cr-border: 255 255 255;
     --cr-border-alpha: 0.06;
     --cr-grid-line: rgba(255, 255, 255, 0.025);
@@ -30,7 +31,8 @@
     --cr-win: 22 163 74;
     --cr-loss: 220 38 38;
     --cr-text: 17 24 39;
-    --cr-muted: 107 114 128;
+    --cr-muted: 71 85 105;
+    --cr-accent: 37 99 235;
     --cr-border: 0 0 0;
     --cr-border-alpha: 0.08;
     --cr-grid-line: rgba(0, 0, 0, 0.04);
@@ -66,7 +68,7 @@
   }
 
   body {
-    @apply bg-cr-bg text-cr-text antialiased overflow-x-hidden font-sans font-medium;
+    @apply bg-cr-bg text-cr-text antialiased overflow-x-hidden font-sans font-semibold;
     background-image:
       linear-gradient(var(--cr-grid-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--cr-grid-line) 1px, transparent 1px);
@@ -188,12 +190,19 @@
   }
 
   .page-title {
-    @apply text-2xl font-bold text-cr-text tracking-tight;
-    font-weight: 700;
+    @apply text-2xl font-extrabold text-cr-text tracking-tight;
+  }
+
+  .page-subtitle {
+    @apply text-sm font-semibold text-cr-accent;
+  }
+
+  .text-label {
+    @apply text-xs font-bold text-cr-accent uppercase tracking-wide;
   }
 
   .card-name-glow {
-    @apply text-cr-gold font-semibold leading-tight;
+    @apply text-cr-gold font-extrabold leading-none;
     text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
   }
 
