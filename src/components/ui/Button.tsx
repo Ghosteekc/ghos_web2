@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import React from "react";
-import { cn } from "@/utils";
+import { cn, hapticImpact } from "@/utils";
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -26,12 +26,18 @@ export function Button({
     ghost: "bg-transparent text-cr-muted hover:text-cr-text hover:bg-white/5",
   };
 
+  const handleClick: React.MouseEventHandler<HTMLButtonElement> = (e) => {
+    if (disabled) return;
+    hapticImpact(variant === "primary" ? "medium" : "light");
+    onClick?.(e);
+  };
+
   return (
     <motion.button
       whileTap={{ scale: 0.96 }}
       type={type}
       disabled={disabled}
-      onClick={onClick}
+      onClick={handleClick}
       className={cn(baseStyles, variants[variant], className)}
     >
       {children}

@@ -18,9 +18,10 @@ import { api } from "@/api/client";
 import { Profile, Settings } from "@/types";
 import { useTelegram, usePageRefresh } from "@/hooks";
 import { applyTheme, loadStoredTheme, type AppTheme } from "@/hooks/useTheme";
+import { hapticImpact, hapticNotify, hapticSelection } from "@/utils";
 
 export function SettingsPage() {
-  const { tg, showAlert, showConfirm, hapticFeedback } = useTelegram();
+  const { tg, showAlert, showConfirm } = useTelegram();
   const [settings, setSettings] = useState<Settings>({
     theme: loadStoredTheme(),
     language: "ru",
@@ -66,7 +67,6 @@ export function SettingsPage() {
     setSettings(next);
     if (patch.theme) {
       applyTheme(patch.theme as AppTheme);
-      hapticFeedback("light");
     }
     try {
       await api.updateSettings(patch);
@@ -82,7 +82,7 @@ export function SettingsPage() {
     setClearing(true);
     try {
       await api.clearCache();
-      hapticFeedback("medium");
+      hapticNotify("success");
       await showAlert?.("Кеш очищен. Данные обновятся при следующей синхронизации.");
     } catch (e) {
       await showAlert?.(e instanceof Error ? e.message : "Не удалось очистить кеш");
@@ -96,7 +96,7 @@ export function SettingsPage() {
       void showAlert?.("Сначала привяжите аккаунт Clash Royale в боте: /link #ТЕГ");
       return;
     }
-    hapticFeedback("light");
+    hapticImpact("medium");
     setArenaOpen(true);
   };
 
@@ -169,7 +169,10 @@ export function SettingsPage() {
                 whileTap={{ scale: 0.95 }}
                 className="p-3 rounded-xl bg-cr-loss/10 hover:bg-cr-loss/20 transition-colors shrink-0"
                 aria-label="Выход"
-                onClick={() => tg?.close?.()}
+                onClick={() => {
+                  hapticImpact("light");
+                  tg?.close?.();
+                }}
               >
                 <LogOut className="w-5 h-5 text-cr-loss" />
               </motion.button>
@@ -259,7 +262,10 @@ function ThemeButton({
       type="button"
       aria-label={label}
       aria-pressed={active}
-      onClick={onClick}
+      onClick={() => {
+        hapticSelection();
+        onClick();
+      }}
       className={
         "p-2 rounded-md transition-all " +
         (active ? "bg-cr-gold text-cr-bg shadow-sm" : "text-cr-muted hover:text-cr-text")
@@ -281,7 +287,10 @@ function ArenaModal({ profile, onClose }: { profile: Profile | null; onClose: ()
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
+      onClick={() => {
+        hapticImpact("soft");
+        onClose();
+      }}
     >
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
@@ -292,7 +301,10 @@ function ArenaModal({ profile, onClose }: { profile: Profile | null; onClose: ()
       >
         <button
           type="button"
-          onClick={onClose}
+          onClick={() => {
+            hapticImpact("light");
+            onClose();
+          }}
           className="absolute top-3 right-3 p-1.5 rounded-lg text-cr-muted hover:text-cr-text hover:bg-cr-bg/60"
           aria-label="Закрыть"
         >
@@ -324,7 +336,10 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
       role="switch"
       aria-checked={checked}
       data-checked={checked}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        hapticSelection();
+        onChange(!checked);
+      }}
       className="toggle-switch"
     >
       <span className="toggle-switch-thumb" />

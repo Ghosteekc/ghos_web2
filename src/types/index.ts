@@ -116,6 +116,12 @@ export interface Settings {
   telegram_notifications: boolean;
 }
 
+export interface HomeData {
+  profile: Profile;
+  battles: BattleSummary[];
+  stats: StatsOverview | null;
+}
+
 export type TabType =
   | "home"
   | "profile"

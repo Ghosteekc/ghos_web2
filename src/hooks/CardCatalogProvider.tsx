@@ -1,5 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { api } from "@/api/client";
+import { lsGet, lsSet, TTL } from "@/api/cache";
+
+const CATALOG_LS_KEY = "card-catalog";
 
 export interface CardCatalogItem {
   name: string;
@@ -34,6 +37,17 @@ export function CardCatalogProvider({ children }: { children: ReactNode }) {
     }
 
     let cancelled = false;
+
+    const cached = lsGet<{ cards: CardCatalogItem[] }>(CATALOG_LS_KEY, TTL.catalog);
+    if (cached?.cards?.length) {
+      const map = new Map<string, CardCatalogItem>();
+      for (const card of cached.cards) {
+        map.set(normalize(card.name), card);
+      }
+      setByName(map);
+      setReady(true);
+    }
+
     void (async () => {
       try {
         const res = await api.getCardCatalog();
@@ -41,9 +55,12 @@ export function CardCatalogProvider({ children }: { children: ReactNode }) {
         for (const card of res.cards) {
           map.set(normalize(card.name), card);
         }
-        if (!cancelled) setByName(map);
+        if (!cancelled) {
+          setByName(map);
+          lsSet(CATALOG_LS_KEY, res, TTL.catalog);
+        }
       } catch {
-        /* catalog optional — UI falls back to initials */
+        /* catalog optional */
       } finally {
         if (!cancelled) setReady(true);
       }

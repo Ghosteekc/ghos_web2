@@ -38,3 +38,11 @@ export const getTrophyChangeColor = (change: number): string => {
   if (change < 0) return "text-cr-loss";
   return "text-cr-muted";
 };
+
+export {
+  hapticImpact,
+  hapticSelection,
+  hapticNotify,
+  withHaptic,
+} from "./haptics";
+export type { HapticImpact, HapticNotify } from "./haptics";
