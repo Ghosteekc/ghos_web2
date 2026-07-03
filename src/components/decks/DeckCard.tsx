@@ -47,7 +47,7 @@ export function DeckCard({ deck, index, onOpen }: DeckCardProps) {
 
         <div className="grid grid-cols-4 gap-2 mb-4">
           {deck.cards.map((card) => (
-            <CardTile key={card.id} name={card.name} icon={card.icon} size="lg" showLabel />
+            <CardTile key={card.id} name={card.name} icon={card.icon} size="deck" showLabel />
           ))}
         </div>
 

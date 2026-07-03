@@ -1,7 +1,7 @@
 import { cn } from "@/utils";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 
-type CardTileSize = "xs" | "sm" | "md" | "grid" | "lg";
+type CardTileSize = "xs" | "sm" | "md" | "grid" | "lg" | "deck";
 
 const sizeClasses: Record<CardTileSize, string> = {
   xs: "w-9 h-11",
@@ -9,6 +9,16 @@ const sizeClasses: Record<CardTileSize, string> = {
   md: "w-14 h-16",
   grid: "w-14 h-[4.25rem] max-w-[4.5rem]",
   lg: "w-full max-w-[5rem] aspect-[4/5]",
+  deck: "w-full max-w-[3.5rem] aspect-[4/5]",
+};
+
+const labelSizeClasses: Record<CardTileSize, string> = {
+  xs: "max-w-[2.25rem] text-[7px]",
+  sm: "max-w-[2.75rem] text-[7px]",
+  md: "max-w-[3.5rem] text-[8px]",
+  grid: "max-w-[3.5rem] text-[8px]",
+  lg: "max-w-[4rem] text-[8px]",
+  deck: "max-w-[3.25rem] text-[7px]",
 };
 
 interface CardTileProps {
@@ -39,7 +49,7 @@ export function CardTile({
   const label = labelOverride ?? (compactLabel && showLabel ? nameShort(name) : nameRu(name));
 
   return (
-    <div className={cn("flex flex-col items-center gap-1 min-w-0 shrink-0", className)}>
+    <div className={cn("flex flex-col items-center gap-0.5 min-w-0 shrink-0", className)}>
       <div className={cn("relative shrink-0 card-tile-wrap", sizeClasses[size])} title={label}>
         <div className="card-tile-glow" aria-hidden />
         {src ? (
@@ -63,7 +73,8 @@ export function CardTile({
       {showLabel && (
         <span
           className={cn(
-            "card-name-glow text-[9px] leading-none text-center truncate max-w-[4.75rem] px-0.5 font-bold",
+            "card-name-glow leading-none text-center truncate px-0.5 font-extrabold",
+            labelSizeClasses[size],
             labelClassName,
           )}
           title={nameRu(name)}

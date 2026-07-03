@@ -10,7 +10,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { TrendingUp, Flame, Target, Clock, Brain, Trophy, Swords } from "lucide-react";
+import { TrendingUp, TrendingDown, Flame, Clock, Brain, Trophy, Swords } from "lucide-react";
 import { StatsOverview, InsightsData } from "@/types";
 import { Card, Loader, Skeleton } from "@/components/ui";
 import { CardUsageGrid } from "@/components/cards";
@@ -162,7 +162,7 @@ export function AnalyticsPage() {
         {[
           { label: "Всего боёв", value: stats.total_battles, icon: Flame, color: "text-cr-gold" },
           { label: "Победы", value: stats.wins, icon: TrendingUp, color: "text-cr-win" },
-          { label: "Поражения", value: stats.losses, icon: Target, color: "text-cr-loss" },
+          { label: "Поражения", value: stats.losses, icon: TrendingDown, color: "text-cr-loss" },
           { label: "Винрейт", value: `${stats.winrate.toFixed(1)}%`, icon: Clock, color: "text-cr-blue" },
         ].map((item, i) => (
           <Card key={i} className="text-center">
@@ -232,44 +232,7 @@ export function AnalyticsPage() {
             <p className="text-cr-muted text-sm text-center py-12">Нет данных по картам</p>
           )}
         </Card>
-
-        <Card>
-          <h3 className="text-sm font-bold text-cr-text mb-4">Сводка</h3>
-          <SummaryStats
-            total={stats.total_battles}
-            wins={stats.wins}
-            losses={stats.losses}
-          />
-        </Card>
       </div>
-    </div>
-  );
-}
-
-function SummaryStats({ total, wins, losses }: { total: number; wins: number; losses: number }) {
-  const max = Math.max(total, wins, losses, 1);
-  const items = [
-    { label: "Игры", value: total, bar: "bg-cr-blue", text: "text-cr-blue", glow: "shadow-glow-blue" },
-    { label: "Победы", value: wins, bar: "bg-cr-win", text: "text-cr-win", glow: "shadow-[0_0_16px_rgba(34,197,94,0.25)]" },
-    { label: "Поражения", value: losses, bar: "bg-cr-loss", text: "text-cr-loss", glow: "shadow-[0_0_16px_rgba(239,68,68,0.2)]" },
-  ];
-
-  return (
-    <div className="space-y-5 py-2">
-      {items.map((item) => (
-        <div key={item.label}>
-          <div className="flex items-center justify-between mb-2">
-            <span className={`text-sm font-bold ${item.text}`}>{item.label}</span>
-            <span className="text-lg font-extrabold text-cr-text">{item.value}</span>
-          </div>
-          <div className="h-3 rounded-full bg-cr-bg/80 overflow-hidden border border-cr-border">
-            <div
-              className={`h-full rounded-full ${item.bar} ${item.glow} transition-all duration-500`}
-              style={{ width: `${Math.max((item.value / max) * 100, item.value > 0 ? 8 : 0)}%` }}
-            />
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
