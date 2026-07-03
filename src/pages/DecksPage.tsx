@@ -30,13 +30,6 @@ const DECK_FILTERS = [
   { id: "random", label: DECK_FILTER_LABELS.random },
 ] as const;
 
-const FILTER_BTN_ACTIVE =
-  "px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 " +
-  "bg-cr-gold/20 text-cr-text border border-cr-gold/55 shadow-glow";
-const FILTER_BTN_IDLE =
-  "px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 " +
-  "bg-cr-card/70 text-cr-text border border-cr-border hover:bg-cr-card-hover";
-
 const CATEGORY_LABELS = DECK_CATEGORY_LABELS;
 
 function formatUpdatedAt(iso: string | null | undefined) {
@@ -133,13 +126,13 @@ export function DecksPage() {
         )}
       </p>
 
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+      <div className="filter-tab-row">
         {DECK_FILTERS.map((item) => (
           <button
             key={item.id}
             type="button"
             onClick={() => setFilter(item.id)}
-            className={filter === item.id ? FILTER_BTN_ACTIVE : FILTER_BTN_IDLE}
+            className={"filter-tab " + (filter === item.id ? "filter-tab--active" : "")}
           >
             {item.label}
           </button>

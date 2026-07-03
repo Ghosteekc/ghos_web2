@@ -279,10 +279,7 @@ function ThemeButton({
         hapticSelection();
         onClick();
       }}
-      className={
-        "p-2 rounded-md transition-all " +
-        (active ? "bg-cr-gold text-cr-bg shadow-sm" : "text-cr-muted hover:text-cr-text")
-      }
+      className={"segment-tab " + (active ? "segment-tab--active" : "")}
     >
       {children}
     </button>

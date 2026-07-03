@@ -61,17 +61,13 @@ export function BattlesPage() {
         </Button>
       </div>
 
-      <div className="flex gap-2">
+      <div className="filter-tab-row">
         {(["all", "wins", "losses"] as const).map((f) => (
           <button
             key={f}
+            type="button"
             onClick={() => setFilter(f)}
-            className={
-              "px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 " +
-              (filter === f
-                ? "bg-cr-gold text-cr-bg shadow-glow"
-                : "bg-cr-card text-cr-muted hover:text-cr-text border border-cr-border")
-            }
+            className={"filter-tab " + (filter === f ? "filter-tab--active" : "")}
           >
             {f === "all" ? "Все" : f === "wins" ? "Победы" : "Поражения"}
           </button>

@@ -177,6 +177,28 @@
     @apply bg-cr-blue/20 text-cr-blue border border-cr-blue/30 px-4 py-2 rounded-cr hover:bg-cr-blue/30 transition-all duration-300 active:scale-95;
   }
 
+  .filter-tab {
+    @apply px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200;
+    @apply bg-cr-card/70 text-cr-text border border-cr-border hover:bg-cr-card-hover;
+  }
+
+  .filter-tab--active {
+    @apply font-semibold bg-cr-gold/20 text-cr-text border-cr-gold/55 shadow-glow;
+  }
+
+  .filter-tab-row {
+    @apply flex gap-2 overflow-x-auto pb-1;
+  }
+
+  .segment-tab {
+    @apply p-2 rounded-md transition-all duration-200 border border-transparent;
+    @apply text-cr-muted hover:text-cr-text;
+  }
+
+  .segment-tab--active {
+    @apply bg-cr-gold/20 text-cr-text border-cr-gold/55 shadow-glow;
+  }
+
   .sidebar-item {
     @apply flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer;
     color: rgb(var(--cr-muted));
