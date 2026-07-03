@@ -5,20 +5,21 @@
 @layer base {
   :root,
   [data-theme="dark"] {
-    --cr-bg: 22 58 58;
-    --cr-surface: 28 72 72;
-    --cr-card: 32 82 82;
-    --cr-card-hover: 38 92 92;
+    --cr-bg: 0 5 26;
+    --cr-surface: 6 14 42;
+    --cr-card: 10 22 58;
+    --cr-card-hover: 14 28 72;
     --cr-gold: 255 220 80;
-    --cr-blue: 147 220 255;
+    --cr-blue: 120 170 255;
     --cr-win: 90 230 130;
     --cr-loss: 255 110 110;
     --cr-text: 255 255 255;
-    --cr-muted: 210 235 235;
-    --cr-accent: 180 230 230;
+    --cr-muted: 200 210 240;
+    --cr-accent: 147 180 255;
     --cr-border: 255 255 255;
     --cr-border-alpha: 0.08;
-    --cr-grid-line: rgba(0, 0, 0, 0.12);
+    --cr-bg-top: #00051a;
+    --cr-bg-bottom: #000c40;
     --cr-stroke-title:
       -1px 2px 0 #000,
       0 2px 0 #000,
@@ -39,20 +40,21 @@
   }
 
   [data-theme="light"] {
-    --cr-bg: 210 232 232;
-    --cr-surface: 235 248 248;
+    --cr-bg: 232 236 248;
+    --cr-surface: 245 247 255;
     --cr-card: 255 255 255;
-    --cr-card-hover: 225 242 242;
+    --cr-card-hover: 228 234 248;
     --cr-gold: 180 120 0;
-    --cr-blue: 0 100 180;
+    --cr-blue: 37 99 235;
     --cr-win: 0 130 60;
     --cr-loss: 190 30 30;
-    --cr-text: 20 50 50;
-    --cr-muted: 60 100 100;
-    --cr-accent: 40 110 110;
+    --cr-text: 15 23 42;
+    --cr-muted: 71 85 105;
+    --cr-accent: 59 100 200;
     --cr-border: 0 0 0;
     --cr-border-alpha: 0.1;
-    --cr-grid-line: rgba(0, 0, 0, 0.06);
+    --cr-bg-top: #e8ecf8;
+    --cr-bg-bottom: #dfe6f5;
     --cr-stroke-title:
       -1px 1px 0 rgba(255, 255, 255, 0.85),
       0 1px 0 rgba(255, 255, 255, 0.85),
@@ -93,15 +95,12 @@
   }
 
   body {
-    @apply bg-cr-bg antialiased overflow-x-hidden font-sans;
+    @apply antialiased overflow-x-hidden font-sans;
     color: rgb(var(--cr-text));
     text-shadow: var(--cr-stroke-body);
-    background-color: rgb(var(--cr-bg));
-    background-image:
-      linear-gradient(45deg, var(--cr-grid-line) 25%, transparent 25%, transparent 75%, var(--cr-grid-line) 75%),
-      linear-gradient(45deg, var(--cr-grid-line) 25%, transparent 25%, transparent 75%, var(--cr-grid-line) 75%);
-    background-size: 28px 28px;
-    background-position: 0 0, 14px 14px;
+    background-color: var(--cr-bg-top);
+    background-image: linear-gradient(180deg, var(--cr-bg-top) 0%, var(--cr-bg-bottom) 100%);
+    background-attachment: fixed;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -314,7 +313,7 @@
     letter-spacing: 0;
     text-align: center;
     color: rgb(var(--cr-gold));
-    background: linear-gradient(to top, rgba(11, 40, 40, 0.94) 60%, transparent);
+    background: linear-gradient(to top, rgba(0, 8, 32, 0.94) 60%, transparent);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
