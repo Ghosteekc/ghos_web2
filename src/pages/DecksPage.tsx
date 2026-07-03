@@ -8,26 +8,32 @@ import {
   RefreshCw,
   Trophy,
   Users,
+  Swords,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Card, Button, SkeletonGroup, ElixirIcon } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
-import type { Deck, DeckCard, RandomDeck, TopPlayer } from "@/types";
+import type { Deck, DeckCard, DeckCompareResult, RandomDeck, TopPlayer } from "@/types";
 import { usePageRefresh, useTelegram } from "@/hooks";
 
 import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
 
 const DECK_FILTERS = [
-  { id: "all", label: DECK_FILTER_LABELS.all },
   { id: "meta", label: DECK_FILTER_LABELS.meta },
   { id: "top", label: DECK_FILTER_LABELS.top },
   { id: "mine", label: DECK_FILTER_LABELS.mine },
-  { id: "cycle", label: DECK_FILTER_LABELS.cycle },
-  { id: "beatdown", label: DECK_FILTER_LABELS.beatdown },
-  { id: "control", label: DECK_FILTER_LABELS.control },
-  { id: "bait", label: DECK_FILTER_LABELS.bait },
+  { id: "arena", label: DECK_FILTER_LABELS.arena },
   { id: "random", label: DECK_FILTER_LABELS.random },
 ] as const;
+
+const FILTER_BTN_ACTIVE =
+  "px-4 py-2 rounded-xl text-sm font-cr whitespace-nowrap transition-all duration-200 " +
+  "bg-cr-gold text-white border border-cr-gold/50 shadow-glow";
+const FILTER_BTN_IDLE =
+  "px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 " +
+  "bg-cr-card/70 text-cr-text border border-cr-border hover:bg-cr-card-hover";
 
 const CATEGORY_LABELS = DECK_CATEGORY_LABELS;
 
@@ -64,11 +70,11 @@ export function DecksPage() {
   const [metaUpdatedAt, setMetaUpdatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>("all");
+  const [filter, setFilter] = useState<string>("meta");
   const [copyHint, setCopyHint] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (filter === "random" || filter === "top") {
+    if (filter === "random" || filter === "top" || filter === "arena") {
       setLoading(false);
       setDecks([]);
       setError(null);
@@ -77,7 +83,7 @@ export function DecksPage() {
     }
     try {
       setError(null);
-      const res = await api.getDecks(filter === "all" ? undefined : filter);
+      const res = await api.getDecks(filter);
       setDecks(res.decks ?? []);
       setMetaUpdatedAt(res.meta_updated_at ?? null);
     } catch (e) {
@@ -96,8 +102,6 @@ export function DecksPage() {
     void load();
   }, [load]);
 
-  const metaHint = formatUpdatedAt(metaUpdatedAt);
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -107,20 +111,23 @@ export function DecksPage() {
             ? "Генератор"
             : filter === "top"
               ? "Рейтинг"
-              : `${decks.length} колод`}
+              : filter === "arena"
+                ? "Арена"
+                : `${decks.length} колод`}
         </span>
       </div>
 
       <p className="text-xs text-cr-muted -mt-2">
         {filter === "meta" ? (
-          <>
-            Мета строится по колодам топов Path of Legend и обновляется каждые несколько часов.
-            {metaHint ? ` Обновлено: ${metaHint}.` : ""}
-          </>
+          <>Классические мета-колоды — проверенные архетипы Clash Royale.</>
         ) : filter === "top" ? (
           "Актуальные колоды и винрейт игроков из глобального рейтинга."
+        ) : filter === "arena" ? (
+          "Популярные колоды на вашей арене. Нажмите «Сравнить» — увидите сильные и слабые стороны относительно вашей колоды."
+        ) : filter === "mine" ? (
+          "Ваши колоды из истории боёв."
         ) : (
-          "Мета-колоды — популярные архетипы. «Мои» — из вашей истории боёв."
+          "Случайная колода из 8 карт."
         )}
       </p>
 
@@ -128,13 +135,10 @@ export function DecksPage() {
         {DECK_FILTERS.map((item) => (
           <button
             key={item.id}
+            type="button"
             onClick={() => setFilter(item.id)}
-            className={
-              "px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 " +
-              (filter === item.id
-                ? "bg-cr-gold text-cr-bg shadow-glow"
-                : "bg-cr-card text-cr-text/75 hover:text-cr-text border border-cr-border")
-            }
+            className={filter === item.id ? FILTER_BTN_ACTIVE : FILTER_BTN_IDLE}
+            style={filter === item.id ? { textShadow: "var(--cr-stroke-body)" } : undefined}
           >
             {item.label}
           </button>
@@ -149,7 +153,7 @@ export function DecksPage() {
         <Card className="text-center text-cr-loss text-sm">{error}</Card>
       )}
 
-      {loading && filter !== "random" && filter !== "top" ? (
+      {loading && filter !== "random" && filter !== "top" && filter !== "arena" ? (
         <SkeletonGroup count={4} />
       ) : filter === "random" ? (
         <RandomDeckPanel
@@ -160,6 +164,13 @@ export function DecksPage() {
         />
       ) : filter === "top" ? (
         <TopPlayersPanel
+          onCopied={(msg) => {
+            setCopyHint(msg);
+            setTimeout(() => setCopyHint(null), 3000);
+          }}
+        />
+      ) : filter === "arena" ? (
+        <ArenaPanel
           onCopied={(msg) => {
             setCopyHint(msg);
             setTimeout(() => setCopyHint(null), 3000);
@@ -195,6 +206,146 @@ export function DecksPage() {
 }
 
 export { DecksPage as default };
+
+function CompareBlock({ title, items, tone }: { title: string; items: string[]; tone: "win" | "loss" | "muted" }) {
+  if (!items.length) return null;
+  const color =
+    tone === "win" ? "text-cr-win" : tone === "loss" ? "text-cr-loss" : "text-cr-muted";
+  return (
+    <div className="mt-2">
+      <p className={"text-xs font-semibold mb-1 " + color}>{title}</p>
+      <ul className="space-y-1">
+        {items.map((line) => (
+          <li key={line} className="text-xs text-cr-text leading-snug">
+            {line}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function DeckComparePanel({ data }: { data: DeckCompareResult }) {
+  return (
+    <div className="mt-4 pt-4 border-t border-cr-border space-y-3">
+      <p className="text-xs font-cr text-cr-gold">Сравнение с «{data.reference_name}»</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Card className="!p-3 bg-cr-bg/40">
+          <p className="text-xs font-semibold text-cr-text mb-2">Ваша колода</p>
+          <CompareBlock title="Сильнее" items={data.user_better} tone="win" />
+          <CompareBlock title="Слабее" items={data.user_worse} tone="loss" />
+        </Card>
+        <Card className="!p-3 bg-cr-bg/40">
+          <p className="text-xs font-semibold text-cr-text mb-2">Популярная колода</p>
+          <CompareBlock title="Сильнее вашей" items={data.reference_better} tone="win" />
+          <CompareBlock title="Слабее вашей" items={data.reference_worse} tone="loss" />
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+function ArenaPanel({ onCopied }: { onCopied: (msg: string) => void }) {
+  const [decks, setDecks] = useState<Deck[]>([]);
+  const [arenaName, setArenaName] = useState("");
+  const [trophies, setTrophies] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [compareData, setCompareData] = useState<DeckCompareResult | null>(null);
+  const [compareLoading, setCompareLoading] = useState(false);
+  const [compareError, setCompareError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setExpandedId(null);
+    setCompareData(null);
+    try {
+      const data = await api.getArenaDecks();
+      setDecks(data.decks ?? []);
+      setArenaName(data.arena_name ?? "");
+      setTrophies(data.trophies ?? 0);
+    } catch (e) {
+      setDecks([]);
+      setError(e instanceof ApiError ? e.message : "Не удалось загрузить колоды арены");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const runCompare = async (deck: Deck) => {
+    const names = deck.cards.map((c) => c.name);
+    if (names.length !== 8) return;
+    if (expandedId === deck.id && compareData) {
+      setExpandedId(null);
+      setCompareData(null);
+      return;
+    }
+    setExpandedId(deck.id);
+    setCompareLoading(true);
+    setCompareError(null);
+    setCompareData(null);
+    try {
+      const result = await api.compareDeck(names);
+      setCompareData(result);
+    } catch (e) {
+      setCompareError(e instanceof ApiError ? e.message : "Не удалось сравнить колоды");
+    } finally {
+      setCompareLoading(false);
+    }
+  };
+
+  if (loading) return <SkeletonGroup count={3} />;
+
+  if (error) {
+    return (
+      <Card className="text-center space-y-3">
+        <p className="text-cr-loss text-sm">{error}</p>
+        <Button onClick={() => void load()}>Попробовать снова</Button>
+      </Card>
+    );
+  }
+
+  if (!decks.length) {
+    return (
+      <Card className="text-center">
+        <p className="text-cr-muted">Нет данных по вашей арене</p>
+        <p className="text-xs text-cr-muted mt-1">Сыграйте несколько боёв и обновите страницу</p>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-cr-muted text-center">
+        {arenaName}
+        {trophies > 0 ? ` · ${trophies} 🏆` : ""}
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
+        {decks.map((deck, i) => (
+          <div key={`${deck.id}-${deck.name}`} className="w-full">
+            <DeckCard
+              deck={deck}
+              index={i}
+              onCopied={onCopied}
+              showCompare
+              compareOpen={expandedId === deck.id}
+              compareLoading={expandedId === deck.id && compareLoading}
+              compareError={expandedId === deck.id ? compareError : null}
+              compareData={expandedId === deck.id ? compareData : null}
+              onCompare={() => void runCompare(deck)}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function TopPlayersPanel({ onCopied }: { onCopied: (msg: string) => void }) {
   const { openLink } = useTelegram();
@@ -445,10 +596,22 @@ function DeckCard({
   deck,
   index,
   onCopied,
+  showCompare = false,
+  compareOpen = false,
+  compareLoading = false,
+  compareError = null,
+  compareData = null,
+  onCompare,
 }: {
   deck: Deck;
   index: number;
   onCopied: (msg: string) => void;
+  showCompare?: boolean;
+  compareOpen?: boolean;
+  compareLoading?: boolean;
+  compareError?: string | null;
+  compareData?: DeckCompareResult | null;
+  onCompare?: () => void;
 }) {
   const { openLink } = useTelegram();
   const cards = deck.cards ?? [];
@@ -528,11 +691,52 @@ function DeckCard({
               </span>
             </div>
             <div className="flex items-center justify-between text-sm mt-1 mb-3">
-            <span className="text-cr-muted">{UI.games}</span>
+              <span className="text-cr-muted">{UI.games}</span>
               <span className="font-semibold text-cr-text">{deck.total_games ?? 0}</span>
             </div>
           </>
         )}
+
+        {deck.type === "arena" && deck.total_games > 0 && (
+          <>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-cr-muted">{UI.winrate}</span>
+              <span className={"font-bold " + (winrate >= 50 ? "text-cr-win" : "text-cr-loss")}>
+                {winrate.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm mt-1 mb-3">
+              <span className="text-cr-muted">{UI.games}</span>
+              <span className="font-semibold text-cr-text">{deck.total_games ?? 0}</span>
+            </div>
+          </>
+        )}
+
+        {showCompare && onCompare ? (
+          <div className="space-y-2 mb-3">
+            <Button
+              variant="secondary"
+              className="w-full !py-2 text-sm flex items-center justify-center gap-2"
+              onClick={onCompare}
+              disabled={compareLoading}
+            >
+              <Swords className="w-4 h-4" />
+              {compareOpen && compareData ? "Скрыть сравнение" : "Сравнить с моей"}
+              {compareOpen ? (
+                compareLoading ? null : <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </Button>
+            {compareError ? (
+              <p className="text-xs text-cr-loss text-center">{compareError}</p>
+            ) : null}
+            {compareOpen && compareLoading ? (
+              <p className="text-xs text-cr-muted text-center">Анализируем колоды…</p>
+            ) : null}
+            {compareOpen && compareData ? <DeckComparePanel data={compareData} /> : null}
+          </div>
+        ) : null}
 
         {canImport ? (
           <div className="flex gap-2">

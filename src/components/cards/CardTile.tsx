@@ -31,6 +31,7 @@ interface CardTileProps {
   labelClassName?: string;
   className?: string;
   badge?: string | number;
+  levelBadge?: string | number;
 }
 
 export function CardTile({
@@ -43,6 +44,7 @@ export function CardTile({
   labelClassName,
   className,
   badge,
+  levelBadge,
 }: CardTileProps) {
   const { nameRu, nameShort, iconUrl } = useCardCatalog();
   const src = icon || iconUrl(name);
@@ -79,6 +81,11 @@ export function CardTile({
             title={nameRu(name)}
           >
             {label}
+          </span>
+        )}
+        {levelBadge != null && (
+          <span className="absolute top-0 right-0 z-20 min-w-[1.1rem] px-1 py-0.5 rounded-md text-[10px] font-cr leading-none bg-cr-bg/95 text-cr-gold border border-cr-gold/40">
+            {levelBadge}
           </span>
         )}
         {badge != null && (

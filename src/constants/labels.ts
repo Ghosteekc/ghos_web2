@@ -3,6 +3,7 @@
 export const DECK_CATEGORY_LABELS: Record<string, string> = {
   meta: "Мета",
   mine: "Мои",
+  arena: "Арена",
   cycle: "Цикл",
   beatdown: "Битдаун",
   control: "Контроль",
@@ -12,14 +13,10 @@ export const DECK_CATEGORY_LABELS: Record<string, string> = {
 };
 
 export const DECK_FILTER_LABELS: Record<string, string> = {
-  all: "Все",
   meta: "Мета",
   top: "Топ игроки",
   mine: "Мои",
-  cycle: "Цикл",
-  beatdown: "Битдаун",
-  control: "Контроль",
-  bait: "Бейт",
+  arena: "Арена",
   random: "Рандом",
 };
 

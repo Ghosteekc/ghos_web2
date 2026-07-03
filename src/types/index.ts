@@ -1,3 +1,53 @@
+export interface PlayerCollectionData {
+  cards: CollectionCardEntry[];
+  cards_owned: number;
+  cards_total: number;
+  emotes: CollectionEmoteEntry[];
+  emotes_owned: number;
+  emotes_total: number;
+  emote_collection_level: number;
+  emote_collection_progress: number;
+  emote_collection_target: number | null;
+  emotes_api_note: string | null;
+  masteries: CollectionMasteryEntry[];
+}
+
+export interface CollectionCardEntry {
+  name: string;
+  name_ru: string;
+  owned: boolean;
+  level: number | null;
+  max_level: number | null;
+  count: number;
+  rarity: string;
+  evolution_level: number;
+  max_evolution_level: number;
+  has_evo: boolean;
+  has_hero: boolean;
+  has_evo_and_hero: boolean;
+  icon: string;
+}
+
+export interface CollectionEmoteEntry {
+  id: string;
+  name: string;
+  owned: boolean;
+  exclusive: boolean;
+  icon: string;
+}
+
+export interface CollectionMasteryEntry {
+  card_name: string;
+  card_name_ru: string;
+  icon: string;
+  level: number;
+  max_level: number;
+  progress: number;
+  target: number | null;
+  progress_percent: number;
+  next_hint: string;
+}
+
 export interface Profile {
   player_tag: string | null;
   player_name: string | null;
@@ -71,7 +121,7 @@ export interface Deck {
   avg_elixir: number;
   best_matchups: BattleSummary[];
   worst_matchups: BattleSummary[];
-  type: "meta" | "mine" | "rated" | "classic" | "2v2" | "tournament" | "legend_path" | "random";
+  type: "meta" | "mine" | "arena" | "rated" | "classic" | "2v2" | "tournament" | "legend_path" | "random";
   category?: string;
   deck_link?: string | null;
   description?: string;
@@ -135,6 +185,25 @@ export interface DecksListData {
   decks: Deck[];
   meta_updated_at?: string | null;
   meta_source?: string | null;
+}
+
+export interface ArenaDecksData {
+  arena_name: string;
+  arena_id: number | null;
+  trophies: number;
+  decks: Deck[];
+  source: string;
+  updated_at: string | null;
+}
+
+export interface DeckCompareResult {
+  reference_name: string;
+  user_deck: DeckCard[];
+  reference_deck: DeckCard[];
+  user_better: string[];
+  user_worse: string[];
+  reference_better: string[];
+  reference_worse: string[];
 }
 
 export interface RandomDeck {

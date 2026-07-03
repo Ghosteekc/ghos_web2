@@ -2,6 +2,8 @@ import {
 
   Profile,
 
+  PlayerCollectionData,
+
   BattleSummary,
 
   BattleDetail,
@@ -23,6 +25,10 @@ import {
   TopPlayersData,
 
   DecksListData,
+
+  ArenaDecksData,
+
+  DeckCompareResult,
 
   InsightsData,
 
@@ -244,6 +250,12 @@ export const api = {
 
 
 
+  getPlayerCollection: () =>
+
+    cachedGet<PlayerCollectionData>("player-collection", "/api/profile/collection", TTL.profile),
+
+
+
   getBattles: () =>
 
     cachedGet<{ battles: BattleSummary[]; cached_total: number | null; cached_winrate: number | null }>(
@@ -283,6 +295,24 @@ export const api = {
   getTopPlayers: () =>
 
     cachedGet<TopPlayersData>("top-players", "/api/decks/top-players", TTL.stats),
+
+
+
+  getArenaDecks: () =>
+
+    cachedGet<ArenaDecksData>("arena-decks", "/api/decks/arena", TTL.battles),
+
+
+
+  compareDeck: (referenceCards: string[]) =>
+
+    request<DeckCompareResult>("/api/decks/compare", {
+
+      method: "POST",
+
+      body: JSON.stringify({ reference_cards: referenceCards }),
+
+    }),
 
 
 
