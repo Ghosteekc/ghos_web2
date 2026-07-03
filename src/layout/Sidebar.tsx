@@ -39,7 +39,7 @@ export function Sidebar({ isOpen = true, onClose }: { isOpen?: boolean; onClose?
           </div>
           <div className="min-w-0">
             <h1 className="text-lg font-bold text-cr-text tracking-tight truncate">Ghosteek</h1>
-            <p className="text-xs text-cr-muted -mt-1 truncate">CR Assistant</p>
+            <p className="text-xs text-cr-muted -mt-1 truncate">Помощник CR</p>
           </div>
         </div>
         <button

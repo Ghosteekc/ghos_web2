@@ -197,7 +197,7 @@ export function AnalyticsPage() {
         </Card>
 
         <Card>
-          <h3 className="text-sm font-semibold text-cr-text mb-4">Winrate по дням</h3>
+          <h3 className="text-sm font-semibold text-cr-text mb-4">Винрейт по дням</h3>
           <div className="h-[220px]">
             {winrateByDay.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">

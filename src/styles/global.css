@@ -5,17 +5,17 @@
 @layer base {
   :root,
   [data-theme="dark"] {
-    --cr-bg: 11 11 20;
-    --cr-surface: 17 17 40;
-    --cr-card: 24 24 48;
-    --cr-card-hover: 30 30 56;
+    --cr-bg: 18 22 42;
+    --cr-surface: 24 30 58;
+    --cr-card: 30 36 64;
+    --cr-card-hover: 36 42 72;
     --cr-gold: 251 191 36;
     --cr-blue: 147 197 253;
     --cr-win: 74 222 128;
     --cr-loss: 248 113 113;
-    --cr-text: 255 248 235;
-    --cr-muted: 214 188 140;
-    --cr-accent: 251 191 36;
+    --cr-text: 255 255 255;
+    --cr-muted: 228 234 255;
+    --cr-accent: 186 211 255;
     --cr-border: 255 255 255;
     --cr-border-alpha: 0.06;
     --cr-grid-line: rgba(255, 255, 255, 0.025);
@@ -68,8 +68,9 @@
   }
 
   body {
-    @apply bg-cr-bg antialiased overflow-x-hidden font-sans font-bold;
+    @apply bg-cr-bg antialiased overflow-x-hidden font-sans font-extrabold;
     color: rgb(var(--cr-text));
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
     background-image:
       linear-gradient(var(--cr-grid-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--cr-grid-line) 1px, transparent 1px);
@@ -81,6 +82,7 @@
   #root {
     @apply min-h-screen overflow-x-hidden;
     color: rgb(var(--cr-text));
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -94,6 +96,7 @@
 
   .text-cr-muted {
     color: rgb(var(--cr-muted)) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
   }
 
   .text-cr-accent {

@@ -13,6 +13,7 @@ import { useTelegram, usePageRefresh } from "@/hooks";
 import { api } from "@/api/client";
 import { Profile } from "@/types";
 import { formatNumber, getWinColor, formatPlayerTag } from "@/utils";
+import { UI } from "@/constants/labels";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 
 function formatSubscription(subscription: Profile["subscription"]) {
@@ -152,7 +153,7 @@ export function ProfilePage() {
         <Card>
           <div className="flex items-center gap-3 mb-3">
             <TrendingUp className="w-5 h-5 text-cr-win shrink-0" />
-            <h3 className="text-sm font-semibold text-cr-text">Winrate</h3>
+            <h3 className="text-sm font-semibold text-cr-text">{UI.winrate}</h3>
           </div>
           <p className={"text-2xl font-bold " + getWinColor(profile?.winrate ?? 50)}>
             {profile?.winrate != null ? `${profile.winrate.toFixed(1)}%` : "—"}

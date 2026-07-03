@@ -15,28 +15,21 @@ import { api, ApiError } from "@/api/client";
 import type { Deck, DeckCard, RandomDeck, TopPlayer } from "@/types";
 import { usePageRefresh, useTelegram } from "@/hooks";
 
+import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
+
 const DECK_FILTERS = [
-  { id: "all", label: "Все" },
-  { id: "meta", label: "Мета" },
-  { id: "top", label: "Топ игроки" },
-  { id: "mine", label: "Мои" },
-  { id: "cycle", label: "Цикл" },
-  { id: "beatdown", label: "Битдаун" },
-  { id: "control", label: "Контроль" },
-  { id: "bait", label: "Bait" },
-  { id: "random", label: "Рандом" },
+  { id: "all", label: DECK_FILTER_LABELS.all },
+  { id: "meta", label: DECK_FILTER_LABELS.meta },
+  { id: "top", label: DECK_FILTER_LABELS.top },
+  { id: "mine", label: DECK_FILTER_LABELS.mine },
+  { id: "cycle", label: DECK_FILTER_LABELS.cycle },
+  { id: "beatdown", label: DECK_FILTER_LABELS.beatdown },
+  { id: "control", label: DECK_FILTER_LABELS.control },
+  { id: "bait", label: DECK_FILTER_LABELS.bait },
+  { id: "random", label: DECK_FILTER_LABELS.random },
 ] as const;
 
-const CATEGORY_LABELS: Record<string, string> = {
-  meta: "Мета",
-  mine: "Мои",
-  cycle: "Цикл",
-  beatdown: "Битдаун",
-  control: "Контроль",
-  bait: "Bait",
-  random: "Рандом",
-  top: "Топ",
-};
+const CATEGORY_LABELS = DECK_CATEGORY_LABELS;
 
 function formatUpdatedAt(iso: string | null | undefined) {
   if (!iso) return null;
@@ -59,12 +52,7 @@ function DeckCardsGrid({ cards }: { cards: DeckCard[] }) {
     <div className="grid grid-cols-4 gap-x-2 gap-y-1 mb-4">
       {sorted.map((card, i) => (
         <div key={`${card.id}-${i}`} className="min-w-0 overflow-hidden">
-          <CardTile
-            name={card.name}
-            icon={card.icon}
-            size="deck"
-            showLabel
-          />
+          <CardTile name={card.name} icon={card.icon} size="deck" />
         </div>
       ))}
     </div>
@@ -145,7 +133,7 @@ export function DecksPage() {
               "px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 " +
               (filter === item.id
                 ? "bg-cr-gold text-cr-bg shadow-glow"
-                : "bg-cr-card text-cr-muted hover:text-cr-text border border-cr-border")
+                : "bg-cr-card text-cr-text/75 hover:text-cr-text border border-cr-border")
             }
           >
             {item.label}
@@ -304,7 +292,7 @@ function TopPlayersPanel({ onCopied }: { onCopied: (msg: string) => void }) {
                   <span className="font-semibold text-cr-text">{player.trophies}</span>
                 </div>
                 <p className={"text-xs font-bold mt-0.5 " + (player.winrate >= 50 ? "text-cr-win" : "text-cr-loss")}>
-                  WR {player.winrate.toFixed(0)}%
+                  {UI.winrateShort} {player.winrate.toFixed(0)}%
                 </p>
               </div>
             </div>
@@ -312,7 +300,7 @@ function TopPlayersPanel({ onCopied }: { onCopied: (msg: string) => void }) {
             <div className="flex items-center gap-1 text-xs mb-3">
               <ElixirIcon size={14} />
               <span className="font-semibold text-cr-text">{player.avg_elixir.toFixed(1)}</span>
-              <span className="text-cr-muted ml-2">{player.total_games} боёв</span>
+              <span className="text-cr-muted ml-2">{player.total_games} {UI.battles}</span>
             </div>
 
             <DeckCardsGrid cards={player.cards} />
@@ -417,7 +405,7 @@ function RandomDeckPanel({ onCopied }: { onCopied: (msg: string) => void }) {
         <div className="grid grid-cols-4 gap-x-2 gap-y-1 mb-4">
           {deck.card_infos.map((card, i) => (
             <div key={card.id} className="min-w-0 overflow-hidden">
-              <CardTile name={card.name} icon={card.icon} size="deck" showLabel />
+              <CardTile name={card.name} icon={card.icon} size="deck" />
             </div>
           ))}
         </div>
@@ -524,7 +512,7 @@ function DeckCard({
 
         {deck.type === "meta" && deck.total_games > 0 && (
           <div className="flex items-center justify-between text-sm mb-3">
-            <span className="text-cr-muted">Winrate топов</span>
+            <span className="text-cr-muted">{UI.winrate} топов</span>
             <span className={"font-bold " + (winrate >= 50 ? "text-cr-win" : "text-cr-loss")}>
               {winrate.toFixed(1)}%
             </span>
@@ -534,13 +522,13 @@ function DeckCard({
         {deck.type === "mine" && (
           <>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-cr-muted">Winrate</span>
+              <span className="text-cr-muted">{UI.winrate}</span>
               <span className={"font-bold " + (winrate >= 50 ? "text-cr-win" : "text-cr-loss")}>
                 {winrate.toFixed(1)}%
               </span>
             </div>
             <div className="flex items-center justify-between text-sm mt-1 mb-3">
-              <span className="text-cr-muted">Игр</span>
+            <span className="text-cr-muted">{UI.games}</span>
               <span className="font-semibold text-cr-text">{deck.total_games ?? 0}</span>
             </div>
           </>

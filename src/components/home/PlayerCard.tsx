@@ -2,7 +2,9 @@ import { motion } from "framer-motion";
 import { Profile } from "@/types";
 import { CircularProgress, LinearProgress } from "@/components/ui/Progress";
 import { Trophy, Crown, Flame, Sword, Clock, Zap, TrendingUp, TrendingDown } from "lucide-react";
+import { UI } from "@/constants/labels";
 import { formatNumber, getWinColor, getTrophyChangeColor, cn, formatPlayerTag } from "@/utils";
+import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 import { Card, Skeleton } from "@/components/ui";
 
 interface PlayerCardProps {
@@ -11,6 +13,7 @@ interface PlayerCardProps {
 }
 
 export function PlayerCard({ profile, loading }: PlayerCardProps) {
+  const { nameRu } = useCardCatalog();
   if (loading) {
     return (
       <Card delay={0} className="overflow-hidden">
@@ -86,7 +89,7 @@ export function PlayerCard({ profile, loading }: PlayerCardProps) {
             </span>
           </div>
           <div className="text-center">
-            <p className="text-xs text-cr-muted mb-1">Winrate</p>
+            <p className="text-xs text-cr-muted mb-1">{UI.winrate}</p>
             <span className={cn("text-2xl font-bold", getWinColor(profile.winrate ?? 50))}>
               {profile.winrate?.toFixed(1) ?? "—"}%
             </span>
@@ -96,7 +99,7 @@ export function PlayerCard({ profile, loading }: PlayerCardProps) {
             size={100}
             strokeWidth={6}
             label={profile.winrate ? `${profile.winrate.toFixed(0)}%` : "—"}
-            sublabel="Winrate"
+            sublabel={UI.winrate}
             color={profile.winrate && profile.winrate >= 50 ? "#22c55e" : "#ef4444"}
           />
         </div>
@@ -120,7 +123,7 @@ export function PlayerCard({ profile, loading }: PlayerCardProps) {
               <Zap className="w-5 h-5 text-cr-blue" />
             </div>
             <div>
-              <p className="text-xs text-cr-muted">Skill Rating</p>
+              <p className="text-xs text-cr-muted">Рейтинг скилла</p>
               <p className="text-sm font-semibold text-cr-text">{profile.skill_rating ?? "—"}</p>
             </div>
           </div>
@@ -131,7 +134,7 @@ export function PlayerCard({ profile, loading }: PlayerCardProps) {
             <div>
               <p className="text-xs text-cr-muted">Любимая карта</p>
               <p className="text-sm font-semibold text-cr-text truncate">
-                {profile.favorite_card ?? "—"}
+                {profile.favorite_card ? nameRu(profile.favorite_card) : "—"}
               </p>
             </div>
           </div>
@@ -141,7 +144,7 @@ export function PlayerCard({ profile, loading }: PlayerCardProps) {
             </div>
             <div>
               <p className="text-xs text-cr-muted">Аренда</p>
-              <p className="text-sm font-semibold text-cr-text">{profile.arena_icon ? "Active" : "—"}</p>
+              <p className="text-sm font-semibold text-cr-text">{profile.arena_icon ? UI.subscriptionActive : "—"}</p>
             </div>
           </div>
         </div>

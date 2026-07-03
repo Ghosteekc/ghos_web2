@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { cn } from "@/utils";
+import { UI } from "@/constants/labels";
 
 interface CircularProgressProps {
   value: number;
@@ -87,7 +88,7 @@ export function LinearProgress({
     <div className={cn("w-full", className)}>
       {showLabel && (
         <div className="flex justify-between mb-2">
-          <span className="text-xs text-cr-muted">Winrate</span>
+          <span className="text-xs text-cr-muted">{UI.winrate}</span>
           <span className="text-xs font-semibold text-cr-text">{percent.toFixed(1)}%</span>
         </div>
       )}

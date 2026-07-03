@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Copy, BarChart3, ChevronRight } from "lucide-react";
 import { Deck } from "@/types";
 import { formatNumber, getWinColor } from "@/utils";
+import { UI } from "@/constants/labels";
 import { Card, Button, LinearProgress, ElixirIcon } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 
@@ -48,14 +49,14 @@ export function DeckCard({ deck, index, onOpen }: DeckCardProps) {
         <div className="grid grid-cols-4 gap-x-2 gap-y-1 mb-4">
           {deck.cards.map((card) => (
             <div key={card.id} className="min-w-0 overflow-hidden">
-              <CardTile name={card.name} icon={card.icon} size="deck" showLabel />
+              <CardTile name={card.name} icon={card.icon} size="deck" />
             </div>
           ))}
         </div>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-cr-muted">Winrate</span>
+            <span className="text-cr-muted">{UI.winrate}</span>
             <div className="flex items-center gap-2">
               <LinearProgress
                 value={deck.winrate}
