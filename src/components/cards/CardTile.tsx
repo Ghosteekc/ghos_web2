@@ -159,11 +159,12 @@ export function CardTile({
         {levelBadge != null && (
           <span
             className={cn(
-              "absolute z-30 font-cr font-extrabold leading-none text-cr-gold",
+              "absolute z-50 font-cr font-extrabold leading-none text-cr-gold pointer-events-none",
               isCollection
                 ? "collection-level-badge"
                 : "top-0 right-0 min-w-[1.1rem] px-1 py-0.5 rounded-md text-[10px] bg-cr-bg/95 border border-cr-gold/40",
             )}
+            aria-label={`Уровень ${levelBadge}`}
           >
             {levelBadge}
           </span>
