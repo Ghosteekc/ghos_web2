@@ -64,8 +64,6 @@ function DeckCardsGrid({ cards }: { cards: DeckCard[] }) {
             icon={card.icon}
             size="deck"
             showLabel
-            evolutionLevel={card.evolution_level ?? 0}
-            isHero={card.is_hero ?? false}
           />
         </div>
       ))}

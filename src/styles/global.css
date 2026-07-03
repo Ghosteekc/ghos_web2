@@ -10,12 +10,12 @@
     --cr-card: 24 24 48;
     --cr-card-hover: 30 30 56;
     --cr-gold: 251 191 36;
-    --cr-blue: 96 165 250;
-    --cr-win: 34 197 94;
-    --cr-loss: 239 68 68;
-    --cr-text: 243 244 246;
-    --cr-muted: 176 192 214;
-    --cr-accent: 186 211 255;
+    --cr-blue: 147 197 253;
+    --cr-win: 74 222 128;
+    --cr-loss: 248 113 113;
+    --cr-text: 255 248 235;
+    --cr-muted: 214 188 140;
+    --cr-accent: 251 191 36;
     --cr-border: 255 255 255;
     --cr-border-alpha: 0.06;
     --cr-grid-line: rgba(255, 255, 255, 0.025);
@@ -31,8 +31,8 @@
     --cr-win: 22 163 74;
     --cr-loss: 220 38 38;
     --cr-text: 17 24 39;
-    --cr-muted: 71 85 105;
-    --cr-accent: 37 99 235;
+    --cr-muted: 120 90 40;
+    --cr-accent: 217 119 6;
     --cr-border: 0 0 0;
     --cr-border-alpha: 0.08;
     --cr-grid-line: rgba(0, 0, 0, 0.04);
@@ -68,7 +68,8 @@
   }
 
   body {
-    @apply bg-cr-bg text-cr-text antialiased overflow-x-hidden font-sans font-semibold;
+    @apply bg-cr-bg antialiased overflow-x-hidden font-sans font-bold;
+    color: rgb(var(--cr-text));
     background-image:
       linear-gradient(var(--cr-grid-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--cr-grid-line) 1px, transparent 1px);
@@ -79,6 +80,28 @@
 
   #root {
     @apply min-h-screen overflow-x-hidden;
+    color: rgb(var(--cr-text));
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-extrabold text-cr-text;
+    letter-spacing: -0.02em;
+  }
+
+  p, span, li, label, td, th {
+    color: inherit;
+  }
+
+  .text-cr-muted {
+    color: rgb(var(--cr-muted)) !important;
+  }
+
+  .text-cr-accent {
+    color: rgb(var(--cr-accent)) !important;
+  }
+
+  .text-cr-text {
+    color: rgb(var(--cr-text)) !important;
   }
 }
 
@@ -105,7 +128,8 @@
   }
 
   .sidebar-item {
-    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl text-cr-muted cursor-pointer;
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl cursor-pointer;
+    color: rgb(var(--cr-muted));
     min-height: 2.75rem;
     border: 1px solid transparent;
     box-sizing: border-box;
@@ -113,7 +137,8 @@
   }
 
   .sidebar-item:hover {
-    @apply text-cr-text bg-white/5;
+    @apply bg-white/5;
+    color: rgb(var(--cr-text));
   }
 
   .sidebar-item.active {
@@ -190,20 +215,25 @@
   }
 
   .page-title {
-    @apply text-2xl font-extrabold text-cr-text tracking-tight;
+    @apply text-2xl font-extrabold tracking-tight;
+    color: rgb(var(--cr-gold));
+    text-shadow: 0 0 18px rgba(251, 191, 36, 0.22);
   }
 
   .page-subtitle {
-    @apply text-sm font-semibold text-cr-accent;
+    @apply text-sm font-bold;
+    color: rgb(var(--cr-accent));
   }
 
   .text-label {
-    @apply text-xs font-bold text-cr-accent uppercase tracking-wide;
+    @apply text-xs font-extrabold uppercase tracking-wide;
+    color: rgb(var(--cr-accent));
   }
 
   .card-name-glow {
-    @apply text-cr-gold font-extrabold leading-none;
-    text-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
+    @apply font-extrabold leading-none;
+    color: rgb(var(--cr-gold));
+    text-shadow: 0 0 10px rgba(251, 191, 36, 0.45);
   }
 
   [data-theme="light"] .card-name-glow {
@@ -211,10 +241,11 @@
   }
 
   .card-name-deck {
-    @apply text-cr-gold font-semibold leading-[1.05];
-    font-size: 6px;
+    @apply font-bold leading-[1.05];
+    font-size: 5px;
     letter-spacing: -0.02em;
-    text-shadow: 0 0 4px rgba(251, 191, 36, 0.2);
+    color: rgb(var(--cr-gold));
+    text-shadow: 0 0 4px rgba(251, 191, 36, 0.35);
   }
 
   .card-name-deck-overlay {
@@ -223,59 +254,31 @@
     right: 0;
     bottom: 0;
     z-index: 20;
-    padding: 1px 1px 2px;
-    font-size: 5px;
-    line-height: 1.1;
-    font-weight: 600;
-    letter-spacing: -0.03em;
+    padding: 0 2px 1px;
+    font-size: 4px;
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.02em;
     text-align: center;
     color: rgb(var(--cr-gold));
-    background: linear-gradient(to top, rgba(11, 11, 20, 0.92) 55%, transparent);
+    background: linear-gradient(to top, rgba(11, 11, 20, 0.94) 60%, transparent);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     -webkit-text-size-adjust: none;
     text-size-adjust: none;
     pointer-events: none;
+    text-shadow: 0 0 4px rgba(251, 191, 36, 0.35);
   }
 
   [data-theme="light"] .card-name-deck-overlay {
     color: rgb(var(--cr-gold));
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.95) 55%, transparent);
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.96) 60%, transparent);
   }
 
   .card-name-lg-overlay {
-    font-size: 6px;
-    padding-bottom: 3px;
-  }
-
-  .card-evo-badge,
-  .card-hero-badge {
-    position: absolute;
-    top: 1px;
-    z-index: 25;
-    width: 10px;
-    height: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 9999px;
-    font-size: 7px;
-    font-weight: 800;
-    line-height: 1;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-  }
-
-  .card-evo-badge {
-    left: 1px;
-    color: #e9d5ff;
-    background: linear-gradient(135deg, #7c3aed, #4c1d95);
-  }
-
-  .card-hero-badge {
-    right: 1px;
-    color: #fef3c7;
-    background: linear-gradient(135deg, #d97706, #92400e);
+    font-size: 5px;
+    padding-bottom: 2px;
   }
 
   [data-theme="light"] .card-name-deck {
@@ -315,8 +318,9 @@
 
   .settings-data-btn {
     @apply w-full flex flex-col items-center justify-center gap-2 py-4 px-4 rounded-cr-lg
-      border border-cr-border bg-cr-bg/40 text-cr-text font-semibold text-sm
+      border border-cr-border bg-cr-bg/40 font-semibold text-sm
       transition-colors active:scale-[0.98];
+    color: rgb(var(--cr-text));
   }
 
   .settings-data-btn:hover {

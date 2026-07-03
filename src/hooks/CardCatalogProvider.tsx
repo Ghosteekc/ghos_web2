@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { api } from "@/api/client";
 import { lsGet, lsSet, TTL } from "@/api/cache";
 
-const CATALOG_LS_KEY = "card-catalog-v3";
+const CATALOG_LS_KEY = "card-catalog-v4";
 
 export interface CardCatalogItem {
   name: string;

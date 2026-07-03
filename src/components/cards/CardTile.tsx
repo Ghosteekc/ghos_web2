@@ -31,8 +31,6 @@ interface CardTileProps {
   labelClassName?: string;
   className?: string;
   badge?: string | number;
-  evolutionLevel?: number;
-  isHero?: boolean;
 }
 
 export function CardTile({
@@ -45,8 +43,6 @@ export function CardTile({
   labelClassName,
   className,
   badge,
-  evolutionLevel = 0,
-  isHero = false,
 }: CardTileProps) {
   const { nameRu, nameShort, iconUrl } = useCardCatalog();
   const src = icon || iconUrl(name);
@@ -88,16 +84,6 @@ export function CardTile({
         {badge != null && (
           <span className="absolute bottom-0.5 right-0.5 z-20 px-1 py-0.5 rounded text-[10px] font-bold bg-cr-bg/90 text-cr-gold border border-cr-gold/30">
             {badge}
-          </span>
-        )}
-        {evolutionLevel > 0 && (
-          <span className="card-evo-badge" title="Эволюция">
-            E
-          </span>
-        )}
-        {isHero && (
-          <span className="card-hero-badge" title="Героизм">
-            ★
           </span>
         )}
       </div>
