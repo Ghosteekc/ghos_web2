@@ -9,7 +9,7 @@ const sizeClasses: Record<CardTileSize, string> = {
   md: "w-14 h-16",
   grid: "w-14 h-[4.25rem] max-w-[4.5rem]",
   lg: "w-full max-w-[5rem] aspect-[4/5]",
-  deck: "w-full max-w-[2.85rem] aspect-[4/5] mx-auto",
+  deck: "w-full max-w-[3rem] aspect-[4/5] mx-auto",
 };
 
 const labelSizeClasses: Record<CardTileSize, string> = {
@@ -46,7 +46,9 @@ export function CardTile({
 }: CardTileProps) {
   const { nameRu, nameShort, iconUrl } = useCardCatalog();
   const src = icon || iconUrl(name);
-  const label = labelOverride ?? (compactLabel && showLabel ? nameShort(name) : nameRu(name));
+  const label =
+    labelOverride ??
+    ((compactLabel || size === "deck") && showLabel ? nameShort(name) : nameRu(name));
 
   return (
     <div
@@ -56,12 +58,12 @@ export function CardTile({
         className,
       )}
     >
-      <div className={cn("relative shrink-0 card-tile-wrap", sizeClasses[size])} title={label}>
+      <div className={cn("relative shrink-0 card-tile-wrap", sizeClasses[size])} title={nameRu(name)}>
         <div className="card-tile-glow" aria-hidden />
         {src ? (
           <img
             src={src}
-            alt={label}
+            alt={nameRu(name)}
             className="relative z-10 w-full h-full object-contain object-center drop-shadow-md"
             loading="lazy"
           />
@@ -70,19 +72,22 @@ export function CardTile({
             {name.charAt(0)}
           </div>
         )}
+        {showLabel && size === "deck" && (
+          <span className="card-name-deck-overlay" title={nameRu(name)}>
+            {label}
+          </span>
+        )}
         {badge != null && (
           <span className="absolute bottom-0.5 right-0.5 z-20 px-1 py-0.5 rounded text-[10px] font-bold bg-cr-bg/90 text-cr-gold border border-cr-gold/30">
             {badge}
           </span>
         )}
       </div>
-      {showLabel && (
+      {showLabel && size !== "deck" && (
         <span
           className={cn(
-            "card-name-glow text-center px-0 font-extrabold",
-            size === "deck"
-              ? "card-name-deck block w-full overflow-hidden text-ellipsis whitespace-nowrap"
-              : cn("leading-none truncate", labelSizeClasses[size]),
+            "card-name-glow leading-none text-center truncate px-0.5 font-extrabold",
+            labelSizeClasses[size],
             labelClassName,
           )}
           title={nameRu(name)}

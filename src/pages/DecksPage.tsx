@@ -223,7 +223,7 @@ function RandomDeckPanel({ onCopied }: { onCopied: (msg: string) => void }) {
           8 случайных карт, как в игре. Нажмите «Перегенерировать», если колода не нравится.
         </p>
 
-        <div className="grid grid-cols-4 gap-x-1.5 gap-y-2 mb-4">
+        <div className="grid grid-cols-4 gap-x-2 gap-y-1 mb-4">
           {deck.card_infos.map((card) => (
             <div key={card.id} className="min-w-0 overflow-hidden">
               <CardTile name={card.name} icon={card.icon} size="deck" showLabel />
@@ -329,7 +329,7 @@ function DeckCard({
           <p className="text-xs text-cr-muted mb-3">{deck.description}</p>
         )}
 
-        <div className="grid grid-cols-4 gap-x-1.5 gap-y-2 mb-4">
+        <div className="grid grid-cols-4 gap-x-2 gap-y-1 mb-4">
           {cards.map((card) => (
             <div key={card.id} className="min-w-0 overflow-hidden">
               <CardTile name={card.name} icon={card.icon} size="deck" showLabel />
