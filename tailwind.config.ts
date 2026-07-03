@@ -22,7 +22,9 @@ const config: Config = {
         "cr-border": "rgb(var(--cr-border) / var(--cr-border-alpha))",
       },
       fontFamily: {
-        sans: ["Plus Jakarta Sans", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+        sans: ["SC CCBackBeat", "Supercell Magic", "system-ui", "sans-serif"],
+        cr: ["Supercell Magic", "SC CCBackBeat", "sans-serif"],
+        mono: ["SC CCBackBeat", "monospace"],
       },
       borderRadius: {
         "cr": "1.25rem",

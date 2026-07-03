@@ -38,7 +38,7 @@ export function Sidebar({ isOpen = true, onClose }: { isOpen?: boolean; onClose?
             <Trophy className="w-6 h-6 text-cr-bg" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg font-bold text-cr-text tracking-tight truncate">Ghosteek</h1>
+            <h1 className="text-lg font-cr text-cr-text tracking-tight truncate">Ghosteek</h1>
             <p className="text-xs text-cr-muted -mt-1 truncate">CR Assistant</p>
           </div>
         </div>

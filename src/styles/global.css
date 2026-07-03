@@ -5,37 +5,62 @@
 @layer base {
   :root,
   [data-theme="dark"] {
-    --cr-bg: 18 22 42;
-    --cr-surface: 24 30 58;
-    --cr-card: 30 36 64;
-    --cr-card-hover: 36 42 72;
-    --cr-gold: 251 191 36;
-    --cr-blue: 147 197 253;
-    --cr-win: 74 222 128;
-    --cr-loss: 248 113 113;
+    --cr-bg: 22 58 58;
+    --cr-surface: 28 72 72;
+    --cr-card: 32 82 82;
+    --cr-card-hover: 38 92 92;
+    --cr-gold: 255 220 80;
+    --cr-blue: 147 220 255;
+    --cr-win: 90 230 130;
+    --cr-loss: 255 110 110;
     --cr-text: 255 255 255;
-    --cr-muted: 228 234 255;
-    --cr-accent: 186 211 255;
+    --cr-muted: 210 235 235;
+    --cr-accent: 180 230 230;
     --cr-border: 255 255 255;
-    --cr-border-alpha: 0.06;
-    --cr-grid-line: rgba(255, 255, 255, 0.025);
+    --cr-border-alpha: 0.08;
+    --cr-grid-line: rgba(0, 0, 0, 0.12);
+    --cr-stroke-title:
+      -1px 2px 0 #000,
+      0 2px 0 #000,
+      1px 2px 0 #000,
+      -2px 0 0 #000,
+      2px 0 0 #000,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      1px 1px 0 #000,
+      0 3px 0 rgba(0, 0, 0, 0.35);
+    --cr-stroke-body:
+      -1px 1px 0 #000,
+      0 1px 0 #000,
+      1px 1px 0 #000,
+      -1px 0 0 #000,
+      1px 0 0 #000;
   }
 
   [data-theme="light"] {
-    --cr-bg: 238 240 246;
-    --cr-surface: 255 255 255;
+    --cr-bg: 210 232 232;
+    --cr-surface: 235 248 248;
     --cr-card: 255 255 255;
-    --cr-card-hover: 244 245 249;
-    --cr-gold: 217 119 6;
-    --cr-blue: 37 99 235;
-    --cr-win: 22 163 74;
-    --cr-loss: 220 38 38;
-    --cr-text: 17 24 39;
-    --cr-muted: 120 90 40;
-    --cr-accent: 217 119 6;
+    --cr-card-hover: 225 242 242;
+    --cr-gold: 180 120 0;
+    --cr-blue: 0 100 180;
+    --cr-win: 0 130 60;
+    --cr-loss: 190 30 30;
+    --cr-text: 20 50 50;
+    --cr-muted: 60 100 100;
+    --cr-accent: 40 110 110;
     --cr-border: 0 0 0;
-    --cr-border-alpha: 0.08;
-    --cr-grid-line: rgba(0, 0, 0, 0.04);
+    --cr-border-alpha: 0.1;
+    --cr-grid-line: rgba(0, 0, 0, 0.06);
+    --cr-stroke-title:
+      -1px 1px 0 rgba(255, 255, 255, 0.85),
+      0 1px 0 rgba(255, 255, 255, 0.85),
+      1px 1px 0 rgba(255, 255, 255, 0.85);
+    --cr-stroke-body:
+      -1px 1px 0 rgba(255, 255, 255, 0.7),
+      0 1px 0 rgba(255, 255, 255, 0.7),
+      1px 1px 0 rgba(255, 255, 255, 0.7);
   }
 
   :root {
@@ -68,43 +93,65 @@
   }
 
   body {
-    @apply bg-cr-bg antialiased overflow-x-hidden font-sans font-extrabold;
+    @apply bg-cr-bg antialiased overflow-x-hidden font-sans;
     color: rgb(var(--cr-text));
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    text-shadow: var(--cr-stroke-body);
+    background-color: rgb(var(--cr-bg));
     background-image:
-      linear-gradient(var(--cr-grid-line) 1px, transparent 1px),
-      linear-gradient(90deg, var(--cr-grid-line) 1px, transparent 1px);
-    background-size: 24px 24px;
-    background-position: -1px -1px;
+      linear-gradient(45deg, var(--cr-grid-line) 25%, transparent 25%, transparent 75%, var(--cr-grid-line) 75%),
+      linear-gradient(45deg, var(--cr-grid-line) 25%, transparent 25%, transparent 75%, var(--cr-grid-line) 75%);
+    background-size: 28px 28px;
+    background-position: 0 0, 14px 14px;
     -webkit-tap-highlight-color: transparent;
   }
 
   #root {
     @apply min-h-screen overflow-x-hidden;
     color: rgb(var(--cr-text));
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    text-shadow: var(--cr-stroke-body);
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-extrabold text-cr-text;
-    letter-spacing: -0.02em;
+    @apply font-cr text-cr-text;
+    text-shadow: var(--cr-stroke-title);
+    letter-spacing: 0.01em;
   }
 
-  p, span, li, label, td, th {
+  button,
+  .btn-gold,
+  .btn-blue {
+    font-family: "Supercell Magic", "SC CCBackBeat", sans-serif;
+    text-shadow: var(--cr-stroke-body);
+  }
+
+  p, span, li, label, td, th, a, input, select, textarea {
     color: inherit;
+    text-shadow: inherit;
   }
 
   .text-cr-muted {
     color: rgb(var(--cr-muted)) !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    text-shadow: var(--cr-stroke-body);
   }
 
   .text-cr-accent {
     color: rgb(var(--cr-accent)) !important;
+    text-shadow: var(--cr-stroke-body);
   }
 
   .text-cr-text {
     color: rgb(var(--cr-text)) !important;
+    text-shadow: var(--cr-stroke-body);
+  }
+
+  .text-cr-gold {
+    text-shadow: var(--cr-stroke-title);
+  }
+
+  .text-cr-win,
+  .text-cr-loss,
+  .text-cr-blue {
+    text-shadow: var(--cr-stroke-body);
   }
 }
 
@@ -123,7 +170,8 @@
   }
 
   .btn-gold {
-    @apply bg-gradient-to-r from-cr-gold to-yellow-500 text-cr-bg font-semibold px-6 py-3 rounded-cr shadow-glow hover:shadow-glow-blue transition-all duration-300 active:scale-95;
+    @apply bg-gradient-to-r from-cr-gold to-yellow-400 text-cr-bg font-cr px-6 py-3 rounded-cr shadow-glow hover:shadow-glow-blue transition-all duration-300 active:scale-95;
+    text-shadow: none;
   }
 
   .btn-blue {
@@ -218,37 +266,39 @@
   }
 
   .page-title {
-    @apply text-2xl font-extrabold tracking-tight;
+    @apply text-2xl font-cr tracking-tight;
     color: rgb(var(--cr-gold));
-    text-shadow: 0 0 18px rgba(251, 191, 36, 0.22);
+    text-shadow: var(--cr-stroke-title);
   }
 
   .page-subtitle {
-    @apply text-sm font-bold;
+    @apply text-sm;
     color: rgb(var(--cr-accent));
+    text-shadow: var(--cr-stroke-body);
   }
 
   .text-label {
-    @apply text-xs font-extrabold uppercase tracking-wide;
+    @apply text-xs font-cr uppercase tracking-wide;
     color: rgb(var(--cr-accent));
+    text-shadow: var(--cr-stroke-body);
   }
 
   .card-name-glow {
-    @apply font-extrabold leading-none;
+    @apply font-cr leading-none;
     color: rgb(var(--cr-gold));
-    text-shadow: 0 0 10px rgba(251, 191, 36, 0.45);
+    text-shadow: var(--cr-stroke-title);
   }
 
   [data-theme="light"] .card-name-glow {
-    text-shadow: 0 0 8px rgba(217, 119, 6, 0.25);
+    text-shadow: var(--cr-stroke-body);
   }
 
   .card-name-deck {
-    @apply font-bold leading-[1.05];
+    @apply font-cr leading-[1.05];
     font-size: 5px;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     color: rgb(var(--cr-gold));
-    text-shadow: 0 0 4px rgba(251, 191, 36, 0.35);
+    text-shadow: var(--cr-stroke-body);
   }
 
   .card-name-deck-overlay {
@@ -258,20 +308,20 @@
     bottom: 0;
     z-index: 20;
     padding: 0 2px 1px;
+    font-family: "Supercell Magic", sans-serif;
     font-size: 4px;
     line-height: 1.05;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    letter-spacing: 0;
     text-align: center;
     color: rgb(var(--cr-gold));
-    background: linear-gradient(to top, rgba(11, 11, 20, 0.94) 60%, transparent);
+    background: linear-gradient(to top, rgba(11, 40, 40, 0.94) 60%, transparent);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     -webkit-text-size-adjust: none;
     text-size-adjust: none;
     pointer-events: none;
-    text-shadow: 0 0 4px rgba(251, 191, 36, 0.35);
+    text-shadow: var(--cr-stroke-body);
   }
 
   [data-theme="light"] .card-name-deck-overlay {
@@ -285,7 +335,7 @@
   }
 
   [data-theme="light"] .card-name-deck {
-    text-shadow: 0 0 3px rgba(217, 119, 6, 0.15);
+    text-shadow: var(--cr-stroke-body);
   }
 
   .card-tile-wrap {

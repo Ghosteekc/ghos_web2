@@ -1,0 +1,16 @@
+/* Clash Royale fonts — fan recreation from Dabolus/cr-fonts (Supercell Magic + SC CCBackBeat) */
+@font-face {
+  font-family: "Supercell Magic";
+  src: url("/fonts/Supercell-Magic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "SC CCBackBeat";
+  src: url("/fonts/SCCCBackBeat.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
