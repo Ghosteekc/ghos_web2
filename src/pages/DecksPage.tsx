@@ -11,6 +11,8 @@ import {
   Swords,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Card, Button, SkeletonGroup, ElixirIcon } from "@/components/ui";
 import { CardTile } from "@/components/cards";
@@ -29,8 +31,8 @@ const DECK_FILTERS = [
 ] as const;
 
 const FILTER_BTN_ACTIVE =
-  "px-4 py-2 rounded-xl text-sm font-cr whitespace-nowrap transition-all duration-200 " +
-  "bg-cr-gold text-white border border-cr-gold/50 shadow-glow";
+  "px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all duration-200 " +
+  "bg-cr-gold/20 text-cr-text border border-cr-gold/55 shadow-glow";
 const FILTER_BTN_IDLE =
   "px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200 " +
   "bg-cr-card/70 text-cr-text border border-cr-border hover:bg-cr-card-hover";
@@ -131,19 +133,23 @@ export function DecksPage() {
         )}
       </p>
 
-      <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
         {DECK_FILTERS.map((item) => (
           <button
             key={item.id}
             type="button"
             onClick={() => setFilter(item.id)}
             className={filter === item.id ? FILTER_BTN_ACTIVE : FILTER_BTN_IDLE}
-            style={filter === item.id ? { textShadow: "var(--cr-stroke-body)" } : undefined}
           >
             {item.label}
           </button>
         ))}
       </div>
+      <p className="text-[11px] text-cr-muted flex items-center gap-1 -mt-3 pb-1">
+        <ChevronLeft className="w-3 h-3 shrink-0 opacity-70" />
+        Листайте вкладки влево и вправо
+        <ChevronRight className="w-3 h-3 shrink-0 opacity-70" />
+      </p>
 
       {copyHint && (
         <Card className="text-center text-cr-win text-sm">{copyHint}</Card>
@@ -473,6 +479,59 @@ function TopPlayersPanel({ onCopied }: { onCopied: (msg: string) => void }) {
   );
 }
 
+function RoflModeBar({
+  rofl,
+  onRoflChange,
+}: {
+  rofl: boolean;
+  onRoflChange: (value: boolean) => void;
+}) {
+  const [showHelp, setShowHelp] = useState(false);
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3 px-0.5">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="text-sm font-medium text-cr-text">Рофл-режим</span>
+          <button
+            type="button"
+            aria-label="Что такое рофл-режим"
+            aria-expanded={showHelp}
+            onClick={() => setShowHelp((v) => !v)}
+            className="w-6 h-6 shrink-0 rounded-full border border-cr-border bg-cr-card/60 text-xs font-bold text-cr-muted hover:text-cr-text hover:border-cr-gold/40 transition-colors"
+          >
+            ?
+          </button>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={rofl}
+          aria-label="Рофл-режим"
+          onClick={() => onRoflChange(!rofl)}
+          className={
+            "relative w-11 h-6 rounded-full transition-colors shrink-0 " +
+            (rofl ? "bg-cr-gold" : "bg-cr-border")
+          }
+        >
+          <span
+            className={
+              "absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform " +
+              (rofl ? "translate-x-5" : "")
+            }
+          />
+        </button>
+      </div>
+      {showHelp ? (
+        <p className="text-xs text-cr-muted leading-snug px-0.5">
+          Генерирует угарные тематические колоды вроде «Похоронное бюро» или «Аляска» — специально
+          нестандартные и не для ranked. Включите тумблер и нажмите «Перегенерировать».
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function RandomDeckPanel({ onCopied }: { onCopied: (msg: string) => void }) {
   const { openLink } = useTelegram();
   const [deck, setDeck] = useState<RandomDeck | null>(null);
@@ -524,46 +583,35 @@ function RandomDeckPanel({ onCopied }: { onCopied: (msg: string) => void }) {
   };
 
   if (loading && !deck) {
-    return <SkeletonGroup count={1} />;
+    return (
+      <div className="space-y-3">
+        <RoflModeBar rofl={rofl} onRoflChange={setRofl} />
+        <SkeletonGroup count={1} />
+      </div>
+    );
   }
 
   if (error || !deck) {
     return (
-      <Card className="text-center space-y-3">
-        <p className="text-cr-loss text-sm">{error ?? "Ошибка"}</p>
-        <Button onClick={() => void roll()}>Попробовать снова</Button>
-      </Card>
+      <div className="space-y-3">
+        <RoflModeBar rofl={rofl} onRoflChange={setRofl} />
+        <Card className="text-center space-y-3">
+          <p className="text-cr-loss text-sm">{error ?? "Ошибка"}</p>
+          <Button onClick={() => void roll()}>Попробовать снова</Button>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+      <RoflModeBar rofl={rofl} onRoflChange={setRofl} />
       <Card className="overflow-hidden">
         <div className="flex items-center justify-between mb-2 gap-2">
           <span className="text-xs font-medium text-cr-gold bg-cr-gold/10 px-2.5 py-1 rounded-full border border-cr-gold/20 flex items-center gap-1 shrink-0">
             <Shuffle className="w-3 h-3" />
             {deck.rofl ? (deck.rofl_name ?? "Рофл") : "Случайная колода"}
           </span>
-          <label className="flex items-center gap-2 text-xs text-cr-text cursor-pointer select-none">
-            <span className="text-cr-muted">Рофл</span>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={rofl}
-              onClick={() => setRofl((v) => !v)}
-              className={
-                "relative w-10 h-5 rounded-full transition-colors " +
-                (rofl ? "bg-cr-gold" : "bg-cr-border")
-              }
-            >
-              <span
-                className={
-                  "absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform " +
-                  (rofl ? "translate-x-5" : "")
-                }
-              />
-            </button>
-          </label>
           <div className="flex items-center gap-1 text-xs shrink-0">
             <ElixirIcon size={14} />
             <span className="font-semibold text-cr-text">{deck.avg_elixir.toFixed(1)}</span>
