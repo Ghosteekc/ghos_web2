@@ -368,22 +368,23 @@
   }
 
   .collection-tile-shell {
+    position: relative;
     overflow: visible;
   }
 
   .collection-card-wrap {
-    overflow: hidden;
+    overflow: visible;
   }
 
   .collection-level-badge {
     position: absolute;
-    top: -1px;
-    right: -1px;
+    top: 0;
+    right: 0;
     z-index: 60;
-    min-width: 1.35rem;
-    padding: 0.1rem 0.28rem;
+    min-width: 1.25rem;
+    padding: 0.08rem 0.26rem;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     line-height: 1.1;
@@ -391,9 +392,10 @@
     color: #fff;
     background: linear-gradient(180deg, rgba(28, 20, 4, 0.98) 0%, rgba(8, 6, 2, 0.98) 100%);
     border: 2px solid rgba(251, 191, 36, 0.95);
-    border-radius: 0.3rem;
+    border-radius: 0.28rem;
     box-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
     pointer-events: none;
+    transform: translate(15%, -15%);
   }
 
   .card-tile-glow {

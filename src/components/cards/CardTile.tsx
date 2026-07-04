@@ -135,8 +135,8 @@ export function CardTile({
       >
         <div
           className={cn(
-            "relative w-full h-full card-tile-wrap overflow-hidden",
-            isCollection && "collection-card-wrap",
+            "relative w-full h-full card-tile-wrap",
+            isCollection ? "collection-card-wrap" : "overflow-hidden",
           )}
         >
           <div className="card-tile-glow" aria-hidden />
@@ -164,9 +164,14 @@ export function CardTile({
           )}
           {!isCollection && levelBadge != null && (
             <span
-              className="absolute top-0 right-0 z-50 min-w-[1.1rem] px-1 py-0.5 rounded-md text-[10px] font-cr font-extrabold leading-none text-cr-gold bg-cr-bg/95 border border-cr-gold/40 pointer-events-none"
+              className="absolute top-0 right-0 z-50 min-w-[1.1rem] px-1 py-0.5 rounded-md text-[10px] font-sans font-extrabold leading-none text-white bg-cr-bg/95 border border-cr-gold/40 pointer-events-none"
               aria-label={`Уровень ${levelBadge}`}
             >
+              {levelBadge}
+            </span>
+          )}
+          {isCollection && levelBadge != null && (
+            <span className="collection-level-badge" aria-label={`Уровень ${levelBadge}`}>
               {levelBadge}
             </span>
           )}
@@ -176,11 +181,6 @@ export function CardTile({
             </span>
           )}
         </div>
-        {isCollection && levelBadge != null && (
-          <span className="collection-level-badge" aria-label={`Уровень ${levelBadge}`}>
-            {levelBadge}
-          </span>
-        )}
       </div>
       {showLabel && !overlayLabel && (
         <span

@@ -15,6 +15,7 @@ export interface CollectionCardEntry {
   max_level: number | null;
   count: number;
   rarity: string;
+  elixir: number | null;
   evolution_level: number;
   max_evolution_level: number;
   display_mode: CardDisplayMode;
