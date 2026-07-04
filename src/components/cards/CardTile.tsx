@@ -1,5 +1,6 @@
 import { cn } from "@/utils";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
+import { ElixirIcon } from "@/components/ui/ElixirIcon";
 import type { CardDisplayMode } from "@/types";
 
 type CardTileSize = "xs" | "sm" | "md" | "grid" | "lg" | "deck" | "collection";
@@ -87,6 +88,7 @@ interface CardTileProps {
   className?: string;
   badge?: string | number;
   levelBadge?: string | number;
+  elixirCost?: number;
   displayMode?: CardDisplayMode;
   iconBase?: string;
   iconEvo?: string;
@@ -104,6 +106,7 @@ export function CardTile({
   className,
   badge,
   levelBadge,
+  elixirCost,
   displayMode = "base",
   iconBase,
   iconEvo,
@@ -117,6 +120,49 @@ export function CardTile({
     labelOverride ??
     ((compactLabel || size === "deck" || size === "lg") && showLabel ? nameShort(name) : nameRu(name));
 
+  if (isCollection) {
+    return (
+      <div className={cn("relative w-full max-w-[4.75rem] mx-auto min-w-0", className)} title={nameRu(name)}>
+        <div className={cn("relative w-full aspect-[4/5]", sizeClasses[size])}>
+          <div className="absolute inset-0 card-tile-wrap overflow-visible">
+            <div className="card-tile-glow" aria-hidden />
+            {src ? (
+              <CardArt
+                name={nameRu(name)}
+                src={src}
+                iconBase={iconBase ?? src}
+                iconEvo={iconEvo}
+                iconHero={iconHero}
+                displayMode={displayMode}
+              />
+            ) : (
+              <div className="relative z-10 w-full h-full flex items-center justify-center text-xs font-bold text-cr-text">
+                {name.charAt(0)}
+              </div>
+            )}
+          </div>
+          {levelBadge != null && (
+            <span
+              className="absolute top-[6%] right-[6%] z-[80] min-w-[1.15rem] px-1 py-0.5 rounded-sm text-[10px] font-bold leading-none text-white bg-[#1a1204]/95 border-2 border-amber-400 shadow-[0_1px_4px_rgba(0,0,0,0.85)] pointer-events-none"
+              aria-label={`Уровень ${levelBadge}`}
+            >
+              {levelBadge}
+            </span>
+          )}
+          {elixirCost != null && (
+            <span
+              className="absolute bottom-[6%] left-[6%] z-[80] inline-flex items-center gap-0.5 px-1 py-0.5 rounded-sm bg-[#1a1204]/95 border border-pink-500/70 shadow-[0_1px_4px_rgba(0,0,0,0.85)] pointer-events-none"
+              aria-label={`${elixirCost} эликсира`}
+            >
+              <ElixirIcon size={11} />
+              <span className="text-[10px] font-bold leading-none text-pink-300">{elixirCost}</span>
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -127,18 +173,11 @@ export function CardTile({
     >
       <div
         className={cn(
-          "relative shrink-0",
+          "relative shrink-0 card-tile-wrap overflow-hidden",
           sizeClasses[size],
-          isCollection && "collection-tile-shell",
         )}
         title={nameRu(name)}
       >
-        <div
-          className={cn(
-            "relative w-full h-full card-tile-wrap",
-            isCollection ? "collection-card-wrap" : "overflow-hidden",
-          )}
-        >
           <div className="card-tile-glow" aria-hidden />
           {src ? (
             <CardArt
@@ -162,16 +201,11 @@ export function CardTile({
               {label}
             </span>
           )}
-          {!isCollection && levelBadge != null && (
+          {levelBadge != null && (
             <span
               className="absolute top-0 right-0 z-50 min-w-[1.1rem] px-1 py-0.5 rounded-md text-[10px] font-sans font-extrabold leading-none text-white bg-cr-bg/95 border border-cr-gold/40 pointer-events-none"
               aria-label={`Уровень ${levelBadge}`}
             >
-              {levelBadge}
-            </span>
-          )}
-          {isCollection && levelBadge != null && (
-            <span className="collection-level-badge" aria-label={`Уровень ${levelBadge}`}>
               {levelBadge}
             </span>
           )}
@@ -181,7 +215,6 @@ export function CardTile({
             </span>
           )}
         </div>
-      </div>
       {showLabel && !overlayLabel && (
         <span
           className={cn(

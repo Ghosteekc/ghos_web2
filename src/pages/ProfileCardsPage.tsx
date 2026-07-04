@@ -1,13 +1,13 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowDown, ArrowLeft, ArrowUp } from "lucide-react";
 import { Card, Button, Loader } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { usePlayerCollection } from "@/hooks/usePlayerCollection";
-import { usePageRefresh } from "@/hooks";
+import { usePageRefresh, useCardCatalog } from "@/hooks";
 import type { CollectionCardEntry } from "@/types";
 
-type SortMode = "default" | "rarity" | "level" | "elixir";
+type SortMode = "rarity" | "level" | "elixir";
 type SortDirection = "asc" | "desc";
 
 const RARITY_ORDER: Record<string, number> = {
@@ -19,7 +19,6 @@ const RARITY_ORDER: Record<string, number> = {
 };
 
 const SORT_OPTIONS: { id: SortMode; label: string; defaultDir: SortDirection }[] = [
-  { id: "default", label: "По имени", defaultDir: "asc" },
   { id: "rarity", label: "Редкость", defaultDir: "desc" },
   { id: "level", label: "Уровень", defaultDir: "desc" },
   { id: "elixir", label: "Эликсир", defaultDir: "asc" },
@@ -37,6 +36,7 @@ function sortCards(
   cards: CollectionCardEntry[],
   mode: SortMode,
   direction: SortDirection,
+  resolveElixir: (card: CollectionCardEntry) => number,
 ): CollectionCardEntry[] {
   const list = [...cards];
 
@@ -48,7 +48,7 @@ function sortCards(
       });
     case "elixir":
       return list.sort((a, b) => {
-        const cmp = withDirection((a.elixir ?? 99) - (b.elixir ?? 99), direction);
+        const cmp = withDirection(resolveElixir(a) - resolveElixir(b), direction);
         return cmp !== 0 ? cmp : tieBreak(a, b);
       });
     case "rarity":
@@ -60,7 +60,7 @@ function sortCards(
         return levelCmp !== 0 ? levelCmp : tieBreak(a, b);
       });
     default:
-      return list.sort((a, b) => withDirection(tieBreak(a, b), direction));
+      return list;
   }
 }
 
@@ -71,17 +71,23 @@ function defaultDirection(mode: SortMode): SortDirection {
 export function ProfileCardsPage() {
   const navigate = useNavigate();
   const { data, loading, error, reload } = usePlayerCollection();
+  const { getCard } = useCardCatalog();
   const [showLockedCards, setShowLockedCards] = useState(true);
-  const [sortMode, setSortMode] = useState<SortMode>("default");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [sortMode, setSortMode] = useState<SortMode>("rarity");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
   usePageRefresh(reload);
+
+  const resolveElixir = useCallback(
+    (card: CollectionCardEntry) => card.elixir ?? getCard(card.name)?.elixir ?? 99,
+    [getCard],
+  );
 
   const visibleCards = useMemo(() => {
     if (!data) return [];
     const base = showLockedCards ? data.cards : data.cards.filter((c) => c.owned);
-    return sortCards(base, sortMode, sortDirection);
-  }, [data, showLockedCards, sortMode, sortDirection]);
+    return sortCards(base, sortMode, sortDirection, resolveElixir);
+  }, [data, showLockedCards, sortMode, sortDirection, resolveElixir]);
 
   const handleSortMode = (mode: SortMode) => {
     if (mode === sortMode) {
@@ -175,24 +181,28 @@ export function ProfileCardsPage() {
         </div>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-          {visibleCards.map((card) => (
-            <div
-              key={card.name}
-              className={cnCardCell(card.owned)}
-              title={card.name_ru}
-            >
-              <CardTile
-                name={card.name}
-                icon={card.icon}
-                iconBase={card.icon_base}
-                iconEvo={card.icon_evo}
-                iconHero={card.icon_hero}
-                displayMode={card.display_mode}
-                size="collection"
-                levelBadge={card.owned && card.level != null && card.level > 0 ? card.level : undefined}
-              />
-            </div>
-          ))}
+          {visibleCards.map((card) => {
+            const elixir = resolveElixir(card);
+            return (
+              <div
+                key={card.name}
+                className={cnCardCell(card.owned)}
+                title={card.name_ru}
+              >
+                <CardTile
+                  name={card.name}
+                  icon={card.icon}
+                  iconBase={card.icon_base}
+                  iconEvo={card.icon_evo}
+                  iconHero={card.icon_hero}
+                  displayMode={card.display_mode}
+                  size="collection"
+                  levelBadge={card.owned && card.level != null && card.level > 0 ? card.level : undefined}
+                  elixirCost={elixir < 99 ? elixir : undefined}
+                />
+              </div>
+            );
+          })}
         </div>
       </Card>
     </div>
