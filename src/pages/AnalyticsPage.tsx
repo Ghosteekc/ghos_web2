@@ -73,10 +73,14 @@ export function AnalyticsPage() {
         };
         return parse(a.date) - parse(b.date);
       })
-      .map((item) => ({
-        ...item,
-        winrate: item.winrate ?? 0,
-      }));
+      .map((item) => {
+        const total = item.wins + item.losses;
+        const winrate =
+          total > 0
+            ? Math.round((item.wins / total) * 1000) / 10
+            : item.winrate ?? 0;
+        return { ...item, winrate };
+      });
   }, [stats?.winrate_by_day]);
   const mostUsedCards = useMemo(() => stats?.most_used_cards ?? [], [stats?.most_used_cards]);
 
@@ -231,7 +235,7 @@ export function AnalyticsPage() {
                   <Tooltip
                     contentStyle={{ backgroundColor: "#181830", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}
                     formatter={(value, name) => {
-                      if (name === "winrate") return [`${Number(value).toFixed(0)}%`, "Винрейт"];
+                      if (name === "winrate") return [`${Number(value).toFixed(1)}%`, "Винрейт"];
                       if (name === "wins") return [value, "Победы"];
                       if (name === "losses") return [value, "Поражения"];
                       return [value, name];
@@ -242,7 +246,7 @@ export function AnalyticsPage() {
                   <Bar yAxisId="left" dataKey="losses" fill="#ef4444" radius={[4, 4, 0, 0]} />
                   <Line
                     yAxisId="right"
-                    type="stepAfter"
+                    type="monotone"
                     dataKey="winrate"
                     stroke="#a78bfa"
                     strokeWidth={2}
@@ -256,7 +260,7 @@ export function AnalyticsPage() {
             )}
           </div>
           <p className="text-[11px] text-cr-muted mt-2 text-center">
-            Фиолетовая линия — винрейт по последнему бою дня
+            Фиолетовая линия — процент побед за день
           </p>
         </Card>
 
