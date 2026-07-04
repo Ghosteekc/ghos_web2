@@ -122,9 +122,12 @@ export function CardTile({
 
   if (isCollection) {
     return (
-      <div className={cn("relative w-full max-w-[4.75rem] mx-auto min-w-0", className)} title={nameRu(name)}>
-        <div className={cn("relative w-full aspect-[4/5]", sizeClasses[size])}>
-          <div className="absolute inset-0 card-tile-wrap overflow-visible">
+      <div
+        className={cn("relative mx-auto w-full max-w-[4.75rem]", className)}
+        title={nameRu(name)}
+      >
+        <div className="relative aspect-[4/5] w-full">
+          <div className="absolute inset-0 card-tile-wrap">
             <div className="card-tile-glow" aria-hidden />
             {src ? (
               <CardArt
@@ -136,14 +139,14 @@ export function CardTile({
                 displayMode={displayMode}
               />
             ) : (
-              <div className="relative z-10 w-full h-full flex items-center justify-center text-xs font-bold text-cr-text">
+              <div className="relative z-10 flex h-full w-full items-center justify-center text-xs font-bold text-cr-text">
                 {name.charAt(0)}
               </div>
             )}
           </div>
           {levelBadge != null && (
             <span
-              className="absolute top-[6%] right-[6%] z-[80] min-w-[1.15rem] px-1 py-0.5 rounded-sm text-[10px] font-bold leading-none text-white bg-[#1a1204]/95 border-2 border-amber-400 shadow-[0_1px_4px_rgba(0,0,0,0.85)] pointer-events-none"
+              className="absolute top-[5%] right-[5%] z-[80] min-w-[1.15rem] rounded-sm border-2 border-amber-400 bg-[#1a1204]/95 px-1 py-0.5 text-[10px] font-bold leading-none text-white shadow-[0_1px_4px_rgba(0,0,0,0.85)] pointer-events-none"
               aria-label={`Уровень ${levelBadge}`}
             >
               {levelBadge}
@@ -151,7 +154,7 @@ export function CardTile({
           )}
           {elixirCost != null && (
             <span
-              className="absolute bottom-[6%] left-[6%] z-[80] inline-flex items-center gap-0.5 px-1 py-0.5 rounded-sm bg-[#1a1204]/95 border border-pink-500/70 shadow-[0_1px_4px_rgba(0,0,0,0.85)] pointer-events-none"
+              className="absolute bottom-[5%] left-[5%] z-[80] inline-flex items-center gap-0.5 rounded-sm border border-pink-500/70 bg-[#1a1204]/95 px-1 py-0.5 shadow-[0_1px_4px_rgba(0,0,0,0.85)] pointer-events-none"
               aria-label={`${elixirCost} эликсира`}
             >
               <ElixirIcon size={11} />

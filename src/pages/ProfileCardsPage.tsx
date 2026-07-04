@@ -5,6 +5,7 @@ import { Card, Button, Loader } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { usePlayerCollection } from "@/hooks/usePlayerCollection";
 import { usePageRefresh, useCardCatalog } from "@/hooks";
+import { cn } from "@/utils";
 import type { CollectionCardEntry } from "@/types";
 
 type SortMode = "rarity" | "level" | "elixir";
@@ -210,7 +211,10 @@ export function ProfileCardsPage() {
 }
 
 function cnCardCell(owned: boolean) {
-  return owned ? "min-w-0" : "min-w-0 opacity-45 grayscale";
+  return cn(
+    "flex w-full justify-center",
+    owned ? "" : "opacity-45 grayscale",
+  );
 }
 
 function PageHeader({ title, onBack }: { title: string; onBack: () => void }) {
