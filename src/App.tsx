@@ -11,7 +11,6 @@ const Analytics = lazy(() => import("@/pages/AnalyticsPage"));
 const DecksPage = lazy(() => import("@/pages/DecksPage"));
 const BattlesPage = lazy(() => import("@/pages/BattlesPage"));
 const BattleDetailPage = lazy(() => import("@/pages/BattleDetailPage"));
-const StatsPage = lazy(() => import("@/pages/StatsPage"));
 const SearchPage = lazy(() => import("@/pages/SearchPage"));
 const FavoritesPage = lazy(() => import("@/pages/FavoritesPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
@@ -90,14 +89,6 @@ export default function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <BattleDetailPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="stats"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <StatsPage />
               </Suspense>
             }
           />

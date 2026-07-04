@@ -264,7 +264,6 @@ export type TabType =
   | "analytics"
   | "decks"
   | "battles"
-  | "stats"
   | "search"
   | "favorites"
   | "settings";
