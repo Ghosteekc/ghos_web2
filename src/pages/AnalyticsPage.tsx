@@ -8,7 +8,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
+  ComposedChart,
   Bar,
 } from "recharts";
 import { TrendingUp, TrendingDown, Flame, Clock, Brain, Trophy, Swords, ChevronRight } from "lucide-react";
@@ -64,14 +64,19 @@ export function AnalyticsPage() {
 
   const winrateByDay = useMemo(() => {
     const items = stats?.winrate_by_day ?? [];
-    return [...items].sort((a, b) => {
-      const parse = (d: string) => {
-        const [day, month] = d.split(".").map(Number);
-        if (!day || !month) return 0;
-        return month * 100 + day;
-      };
-      return parse(a.date) - parse(b.date);
-    });
+    return [...items]
+      .sort((a, b) => {
+        const parse = (d: string) => {
+          const [day, month] = d.split(".").map(Number);
+          if (!day || !month) return 0;
+          return month * 100 + day;
+        };
+        return parse(a.date) - parse(b.date);
+      })
+      .map((item) => ({
+        ...item,
+        winrate: item.winrate ?? 0,
+      }));
   }, [stats?.winrate_by_day]);
   const mostUsedCards = useMemo(() => stats?.most_used_cards ?? [], [stats?.most_used_cards]);
 
@@ -209,21 +214,50 @@ export function AnalyticsPage() {
           <div className="h-[220px]">
             {winrateByDay.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={winrateByDay}>
+                <ComposedChart data={winrateByDay}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} />
-                  <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis yAxisId="left" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    domain={[0, 100]}
+                    stroke="#a78bfa"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(v) => `${v}%`}
+                  />
                   <Tooltip
                     contentStyle={{ backgroundColor: "#181830", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}
+                    formatter={(value, name) => {
+                      if (name === "winrate") return [`${Number(value).toFixed(0)}%`, "Винрейт"];
+                      if (name === "wins") return [value, "Победы"];
+                      if (name === "losses") return [value, "Поражения"];
+                      return [value, name];
+                    }}
+                    labelFormatter={(label) => `${label}`}
                   />
-                  <Bar dataKey="wins" fill="#22c55e" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="losses" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                </BarChart>
+                  <Bar yAxisId="left" dataKey="wins" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                  <Bar yAxisId="left" dataKey="losses" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  <Line
+                    yAxisId="right"
+                    type="stepAfter"
+                    dataKey="winrate"
+                    stroke="#a78bfa"
+                    strokeWidth={2}
+                    dot={{ fill: "#a78bfa", r: 3 }}
+                    name="winrate"
+                  />
+                </ComposedChart>
               </ResponsiveContainer>
             ) : (
               <p className="text-cr-muted text-sm text-center pt-16">Нет данных по дням</p>
             )}
           </div>
+          <p className="text-[11px] text-cr-muted mt-2 text-center">
+            Фиолетовая линия — винрейт по последнему бою дня
+          </p>
         </Card>
 
         <Card>

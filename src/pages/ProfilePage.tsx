@@ -5,13 +5,14 @@ import {
   Trophy,
   Settings,
   TrendingUp,
+  TrendingDown,
 } from "lucide-react";
 import { Card, Button, Loader } from "@/components/ui";
 import { ProfileCollectionNav } from "@/components/profile/ProfileCollectionNav";
 import { useTelegram, usePageRefresh } from "@/hooks";
 import { api } from "@/api/client";
 import { Profile } from "@/types";
-import { formatNumber, getWinColor, formatPlayerTag } from "@/utils";
+import { formatNumber, getWinColor, formatPlayerTag, getTrophyChangeColor } from "@/utils";
 import { UI } from "@/constants/labels";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 
@@ -56,6 +57,7 @@ export function ProfilePage() {
   }
 
   const subscription = profile ? formatSubscription(profile.subscription) : null;
+  const dailyTrophies = profile?.daily_trophy_change;
 
   return (
     <div className="space-y-6">
@@ -129,13 +131,17 @@ export function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <div className="flex items-center gap-3 mb-3">
-            <Trophy className="w-5 h-5 text-cr-gold shrink-0" />
-            <h3 className="text-sm font-semibold text-cr-text">Макс. кубки</h3>
+            {dailyTrophies != null && dailyTrophies >= 0 ? (
+              <TrendingUp className="w-5 h-5 text-cr-win shrink-0" />
+            ) : (
+              <TrendingDown className="w-5 h-5 text-cr-loss shrink-0" />
+            )}
+            <h3 className="text-sm font-semibold text-cr-text">Кубки за день</h3>
           </div>
-          <p className="text-2xl font-bold text-cr-text">
-            {profile?.max_trophies != null ? formatNumber(profile.max_trophies) : "—"}
+          <p className={"text-2xl font-bold " + getTrophyChangeColor(dailyTrophies ?? 0)}>
+            {dailyTrophies != null ? `${dailyTrophies > 0 ? "+" : ""}${dailyTrophies}` : "—"}
           </p>
-          <p className="text-label mt-1">Лучший результат</p>
+          <p className="text-label mt-1">За сегодня</p>
         </Card>
 
         <Card>

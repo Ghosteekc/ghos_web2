@@ -55,6 +55,7 @@ export interface Profile {
   skill_rating: number | null;
   winrate: number | null;
   last_rating_change: number | null;
+  daily_trophy_change: number | null;
   max_trophies: number | null;
   clan_name: string | null;
 }
@@ -155,7 +156,7 @@ export interface StatsOverview {
   winrate: number;
   avg_elixir: number;
   max_trophies: number;
-  winrate_by_day: { date: string; wins: number; losses: number }[];
+  winrate_by_day: { date: string; wins: number; losses: number; winrate: number }[];
   winrate_by_hour: { hour: number; wins: number; total: number }[];
   best_cards: { name: string; count: number }[];
   most_used_cards: { name: string; count: number; winrate: number }[];
