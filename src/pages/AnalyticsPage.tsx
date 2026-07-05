@@ -54,19 +54,15 @@ export function AnalyticsPage() {
 
   const lastResults = useMemo(() => {
     const items = stats?.last_results ?? [];
-    return items.map((r) => {
+    return items.map((r, index) => {
       const trophyChange = Number(r.trophy_change) || 0;
-      const date = r.played_date ?? "";
-      const time = r.played_time ?? "";
-      const opponent = r.opponent_name ?? "Соперник";
-      const label = date && time ? `${date} ${time}` : opponent;
       return {
-        label,
+        index,
         trophyChange,
         won: r.won,
-        opponentName: opponent,
-        playedDate: date,
-        playedTime: time,
+        opponentName: r.opponent_name ?? "Соперник",
+        playedDate: r.played_date ?? "",
+        playedTime: r.played_time ?? "",
       };
     });
   }, [stats?.last_results]);
@@ -201,36 +197,29 @@ export function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <Card>
-          <h3 className="text-sm font-semibold text-cr-text mb-4">Рост трофеев</h3>
-          <div className="h-[260px]">
+          <h3 className="text-sm font-semibold text-cr-text mb-2">Рост трофеев</h3>
+          <p className="text-[11px] text-cr-muted mb-3">Только рейтинговые 1v1 · наведите на точку для деталей</p>
+          <div className="h-[170px]">
             {lastResults.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={lastResults} margin={{ bottom: 8, left: 4, right: 8 }}>
+                <LineChart data={lastResults} margin={{ top: 4, bottom: 4, left: 4, right: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis
-                    dataKey="label"
-                    stroke="#9ca3af"
-                    fontSize={10}
-                    tickLine={false}
-                    interval="preserveStartEnd"
-                    angle={-35}
-                    textAnchor="end"
-                    height={52}
-                  />
-                  <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                  <XAxis dataKey="index" hide />
+                  <YAxis stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} width={32} />
                   <Tooltip content={<TrophyGrowthTooltip />} />
                   <Line
                     type="monotone"
                     dataKey="trophyChange"
                     name="Кубки"
                     stroke="#fbbf24"
-                    strokeWidth={3}
-                    dot={{ fill: "#fbbf24", r: 4 }}
+                    strokeWidth={2}
+                    dot={{ fill: "#fbbf24", r: 3 }}
+                    activeDot={{ r: 5 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-cr-muted text-sm text-center pt-16">Недостаточно боёв</p>
+              <p className="text-cr-muted text-sm text-center pt-10">Недостаточно рейтинговых боёв</p>
             )}
           </div>
         </Card>
