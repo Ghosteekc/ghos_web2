@@ -189,7 +189,7 @@ export function ProfilePage() {
           <p className="text-2xl font-bold text-cr-gold">
             {profile?.collection_level != null ? formatNumber(profile.collection_level) : "—"}
           </p>
-          <p className="text-label mt-1">Сумма уровней карт + эво/герои</p>
+          <p className="text-label mt-1">Уровни карт + эво/герои + звёзды</p>
         </Card>
       </div>
 

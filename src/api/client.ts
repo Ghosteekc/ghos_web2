@@ -246,13 +246,10 @@ export const api = {
 
 
 
-  getProfile: () => cachedGet<Profile>("profile-v2", "/api/me", TTL.profile),
-
-
+  getProfile: () => cachedGet<Profile>("profile-v3", "/api/me", TTL.profile),
 
   getPlayerCollection: () =>
-
-    cachedGet<PlayerCollectionData>("player-collection-v6", "/api/profile/collection", TTL.profile),
+    cachedGet<PlayerCollectionData>("player-collection-v7", "/api/profile/collection", TTL.profile),
 
 
 
