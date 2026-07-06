@@ -215,23 +215,43 @@ export function AnalyticsPage() {
           </div>
         </Card>
 
-        <Card>
-          <h3 className="text-sm font-semibold text-cr-text mb-4">Винрейт по дням</h3>
-          <div className="h-[220px]">
+        <Card className="lg:col-span-2">
+          <h3 className="text-sm font-semibold text-cr-text mb-3">Винрейт по дням</h3>
+          <div className="h-[220px] -mx-1">
             {winrateByDay.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={winrateByDay}>
+                <ComposedChart
+                  data={winrateByDay}
+                  margin={{ top: 8, right: 0, left: 0, bottom: 0 }}
+                  barCategoryGap="18%"
+                  barGap={2}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="date" stroke="#9ca3af" fontSize={12} tickLine={false} />
-                  <YAxis yAxisId="left" stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
+                  <XAxis
+                    dataKey="date"
+                    stroke="#9ca3af"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    padding={{ left: 0, right: 0 }}
+                  />
+                  <YAxis
+                    yAxisId="left"
+                    stroke="#9ca3af"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    width={20}
+                  />
                   <YAxis
                     yAxisId="right"
                     orientation="right"
                     domain={[0, 100]}
                     stroke="#a78bfa"
-                    fontSize={11}
+                    fontSize={10}
                     tickLine={false}
                     axisLine={false}
+                    width={28}
                     tickFormatter={(v) => `${v}%`}
                   />
                   <Tooltip

@@ -74,8 +74,8 @@ function matchesRarityFilter(
   filter: CollectionRarityFilter,
 ): boolean {
   if (filter === "all") return true;
-  if (filter === "evolution") return card.evolution_level >= 1;
-  if (filter === "hero") return card.evolution_level >= 2;
+  if (filter === "evolution") return card.evolution_level === 1 || card.display_mode === "evo";
+  if (filter === "hero") return card.evolution_level >= 2 || card.display_mode === "hero" || card.display_mode === "split";
   return card.rarity === filter;
 }
 
