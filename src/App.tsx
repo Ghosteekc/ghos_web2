@@ -9,6 +9,7 @@ const ProfileCardsPage = lazy(() => import("@/pages/ProfileCardsPage"));
 const ProfileMasteryPage = lazy(() => import("@/pages/ProfileMasteryPage"));
 const Analytics = lazy(() => import("@/pages/AnalyticsPage"));
 const DecksPage = lazy(() => import("@/pages/DecksPage"));
+const MineDeckStatsPage = lazy(() => import("@/pages/MineDeckStatsPage"));
 const BattlesPage = lazy(() => import("@/pages/BattlesPage"));
 const BattleDetailPage = lazy(() => import("@/pages/BattleDetailPage"));
 const SearchPage = lazy(() => import("@/pages/SearchPage"));
@@ -65,6 +66,14 @@ export default function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <Analytics />
+              </Suspense>
+            }
+          />
+          <Route
+            path="decks/mine/stats"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <MineDeckStatsPage />
               </Suspense>
             }
           />

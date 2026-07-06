@@ -233,6 +233,36 @@ export interface DeckCompareResult {
   reference_worse: string[];
 }
 
+export interface DeckCardMatchup {
+  card: string;
+  card_ru: string;
+  winrate: number;
+  games: number;
+  reason: string;
+}
+
+export interface DeckImprovementSuggestion {
+  category: string;
+  message: string;
+  suggested_cards: string[];
+}
+
+export interface MineDeckStats {
+  name: string;
+  cards: DeckCard[];
+  wins: number;
+  losses: number;
+  total_games: number;
+  winrate: number;
+  avg_elixir: number;
+  win_conditions: string[];
+  strong_against: DeckCardMatchup[];
+  weak_against: DeckCardMatchup[];
+  improvements: DeckImprovementSuggestion[];
+  balanced: boolean;
+  sample_note: string;
+}
+
 export interface RandomDeck {
   cards: string[];
   card_infos: { id: string; name: string; icon: string; cost: number }[];

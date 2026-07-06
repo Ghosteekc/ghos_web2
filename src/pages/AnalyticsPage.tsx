@@ -11,9 +11,9 @@ import {
   ComposedChart,
   Bar,
 } from "recharts";
-import { TrendingUp, TrendingDown, Flame, Clock, Brain, Trophy, Swords, ChevronRight } from "lucide-react";
+import { TrendingUp, TrendingDown, Flame, Clock, Brain, Trophy, Swords, ChevronRight, Layers } from "lucide-react";
 import { StatsOverview, InsightsData } from "@/types";
-import { Card, Loader } from "@/components/ui";
+import { Card, Button, Loader } from "@/components/ui";
 import { CardUsageGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
 import { usePageRefresh } from "@/hooks";
@@ -170,6 +170,29 @@ export function AnalyticsPage() {
       ) : insightsError ? (
         <Card className="text-center text-sm text-cr-muted">{insightsError}</Card>
       ) : null}
+
+      <Card className="border-cr-gold/25 bg-cr-gold/5">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-cr-gold/15 border border-cr-gold/30 flex items-center justify-center shrink-0">
+            <Layers className="w-5 h-5 text-cr-gold" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-semibold text-cr-text">Мои колоды</h3>
+            <p className="text-xs text-cr-muted mt-1 leading-relaxed">
+              Оцените практичность каждой колоды из истории боёв: винрейт и число игр именно на ней,
+              сильные и слабые матчапы, советы что добавить для защиты, сплеша и добивания.
+            </p>
+            <Button
+              variant="secondary"
+              className="mt-3 w-full sm:w-auto !py-2 text-sm flex items-center justify-center gap-2"
+              onClick={() => navigate("/decks?tab=mine")}
+            >
+              Открыть мои колоды
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[

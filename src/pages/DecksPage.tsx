@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   SlidersHorizontal,
@@ -13,6 +14,7 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
+  BarChart3,
 } from "lucide-react";
 import { Card, Button, Loader, ElixirIcon } from "@/components/ui";
 import { CardTile } from "@/components/cards";
@@ -29,6 +31,12 @@ const DECK_FILTERS = [
   { id: "arena", label: DECK_FILTER_LABELS.arena },
   { id: "random", label: DECK_FILTER_LABELS.random },
 ] as const;
+
+const VALID_FILTERS = new Set(DECK_FILTERS.map((item) => item.id));
+
+function filterFromTab(tab: string | null): string {
+  return tab && VALID_FILTERS.has(tab as (typeof DECK_FILTERS)[number]["id"]) ? tab : "meta";
+}
 
 const CATEGORY_LABELS = DECK_CATEGORY_LABELS;
 
@@ -61,11 +69,13 @@ function DeckCardsGrid({ cards }: { cards: DeckCard[] }) {
 }
 
 export function DecksPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [decks, setDecks] = useState<Deck[]>([]);
   const [metaUpdatedAt, setMetaUpdatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<string>("meta");
+  const [filter, setFilter] = useState<string>(() => filterFromTab(searchParams.get("tab")));
   const [copyHint, setCopyHint] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -91,6 +101,10 @@ export function DecksPage() {
   }, [filter]);
 
   usePageRefresh(load);
+
+  useEffect(() => {
+    setFilter(filterFromTab(searchParams.get("tab")));
+  }, [searchParams]);
 
   useEffect(() => {
     setLoading(true);
@@ -120,7 +134,7 @@ export function DecksPage() {
         ) : filter === "arena" ? (
           "Популярные колоды на вашем диапазоне кубков: лучший винрейт игроков арены + мета. «Сравнить» — разбор относительно вашей колоды."
         ) : filter === "mine" ? (
-          "Ваши колоды из истории боёв."
+          "Ваши колоды из истории боёв. Нажмите «Статистика» для разбора матчапов и советов."
         ) : (
           "Случайная колода из 8 карт."
         )}
@@ -186,6 +200,14 @@ export function DecksPage() {
                   setCopyHint(msg);
                   setTimeout(() => setCopyHint(null), 3000);
                 }}
+                onOpenStats={
+                  deck.type === "mine"
+                    ? () => {
+                        const key = [...(deck.cards ?? []).map((c) => c.name)].sort().join("|");
+                        navigate(`/decks/mine/stats?deck=${encodeURIComponent(key)}`);
+                      }
+                    : undefined
+                }
               />
             </div>
           ))}
@@ -682,6 +704,7 @@ function DeckCard({
   compareError = null,
   compareData = null,
   onCompare,
+  onOpenStats,
 }: {
   deck: Deck;
   index: number;
@@ -692,6 +715,7 @@ function DeckCard({
   compareError?: string | null;
   compareData?: DeckCompareResult | null;
   onCompare?: () => void;
+  onOpenStats?: () => void;
 }) {
   const { openLink } = useTelegram();
   const cards = deck.cards ?? [];
@@ -791,6 +815,17 @@ function DeckCard({
             </div>
           </>
         )}
+
+        {deck.type === "mine" && onOpenStats ? (
+          <Button
+            variant="secondary"
+            className="w-full !py-2 text-sm flex items-center justify-center gap-2 mb-3"
+            onClick={onOpenStats}
+          >
+            <BarChart3 className="w-4 h-4" />
+            Статистика колоды
+          </Button>
+        ) : null}
 
         {showCompare && onCompare ? (
           <div className="space-y-2 mb-3">

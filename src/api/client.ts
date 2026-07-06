@@ -29,7 +29,7 @@ import {
   ArenaDecksData,
 
   DeckCompareResult,
-
+  MineDeckStats,
   InsightsData,
 
 } from "@/types";
@@ -308,6 +308,20 @@ export const api = {
       body: JSON.stringify({ reference_cards: referenceCards }),
 
     }),
+
+
+
+  getMineDeckStats: (deckKey: string) =>
+
+    cachedGet<MineDeckStats>(
+
+      `mine-deck:${deckKey}`,
+
+      `/api/decks/mine/stats?deck=${encodeURIComponent(deckKey)}`,
+
+      TTL.battles,
+
+    ),
 
 
 

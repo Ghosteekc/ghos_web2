@@ -103,7 +103,8 @@ export function CollectionStatsGrid({
               onClick={() => onFilterChange?.(isActive ? "all" : filter)}
               className={
                 "collection-filter-tab filter-tab " +
-                (isActive ? `filter-tab--active ${activeClass}` : "")
+                activeClass +
+                (isActive ? " collection-filter-tab--active" : "")
               }
             >
               <span className={`text-[11px] font-bold uppercase tracking-wide leading-tight ${tone}`}>
