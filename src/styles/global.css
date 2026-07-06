@@ -459,7 +459,7 @@
   }
 
   .collection-stat-hero {
-    background: linear-gradient(90deg, #fbbf24 0%, #22c55e 100%);
+    background: linear-gradient(90deg, #facc15 0%, #84cc16 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -468,7 +468,7 @@
   }
 
   .collection-stat-legendary {
-    background: linear-gradient(90deg, #a3e635 0%, #f472b6 100%);
+    background: linear-gradient(90deg, #f472b6 0%, #a3e635 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;

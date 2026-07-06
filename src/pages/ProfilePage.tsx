@@ -1,23 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  User,
-  Trophy,
-  Settings,
-  TrendingUp,
-  TrendingDown,
-  Crown,
-  Swords,
-  Layers,
-} from "lucide-react";
+import { User, Settings } from "lucide-react";
 import { Card, Button, Loader } from "@/components/ui";
 import { ProfileCollectionNav } from "@/components/profile/ProfileCollectionNav";
 import { CardLevelScale } from "@/components/profile/CardLevelScale";
+import { ProfileStatGrid } from "@/components/profile/ProfileStatGrid";
 import { useTelegram, usePageRefresh } from "@/hooks";
 import { api } from "@/api/client";
 import { Profile } from "@/types";
-import { formatNumber, getWinColor, formatPlayerTag, getTrophyChangeColor } from "@/utils";
-import { UI } from "@/constants/labels";
+import { formatPlayerTag } from "@/utils";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 
 export function ProfilePage() {
@@ -49,8 +40,6 @@ export function ProfilePage() {
   if (loading) {
     return <Loader />;
   }
-
-  const dailyTrophies = profile?.daily_trophy_change;
 
   return (
     <div className="space-y-6">
@@ -121,77 +110,7 @@ export function ProfilePage() {
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <div className="flex items-center gap-3 mb-3">
-            {dailyTrophies != null && dailyTrophies >= 0 ? (
-              <TrendingUp className="w-5 h-5 text-cr-win shrink-0" />
-            ) : (
-              <TrendingDown className="w-5 h-5 text-cr-loss shrink-0" />
-            )}
-            <h3 className="text-sm font-semibold text-cr-text">Кубки за день</h3>
-          </div>
-          <p className={"text-2xl font-bold " + getTrophyChangeColor(dailyTrophies ?? 0)}>
-            {dailyTrophies != null ? `${dailyTrophies > 0 ? "+" : ""}${dailyTrophies}` : "—"}
-          </p>
-          <p className="text-label mt-1">За сегодня</p>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3 mb-3">
-            <Trophy className="w-5 h-5 text-cr-blue shrink-0" />
-            <h3 className="text-sm font-semibold text-cr-text">Трофеи</h3>
-          </div>
-          <p className="text-2xl font-bold text-cr-text">
-            {profile?.trophies != null ? formatNumber(profile.trophies) : "—"}
-          </p>
-          <p className="text-label mt-1">Текущий рейтинг</p>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3 mb-3">
-            <TrendingUp className="w-5 h-5 text-cr-win shrink-0" />
-            <h3 className="text-sm font-semibold text-cr-text">{UI.winrate}</h3>
-          </div>
-          <p className={"text-2xl font-bold " + getWinColor(profile?.winrate ?? 50)}>
-            {profile?.winrate != null ? `${profile.winrate.toFixed(1)}%` : "—"}
-          </p>
-          <p className="text-label mt-1">Процент побед</p>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3 mb-3">
-            <Swords className="w-5 h-5 text-cr-win shrink-0" />
-            <h3 className="text-sm font-semibold text-cr-text">Победы</h3>
-          </div>
-          <p className="text-2xl font-bold text-cr-text">
-            {profile?.total_wins != null ? formatNumber(profile.total_wins) : "—"}
-          </p>
-          <p className="text-label mt-1">Суммарно за карьеру</p>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3 mb-3">
-            <Crown className="w-5 h-5 text-cr-gold shrink-0" />
-            <h3 className="text-sm font-semibold text-cr-text">На 3 короны</h3>
-          </div>
-          <p className="text-2xl font-bold text-cr-text">
-            {profile?.three_crown_wins != null ? formatNumber(profile.three_crown_wins) : "—"}
-          </p>
-          <p className="text-label mt-1">Побед с полным разгромом</p>
-        </Card>
-
-        <Card>
-          <div className="flex items-center gap-3 mb-3">
-            <Layers className="w-5 h-5 text-cr-blue shrink-0" />
-            <h3 className="text-sm font-semibold text-cr-text">Уровень коллекции</h3>
-          </div>
-          <p className="text-2xl font-bold text-cr-gold">
-            {profile?.collection_level != null ? formatNumber(profile.collection_level) : "—"}
-          </p>
-          <p className="text-label mt-1">Уровни карт + эво/герои + звёзды</p>
-        </Card>
-      </div>
+      {profile && <ProfileStatGrid profile={profile} />}
 
       {(profile?.cards_by_level?.length ?? 0) > 0 && (
         <Card>

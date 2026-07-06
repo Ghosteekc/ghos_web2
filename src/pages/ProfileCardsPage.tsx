@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowDown, ArrowLeft, ArrowUp } from "lucide-react";
 import { Card, Button, Loader } from "@/components/ui";
 import { CardTile } from "@/components/cards";
-import { CollectionStatsGrid } from "@/components/profile/CollectionStatsGrid";
+import { CollectionStatsGrid, type CollectionRarityFilter } from "@/components/profile/CollectionStatsGrid";
 import { usePlayerCollection } from "@/hooks/usePlayerCollection";
 import { usePageRefresh, useCardCatalog } from "@/hooks";
 import type { CollectionCardEntry } from "@/types";
@@ -69,11 +69,33 @@ function defaultDirection(mode: SortMode): SortDirection {
   return SORT_OPTIONS.find((o) => o.id === mode)?.defaultDir ?? "asc";
 }
 
+function matchesRarityFilter(
+  card: CollectionCardEntry,
+  filter: CollectionRarityFilter,
+): boolean {
+  if (filter === "all") return true;
+  if (filter === "evolution") return card.evolution_level >= 1;
+  if (filter === "hero") return card.evolution_level >= 2;
+  return card.rarity === filter;
+}
+
+const FILTER_LABELS: Record<CollectionRarityFilter, string> = {
+  all: "Все",
+  evolution: "Эволюции",
+  hero: "Герои",
+  champion: "Чемпионы",
+  legendary: "Легендарные",
+  epic: "Эпические",
+  rare: "Редкие",
+  common: "Обычные",
+};
+
 export function ProfileCardsPage() {
   const navigate = useNavigate();
   const { data, loading, error, reload } = usePlayerCollection();
   const { getCard } = useCardCatalog();
   const [showLockedCards, setShowLockedCards] = useState(true);
+  const [rarityFilter, setRarityFilter] = useState<CollectionRarityFilter>("all");
   const [sortMode, setSortMode] = useState<SortMode>("rarity");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
 
@@ -87,8 +109,12 @@ export function ProfileCardsPage() {
   const visibleCards = useMemo(() => {
     if (!data) return [];
     const base = showLockedCards ? data.cards : data.cards.filter((c) => c.owned);
-    return sortCards(base, sortMode, sortDirection, resolveElixir);
-  }, [data, showLockedCards, sortMode, sortDirection, resolveElixir]);
+    const filtered =
+      rarityFilter === "all"
+        ? base
+        : base.filter((c) => matchesRarityFilter(c, rarityFilter));
+    return sortCards(filtered, sortMode, sortDirection, resolveElixir);
+  }, [data, showLockedCards, rarityFilter, sortMode, sortDirection, resolveElixir]);
 
   const handleSortMode = (mode: SortMode) => {
     if (mode === sortMode) {
@@ -122,19 +148,37 @@ export function ProfileCardsPage() {
       <PageHeader title="Коллекция карт" onBack={() => navigate("/profile")} />
 
       <Card>
-        <CollectionStatsGrid stats={data} />
+        <CollectionStatsGrid
+          stats={data}
+          activeFilter={rarityFilter}
+          onFilterChange={setRarityFilter}
+        />
 
         <div className="flex flex-wrap items-center justify-between gap-2 mt-5 mb-3 pt-4 border-t border-cr-border">
           <p className="text-sm text-cr-text font-semibold">
+            {visibleCards.length}
+            {rarityFilter !== "all" ? ` · ${FILTER_LABELS[rarityFilter]}` : ""}
+            {" / "}
             {data.cards_owned} / {data.cards_total} карт
           </p>
-          <button
-            type="button"
-            className="text-xs text-cr-accent underline"
-            onClick={() => setShowLockedCards((v) => !v)}
-          >
-            {showLockedCards ? "Только мои" : "Показать все"}
-          </button>
+          <div className="flex items-center gap-3">
+            {rarityFilter !== "all" && (
+              <button
+                type="button"
+                className="text-xs text-cr-accent underline"
+                onClick={() => setRarityFilter("all")}
+              >
+                Сбросить фильтр
+              </button>
+            )}
+            <button
+              type="button"
+              className="text-xs text-cr-accent underline"
+              onClick={() => setShowLockedCards((v) => !v)}
+            >
+              {showLockedCards ? "Только мои" : "Показать все"}
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5 mb-4">
@@ -184,29 +228,35 @@ export function ProfileCardsPage() {
         </div>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-          {visibleCards.map((card) => {
-            const elixir = resolveElixir(card);
-            return (
-              <div
-                key={card.name}
-                className={cnCardCell(card.owned)}
-                title={card.name_ru}
-              >
-                <CardTile
-                  name={card.name}
-                  icon={card.icon}
-                  iconBase={card.icon_base}
-                  iconEvo={card.icon_evo}
-                  iconHero={card.icon_hero}
-                  displayMode={card.display_mode}
-                  rarity={card.rarity}
-                  size="collection"
-                  levelBadge={card.owned && card.level != null && card.level > 0 ? card.level : undefined}
-                  elixirCost={elixir < 99 ? elixir : undefined}
-                />
-              </div>
-            );
-          })}
+          {visibleCards.length === 0 ? (
+            <p className="col-span-full text-center text-sm text-cr-muted py-6">
+              Нет карт для фильтра «{FILTER_LABELS[rarityFilter]}»
+            </p>
+          ) : (
+            visibleCards.map((card) => {
+              const elixir = resolveElixir(card);
+              return (
+                <div
+                  key={card.name}
+                  className={cnCardCell(card.owned)}
+                  title={card.name_ru}
+                >
+                  <CardTile
+                    name={card.name}
+                    icon={card.icon}
+                    iconBase={card.icon_base}
+                    iconEvo={card.icon_evo}
+                    iconHero={card.icon_hero}
+                    displayMode={card.display_mode}
+                    rarity={card.rarity}
+                    size="collection"
+                    levelBadge={card.owned && card.level != null && card.level > 0 ? card.level : undefined}
+                    elixirCost={elixir < 99 ? elixir : undefined}
+                  />
+                </div>
+              );
+            })
+          )}
         </div>
       </Card>
     </div>
