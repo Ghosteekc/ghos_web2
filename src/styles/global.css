@@ -190,6 +190,51 @@
     @apply flex gap-2 overflow-x-auto pb-1;
   }
 
+  .collection-filter-tab {
+    @apply flex flex-col items-start justify-center min-h-[3.5rem] py-2.5 px-3 text-left w-full;
+  }
+
+  .collection-filter-tab.filter-tab--active.collection-filter-tab--evo {
+    border-color: rgba(192, 132, 252, 0.7);
+    background: rgba(192, 132, 252, 0.15);
+    box-shadow: 0 0 12px rgba(192, 132, 252, 0.25);
+  }
+
+  .collection-filter-tab.filter-tab--active.collection-filter-tab--hero {
+    border-color: rgba(132, 204, 22, 0.7);
+    background: rgba(132, 204, 22, 0.12);
+    box-shadow: 0 0 12px rgba(132, 204, 22, 0.25);
+  }
+
+  .collection-filter-tab.filter-tab--active.collection-filter-tab--champion {
+    border-color: rgba(251, 191, 36, 0.7);
+    background: rgba(251, 191, 36, 0.15);
+  }
+
+  .collection-filter-tab.filter-tab--active.collection-filter-tab--legendary {
+    border-color: rgba(244, 114, 182, 0.7);
+    background: linear-gradient(135deg, rgba(244, 114, 182, 0.12), rgba(163, 230, 53, 0.1));
+    box-shadow: 0 0 12px rgba(244, 114, 182, 0.2);
+  }
+
+  .collection-filter-tab.filter-tab--active.collection-filter-tab--epic {
+    border-color: rgba(244, 114, 182, 0.7);
+    background: rgba(244, 114, 182, 0.15);
+    box-shadow: 0 0 12px rgba(244, 114, 182, 0.22);
+  }
+
+  .collection-filter-tab.filter-tab--active.collection-filter-tab--rare {
+    border-color: rgba(251, 146, 60, 0.7);
+    background: rgba(251, 146, 60, 0.15);
+    box-shadow: 0 0 12px rgba(251, 146, 60, 0.22);
+  }
+
+  .collection-filter-tab.filter-tab--active.collection-filter-tab--common {
+    border-color: rgba(56, 189, 248, 0.7);
+    background: rgba(56, 189, 248, 0.15);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.22);
+  }
+
   .segment-tab {
     @apply p-2 rounded-md transition-all duration-200 border border-transparent;
     @apply text-cr-muted hover:text-cr-text;

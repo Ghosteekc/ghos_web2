@@ -156,10 +156,9 @@ export function ProfileCardsPage() {
 
         <div className="flex flex-wrap items-center justify-between gap-2 mt-5 mb-3 pt-4 border-t border-cr-border">
           <p className="text-sm text-cr-text font-semibold">
-            {visibleCards.length}
-            {rarityFilter !== "all" ? ` · ${FILTER_LABELS[rarityFilter]}` : ""}
-            {" / "}
-            {data.cards_owned} / {data.cards_total} карт
+            {rarityFilter !== "all"
+              ? `${visibleCards.length} карт · ${FILTER_LABELS[rarityFilter]}`
+              : `${data.cards_owned} / ${data.cards_total} карт`}
           </p>
           <div className="flex items-center gap-3">
             {rarityFilter !== "all" && (
