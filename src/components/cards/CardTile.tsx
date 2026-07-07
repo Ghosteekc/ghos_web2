@@ -297,7 +297,6 @@ export function CardUsageList({ items }: { items: CardUsageItem[] }) {
 
 export function CardUsageCompactGrid({ items }: { items: CardUsageItem[] }) {
   const { nameRu, nameShort } = useCardCatalog();
-  const maxCount = Math.max(...items.map((i) => i.count), 1);
 
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -311,12 +310,15 @@ export function CardUsageCompactGrid({ items }: { items: CardUsageItem[] }) {
             {item.count} игр
             {item.winrate != null ? ` · ${item.winrate.toFixed(0)}%` : ""}
           </p>
-          <div className="h-1 w-full overflow-hidden rounded-full bg-cr-border/40">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-cr-blue to-cr-gold"
-              style={{ width: `${Math.min((item.count / maxCount) * 100, 100)}%` }}
-            />
-          </div>
+          {item.winrate != null ? (
+            <div className="h-1 w-full overflow-hidden rounded-full bg-cr-border/40">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-cr-blue to-cr-gold"
+                style={{ width: `${Math.min(item.winrate, 100)}%` }}
+                title={`Винрейт с картой: ${item.winrate.toFixed(0)}%`}
+              />
+            </div>
+          ) : null}
         </div>
       ))}
     </div>
