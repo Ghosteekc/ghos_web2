@@ -19,7 +19,7 @@ import {
 import { Card, Button, Loader, ElixirIcon } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
-import type { Deck, DeckCard, DeckCompareResult, RandomDeck, TopPlayer } from "@/types";
+import type { Deck, DeckCard, DeckCompareCardNote, DeckCompareResult, RandomDeck, TopPlayer } from "@/types";
 import { usePageRefresh, useTelegram } from "@/hooks";
 
 import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
@@ -246,18 +246,99 @@ function CompareBlock({ title, items, tone }: { title: string; items: string[]; 
   );
 }
 
-function DeckComparePanel({ data }: { data: DeckCompareResult }) {
+function noteToneClass(tone: DeckCompareCardNote["tone"]): string {
+  if (tone === "good") return "border-cr-win/30 bg-cr-win/5";
+  if (tone === "bad") return "border-cr-loss/30 bg-cr-loss/5";
+  if (tone === "warn") return "border-cr-gold/30 bg-cr-gold/5";
+  return "border-cr-border bg-cr-bg/30";
+}
+
+function CardCompareNote({ note, icon }: { note: DeckCompareCardNote; icon?: string }) {
+  return (
+    <li className={"rounded-lg border px-2.5 py-2 flex gap-2.5 " + noteToneClass(note.tone)}>
+      {icon ? (
+        <img src={icon} alt={note.card_ru || note.card} className="w-9 h-11 shrink-0 object-contain" loading="lazy" />
+      ) : null}
+      <p className="text-xs text-cr-text leading-snug min-w-0">{note.text}</p>
+    </li>
+  );
+}
+
+function CardCompareSection({
+  title,
+  notes,
+  deck,
+}: {
+  title: string;
+  notes: DeckCompareCardNote[];
+  deck: DeckCard[];
+}) {
+  const icons = new Map(deck.map((c) => [c.name, c.icon]));
+  if (!notes.length) return null;
+  return (
+    <Card className="!p-3 bg-cr-bg/40">
+      <p className="text-xs font-semibold text-cr-text mb-2">{title}</p>
+      <ul className="space-y-2">
+        {notes.map((note) => (
+          <CardCompareNote key={note.card} note={note} icon={icons.get(note.card)} />
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+function DeckComparePanel({
+  data,
+  referenceLabel = "Колода соперника",
+}: {
+  data: DeckCompareResult;
+  referenceLabel?: string;
+}) {
+  const userScore = data.matchup_score ?? 50;
+  const refScore = data.opponent_matchup_score ?? 50;
+
   return (
     <div className="mt-4 pt-4 border-t border-cr-border space-y-3">
-      <p className="text-xs font-cr text-cr-gold">Сравнение с «{data.reference_name}»</p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-cr text-cr-gold">Сравнение с «{data.reference_name}»</p>
+        <div className="text-right shrink-0">
+          <p className="text-[10px] text-cr-muted">Матчап</p>
+          <p className={"text-sm font-bold tabular-nums " + (userScore >= 50 ? "text-cr-win" : "text-cr-loss")}>
+            {userScore.toFixed(0)} / 100
+          </p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 text-center text-[10px]">
+        <div className="rounded-lg border border-cr-win/25 bg-cr-win/5 px-2 py-1.5">
+          <p className="text-cr-muted">Ваша колода</p>
+          <p className="font-bold text-cr-win">{userScore.toFixed(0)}%</p>
+        </div>
+        <div className="rounded-lg border border-cr-loss/25 bg-cr-loss/5 px-2 py-1.5">
+          <p className="text-cr-muted">{referenceLabel}</p>
+          <p className="font-bold text-cr-loss">{refScore.toFixed(0)}%</p>
+        </div>
+      </div>
+
+      <CardCompareSection
+        title="Ваша колода — карта за картой"
+        notes={data.user_card_notes ?? []}
+        deck={data.user_deck ?? []}
+      />
+      <CardCompareSection
+        title={`${referenceLabel} — карта за картой`}
+        notes={data.reference_card_notes ?? []}
+        deck={data.reference_deck ?? []}
+      />
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Card className="!p-3 bg-cr-bg/40">
-          <p className="text-xs font-semibold text-cr-text mb-2">Ваша колода</p>
+          <p className="text-xs font-semibold text-cr-text mb-2">Итог: ваша колода</p>
           <CompareBlock title="Сильнее" items={data.user_better} tone="win" />
           <CompareBlock title="Слабее" items={data.user_worse} tone="loss" />
         </Card>
         <Card className="!p-3 bg-cr-bg/40">
-          <p className="text-xs font-semibold text-cr-text mb-2">Популярная колода</p>
+          <p className="text-xs font-semibold text-cr-text mb-2">Итог: {referenceLabel.toLowerCase()}</p>
           <CompareBlock title="Сильнее вашей" items={data.reference_better} tone="win" />
           <CompareBlock title="Слабее вашей" items={data.reference_worse} tone="loss" />
         </Card>
@@ -849,7 +930,9 @@ function DeckCard({
             {compareOpen && compareLoading ? (
               <p className="text-xs text-cr-muted text-center">Анализируем колоды…</p>
             ) : null}
-            {compareOpen && compareData ? <DeckComparePanel data={compareData} /> : null}
+            {compareOpen && compareData ? (
+              <DeckComparePanel data={compareData} referenceLabel="Колода вашей арены" />
+            ) : null}
           </div>
         ) : null}
 

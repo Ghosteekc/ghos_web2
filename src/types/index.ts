@@ -223,6 +223,13 @@ export interface ArenaDecksData {
   updated_at: string | null;
 }
 
+export interface DeckCompareCardNote {
+  card: string;
+  card_ru: string;
+  tone: "good" | "warn" | "bad" | "neutral" | string;
+  text: string;
+}
+
 export interface DeckCompareResult {
   reference_name: string;
   user_deck: DeckCard[];
@@ -231,6 +238,10 @@ export interface DeckCompareResult {
   user_worse: string[];
   reference_better: string[];
   reference_worse: string[];
+  user_card_notes: DeckCompareCardNote[];
+  reference_card_notes: DeckCompareCardNote[];
+  matchup_score: number;
+  opponent_matchup_score: number;
 }
 
 export interface DeckCardMatchup {
