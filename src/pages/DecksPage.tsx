@@ -782,7 +782,7 @@ function DeckCard({
           </div>
         ) : (
           <p className="text-xs text-cr-muted text-center">
-            Импорт недоступен — не все карты распознаны API
+            Импорт недоступен — не все карты распознаны
           </p>
         )}
       </Card>

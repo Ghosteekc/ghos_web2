@@ -4,7 +4,7 @@ export function SupercellDisclaimer() {
   return (
     <footer className="pt-2 pb-4 px-1">
       <p className="text-[10px] leading-relaxed text-cr-muted/75 text-center">
-        Статистика, колоды и изображения карт загружаются из публичного API Clash Royale по вашему
+        Статистика, колоды и изображения карт загружаются из игровых данных Clash Royale по вашему
         игровому тегу — те же данные, что доступны любому игроку в игре.
       </p>
       <p className="text-[10px] leading-relaxed text-cr-muted/75 text-center mt-2">
@@ -15,7 +15,7 @@ export function SupercellDisclaimer() {
           rel="noopener noreferrer"
           className="text-cr-muted underline underline-offset-2 hover:text-cr-text"
         >
-          Fan Content Policy
+          правилам фан-контента
         </a>
       </p>
     </footer>

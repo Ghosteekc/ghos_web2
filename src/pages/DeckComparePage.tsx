@@ -150,7 +150,7 @@ export function DeckComparePage() {
         </Button>
         <div className="min-w-0">
           <h1 className="page-title truncate">Сравнение колод</h1>
-          <p className="text-xs text-cr-muted truncate">vs «{referenceName || data.reference_name}»</p>
+          <p className="text-xs text-cr-muted truncate">против «{referenceName || data.reference_name}»</p>
         </div>
       </div>
 

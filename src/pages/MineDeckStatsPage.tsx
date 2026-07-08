@@ -160,7 +160,7 @@ export function MineDeckStatsPage() {
 
         {winConditionsRu.length > 0 ? (
           <p className="text-xs text-cr-muted mt-3">
-            Win-condition:{" "}
+            Условие победы:{" "}
             <span className="text-cr-gold font-semibold">{winConditionsRu.join(", ")}</span>
           </p>
         ) : null}

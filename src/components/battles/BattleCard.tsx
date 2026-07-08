@@ -48,7 +48,7 @@ export function BattleCardSimple({ summary, onOpen, index }: BattleCardSimplePro
 
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-sm font-medium text-cr-text">vs {summary.opponent_name}</p>
+              <p className="text-sm font-medium text-cr-text">против {summary.opponent_name}</p>
               <p className="text-xs text-cr-muted">#{summary.opponent_tag || "—"}</p>
             </div>
             <div className="text-right">

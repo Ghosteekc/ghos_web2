@@ -99,7 +99,7 @@ export function SearchPage() {
       </div>
 
       <p className="text-xs text-cr-muted -mt-2">
-        Поиск работает только по тегу игрока (Clash Royale API не поддерживает поиск по нику).
+        Поиск работает только по тегу игрока — по нику найти нельзя.
       </p>
 
       <AnimatePresence>

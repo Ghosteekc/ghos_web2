@@ -39,7 +39,7 @@ export function HomePage() {
       <Card className="text-center">
         <p className="text-cr-loss mb-2">{error ?? "Ошибка загрузки"}</p>
         <p className="text-xs text-cr-muted mb-4">
-          Проверьте, что бот и localtunnel запущены. Потяните вниз для обновления.
+          Нет связи с сервером. Потяните вниз для обновления.
         </p>
         <Button onClick={() => void load()}>Повторить</Button>
       </Card>

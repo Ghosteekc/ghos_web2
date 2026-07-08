@@ -144,7 +144,7 @@ export function AnalyticsPage() {
                 <div className="flex items-start gap-2 mb-1.5">
                   <Swords className="w-4 h-4 text-cr-loss shrink-0 mt-0.5" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs text-cr-accent font-semibold mb-0.5">vs {item.opponent_name}</p>
+                    <p className="text-xs text-cr-accent font-semibold mb-0.5">против {item.opponent_name}</p>
                     <p className="text-sm text-cr-text leading-snug">{item.summary}</p>
                     {item.matchup_score > 0 ? (
                       <p className="text-[11px] text-cr-muted mt-1">Матчап: {item.matchup_score.toFixed(0)}/100</p>
@@ -362,7 +362,7 @@ function TrophyGrowthTooltip({
   const delta = point.trophyChange;
   return (
     <div className="rounded-xl border border-white/10 bg-[#181830] px-3 py-2 text-xs shadow-lg">
-      <p className="font-semibold text-cr-text">vs {point.opponentName}</p>
+      <p className="font-semibold text-cr-text">против {point.opponentName}</p>
       {(point.playedDate || point.playedTime) && (
         <p className="text-cr-muted mt-0.5">
           {point.playedDate}

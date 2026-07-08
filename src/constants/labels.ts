@@ -5,7 +5,7 @@ export const DECK_CATEGORY_LABELS: Record<string, string> = {
   mine: "Мои",
   arena: "Арена",
   cycle: "Цикл",
-  beatdown: "Битдаун",
+  beatdown: "Натиск",
   control: "Контроль",
   bait: "Бейт",
   random: "Рандом",

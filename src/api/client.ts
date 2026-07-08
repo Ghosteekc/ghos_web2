@@ -102,7 +102,7 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
     throw new ApiError(
 
-      "VITE_API_URL не задан. На Vercel укажите URL localtunnel и пересоберите проект.",
+      "Сервис временно недоступен. Попробуйте позже.",
 
       0,
 
@@ -126,7 +126,7 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
   } catch {
 
-    throw new ApiError("Нет связи с сервером. Проверьте, что бот и localtunnel запущены.", 0);
+    throw new ApiError("Нет связи с сервером. Проверьте интернет и попробуйте позже.", 0);
 
   }
 
@@ -142,7 +142,7 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
       throw new ApiError(
 
-        "localtunnel требует авторизацию. Откройте URL туннеля в браузере один раз.",
+        "Сервер временно недоступен. Попробуйте позже.",
 
         res.status,
 
@@ -154,7 +154,7 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
       throw new ApiError(
 
-        "Backend недоступен (туннель offline). Перезапустите localtunnel.",
+        "Сервер временно недоступен. Попробуйте позже.",
 
         res.status,
 
@@ -164,7 +164,7 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
     const body = await res.json().catch(() => ({ detail: res.statusText }));
 
-    throw new ApiError(body.detail ?? `HTTP ${res.status}`, res.status);
+    throw new ApiError(body.detail ?? `Ошибка сервера (${res.status})`, res.status);
 
   }
 
@@ -172,7 +172,7 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!contentType.includes("application/json")) {
 
-    throw new ApiError("Ответ не JSON — проверьте VITE_API_URL.", res.status);
+    throw new ApiError("Сервер вернул некорректный ответ. Попробуйте позже.", res.status);
 
   }
 
@@ -218,7 +218,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 
 
-  throw lastError ?? new ApiError("Unknown error", 0);
+  throw lastError ?? new ApiError("Неизвестная ошибка", 0);
 
 }
 

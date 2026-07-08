@@ -34,7 +34,7 @@ function KeyCardsBlock({
         <h3 className="font-semibold text-cr-text">{title}</h3>
       </div>
       <p className="text-[11px] text-cr-muted mb-3">
-        Оценка по колоде — API Clash Royale не передаёт точный урон по картам.
+        Оценка по колоде — точный урон по картам в статистике не показывается.
       </p>
       <div className="space-y-2">
         {items.map((item) => (
@@ -92,7 +92,7 @@ export function BattleDetailPage() {
         </Button>
         <div>
           <h1 className="text-xl font-bold text-cr-text">Детали боя</h1>
-          <p className="text-sm text-cr-muted">vs {battle.opponent_name}</p>
+          <p className="text-sm text-cr-muted">против {battle.opponent_name}</p>
         </div>
       </div>
 
@@ -168,7 +168,7 @@ export function BattleDetailPage() {
             <h3 className="font-semibold text-cr-text">Мало повлияли на бой</h3>
           </div>
           <p className="text-[11px] text-cr-muted mb-3">
-            Карты, которые не подходят под матчап — возможно, не были розыграны или не успели дать value.
+            Карты, которые не подходят под матчап — возможно, не были розыграны или не успели сработать.
           </p>
           <div className="flex flex-wrap gap-2">
             {battle.low_impact_cards!.map((c) => (
@@ -188,7 +188,7 @@ export function BattleDetailPage() {
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <Shield className="w-5 h-5 text-cr-loss" />
-            <h3 className="font-semibold text-cr-text">Win-condition соперника</h3>
+            <h3 className="font-semibold text-cr-text">Условие победы соперника</h3>
           </div>
           <div className="flex flex-wrap gap-2">
             {battle.opponent_threats.map((threat, i) => (
