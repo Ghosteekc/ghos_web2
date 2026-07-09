@@ -16,17 +16,22 @@ import { StatsOverview, InsightsData } from "@/types";
 import { Card, Button, Loader } from "@/components/ui";
 import { CardUsageGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
+import { cacheHas, cacheGet } from "@/api/cache";
 import { usePageRefresh } from "@/hooks";
 
 export function AnalyticsPage() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState<StatsOverview | null>(null);
-  const [insights, setInsights] = useState<InsightsData | null>(null);
+  const [stats, setStats] = useState<StatsOverview | null>(() => cacheGet<StatsOverview>("stats-v5"));
+  const [insights, setInsights] = useState<InsightsData | null>(() => cacheGet<InsightsData>("insights"));
   const [insightsError, setInsightsError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !cacheHas("stats-v5"));
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    const hasStats = cacheHas("stats-v5");
+    if (!hasStats) {
+      setLoading(true);
+    }
     try {
       setError(null);
       setInsightsError(null);

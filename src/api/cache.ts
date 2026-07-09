@@ -1,4 +1,7 @@
 const store = new Map<string, { data: unknown; expires: number }>();
+const inflight = new Map<string, Promise<unknown>>();
+
+export { inflight };
 
 export function cacheGet<T>(key: string): T | null {
   const entry = store.get(key);
@@ -8,6 +11,10 @@ export function cacheGet<T>(key: string): T | null {
     return null;
   }
   return entry.data as T;
+}
+
+export function cacheHas(key: string): boolean {
+  return cacheGet(key) !== null;
 }
 
 export function cacheSet(key: string, data: unknown, ttlMs: number) {
@@ -58,6 +65,8 @@ export const TTL = {
   battles: 60_000,
   stats: 60_000,
   catalog: 24 * 60 * 60_000,
+  topPlayers: 10 * 60_000,
+  arenaDecks: 15 * 60_000,
 } as const;
 
 function sleep(ms: number) {

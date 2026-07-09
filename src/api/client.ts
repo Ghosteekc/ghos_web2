@@ -34,9 +34,7 @@ import {
 
 } from "@/types";
 
-import { cacheGet, cacheSet, cacheInvalidate, TTL, sleep } from "./cache";
-
-
+import { cacheGet, cacheSet, cacheInvalidate, cacheHas, inflight, TTL, sleep } from "./cache";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
@@ -225,17 +223,23 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 
 async function cachedGet<T>(key: string, path: string, ttlMs: number): Promise<T> {
-
   const hit = cacheGet<T>(key);
-
   if (hit) return hit;
 
-  const data = await request<T>(path);
+  const pending = inflight.get(key);
+  if (pending) return pending as Promise<T>;
 
-  cacheSet(key, data, ttlMs);
+  const promise = request<T>(path)
+    .then((data) => {
+      cacheSet(key, data, ttlMs);
+      return data;
+    })
+    .finally(() => {
+      inflight.delete(key);
+    });
 
-  return data;
-
+  inflight.set(key, promise);
+  return promise;
 }
 
 
@@ -289,13 +293,13 @@ export const api = {
 
 
 
-  getTopPlayers: () => request<TopPlayersData>("/api/decks/top-players?limit=10"),
+  getTopPlayers: () =>
+    cachedGet<TopPlayersData>("top-players-v2", "/api/decks/top-players?limit=10", TTL.topPlayers),
 
 
 
   getArenaDecks: () =>
-
-    cachedGet<ArenaDecksData>("arena-decks", "/api/decks/arena", TTL.battles),
+    cachedGet<ArenaDecksData>("arena-decks-v2", "/api/decks/arena", TTL.arenaDecks),
 
 
 

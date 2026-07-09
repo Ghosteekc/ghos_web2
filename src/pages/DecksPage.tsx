@@ -17,6 +17,8 @@ import {
 import { Card, Button, Loader, ElixirIcon } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
+import { cacheHas, cacheGet } from "@/api/cache";
+import type { ArenaDecksData, TopPlayersData } from "@/types";
 import type { Deck, DeckCard, RandomDeck, TopPlayer } from "@/types";
 import { usePageRefresh, useTelegram } from "@/hooks";
 
@@ -84,6 +86,10 @@ export function DecksPage() {
       setMetaUpdatedAt(null);
       return;
     }
+    const cacheKey = `decks:${filter}`;
+    if (!cacheHas(cacheKey)) {
+      setLoading(true);
+    }
     try {
       setError(null);
       const res = await api.getDecks(filter);
@@ -105,9 +111,13 @@ export function DecksPage() {
   }, [searchParams]);
 
   useEffect(() => {
-    setLoading(true);
     void load();
   }, [load]);
+
+  useEffect(() => {
+    void api.getTopPlayers().catch(() => {});
+    void api.getArenaDecks().catch(() => {});
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -166,28 +176,36 @@ export function DecksPage() {
 
       {loading && filter !== "random" && filter !== "top" && filter !== "arena" ? (
         <Loader />
-      ) : filter === "random" ? (
+      ) : null}
+
+      <div className={filter === "random" ? "" : "hidden"}>
         <RandomDeckPanel
           onCopied={(msg) => {
             setCopyHint(msg);
             setTimeout(() => setCopyHint(null), 3000);
           }}
         />
-      ) : filter === "top" ? (
+      </div>
+
+      <div className={filter === "top" ? "" : "hidden"}>
         <TopPlayersPanel
           onCopied={(msg) => {
             setCopyHint(msg);
             setTimeout(() => setCopyHint(null), 3000);
           }}
         />
-      ) : filter === "arena" ? (
+      </div>
+
+      <div className={filter === "arena" ? "" : "hidden"}>
         <ArenaPanel
           onCopied={(msg) => {
             setCopyHint(msg);
             setTimeout(() => setCopyHint(null), 3000);
           }}
         />
-      ) : (
+      </div>
+
+      {filter !== "random" && filter !== "top" && filter !== "arena" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
           {decks.map((deck, i) => (
             <div key={`${deck.id}-${deck.name}`} className="w-full">
@@ -209,7 +227,7 @@ export function DecksPage() {
               />
             </div>
           ))}
-          {!error && decks.length === 0 && (
+          {!error && decks.length === 0 && !loading ? (
             <Card className="col-span-full text-center">
               <SlidersHorizontal className="w-12 h-12 text-cr-muted mx-auto mb-3 opacity-50" />
               <p className="text-cr-muted">Колоды не найдены</p>
@@ -217,9 +235,9 @@ export function DecksPage() {
                 Выберите «Мета» или сыграйте бои для раздела «Мои»
               </p>
             </Card>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
@@ -236,14 +254,19 @@ function buildComparePath(deck: Deck, fromTab = "arena"): string {
 
 function ArenaPanel({ onCopied }: { onCopied: (msg: string) => void }) {
   const navigate = useNavigate();
-  const [decks, setDecks] = useState<Deck[]>([]);
-  const [arenaName, setArenaName] = useState("");
-  const [trophies, setTrophies] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [decks, setDecks] = useState<Deck[]>(() => {
+    const hit = cacheGet<ArenaDecksData>("arena-decks-v2");
+    return hit?.decks ?? [];
+  });
+  const [arenaName, setArenaName] = useState(() => cacheGet<ArenaDecksData>("arena-decks-v2")?.arena_name ?? "");
+  const [trophies, setTrophies] = useState(() => cacheGet<ArenaDecksData>("arena-decks-v2")?.trophies ?? 0);
+  const [loading, setLoading] = useState(() => !cacheHas("arena-decks-v2"));
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!cacheHas("arena-decks-v2")) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const data = await api.getArenaDecks();
@@ -310,13 +333,20 @@ function ArenaPanel({ onCopied }: { onCopied: (msg: string) => void }) {
 
 function TopPlayersPanel({ onCopied }: { onCopied: (msg: string) => void }) {
   const { openLink } = useTelegram();
-  const [players, setPlayers] = useState<TopPlayer[]>([]);
-  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [players, setPlayers] = useState<TopPlayer[]>(() => {
+    const hit = cacheGet<TopPlayersData>("top-players-v2");
+    return hit?.players ?? [];
+  });
+  const [updatedAt, setUpdatedAt] = useState<string | null>(
+    () => cacheGet<TopPlayersData>("top-players-v2")?.updated_at ?? null,
+  );
+  const [loading, setLoading] = useState(() => !cacheHas("top-players-v2"));
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!cacheHas("top-players-v2")) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const data = await api.getTopPlayers();
