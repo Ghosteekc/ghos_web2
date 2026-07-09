@@ -128,7 +128,7 @@ export function DecksPage() {
         {filter === "meta" ? (
           <>Классические мета-колоды — проверенные архетипы Clash Royale.</>
         ) : filter === "top" ? (
-          "Топ игроков мира по кубкам — их текущие колоды и винрейт за последние бои."
+          "Топ-10 игроков из глобального списка лидеров (Легендарный путь): колода, винрейт на ней и кубки."
         ) : filter === "arena" ? (
           "Популярные колоды на вашем диапазоне кубков: лучший винрейт игроков арены + мета. «Сравнить» — разбор относительно вашей колоды."
         ) : filter === "mine" ? (
@@ -403,8 +403,10 @@ function TopPlayersPanel({ onCopied }: { onCopied: (msg: string) => void }) {
                   <Trophy className="w-3.5 h-3.5 text-cr-gold" />
                   <span className="font-semibold text-cr-text">{player.trophies}</span>
                 </div>
-                <p className={"text-xs font-bold mt-0.5 " + (player.winrate >= 50 ? "text-cr-win" : "text-cr-loss")}>
-                  {UI.winrateShort} {player.winrate.toFixed(0)}%
+                <p className={"text-xs font-bold mt-0.5 " + (player.total_games > 0 ? (player.winrate >= 50 ? "text-cr-win" : "text-cr-loss") : "text-cr-muted")}>
+                  {player.total_games > 0
+                    ? `${UI.winrateShort} ${player.winrate.toFixed(0)}%`
+                    : "Винрейт: нет данных"}
                 </p>
               </div>
             </div>
@@ -412,7 +414,9 @@ function TopPlayersPanel({ onCopied }: { onCopied: (msg: string) => void }) {
             <div className="flex items-center gap-1 text-xs mb-3">
               <ElixirIcon size={14} />
               <span className="font-semibold text-cr-text">{player.avg_elixir.toFixed(1)}</span>
-              <span className="text-cr-muted ml-2">{player.total_games} {UI.battles}</span>
+              {player.total_games > 0 ? (
+                <span className="text-cr-muted ml-2">{player.total_games} {UI.battles}</span>
+              ) : null}
             </div>
 
             <DeckCardsGrid cards={player.cards} />

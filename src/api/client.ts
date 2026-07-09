@@ -289,7 +289,7 @@ export const api = {
 
 
 
-  getTopPlayers: () => request<TopPlayersData>("/api/decks/top-players?refresh=true"),
+  getTopPlayers: () => request<TopPlayersData>("/api/decks/top-players?limit=10"),
 
 
 
