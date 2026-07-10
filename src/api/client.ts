@@ -287,9 +287,9 @@ export const api = {
   getCounterDeck: (index: number) =>
     request<CounterDeckData>(`/api/opponents/${index}/counter`),
 
-  getCustomizeDeck: () => cachedGet<CustomizeData>("customize-v4", "/api/customize", TTL.battles),
+  getCustomizeDeck: () => cachedGet<CustomizeData>("customize-v5", "/api/customize", TTL.battles),
 
-  getSynergyDeck: () => cachedGet<SynergyData>("synergy", "/api/synergy", TTL.battles),
+  getSynergyDeck: () => cachedGet<SynergyData>("synergy-v2", "/api/synergy", TTL.battles),
 
   getPlayerPreview: (tag: string) => {
     const clean = tag.replace(/^#/, "");

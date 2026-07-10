@@ -1,11 +1,52 @@
 import { useCallback, useEffect, useState } from "react";
-import { Shield, Swords, Wand2, Sparkles, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { Shield, Swords, Wand2, Sparkles, ChevronDown, ChevronUp, RefreshCw, ExternalLink } from "lucide-react";
 import { api, ApiError } from "@/api/client";
 import { cacheInvalidate } from "@/api/cache";
 import { Card, Button, Loader } from "@/components/ui";
 import { CardDeckGrid } from "@/components/cards";
-import { useCardCatalog } from "@/hooks";
+import { useCardCatalog, useTelegram } from "@/hooks";
 import type { CounterDeckData, CustomizeData, OpponentEntry, SynergyData, WinrateEntry } from "@/types";
+
+function decksEqual(a: string[], b: string[]) {
+  return a.length === b.length && a.every((card, i) => card === b[i]);
+}
+
+function DeckImportButton({ deckLink, label }: { deckLink?: string | null; label: string }) {
+  const { openLink, showAlert } = useTelegram();
+
+  const importDeck = async () => {
+    if (!deckLink) return;
+    if (openLink) {
+      openLink(deckLink);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(deckLink);
+      showAlert?.("Ссылка на колоду скопирована");
+    } catch {
+      showAlert?.("Откройте приложение из Telegram для импорта колоды");
+    }
+  };
+
+  if (!deckLink) {
+    return (
+      <p className="text-[11px] text-cr-muted mt-3">
+        Импорт недоступен — не все карты распознаны
+      </p>
+    );
+  }
+
+  return (
+    <Button
+      variant="secondary"
+      className="mt-3 w-full !py-2 text-sm flex items-center justify-center gap-2"
+      onClick={() => void importDeck()}
+    >
+      <ExternalLink className="w-4 h-4" />
+      {label}
+    </Button>
+  );
+}
 
 function ErrorCard({ message }: { message: string }) {
   return <Card className="text-center text-cr-loss text-sm">{message}</Card>;
@@ -161,8 +202,8 @@ export function DeckToolsPanel() {
     try {
       setError(null);
       if (force) {
-        cacheInvalidate("customize-v4");
-        cacheInvalidate("synergy");
+        cacheInvalidate("customize-v5");
+        cacheInvalidate("synergy-v2");
       }
       const [custom, syn] = await Promise.all([
         api.getCustomizeDeck().catch(() => null),
@@ -212,8 +253,14 @@ export function DeckToolsPanel() {
           <p className="text-xs text-cr-muted mb-3">Ср. эликсир: {customize.avg_elixir.toFixed(1)}</p>
           <p className="text-xs text-cr-muted mb-2">Было</p>
           <CardDeckGrid cards={customize.original} size="sm" showLabels maxVisible={8} />
-          <p className="text-xs text-cr-muted mb-2 mt-4">Стало</p>
-          <CardDeckGrid cards={customize.customized} size="sm" showLabels maxVisible={8} />
+          {!decksEqual(customize.original, customize.customized) ? (
+            <>
+              <p className="text-xs text-cr-muted mb-2 mt-4">Стало</p>
+              <CardDeckGrid cards={customize.customized} size="sm" showLabels maxVisible={8} />
+            </>
+          ) : (
+            <p className="text-xs text-cr-muted mt-4">Колода подходит для вашей арены — обязательных замен нет</p>
+          )}
           {customize.issues.length > 0 && (
             <button
               type="button"
@@ -231,6 +278,9 @@ export function DeckToolsPanel() {
               ))}
             </ul>
           )}
+          {!decksEqual(customize.original, customize.customized) && (
+            <DeckImportButton deckLink={customize.deck_link} label="Импорт улучшенной колоды" />
+          )}
         </Card>
       )}
 
@@ -244,6 +294,7 @@ export function DeckToolsPanel() {
             Ядро: {synergy.core.map((c) => nameRu(c)).join(", ")} · эликсир {synergy.avg_elixir.toFixed(1)}
           </p>
           <CardDeckGrid cards={synergy.deck} size="sm" showLabels maxVisible={8} />
+          <DeckImportButton deckLink={synergy.deck_link} label="Импорт колоды синергий" />
         </Card>
       )}
     </div>

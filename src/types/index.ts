@@ -356,6 +356,7 @@ export interface CustomizeData {
   customized: string[];
   issues: string[];
   avg_elixir: number;
+  deck_link?: string | null;
 }
 
 export interface SynergyData {
@@ -363,6 +364,7 @@ export interface SynergyData {
   deck: string[];
   synergies: Record<string, string[]>;
   avg_elixir: number;
+  deck_link?: string | null;
 }
 
 export type TabType =
