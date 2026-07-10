@@ -116,19 +116,38 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
   let res: Response;
 
+  const controller = new AbortController();
+  const timeoutMs = API_BASE.includes("loca.lt") ? 35_000 : 20_000;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
 
     res = await fetch(`${API_BASE}${path}`, {
 
       ...options,
 
+      signal: controller.signal,
+
       headers: buildRequestHeaders(options?.headers),
 
     });
 
-  } catch {
+  } catch (err) {
 
-    throw new ApiError("Нет связи с сервером. Проверьте интернет и попробуйте позже.", 0);
+    const tunnelHint = API_BASE.includes("loca.lt")
+      ? " Туннель до бота не отвечает — перезапустите start-tunnel.ps1 в отдельном окне PowerShell."
+      : "";
+    const aborted = err instanceof DOMException && err.name === "AbortError";
+    throw new ApiError(
+      aborted
+        ? `Сервер не ответил вовремя.${tunnelHint}`
+        : `Нет связи с сервером.${tunnelHint}`,
+      0,
+    );
+
+  } finally {
+
+    clearTimeout(timer);
 
   }
 
