@@ -42,7 +42,10 @@ export function DeckWinratesPanel() {
         <Card key={i} delay={i * 0.03}>
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-semibold text-cr-text">
-              {row.wins}П / {row.losses}П · {row.total} игр
+              <span className="text-cr-win">{row.wins} побед</span>
+              <span className="text-cr-muted"> · </span>
+              <span className="text-cr-loss">{row.losses} поражений</span>
+              <span className="text-cr-muted"> · {row.total} игр</span>
             </span>
             <span className={`text-sm font-bold ${row.winrate >= 50 ? "text-cr-win" : "text-cr-loss"}`}>
               {row.winrate.toFixed(1)}%
