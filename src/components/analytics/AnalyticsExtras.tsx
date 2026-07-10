@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { Shield, Swords, Wand2, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { Shield, Swords, Wand2, Sparkles, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { api, ApiError } from "@/api/client";
+import { cacheInvalidate } from "@/api/cache";
 import { Card, Button, Loader } from "@/components/ui";
 import { CardDeckGrid } from "@/components/cards";
 import { useCardCatalog } from "@/hooks";
@@ -152,12 +153,17 @@ export function DeckToolsPanel() {
   const [customize, setCustomize] = useState<CustomizeData | null>(null);
   const [synergy, setSynergy] = useState<SynergyData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showIssues, setShowIssues] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (force = false) => {
     try {
       setError(null);
+      if (force) {
+        cacheInvalidate("customize-v4");
+        cacheInvalidate("synergy");
+      }
       const [custom, syn] = await Promise.all([
         api.getCustomizeDeck().catch(() => null),
         api.getSynergyDeck().catch(() => null),
@@ -183,6 +189,20 @@ export function DeckToolsPanel() {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button
+          variant="ghost"
+          className="text-cr-muted px-3 py-2 text-xs"
+          disabled={refreshing}
+          onClick={() => {
+            setRefreshing(true);
+            void load(true).finally(() => setRefreshing(false));
+          }}
+        >
+          <RefreshCw className={`w-4 h-4 mr-1 ${refreshing ? "animate-spin" : ""}`} />
+          Обновить
+        </Button>
+      </div>
       {customize && (
         <Card>
           <div className="flex items-center gap-2 mb-3">
