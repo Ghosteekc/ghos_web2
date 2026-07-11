@@ -1,9 +1,8 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/layout/Layout";
 import { Loader } from "@/components/ui";
 
-const HomePage = lazy(() => import("@/pages/HomePage"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const ProfileCardsPage = lazy(() => import("@/pages/ProfileCardsPage"));
 const ProfileMasteryPage = lazy(() => import("@/pages/ProfileMasteryPage"));
@@ -36,18 +35,11 @@ export default function App() {
             index
             element={
               <Suspense fallback={<PageLoader />}>
-                <HomePage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="profile"
-            element={
-              <Suspense fallback={<PageLoader />}>
                 <ProfilePage />
               </Suspense>
             }
           />
+          <Route path="profile" element={<Navigate to="/" replace />} />
           <Route
             path="profile/cards"
             element={

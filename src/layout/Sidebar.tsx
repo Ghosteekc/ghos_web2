@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import {
-  Home,
+  User,
   BarChart3,
   GitCompare,
   History,
@@ -11,7 +11,7 @@ import {
 import { cn } from "@/utils";
 
 const navItems = [
-  { to: "/", icon: Home, label: "Главная" },
+  { to: "/", icon: User, label: "Профиль" },
   { to: "/battles", icon: History, label: "Бои" },
   { to: "/decks", icon: GitCompare, label: "Колоды" },
   { to: "/analytics", icon: BarChart3, label: "Аналитика" },

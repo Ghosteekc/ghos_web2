@@ -15,7 +15,7 @@ const quickLinks = [
   { to: "/analytics", icon: BarChart3, label: "Аналитика", hint: "Графики, соперники, улучшения" },
   { to: "/decks", icon: GitCompare, label: "Колоды", hint: "Мета, сравнение, рандом" },
   { to: "/battles", icon: History, label: "История", hint: "Разбор последних боёв" },
-  { to: "/more", icon: Settings, label: "Ещё", hint: "Профиль, поиск, избранное" },
+  { to: "/more", icon: Settings, label: "Ещё", hint: "Поиск, избранное, настройки" },
 ] as const;
 
 interface HomeServicePanelProps {

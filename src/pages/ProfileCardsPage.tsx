@@ -134,7 +134,7 @@ export function ProfileCardsPage() {
   if (error || !data) {
     return (
       <div className="space-y-4">
-        <PageHeader title="Коллекция карт" onBack={() => navigate("/profile")} />
+        <PageHeader title="Коллекция карт" onBack={() => navigate("/")} />
         <Card className="text-center space-y-3">
           <p className="text-cr-loss text-sm">{error ?? "Нет данных"}</p>
           <Button onClick={() => void reload()}>Повторить</Button>
@@ -145,7 +145,7 @@ export function ProfileCardsPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader title="Коллекция карт" onBack={() => navigate("/profile")} />
+      <PageHeader title="Коллекция карт" onBack={() => navigate("/")} />
 
       <Card>
         <CollectionStatsGrid

@@ -5,18 +5,20 @@ import { Card, Button, Loader } from "@/components/ui";
 import { ProfileCollectionNav } from "@/components/profile/ProfileCollectionNav";
 import { CardLevelScale } from "@/components/profile/CardLevelScale";
 import { ProfileStatGrid } from "@/components/profile/ProfileStatGrid";
+import { SupercellDisclaimer } from "@/components/home/SupercellDisclaimer";
 import { useTelegram, usePageRefresh } from "@/hooks";
 import { api } from "@/api/client";
 import { Profile } from "@/types";
 import { formatPlayerTag } from "@/utils";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
+import { cacheHas } from "@/api/cache";
 
 export function ProfilePage() {
   const navigate = useNavigate();
   const { user } = useTelegram();
   const { nameRu } = useCardCatalog();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !cacheHas("profile-v4"));
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -35,6 +37,7 @@ export function ProfilePage() {
 
   useEffect(() => {
     void load();
+    api.prefetchDeckTabs();
   }, [load]);
 
   if (loading) {
@@ -130,6 +133,8 @@ export function ProfilePage() {
         <Settings className="w-4 h-4" />
         Открыть настройки
       </Button>
+
+      <SupercellDisclaimer />
     </div>
   );
 }

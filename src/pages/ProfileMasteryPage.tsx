@@ -56,7 +56,7 @@ export function ProfileMasteryPage() {
 
       <div className="space-y-4">
 
-        <PageHeader title="Мастерство карт" onBack={() => navigate("/profile")} />
+        <PageHeader title="Мастерство карт" onBack={() => navigate("/")} />
 
         <Card className="text-center space-y-3">
 
@@ -78,7 +78,7 @@ export function ProfileMasteryPage() {
 
     <div className="space-y-4">
 
-      <PageHeader title="Мастерство карт" onBack={() => navigate("/profile")} />
+      <PageHeader title="Мастерство карт" onBack={() => navigate("/")} />
 
 
 

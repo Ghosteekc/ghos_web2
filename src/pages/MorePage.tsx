@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import {
-  User,
   Search,
   Star,
   Settings,
@@ -10,7 +9,6 @@ import {
 import { Card } from "@/components/ui";
 
 const links = [
-  { to: "/profile", icon: User, label: "Профиль", hint: "Коллекция, кубки, клан" },
   { to: "/search", icon: Search, label: "Поиск", hint: "Игрок по тегу" },
   { to: "/favorites", icon: Star, label: "Избранное", hint: "Сохранённые колоды" },
   { to: "/settings", icon: Settings, label: "Настройки", hint: "Синхронизация и кеш" },
@@ -22,7 +20,7 @@ export function MorePage() {
   return (
     <div className="space-y-6">
       <h1 className="page-title">Ещё</h1>
-      <p className="text-xs text-cr-muted -mt-2">Профиль, поиск и настройки</p>
+      <p className="text-xs text-cr-muted -mt-2">Поиск, избранное и настройки</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {links.map((item) => (
@@ -48,7 +46,7 @@ export function MorePage() {
         <div className="flex items-start gap-3">
           <Trophy className="w-5 h-5 text-cr-gold shrink-0 mt-0.5" />
           <p className="text-xs text-cr-muted leading-relaxed">
-            Основные разделы — в нижнем меню: Главная, Бои, Колоды, Аналитика.
+            Основные разделы — в нижнем меню: Профиль, Бои, Колоды, Аналитика.
           </p>
         </div>
       </Card>
