@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { User, Settings } from "lucide-react";
+import { User } from "lucide-react";
 import { Card, Button, Loader } from "@/components/ui";
 import { ProfileCollectionNav } from "@/components/profile/ProfileCollectionNav";
 import { CardLevelScale } from "@/components/profile/CardLevelScale";
@@ -14,7 +13,6 @@ import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 import { cacheHas } from "@/api/cache";
 
 export function ProfilePage() {
-  const navigate = useNavigate();
   const { user } = useTelegram();
   const { nameRu } = useCardCatalog();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -124,15 +122,6 @@ export function ProfilePage() {
       )}
 
       <ProfileCollectionNav />
-
-      <Button
-        variant="secondary"
-        className="w-full max-w-md mx-auto flex items-center justify-center gap-2"
-        onClick={() => navigate("/settings")}
-      >
-        <Settings className="w-4 h-4" />
-        Открыть настройки
-      </Button>
 
       <SupercellDisclaimer />
     </div>

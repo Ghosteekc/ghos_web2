@@ -4,7 +4,9 @@ import {
   BarChart3,
   GitCompare,
   History,
-  LayoutGrid,
+  Search,
+  Star,
+  Settings,
   Trophy,
   X,
 } from "lucide-react";
@@ -15,7 +17,9 @@ const navItems = [
   { to: "/battles", icon: History, label: "Бои" },
   { to: "/decks", icon: GitCompare, label: "Колоды" },
   { to: "/analytics", icon: BarChart3, label: "Аналитика" },
-  { to: "/more", icon: LayoutGrid, label: "Ещё" },
+  { to: "/search", icon: Search, label: "Поиск" },
+  { to: "/favorites", icon: Star, label: "Избранное" },
+  { to: "/settings", icon: Settings, label: "Настройки" },
 ];
 
 export function Sidebar({ isOpen = true, onClose }: { isOpen?: boolean; onClose?: () => void }) {

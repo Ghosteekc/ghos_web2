@@ -14,7 +14,6 @@ const BattlesPage = lazy(() => import("@/pages/BattlesPage"));
 const BattleDetailPage = lazy(() => import("@/pages/BattleDetailPage"));
 const SearchPage = lazy(() => import("@/pages/SearchPage"));
 const FavoritesPage = lazy(() => import("@/pages/FavoritesPage"));
-const MorePage = lazy(() => import("@/pages/MorePage"));
 const PlayerPreviewPage = lazy(() => import("@/pages/PlayerPreviewPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 
@@ -136,14 +135,7 @@ export default function App() {
               </Suspense>
             }
           />
-          <Route
-            path="more"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <MorePage />
-              </Suspense>
-            }
-          />
+          <Route path="more" element={<Navigate to="/search" replace />} />
           <Route
             path="settings"
             element={
