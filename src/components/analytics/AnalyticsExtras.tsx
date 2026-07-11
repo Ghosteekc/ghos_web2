@@ -103,7 +103,8 @@ export function DeckWinratesPanel() {
 
 export function OpponentsPanel() {
   const [opponents, setOpponents] = useState<OpponentEntry[]>([]);
-  const [counter, setCounter] = useState<CounterDeckData | null>(null);
+  const [counters, setCounters] = useState<Record<number, CounterDeckData>>({});
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -125,11 +126,23 @@ export function OpponentsPanel() {
   }, [load]);
 
   const loadCounter = async (index: number) => {
+    if (activeIndex === index) {
+      setActiveIndex(null);
+      return;
+    }
+
+    setActiveIndex(index);
+
+    if (counters[index]) {
+      return;
+    }
+
     setLoadingId(index);
     try {
-      setCounter(await api.getCounterDeck(index));
+      const data = await api.getCounterDeck(index);
+      setCounters((prev) => ({ ...prev, [index]: data }));
     } catch {
-      setCounter(null);
+      setActiveIndex(null);
     } finally {
       setLoadingId(null);
     }
@@ -143,48 +156,62 @@ export function OpponentsPanel() {
 
   return (
     <div className="space-y-4">
-      {opponents.map((opp) => (
-        <Card key={opp.index}>
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <div>
-              <p className="text-sm font-semibold text-cr-text flex items-center gap-2">
-                <Shield className="w-4 h-4 text-cr-loss" />
-                {opp.name}
-              </p>
-              <p className="text-xs text-cr-muted mt-0.5">
-                {opp.won_against ? "Вы побеждали эту колоду" : "Проигрывали этой колоде"} · эликсир {opp.avg_elixir.toFixed(1)}
-              </p>
-            </div>
-            <Button
-              variant="secondary"
-              className="!py-1.5 !px-3 text-xs shrink-0"
-              disabled={loadingId === opp.index}
-              onClick={() => void loadCounter(opp.index)}
-            >
-              <Swords className="w-3.5 h-3.5 mr-1" />
-              Контр
-            </Button>
-          </div>
-          {opp.threats.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {opp.threats.map((t) => (
-                <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-cr-loss/10 text-cr-loss border border-cr-loss/20">
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
-          <CardDeckGrid cards={opp.deck} size="sm" showLabels maxVisible={8} />
-        </Card>
-      ))}
+      {opponents.map((opp) => {
+        const isOpen = activeIndex === opp.index;
+        const counter = counters[opp.index];
+        const isLoadingCounter = loadingId === opp.index;
 
-      {counter && (
-        <Card className="border-cr-win/30 bg-cr-win/5">
-          <h3 className="text-sm font-semibold text-cr-text mb-1">Контр-колода vs {counter.opponent_name}</h3>
-          <p className="text-xs text-cr-muted mb-3">Под ваш арсенал и арену</p>
-          <CardDeckGrid cards={counter.counter_deck} size="sm" showLabels maxVisible={8} />
-        </Card>
-      )}
+        return (
+          <Card key={opp.index}>
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <div>
+                <p className="text-sm font-semibold text-cr-text flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-cr-loss" />
+                  {opp.name}
+                </p>
+                <p className="text-xs text-cr-muted mt-0.5">
+                  {opp.won_against ? "Вы побеждали эту колоду" : "Проигрывали этой колоде"} · эликсир {opp.avg_elixir.toFixed(1)}
+                </p>
+              </div>
+              <Button
+                variant={isOpen ? "primary" : "secondary"}
+                className="!py-1.5 !px-3 text-xs shrink-0"
+                disabled={isLoadingCounter}
+                onClick={() => void loadCounter(opp.index)}
+              >
+                <Swords className="w-3.5 h-3.5 mr-1" />
+                {isOpen ? "Скрыть" : "Контр"}
+              </Button>
+            </div>
+            {opp.threats.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {opp.threats.map((t) => (
+                  <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-cr-loss/10 text-cr-loss border border-cr-loss/20">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+            <CardDeckGrid cards={opp.deck} size="sm" showLabels maxVisible={8} />
+
+            {isOpen && (
+              <div className="mt-3 pt-3 border-t border-cr-win/20 rounded-lg bg-cr-win/5 px-3 pb-3 -mx-1">
+                {isLoadingCounter ? (
+                  <p className="text-xs text-cr-muted text-center py-2">Подбираем контр-колоду…</p>
+                ) : counter ? (
+                  <>
+                    <h3 className="text-sm font-semibold text-cr-text mb-1">
+                      Контр-колода vs {counter.opponent_name}
+                    </h3>
+                    <p className="text-xs text-cr-muted mb-3">Под ваш арсенал и арену</p>
+                    <CardDeckGrid cards={counter.counter_deck} size="sm" showLabels maxVisible={8} />
+                  </>
+                ) : null}
+              </div>
+            )}
+          </Card>
+        );
+      })}
     </div>
   );
 }
