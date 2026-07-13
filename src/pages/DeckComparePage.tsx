@@ -222,7 +222,7 @@ export function DeckComparePage() {
             </div>
             {(data.user_synergy_notes?.length ?? 0) > 0 && (
               <div className="mt-3">
-                <SummaryList title="Синергия в колоде" items={data.user_synergy_notes} tone="win" />
+                <SummaryList title="Синергия в колоде" items={data.user_synergy_notes ?? []} tone="win" />
               </div>
             )}
           </Card>
