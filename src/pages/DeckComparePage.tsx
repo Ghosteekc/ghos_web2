@@ -163,10 +163,16 @@ export function DeckComparePage() {
           <div className="rounded-xl border border-cr-win/30 bg-cr-win/10 p-3 text-center">
             <p className="text-[11px] text-cr-muted">Ваша колода</p>
             <p className="text-2xl font-bold text-cr-win tabular-nums">{userScore.toFixed(0)}%</p>
+            {data.user_synergy_score != null && (
+              <p className="text-[10px] text-cr-muted mt-1">Синергия: {data.user_synergy_score.toFixed(0)}%</p>
+            )}
           </div>
           <div className="rounded-xl border border-cr-loss/30 bg-cr-loss/10 p-3 text-center">
             <p className="text-[11px] text-cr-muted">{refLabel}</p>
             <p className="text-2xl font-bold text-cr-loss tabular-nums">{refScore.toFixed(0)}%</p>
+            {data.reference_synergy_score != null && (
+              <p className="text-[10px] text-cr-muted mt-1">Синергия: {data.reference_synergy_score.toFixed(0)}%</p>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -214,6 +220,11 @@ export function DeckComparePage() {
             <div className="mt-3">
               <SummaryList title="Слабее" items={data.user_worse} tone="loss" />
             </div>
+            {(data.user_synergy_notes?.length ?? 0) > 0 && (
+              <div className="mt-3">
+                <SummaryList title="Синергия в колоде" items={data.user_synergy_notes} tone="win" />
+              </div>
+            )}
           </Card>
           <Card className="!p-4">
             <div className="flex items-center gap-2 mb-3">

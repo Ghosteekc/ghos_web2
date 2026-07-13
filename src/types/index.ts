@@ -242,6 +242,10 @@ export interface DeckCompareResult {
   reference_card_notes: DeckCompareCardNote[];
   matchup_score: number;
   opponent_matchup_score: number;
+  user_synergy_score?: number;
+  reference_synergy_score?: number;
+  user_synergy_notes?: string[];
+  reference_synergy_notes?: string[];
 }
 
 export interface DeckCardMatchup {
