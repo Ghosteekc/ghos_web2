@@ -5,6 +5,7 @@ import { cacheInvalidate } from "@/api/cache";
 import { Card, Button, Loader } from "@/components/ui";
 import { CardDeckGrid } from "@/components/cards";
 import { useCardCatalog, useTelegram } from "@/hooks";
+import { cn } from "@/utils";
 import type { CounterDeckData, CustomizeData, OpponentEntry, SynergyData, WinrateEntry } from "@/types";
 
 function decksEqual(a: string[], b: string[]) {
@@ -174,8 +175,11 @@ export function OpponentsPanel() {
                 </p>
               </div>
               <Button
-                variant={isOpen ? "primary" : "secondary"}
-                className="!py-1.5 !px-3 text-xs shrink-0"
+                variant="secondary"
+                className={cn(
+                  "!py-1.5 !px-3 text-xs shrink-0",
+                  isOpen && "border-cr-gold/60 text-cr-gold bg-cr-gold/10 hover:bg-cr-gold/15 active:bg-cr-gold/20",
+                )}
                 disabled={isLoadingCounter}
                 onClick={() => void loadCounter(opp.index)}
               >
