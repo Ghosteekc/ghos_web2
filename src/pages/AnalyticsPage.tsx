@@ -30,6 +30,9 @@ const ANALYTICS_TABS = [
 
 type AnalyticsTab = (typeof ANALYTICS_TABS)[number]["id"];
 
+const CHART_MARGIN = { top: 8, right: 8, left: 4, bottom: 4 };
+const CHART_YAXIS_WIDTH = 32;
+
 export function AnalyticsPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<AnalyticsTab>("overview");
@@ -262,10 +265,10 @@ export function AnalyticsPage() {
           <div className="h-[170px]">
             {lastResults.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={lastResults} margin={{ top: 4, bottom: 4, left: 4, right: 8 }}>
+                <LineChart data={lastResults} margin={CHART_MARGIN}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="index" hide />
-                  <YAxis stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} width={32} />
+                  <YAxis stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} width={CHART_YAXIS_WIDTH} />
                   <Tooltip content={<TrophyGrowthTooltip />} />
                   <Line
                     type="monotone"
@@ -285,13 +288,13 @@ export function AnalyticsPage() {
         </Card>
 
         <Card className="lg:col-span-2">
-          <h3 className="text-sm font-semibold text-cr-text mb-3">Винрейт по дням</h3>
-          <div className="h-[220px] -mx-1">
+          <h3 className="text-sm font-semibold text-cr-text mb-2">Винрейт по дням</h3>
+          <div className="h-[220px]">
             {winrateByDay.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                   data={winrateByDay}
-                  margin={{ top: 8, right: 0, left: 0, bottom: 0 }}
+                  margin={CHART_MARGIN}
                   barCategoryGap="18%"
                   barGap={2}
                 >
@@ -310,7 +313,7 @@ export function AnalyticsPage() {
                     fontSize={10}
                     tickLine={false}
                     axisLine={false}
-                    width={20}
+                    width={CHART_YAXIS_WIDTH}
                   />
                   <YAxis
                     yAxisId="right"
