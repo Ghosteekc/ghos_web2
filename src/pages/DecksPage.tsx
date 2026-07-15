@@ -273,16 +273,17 @@ function buildComparePath(deck: Deck, fromTab = "arena"): string {
 function ArenaPanel({ onCopied }: { onCopied: (msg: string) => void }) {
   const navigate = useNavigate();
   const [decks, setDecks] = useState<Deck[]>(() => {
-    const hit = cacheGet<ArenaDecksData>("arena-decks-v3");
+    const hit = cacheGet<ArenaDecksData>("arena-decks-v4");
     return hit?.decks ?? [];
   });
-  const [arenaName, setArenaName] = useState(() => cacheGet<ArenaDecksData>("arena-decks-v3")?.arena_name ?? "");
-  const [trophies, setTrophies] = useState(() => cacheGet<ArenaDecksData>("arena-decks-v3")?.trophies ?? 0);
-  const [loading, setLoading] = useState(() => !cacheHas("arena-decks-v3"));
+  const [arenaName, setArenaName] = useState(() => cacheGet<ArenaDecksData>("arena-decks-v4")?.arena_name ?? "");
+  const [trophies, setTrophies] = useState(() => cacheGet<ArenaDecksData>("arena-decks-v4")?.trophies ?? 0);
+  const [loading, setLoading] = useState(() => !cacheHas("arena-decks-v4"));
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!cacheHas("arena-decks-v3")) {
+    const hasCache = cacheHas("arena-decks-v4");
+    if (!hasCache) {
       setLoading(true);
     }
     setError(null);
@@ -292,7 +293,9 @@ function ArenaPanel({ onCopied }: { onCopied: (msg: string) => void }) {
       setArenaName(data.arena_name ?? "");
       setTrophies(data.trophies ?? 0);
     } catch (e) {
-      setDecks([]);
+      if (!hasCache) {
+        setDecks([]);
+      }
       setError(e instanceof ApiError ? e.message : "Не удалось загрузить колоды арены");
     } finally {
       setLoading(false);
