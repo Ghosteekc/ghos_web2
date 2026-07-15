@@ -30,7 +30,7 @@ const DECK_FILTERS = [
   { id: "top", label: DECK_FILTER_LABELS.top },
   { id: "mine", label: DECK_FILTER_LABELS.mine },
   { id: "arena", label: DECK_FILTER_LABELS.arena },
-  { id: "constructor", label: DECK_FILTER_LABELS.constructor },
+  { id: "constructor", label: DECK_FILTER_LABELS["constructor"] },
   { id: "random", label: DECK_FILTER_LABELS.random },
 ] as const;
 
