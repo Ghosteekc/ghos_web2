@@ -103,17 +103,16 @@ export function buildConstructorDecksLocal(
     ];
 
     const notes = synergyNotes(r.deck);
-    const displayName = r.sourceDeckName ?? `${r.archetype} · под ваши карты`;
 
     return {
       id: startId + idx,
-      name: displayName,
+      name: "",
       cards,
       synergy_score: r.synergyScore,
       synergy_notes: notes,
       avg_elixir: r.averageElixir,
       deck_link: buildDeckLink(r.deck, catalogMap),
-      description: `Архетип ${r.archetype} · уверенность ${r.confidence}% · ср. эликсир ${r.averageElixir}`,
+      description: `Синергия ${r.synergyScore.toFixed(0)}% · эликсир ${r.averageElixir.toFixed(1)}`,
       type: "constructor",
       category: categoryFromArchetype(r.archetype),
       archetype: r.archetype,

@@ -66,6 +66,7 @@ export interface BuildResult {
   confidence: number;
   sourceDeckId?: string;
   sourceDeckName?: string;
+  balanced?: boolean;
 }
 
 export interface ScoredDeck {
