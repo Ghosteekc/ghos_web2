@@ -15,7 +15,7 @@ import { TrendingUp, TrendingDown, Flame, Clock, Brain, Swords, ChevronRight, La
 import { StatsOverview, InsightsData } from "@/types";
 import { Card, Button, Loader } from "@/components/ui";
 import { CardUsageGrid } from "@/components/cards";
-import { api, ApiError } from "@/api/client";
+import { api } from "@/api/client";
 import { cacheHas, cacheGet } from "@/api/cache";
 import { usePageRefresh } from "@/hooks";
 import { battleDetailPath } from "@/utils";
@@ -35,7 +35,6 @@ export function AnalyticsPage() {
   const [tab, setTab] = useState<AnalyticsTab>("overview");
   const [stats, setStats] = useState<StatsOverview | null>(() => cacheGet<StatsOverview>("stats-v5"));
   const [insights, setInsights] = useState<InsightsData | null>(() => cacheGet<InsightsData>("insights"));
-  const [insightsError, setInsightsError] = useState<string | null>(null);
   const [loading, setLoading] = useState(() => !cacheHas("stats-v5"));
   const [error, setError] = useState<string | null>(null);
 
@@ -46,20 +45,19 @@ export function AnalyticsPage() {
     }
     try {
       setError(null);
-      setInsightsError(null);
-      const [data, insightData] = await Promise.all([
-        api.getStats(),
-        api.getInsights().catch((e) => {
-          setInsightsError(e instanceof ApiError ? e.message : "Анализ боёв недоступен");
-          return null;
-        }),
-      ]);
+      const data = await api.getStats();
       setStats(data);
-      setInsights(insightData);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка загрузки");
     } finally {
       setLoading(false);
+    }
+
+    try {
+      const insightData = await api.getInsights();
+      setInsights(insightData);
+    } catch {
+      setInsights(null);
     }
   }, []);
 
@@ -201,8 +199,6 @@ export function AnalyticsPage() {
             ))}
           </div>
         </Card>
-      ) : insightsError ? (
-        <Card className="text-center text-sm text-cr-muted">{insightsError}</Card>
       ) : null}
 
       <Card className="border-cr-gold/25 bg-cr-gold/5">
@@ -212,18 +208,20 @@ export function AnalyticsPage() {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-semibold text-cr-text">Мои колоды</h3>
-            <p className="text-xs text-cr-muted mt-1 leading-relaxed">
-              Оценка ваших колод по практичности относительно последних боёв
-            </p>
-            <div className="mt-3 space-y-3">
-              <Button
-                variant="secondary"
-                className="w-full sm:w-auto !py-2 text-sm flex items-center justify-center gap-2"
-                onClick={() => navigate("/decks?tab=mine")}
-              >
-                Открыть мои колоды
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+            <div className="mt-3 space-y-4">
+              <div>
+                <Button
+                  variant="secondary"
+                  className="w-full sm:w-auto !py-2 text-sm flex items-center justify-center gap-2"
+                  onClick={() => navigate("/decks?tab=mine")}
+                >
+                  Открыть мои колоды
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+                <p className="text-[11px] text-cr-muted mt-1.5 leading-snug">
+                  Оценка ваших колод по практичности относительно последних боёв
+                </p>
+              </div>
               <div>
                 <Button
                   variant="secondary"
