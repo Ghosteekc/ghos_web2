@@ -65,7 +65,7 @@ interface ConstructorPanelProps {
 }
 
 export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
-  const { ready, getCard, nameRu, nameShort } = useCardCatalog();
+  const { ready, getCard, nameRu } = useCardCatalog();
   const [slots, setSlots] = useState<(SlotPick)[]>([null, null, null, null]);
   const [activeSlot, setActiveSlot] = useState(0);
   const [search, setSearch] = useState("");
@@ -243,46 +243,46 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         ) : null}
       </Card>
 
-      <div>
-        <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cr-muted" />
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Поиск карты…"
-            className="w-full rounded-xl border border-cr-border/60 bg-cr-bg/60 py-2.5 pl-10 pr-3 text-sm text-cr-text placeholder:text-cr-muted focus:border-cr-gold/50 focus:outline-none"
-          />
-        </div>
-
-        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 max-h-[min(52vh,28rem)] overflow-y-auto pr-1">
-          {filteredCards.map((card) => (
-            <button
-              key={card.name}
-              type="button"
-              onClick={() => placeCard(card)}
-              className="rounded-lg p-1 hover:bg-cr-blue/10 transition-colors"
-              title={nameRu(card.name)}
-            >
-              <CardTile
-                name={card.name}
-                icon={card.icon}
-                size="grid"
-                showLabel
-                elixirCost={card.elixir ?? undefined}
-              />
-            </button>
-          ))}
-        </div>
-        {filteredCards.length === 0 ? (
-          <p className="text-center text-sm text-cr-muted py-6">Карты не найдены</p>
-        ) : null}
-      </div>
-
       {filledCount < 4 ? (
-        <Card className="text-center text-sm text-cr-muted py-6">
-          Выберите ещё {4 - filledCount} {4 - filledCount === 1 ? "карту" : "карты"} — ниже появятся готовые колоды
-        </Card>
+        <div>
+          <div className="relative mb-3">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cr-muted" />
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Поиск карты…"
+              className="w-full rounded-xl border border-cr-border/60 bg-cr-bg/60 py-2.5 pl-10 pr-3 text-sm text-cr-text placeholder:text-cr-muted focus:border-cr-gold/50 focus:outline-none"
+            />
+          </div>
+
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 max-h-[min(52vh,28rem)] overflow-y-auto pr-1">
+            {filteredCards.map((card) => (
+              <button
+                key={card.name}
+                type="button"
+                onClick={() => placeCard(card)}
+                className="rounded-lg p-1 hover:bg-cr-blue/10 transition-colors"
+                title={nameRu(card.name)}
+              >
+                <CardTile
+                  name={card.name}
+                  icon={card.icon}
+                  size="grid"
+                  showLabel
+                  elixirCost={card.elixir ?? undefined}
+                />
+              </button>
+            ))}
+          </div>
+          {filteredCards.length === 0 ? (
+            <p className="text-center text-sm text-cr-muted py-6">Карты не найдены</p>
+          ) : null}
+
+          <Card className="text-center text-sm text-cr-muted py-4 mt-3">
+            Выберите ещё {4 - filledCount} {4 - filledCount === 1 ? "карту" : "карты"} — ниже появятся готовые колоды
+          </Card>
+        </div>
       ) : null}
 
       {loading ? <Loader /> : null}
