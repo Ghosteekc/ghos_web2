@@ -384,6 +384,8 @@ export interface ConstructorDeckEntry {
   description: string;
   type: string;
   category: string;
+  archetype?: string;
+  confidence?: number;
 }
 
 export interface ConstructorData {
