@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://ghosteekcr.loca.lt/api/:path*"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

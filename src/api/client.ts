@@ -91,6 +91,18 @@ function buildRequestHeaders(extra?: HeadersInit): HeadersInit {
 
 
 
+function isTunnelBlockedResponse(res: Response, contentType: string): boolean {
+
+  if (res.status === 511 || res.status === 403) return true;
+
+  if (API_BASE.includes("loca.lt") && !contentType.includes("application/json")) return true;
+
+  return false;
+
+}
+
+
+
 function isRetryable(status: number) {
 
   return status === 502 || status === 503 || status === 511 || status === 0;
@@ -159,6 +171,18 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
 
   if (!res.ok) {
+
+    if (isTunnelBlockedResponse(res, contentType)) {
+
+      throw new ApiError(
+
+        "localtunnel заблокировал запрос (Forbidden). Откройте приложение через бота в Telegram, не по ссылке loca.lt. Если не поможет — админу нужен Cloudflare Tunnel.",
+
+        res.status,
+
+      );
+
+    }
 
     if (res.status === 511) {
 
