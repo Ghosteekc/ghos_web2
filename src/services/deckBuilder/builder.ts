@@ -129,8 +129,10 @@ function buildOneVariant(
   pool: Set<string>,
   archetype: string,
   template?: DeckRecord,
+  fillerSkip = 0,
 ): string[] {
-  const fillers = template ? fillersFromTemplate(core, template) : [];
+  let fillers = template ? fillersFromTemplate(core, template) : [];
+  if (fillerSkip > 0) fillers = fillers.slice(fillerSkip);
   let deck = [...core];
   for (const card of fillers) {
     if (deck.length >= 8) break;
@@ -167,9 +169,25 @@ export function buildDeckFromCore(core: string[], pool?: Set<string>): BuildResu
   };
 }
 
+function deckKey(deck: string[]): string {
+  return [...deck].sort().join("|");
+}
+
+function dedupeBuildResults(results: BuildResult[]): BuildResult[] {
+  const out: BuildResult[] = [];
+  const seen = new Set<string>();
+  for (const item of results) {
+    const key = deckKey(item.deck);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(item);
+  }
+  return out;
+}
+
 export function buildMultipleDecks(core: string[], limit = 6): BuildResult[] {
   const archetype = detectArchetype(core);
-  const ranked = rankSimilar(core, archetype, limit * 3);
+  const ranked = rankSimilar(core, archetype, limit * 5);
   const allCards = getAllCards();
   const pool = new Set(Object.keys(allCards));
   for (const c of core) pool.add(c);
@@ -179,28 +197,32 @@ export function buildMultipleDecks(core: string[], limit = 6): BuildResult[] {
 
   for (const sd of ranked) {
     if (results.length >= limit) break;
-    const deck = buildOneVariant(core, pool, archetype, sd.record);
-    if (deck.length !== 8 || balanceIssues(deck, sd.record.archetype).includes("win_condition")) {
-      continue;
-    }
-    const key = [...deck].sort().join("|");
-    if (seen.has(key)) continue;
-    seen.add(key);
+    for (const fillerSkip of [0, 1, 2]) {
+      const deck = buildOneVariant(core, pool, archetype, sd.record, fillerSkip);
+      if (deck.length !== 8 || balanceIssues(deck, sd.record.archetype).includes("win_condition")) {
+        continue;
+      }
+      const key = deckKey(deck);
+      if (seen.has(key)) continue;
+      seen.add(key);
 
-    results.push({
-      deck,
-      archetype: sd.record.archetype,
-      averageElixir: avgElixir(deck),
-      synergyScore: deckSynergyScore(deck),
-      confidence: Math.round(sd.confidence * 10) / 10,
-      sourceDeckId: sd.record.id,
-      sourceDeckName: undefined,
-      balanced: balanceIssues(deck, sd.record.archetype).length === 0,
-    });
+      results.push({
+        deck,
+        archetype: sd.record.archetype,
+        averageElixir: avgElixir(deck),
+        synergyScore: deckSynergyScore(deck),
+        confidence: Math.round(sd.confidence * 10) / 10,
+        sourceDeckId: sd.record.id,
+        sourceDeckName: undefined,
+        balanced: balanceIssues(deck, sd.record.archetype).length === 0,
+      });
+      break;
+    }
   }
 
   if (!results.length) {
     const fallback = buildOneVariant(core, pool, archetype);
+    seen.add(deckKey(fallback));
     results.push({
       deck: fallback,
       archetype,
@@ -212,7 +234,7 @@ export function buildMultipleDecks(core: string[], limit = 6): BuildResult[] {
   }
 
   const genericFallback = finalizeDeck(core, core, pool, archetype);
-  const gKey = [...genericFallback].sort().join("|");
+  const gKey = deckKey(genericFallback);
   if (!seen.has(gKey) && results.length < limit) {
     results.push({
       deck: genericFallback,
@@ -225,7 +247,7 @@ export function buildMultipleDecks(core: string[], limit = 6): BuildResult[] {
   }
 
   results.sort((a, b) => b.synergyScore + b.confidence - (a.synergyScore + a.confidence));
-  return results.slice(0, limit);
+  return dedupeBuildResults(results).slice(0, limit);
 }
 
 export { detectArchetype, rankSimilar, balanceIssues };

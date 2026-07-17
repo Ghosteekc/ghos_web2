@@ -124,7 +124,17 @@ export function buildConstructorDecksLocal(
     (a, b) =>
       (b.confidence ?? 0) + b.synergy_score - ((a.confidence ?? 0) + a.synergy_score),
   );
-  return { core, decks };
+
+  const unique: ConstructorDeckEntry[] = [];
+  const seenDecks = new Set<string>();
+  for (const deck of decks) {
+    const key = deck.cards.map((c) => c.name).sort().join("|");
+    if (seenDecks.has(key)) continue;
+    seenDecks.add(key);
+    unique.push(deck);
+  }
+
+  return { core, decks: unique };
 }
 
 export function constructorEntryToDeck(entry: ConstructorDeckEntry): Deck {

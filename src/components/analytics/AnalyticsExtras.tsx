@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Shield, Swords, Wand2, Sparkles, ChevronDown, ChevronUp, RefreshCw, ExternalLink } from "lucide-react";
+import { Shield, Swords, Wand2, ChevronDown, ChevronUp, RefreshCw, ExternalLink } from "lucide-react";
 import { api, ApiError } from "@/api/client";
 import { cacheInvalidate } from "@/api/cache";
 import { Card, Button, Loader } from "@/components/ui";
 import { CardDeckGrid } from "@/components/cards";
 import { useCardCatalog, useTelegram } from "@/hooks";
 import { cn } from "@/utils";
-import type { CounterDeckData, CustomizeData, OpponentEntry, SynergyData, WinrateEntry } from "@/types";
+import type { CounterDeckData, CustomizeData, OpponentEntry, WinrateEntry } from "@/types";
 
 function decksEqual(a: string[], b: string[]) {
   return a.length === b.length && a.every((card, i) => card === b[i]);
@@ -221,9 +221,7 @@ export function OpponentsPanel() {
 }
 
 export function DeckToolsPanel() {
-  const { nameRu } = useCardCatalog();
   const [customize, setCustomize] = useState<CustomizeData | null>(null);
-  const [synergy, setSynergy] = useState<SynergyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -234,15 +232,10 @@ export function DeckToolsPanel() {
       setError(null);
       if (force) {
         cacheInvalidate("customize-v5");
-        cacheInvalidate("synergy-v2");
       }
-      const [custom, syn] = await Promise.all([
-        api.getCustomizeDeck().catch(() => null),
-        api.getSynergyDeck().catch(() => null),
-      ]);
+      const custom = await api.getCustomizeDeck().catch(() => null);
       setCustomize(custom);
-      setSynergy(syn);
-      if (!custom && !syn) {
+      if (!custom) {
         setError("Недостаточно боёв для рекомендаций");
       }
     } catch (e) {
@@ -257,7 +250,7 @@ export function DeckToolsPanel() {
   }, [load]);
 
   if (loading) return <Loader />;
-  if (error && !customize && !synergy) return <ErrorCard message={error} />;
+  if (error && !customize) return <ErrorCard message={error} />;
 
   return (
     <div className="space-y-4">
@@ -312,20 +305,6 @@ export function DeckToolsPanel() {
           {!decksEqual(customize.original, customize.customized) && (
             <DeckImportButton deckLink={customize.deck_link} label="Импорт улучшенной колоды" />
           )}
-        </Card>
-      )}
-
-      {synergy && (
-        <Card className="border-cr-blue/25">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-5 h-5 text-cr-blue" />
-            <h3 className="font-semibold text-cr-text">Синергии</h3>
-          </div>
-          <p className="text-xs text-cr-muted mb-2">
-            Ядро: {synergy.core.map((c) => nameRu(c)).join(", ")} · эликсир {synergy.avg_elixir.toFixed(1)}
-          </p>
-          <CardDeckGrid cards={synergy.deck} size="sm" showLabels maxVisible={8} />
-          <DeckImportButton deckLink={synergy.deck_link} label="Импорт колоды синергий" />
         </Card>
       )}
     </div>
