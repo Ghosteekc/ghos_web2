@@ -497,16 +497,38 @@ function TopPlayersPanel({ onCopied }: { onCopied: (msg: string) => void }) {
 
             <DeckCardsGrid cards={player.cards} />
 
-            {player.deck_link ? (
-              <Button
-                variant="secondary"
-                className="w-full !py-2 text-sm flex items-center justify-center gap-2"
-                onClick={() => void importDeck(player.deck_link)}
-              >
-                <ExternalLink className="w-4 h-4" />
-                Импорт колоды
-              </Button>
-            ) : null}
+            <div className="flex gap-2 mt-0">
+              {player.deck_link ? (
+                <Button
+                  variant="secondary"
+                  className="flex-1 !py-2 text-sm flex items-center justify-center gap-2"
+                  onClick={() => void importDeck(player.deck_link)}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Импорт колоды
+                </Button>
+              ) : (
+                <p className="flex-1 text-xs text-cr-muted text-center self-center">
+                  Импорт недоступен
+                </p>
+              )}
+              {player.cards.length === 8 ? (
+                <Button
+                  variant="ghost"
+                  className="!px-3 shrink-0"
+                  aria-label="В избранное"
+                  onClick={() => {
+                    const names = player.cards.map((c) => c.name);
+                    if (names.length !== 8) return;
+                    void api.addFavoriteDeck(names)
+                      .then(() => onCopied("Колода добавлена в избранное"))
+                      .catch(() => onCopied("Не удалось сохранить колоду"));
+                  }}
+                >
+                  <Star className="w-4 h-4" />
+                </Button>
+              ) : null}
+            </div>
           </Card>
         </motion.div>
       ))}
@@ -694,19 +716,19 @@ function RandomDeckPanel({ onCopied }: { onCopied: (msg: string) => void }) {
             Перегенерировать
           </Button>
           {deck.deck_link ? (
-            <>
-              <Button
-                variant="secondary"
-                className="flex-1 !py-2 text-sm flex items-center justify-center gap-2"
-                onClick={() => void importDeck()}
-              >
-                <ExternalLink className="w-4 h-4" />
-                В игру
-              </Button>
-              <Button variant="ghost" className="!px-3" onClick={() => void saveFavorite()} aria-label="В избранное">
-                <Star className="w-4 h-4" />
-              </Button>
-            </>
+            <Button
+              variant="secondary"
+              className="flex-1 !py-2 text-sm flex items-center justify-center gap-2"
+              onClick={() => void importDeck()}
+            >
+              <ExternalLink className="w-4 h-4" />
+              В игру
+            </Button>
+          ) : null}
+          {deck.cards.length === 8 ? (
+            <Button variant="ghost" className="!px-3 shrink-0" onClick={() => void saveFavorite()} aria-label="В избранное">
+              <Star className="w-4 h-4" />
+            </Button>
           ) : null}
         </div>
       </Card>
@@ -735,6 +757,7 @@ function DeckCard({
   const winrate = deck.winrate ?? 0;
   const category = deck.category ?? deck.type;
   const canImport = Boolean(deck.deck_link);
+  const canFavorite = cards.length === 8;
 
   const importDeck = async () => {
     if (!deck.deck_link) return;
@@ -868,21 +891,34 @@ function DeckCard({
           </Button>
         ) : null}
 
-        {canImport ? (
+        {canImport || canFavorite ? (
           <div className="flex gap-2">
-            <Button variant="secondary" className="flex-1 !py-2 text-sm flex items-center justify-center gap-2" onClick={() => void importDeck()}>
-              <ExternalLink className="w-4 h-4" />
-              Импорт в игру
-            </Button>
-            <Button variant="ghost" className="!px-3" onClick={() => void saveFavorite()} aria-label="В избранное">
-              <Star className="w-4 h-4" />
-            </Button>
+            {canImport ? (
+              <Button
+                variant="secondary"
+                className="flex-1 !py-2 text-sm flex items-center justify-center gap-2"
+                onClick={() => void importDeck()}
+              >
+                <ExternalLink className="w-4 h-4" />
+                Импорт в игру
+              </Button>
+            ) : (
+              <p className="flex-1 text-xs text-cr-muted text-center self-center leading-snug px-1">
+                Импорт недоступен — не все карты распознаны
+              </p>
+            )}
+            {canFavorite ? (
+              <Button
+                variant="ghost"
+                className="!px-3 shrink-0"
+                onClick={() => void saveFavorite()}
+                aria-label="В избранное"
+              >
+                <Star className="w-4 h-4" />
+              </Button>
+            ) : null}
           </div>
-        ) : (
-          <p className="text-xs text-cr-muted text-center">
-            Импорт недоступен — не все карты распознаны
-          </p>
-        )}
+        ) : null}
       </Card>
     </motion.div>
   );

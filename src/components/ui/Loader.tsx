@@ -25,7 +25,7 @@ const Loader = ({
   showLabel = true,
   className = "",
   items = [...DEFAULT_LOADING_ITEMS],
-  intervalMs = 2200,
+  intervalMs = 900,
 }: LoaderProps) => {
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
@@ -40,7 +40,7 @@ const Loader = ({
       fadeTimer = setTimeout(() => {
         setIndex((prev) => (prev + 1) % items.length);
         setVisible(true);
-      }, 320);
+      }, 120);
     }, intervalMs);
 
     return () => {
@@ -69,9 +69,9 @@ const Loader = ({
         <div className={`text-center ${compact ? "mt-2" : "mt-4"}`}>
           <p className={`text-cr-muted ${compact ? "text-xs" : "text-sm"}`}>Загрузка</p>
           <p
-            className={`text-cr-gold/90 font-medium transition-all duration-300 ease-in-out ${
+            className={`text-cr-gold/90 font-medium transition-all duration-150 ease-in-out ${
               compact ? "mt-0.5 text-[11px] min-h-[1rem]" : "mt-1 text-xs min-h-[1.125rem]"
-            } ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}
+            } ${visible ? "opacity-100 translate-y-0 scale-100" : "opacity-40 translate-y-0 scale-[0.98]"}`}
           >
             {current}
           </p>
