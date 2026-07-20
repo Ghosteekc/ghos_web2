@@ -52,13 +52,13 @@ function buildCollectionMap(cards: CollectionCardEntry[]): Map<string, Collectio
 export function resolvePlayerArenaNumber(context: PlayerArenaContext): number {
   const trophies = context.trophies ?? 0;
 
-  if (trophies >= 9000 || (context.arenaId ?? 0) >= 54_000_000) {
-    return 24;
-  }
-
   const byName = resolveArenaByName(context.arenaName);
   if (byName != null) {
     return byName;
+  }
+
+  if ((context.arenaId ?? 0) >= 54_000_000) {
+    return resolveArenaByTrophies(trophies);
   }
 
   return resolveArenaByTrophies(trophies);

@@ -5,153 +5,75 @@ export interface ArenaRecommendationConfig {
   priorityCards: string[];
 }
 
-/** Trophy Road arenas in unlock order + Legend League (arena 24). */
-export const ARENA_RECOMMENDATIONS: ArenaRecommendationConfig[] = [
-  {
-    arena: 1,
-    name: "Гоблинов стадион",
-    minTrophies: 0,
-    priorityCards: ["Knight", "Archers", "Goblins", "Fireball", "Giant", "Musketeer", "Mini P.E.K.K.A", "Zap"],
-  },
-  {
-    arena: 2,
-    name: "Костяная яма",
-    minTrophies: 500,
-    priorityCards: ["Knight", "Archers", "Goblins", "Fireball", "Giant", "Musketeer", "Mini P.E.K.K.A", "Cannon"],
-  },
-  {
-    arena: 3,
-    name: "Варварская арена",
-    minTrophies: 1000,
-    priorityCards: ["Knight", "Archers", "Goblins", "Fireball", "Giant", "Valkyrie", "Musketeer", "Zap"],
-  },
-  {
-    arena: 4,
-    name: "Долина заклинаний",
-    minTrophies: 1300,
-    priorityCards: ["Knight", "Archers", "Fireball", "Giant", "Valkyrie", "Wizard", "Musketeer", "Zap"],
-  },
-  {
-    arena: 5,
-    name: "Мастерская строителя",
-    minTrophies: 1600,
-    priorityCards: ["Knight", "Archers", "Fireball", "Giant", "Valkyrie", "Wizard", "Hog Rider", "Zap"],
-  },
-  {
-    arena: 6,
-    name: "Игровая P.E.K.K.A",
-    minTrophies: 2000,
-    priorityCards: ["Knight", "Archers", "Fireball", "Giant", "Valkyrie", "Wizard", "Hog Rider", "Mini P.E.K.K.A"],
-  },
-  {
-    arena: 7,
-    name: "Королевская арена",
-    minTrophies: 2300,
-    priorityCards: ["Knight", "Archers", "Fireball", "Giant", "Valkyrie", "Wizard", "Hog Rider", "Musketeer"],
-  },
-  {
-    arena: 8,
-    name: "Ледяной пик",
-    minTrophies: 2600,
-    priorityCards: ["Knight", "Archers", "Fireball", "Giant", "Valkyrie", "Wizard", "Hog Rider", "Ice Spirit"],
-  },
-  {
-    arena: 9,
-    name: "Арена джунглей",
-    minTrophies: 3000,
-    priorityCards: ["Knight", "Archers", "Fireball", "Hog Rider", "Valkyrie", "Wizard", "Mega Minion", "Zap"],
-  },
-  {
-    arena: 10,
-    name: "Гора хogs",
-    minTrophies: 3300,
-    priorityCards: ["Knight", "Archers", "Fireball", "Hog Rider", "Valkyrie", "Wizard", "Mega Minion", "The Log"],
-  },
-  {
-    arena: 11,
-    name: "Электро-долина",
-    minTrophies: 3600,
-    priorityCards: ["Knight", "Archers", "Fireball", "Hog Rider", "Wizard", "Mega Minion", "Zap", "The Log"],
-  },
-  {
-    arena: 12,
-    name: "Жуткий город",
-    minTrophies: 4000,
-    priorityCards: ["Knight", "Skeletons", "Fireball", "Hog Rider", "Wizard", "Mega Minion", "Tesla", "The Log"],
-  },
-  {
-    arena: 13,
-    name: "Логово хулиганов",
-    minTrophies: 4300,
-    priorityCards: ["Knight", "Skeletons", "Fireball", "Hog Rider", "Wizard", "Tesla", "Mega Minion", "The Log"],
-  },
-  {
-    arena: 14,
-    name: "Безмятежный пик",
-    minTrophies: 4600,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Archers", "The Log"],
-  },
-  {
-    arena: 15,
-    name: "Шахта шахтёра",
-    minTrophies: 5000,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Hog Rider", "The Log"],
-  },
-  {
-    arena: 16,
-    name: "Безмолвное святилище",
-    minTrophies: 5300,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Inferno Tower", "The Log"],
-  },
-  {
-    arena: 17,
-    name: "Кухня палача",
-    minTrophies: 5600,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Prince", "The Log"],
-  },
-  {
-    arena: 18,
-    name: "Королевская гробница",
-    minTrophies: 6000,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Balloon", "The Log"],
-  },
-  {
-    arena: 19,
-    name: "Кладбище",
-    minTrophies: 6300,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Graveyard", "The Log"],
-  },
-  {
-    arena: 20,
-    name: "Тёмная башня",
-    minTrophies: 6600,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Lava Hound", "The Log"],
-  },
-  {
-    arena: 21,
-    name: "Запретная арена",
-    minTrophies: 7000,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Electro Wizard", "The Log"],
-  },
-  {
-    arena: 22,
-    name: "Трофейная дорога",
-    minTrophies: 7300,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Royal Ghost", "The Log"],
-  },
-  {
-    arena: 23,
-    name: "Арена 23+",
-    minTrophies: 7600,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Phoenix", "The Log"],
-  },
-  {
-    arena: 24,
-    name: "Лига легенд",
-    minTrophies: 9000,
-    priorityCards: ["Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Archer Queen", "The Log"],
-  },
+/** Русские названия и пороги кубков (Trophy Road, актуально на 2026). */
+const ARENA_DEFINITIONS: { name: string; minTrophies: number }[] = [
+  { name: "Гоблинский стадион", minTrophies: 0 },
+  { name: "Костяная яма", minTrophies: 300 },
+  { name: "Варварская арена", minTrophies: 600 },
+  { name: "Долина чар", minTrophies: 1000 },
+  { name: "Мастерская строителя", minTrophies: 1300 },
+  { name: "Игровой домик П.Е.К.К.А.", minTrophies: 1600 },
+  { name: "Королевская арена", minTrophies: 2000 },
+  { name: "Ледяной пик", minTrophies: 2300 },
+  { name: "Арена в джунглях", minTrophies: 2600 },
+  { name: "Кабанья гора", minTrophies: 3000 },
+  { name: "Электрическая долина", minTrophies: 3400 },
+  { name: "Жуткий город", minTrophies: 3800 },
+  { name: "Убежище разбойников", minTrophies: 4200 },
+  { name: "Пик просветления", minTrophies: 4600 },
+  { name: "Шахта", minTrophies: 5000 },
+  { name: "Кухня палача", minTrophies: 5500 },
+  { name: "Королевская гробница", minTrophies: 6000 },
+  { name: "Тихая обитель", minTrophies: 6500 },
+  { name: "Драконья купальня", minTrophies: 7000 },
+  { name: "Тренировочный лагерь", minTrophies: 7500 },
+  { name: "Clash Fest", minTrophies: 8000 },
+  { name: "БЛИНЧИКИ!", minTrophies: 8500 },
+  { name: "Valkalla", minTrophies: 9000 },
+  { name: "Легендарная арена", minTrophies: 9500 },
+  { name: "Lumberlove Cabin", minTrophies: 10000 },
+  { name: "Royal Road", minTrophies: 10500 },
+  { name: "Musketeer Street", minTrophies: 11000 },
+  { name: "Summit of Heroes", minTrophies: 11500 },
+  { name: "Magic Academy", minTrophies: 12000 },
+  { name: "Ultimate Clash Pit", minTrophies: 12500 },
+  { name: "Little Prince's Tavern", minTrophies: 13000 },
+  { name: "Spirit Square", minTrophies: 13500 },
 ];
+
+const EARLY_CARDS = [
+  "Knight", "Archers", "Goblins", "Fireball", "Giant", "Musketeer", "Mini P.E.K.K.A", "Zap",
+];
+const MID_CARDS = [
+  "Knight", "Archers", "Fireball", "Hog Rider", "Valkyrie", "Wizard", "Mega Minion", "The Log",
+];
+const HIGH_CARDS = [
+  "Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Hog Rider", "The Log",
+];
+const TOP_CARDS = [
+  "Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Phoenix", "The Log",
+];
+const LEGEND_CARDS = [
+  "Fireball", "Knight", "Skeletons", "Tesla", "Poison", "Miner", "Archer Queen", "The Log",
+];
+
+function priorityCardsForArena(arena: number): string[] {
+  if (arena <= 4) return EARLY_CARDS;
+  if (arena <= 8) return MID_CARDS.slice(0, 8);
+  if (arena <= 14) return HIGH_CARDS;
+  if (arena <= 23) return TOP_CARDS;
+  return LEGEND_CARDS;
+}
+
+/** Trophy Road arenas 1–32 in unlock order. */
+export const ARENA_RECOMMENDATIONS: ArenaRecommendationConfig[] = ARENA_DEFINITIONS.map(
+  (entry, index) => ({
+    arena: index + 1,
+    name: entry.name,
+    minTrophies: entry.minTrophies,
+    priorityCards: priorityCardsForArena(index + 1),
+  }),
+);
 
 /** English API arena names → our arena number (partial match). */
 const ARENA_NAME_ALIASES: Record<string, number> = {
@@ -161,27 +83,41 @@ const ARENA_NAME_ALIASES: Record<string, number> = {
   "barbarian bowl": 3,
   "barbarian": 3,
   "spell valley": 4,
+  "charm valley": 4,
   "builder": 5,
   "p.e.k.k.a": 6,
-  "pekkas playhouse": 6,
+  "pekka": 6,
+  "playhouse": 6,
   "royal arena": 7,
   "frozen peak": 8,
-  "jungle arena": 9,
+  "jungle": 9,
   "hog mountain": 10,
   "electro valley": 11,
+  "electro": 11,
   "spooky town": 12,
   "rascal": 13,
   "serenity peak": 14,
   "miner": 15,
-  "silent sanctuary": 16,
-  "executioner": 17,
-  "royal crypt": 18,
-  "graveyard": 19,
-  "dark tower": 20,
-  "forbidden": 21,
-  "trophy": 22,
-  "legend": 24,
-  "league": 24,
+  "executioner": 16,
+  "royal crypt": 17,
+  "silent sanctuary": 18,
+  "dragon spa": 19,
+  "boot camp": 20,
+  "training camp": 20,
+  "clash fest": 21,
+  "pancake": 22,
+  "блин": 22,
+  "valkalla": 23,
+  "legendary arena": 24,
+  "legendary": 24,
+  "lumberlove": 25,
+  "royal road": 26,
+  "musketeer street": 27,
+  "summit of heroes": 28,
+  "magic academy": 29,
+  "ultimate clash pit": 30,
+  "little prince": 31,
+  "spirit square": 32,
 };
 
 export function getRecommendedLevelForArena(arena: number): number {
@@ -218,3 +154,5 @@ export function getArenaConfig(arena: number): ArenaRecommendationConfig {
     ARENA_RECOMMENDATIONS[ARENA_RECOMMENDATIONS.length - 1]
   );
 }
+
+export const LAST_ARENA_NUMBER = ARENA_RECOMMENDATIONS.length;
