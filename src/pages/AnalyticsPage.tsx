@@ -20,9 +20,11 @@ import { cacheHas, cacheGet } from "@/api/cache";
 import { usePageRefresh } from "@/hooks";
 import { battleDetailPath } from "@/utils";
 import { DeckWinratesPanel, OpponentsPanel, DeckToolsPanel } from "@/components/analytics/AnalyticsExtras";
+import { RecommendationsPanel } from "@/components/analytics/recommendations";
 
 const ANALYTICS_TABS = [
   { id: "overview", label: "Обзор" },
+  { id: "recommendations", label: "Рекомендации" },
   { id: "decks", label: "Колоды" },
   { id: "opponents", label: "Соперники" },
   { id: "tools", label: "Улучшения" },
@@ -147,6 +149,7 @@ export function AnalyticsPage() {
         ))}
       </div>
 
+      {tab === "recommendations" && <RecommendationsPanel />}
       {tab === "decks" && <DeckWinratesPanel />}
       {tab === "opponents" && <OpponentsPanel />}
       {tab === "tools" && <DeckToolsPanel />}
