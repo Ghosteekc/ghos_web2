@@ -169,7 +169,7 @@
   }
 
   .btn-gold {
-    @apply bg-gradient-to-r from-cr-gold to-yellow-400 text-cr-bg font-cr px-6 py-3 rounded-cr shadow-glow hover:shadow-glow-blue transition-all duration-300 active:scale-95;
+    @apply bg-gradient-to-r from-cr-gold to-yellow-400 text-white font-cr px-6 py-3 rounded-cr shadow-glow hover:shadow-glow-blue transition-all duration-300 active:scale-95;
     text-shadow: none;
   }
 
