@@ -75,10 +75,13 @@ function matchesRarityFilter(
 ): boolean {
   if (filter === "all") return true;
   if (filter === "evolution") {
-    return Boolean(card.has_evolution_unlocked);
+    return (
+      card.has_evolution_unlocked ??
+      (card.evolution_level === 1 || card.evolution_level >= 3)
+    );
   }
   if (filter === "hero") {
-    return Boolean(card.has_hero_unlocked);
+    return card.has_hero_unlocked ?? card.evolution_level >= 2;
   }
   return card.rarity === filter;
 }
