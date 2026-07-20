@@ -32,6 +32,8 @@ export interface CollectionCardEntry {
   elixir: number | null;
   evolution_level: number;
   max_evolution_level: number;
+  has_evolution_unlocked?: boolean;
+  has_hero_unlocked?: boolean;
   display_mode: CardDisplayMode;
   icon: string;
   icon_base: string;
