@@ -48,14 +48,14 @@ function apiUrl(path: string): string {
 }
 
 function usesDirectTunnel(): boolean {
-  return API_BASE.includes("loca.lt");
+  return API_BASE.includes("loca.lt") || API_BASE.includes("trycloudflare.com");
 }
 
 function connectionHint(): string {
   if (usesDirectTunnel()) {
     return " Туннель до бота не отвечает — перезапустите start-tunnel.ps1 в отдельном окне PowerShell.";
   }
-  return " Проверьте, что бот и localtunnel запущены (vercel.json → ghosteekcr.loca.lt).";
+  return " Проверьте, что бот и start-tunnel.ps1 запущены.";
 }
 
 export class ApiError extends Error {
