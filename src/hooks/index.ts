@@ -5,6 +5,7 @@ import type { HapticImpact } from "@/utils/haptics";
 import { hapticImpact } from "@/utils/haptics";
 export { PageRefreshProvider, usePageRefresh } from "./PageRefreshProvider";
 export { CardCatalogProvider, useCardCatalog } from "./CardCatalogProvider";
+export { FavoriteDecksProvider, useFavoriteDecks } from "./FavoriteDecksProvider";
 export { usePullToRefresh } from "./usePullToRefresh";
 export { useGlobalButtonHaptics } from "./useGlobalButtonHaptics";
 export { applyTheme, loadStoredTheme, resolveTheme, initTheme } from "./useTheme";

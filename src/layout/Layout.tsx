@@ -4,7 +4,7 @@ import { Sidebar } from "./Sidebar";
 import { MenuNavHint } from "./MenuNavHint";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/utils";
-import { PageRefreshProvider, CardCatalogProvider, useGlobalButtonHaptics } from "@/hooks";
+import { PageRefreshProvider, CardCatalogProvider, FavoriteDecksProvider, useGlobalButtonHaptics } from "@/hooks";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
 function getTelegramChromeTop(webApp: NonNullable<typeof window.Telegram>["WebApp"]) {
@@ -116,11 +116,13 @@ export function Layout() {
       <main className="app-main">
         <PageRefreshProvider>
           <CardCatalogProvider>
-            <div className="page-shell">
-              <ErrorBoundary>
-                <Outlet />
-              </ErrorBoundary>
-            </div>
+            <FavoriteDecksProvider>
+              <div className="page-shell">
+                <ErrorBoundary>
+                  <Outlet />
+                </ErrorBoundary>
+              </div>
+            </FavoriteDecksProvider>
           </CardCatalogProvider>
         </PageRefreshProvider>
       </main>

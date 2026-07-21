@@ -3,7 +3,7 @@ import { Star, ExternalLink, Trash2 } from "lucide-react";
 import { Card, Button, Loader } from "@/components/ui";
 import { CardDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
-import { usePageRefresh, useTelegram } from "@/hooks";
+import { usePageRefresh, useTelegram, useFavoriteDecks } from "@/hooks";
 
 interface FavoriteEntry {
   cards: string[];
@@ -12,6 +12,7 @@ interface FavoriteEntry {
 
 export function FavoritesPage() {
   const { openLink } = useTelegram();
+  const { removeFavorite } = useFavoriteDecks();
   const [entries, setEntries] = useState<FavoriteEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +42,7 @@ export function FavoritesPage() {
     if (!entry) return;
     setRemoving(index);
     try {
-      await api.removeFavoriteDeck(entry.cards);
+      await removeFavorite(entry.cards);
       setEntries((prev) => prev.filter((_, i) => i !== index));
     } catch {
       setError("Не удалось удалить колоду");

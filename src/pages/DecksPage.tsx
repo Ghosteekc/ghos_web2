@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import {
   SlidersHorizontal,
   ExternalLink,
-  Star,
   Shuffle,
   RefreshCw,
   Trophy,
@@ -18,6 +17,7 @@ import {
 import { Card, Button, Loader, ElixirIcon } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { ConstructorPanel, ConstructorDeckGrid } from "@/components/decks/ConstructorPanel";
+import { FavoriteDeckButton } from "@/components/decks/FavoriteDeckButton";
 import { DeckPassport } from "@/analytics/deckPassport";
 import { api, ApiError } from "@/api/client";
 import { cacheHas, cacheGet } from "@/api/cache";
@@ -529,20 +529,10 @@ function TopPlayersPanel({ onCopied }: { onCopied: (msg: string) => void }) {
                 </p>
               )}
               {player.cards.length === 8 ? (
-                <Button
-                  variant="ghost"
-                  className="!px-3 shrink-0"
-                  aria-label="В избранное"
-                  onClick={() => {
-                    const names = player.cards.map((c) => c.name);
-                    if (names.length !== 8) return;
-                    void api.addFavoriteDeck(names)
-                      .then(() => onCopied("Колода добавлена в избранное"))
-                      .catch(() => onCopied("Не удалось сохранить колоду"));
-                  }}
-                >
-                  <Star className="w-4 h-4" />
-                </Button>
+                <FavoriteDeckButton
+                  cards={player.cards.map((c) => c.name)}
+                  onMessage={onCopied}
+                />
               ) : null}
             </div>
           </Card>
@@ -667,16 +657,6 @@ function RandomDeckPanel({
     }
   };
 
-  const saveFavorite = async () => {
-    if (!deck || deck.cards.length !== 8) return;
-    try {
-      await api.addFavoriteDeck(deck.cards);
-      onCopied("Колода добавлена в избранное");
-    } catch {
-      onCopied("Не удалось сохранить колоду");
-    }
-  };
-
   if (loading && !deck) {
     return (
       <div className="space-y-3">
@@ -778,9 +758,7 @@ function RandomDeckPanel({
               </Button>
             ) : null}
             {deck.cards.length === 8 ? (
-              <Button variant="ghost" className="!px-3 shrink-0" onClick={() => void saveFavorite()} aria-label="В избранное">
-                <Star className="w-4 h-4" />
-              </Button>
+              <FavoriteDeckButton cards={deck.cards} onMessage={onCopied} />
             ) : null}
           </div>
         </div>
@@ -829,16 +807,7 @@ function DeckCard({
     }
   };
 
-  const saveFavorite = async () => {
-    const names = cards.map((c) => c.name);
-    if (names.length !== 8) return;
-    try {
-      await api.addFavoriteDeck(names);
-      onCopied("Колода добавлена в избранное");
-    } catch {
-      onCopied("Не удалось сохранить колоду");
-    }
-  };
+  const cardNames = cards.map((c) => c.name);
 
   return (
     <motion.div
@@ -974,14 +943,7 @@ function DeckCard({
               </p>
             )}
             {canFavorite ? (
-              <Button
-                variant="ghost"
-                className="!px-3 shrink-0"
-                onClick={() => void saveFavorite()}
-                aria-label="В избранное"
-              >
-                <Star className="w-4 h-4" />
-              </Button>
+              <FavoriteDeckButton cards={cardNames} onMessage={onCopied} />
             ) : null}
           </div>
         ) : null}
