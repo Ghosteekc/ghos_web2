@@ -48,7 +48,7 @@ function apiUrl(path: string): string {
 }
 
 function usesDirectTunnel(): boolean {
-  return API_BASE.includes("loca.lt") || API_BASE.includes("trycloudflare.com");
+  return API_BASE.includes("loca.lt");
 }
 
 function connectionHint(): string {
@@ -172,7 +172,7 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
       throw new ApiError(
 
-        "localtunnel заблокировал запрос (Forbidden). Откройте приложение через бота в Telegram, не по ссылке loca.lt. Если не поможет — админу нужен Cloudflare Tunnel.",
+        "localtunnel заблокировал запрос (Forbidden). Откройте приложение через бота в Telegram, не по ссылке loca.lt.",
 
         res.status,
 
