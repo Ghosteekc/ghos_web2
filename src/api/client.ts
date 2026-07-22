@@ -43,6 +43,9 @@ import { cacheGet, cacheSet, cacheInvalidate, cacheHas, inflight, TTL, sleep } f
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? "").trim();
 
+const DEFAULT_UNAVAILABLE =
+  "В данный момент сервер не отвечает. Подождите или зайдите позже.";
+
 function apiUrl(path: string): string {
   return `${API_BASE}${path}`;
 }
@@ -51,25 +54,35 @@ function usesDirectTunnel(): boolean {
   return API_BASE.includes("loca.lt");
 }
 
-function connectionHint(): string {
-  if (usesDirectTunnel()) {
-    return " Туннель до бота не отвечает — перезапустите start-tunnel.ps1 в отдельном окне PowerShell.";
+function formatApiError(message: string, code?: string): string {
+  const base = message || DEFAULT_UNAVAILABLE;
+  return code ? `${base}\n\nКод ошибки: ${code}` : base;
+}
+
+function parseErrorBody(body: unknown, status: number): { message: string; code: string } {
+  if (body && typeof body === "object") {
+    const record = body as Record<string, unknown>;
+    const message =
+      typeof record.message === "string"
+        ? record.message
+        : typeof record.detail === "string"
+          ? record.detail
+          : DEFAULT_UNAVAILABLE;
+    const code = typeof record.code === "string" ? record.code : `E1${Math.min(status, 999)}`;
+    return { message, code };
   }
-  return " Проверьте, что бот и start-tunnel.ps1 запущены.";
+  return { message: DEFAULT_UNAVAILABLE, code: `E1${Math.min(status, 999)}` };
 }
 
 export class ApiError extends Error {
-
   status: number;
+  code: string;
 
-  constructor(message: string, status: number) {
-
+  constructor(message: string, status: number, code?: string) {
     super(message);
-
     this.status = status;
-
+    this.code = code ?? (status > 0 ? `E1${Math.min(status, 999)}` : "E100");
   }
-
 }
 
 
@@ -145,13 +158,12 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
   } catch (err) {
 
-    const tunnelHint = connectionHint();
     const aborted = err instanceof DOMException && err.name === "AbortError";
+    const code = aborted ? "E101" : "E100";
     throw new ApiError(
-      aborted
-        ? `Сервер не ответил вовремя.${tunnelHint}`
-        : `Нет связи с сервером.${tunnelHint}`,
+      formatApiError(DEFAULT_UNAVAILABLE, code),
       0,
+      code,
     );
 
   } finally {
@@ -169,51 +181,28 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
   if (!res.ok) {
 
     if (isTunnelBlockedResponse(res, contentType)) {
-
       throw new ApiError(
-
-        "localtunnel заблокировал запрос (Forbidden). Откройте приложение через бота в Telegram, не по ссылке loca.lt.",
-
+        formatApiError(DEFAULT_UNAVAILABLE, "E102"),
         res.status,
-
+        "E102",
       );
-
     }
 
-    if (res.status === 511) {
-
+    if (res.status === 511 || res.status === 503 || res.status === 502) {
       throw new ApiError(
-
-        "Сервер временно недоступен. Попробуйте позже.",
-
+        formatApiError(DEFAULT_UNAVAILABLE, "E103"),
         res.status,
-
+        "E103",
       );
-
     }
 
-    if (res.status === 503 || res.status === 502) {
-
-      throw new ApiError(
-
-        "Сервер временно недоступен. Попробуйте позже.",
-
-        res.status,
-
-      );
-
-    }
-
-    const body = await res.json().catch(() => ({ detail: res.statusText }));
-    const detail = body.detail;
-    const message =
-      typeof detail === "string"
-        ? detail
-        : Array.isArray(detail)
-          ? detail.map((item) => item?.msg ?? String(item)).join("; ")
-          : `Ошибка сервера (${res.status})`;
-
-    throw new ApiError(message, res.status);
+    const body = await res.json().catch(() => ({}));
+    const parsed = parseErrorBody(body, res.status);
+    throw new ApiError(
+      formatApiError(parsed.message, parsed.code),
+      res.status,
+      parsed.code,
+    );
 
   }
 
@@ -221,7 +210,7 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
   if (!contentType.includes("application/json")) {
 
-    throw new ApiError("Сервер вернул некорректный ответ. Попробуйте позже.", res.status);
+    throw new ApiError(formatApiError(DEFAULT_UNAVAILABLE, "E104"), res.status, "E104");
 
   }
 
@@ -249,7 +238,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
     } catch (e) {
 
-      lastError = e instanceof ApiError ? e : new ApiError(String(e), 0);
+      lastError = e instanceof ApiError ? e : new ApiError(formatApiError(DEFAULT_UNAVAILABLE, "E099"), 0, "E099");
 
       if (isRetryable(lastError.status) && attempt < retries) {
 
@@ -267,7 +256,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 
 
-  throw lastError ?? new ApiError("Неизвестная ошибка", 0);
+  throw lastError ?? new ApiError(formatApiError(DEFAULT_UNAVAILABLE, "E099"), 0, "E099");
 
 }
 
