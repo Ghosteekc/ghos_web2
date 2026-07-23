@@ -8,21 +8,50 @@ const TAB_COUNT = MAIN_NAV_ITEMS.length;
 const BUBBLE_HIT_X = 58;
 const BUBBLE_HIT_Y = 50;
 
-const MOVE_SPRING = { type: "spring" as const, stiffness: 210, damping: 28, mass: 0.85 };
-const RELEASE_SPRING = { type: "spring" as const, stiffness: 180, damping: 18, mass: 0.92 };
 const STRETCH_TWEEN = { type: "tween" as const, duration: 0.18, ease: [0.22, 0.08, 0.24, 1] as const };
+
+const NEAR_TAB_SPRING = { stiffness: 190, damping: 36, mass: 0.92 };
+const FAR_TAB_SPRING = { stiffness: 270, damping: 23, mass: 0.72 };
+
+function getSpringForTabDistance(fromIndex: number, toIndex: number) {
+  const steps = Math.abs(toIndex - fromIndex);
+  if (steps <= 0) {
+    return { type: "spring" as const, ...NEAR_TAB_SPRING };
+  }
+
+  const t = Math.min((steps - 1) / Math.max(TAB_COUNT - 2, 1), 1);
+
+  return {
+    type: "spring" as const,
+    stiffness: NEAR_TAB_SPRING.stiffness + t * (FAR_TAB_SPRING.stiffness - NEAR_TAB_SPRING.stiffness),
+    damping: NEAR_TAB_SPRING.damping + t * (FAR_TAB_SPRING.damping - NEAR_TAB_SPRING.damping),
+    mass: NEAR_TAB_SPRING.mass + t * (FAR_TAB_SPRING.mass - NEAR_TAB_SPRING.mass),
+  };
+}
+
+function getReleaseSpringForTabDistance(fromIndex: number, toIndex: number) {
+  const moveSpring = getSpringForTabDistance(fromIndex, toIndex);
+  return {
+    ...moveSpring,
+    stiffness: moveSpring.stiffness * 0.92,
+    damping: moveSpring.damping + 3,
+  };
+}
 
 const STRETCH_X_MAX = 0.32;
 const STRETCH_Y_MIN = 0.86;
 
-function stretchFromPull(pull: number): { x: number; y: number } {
+function stretchFromPull(pull: number, tabSteps = 1): { x: number; y: number } {
+  const stepBoost = 1 + Math.min(Math.max(tabSteps - 1, 0) / Math.max(TAB_COUNT - 2, 1), 1) * 0.18;
+
   return {
-    x: 1 + Math.min(pull / 48, STRETCH_X_MAX),
-    y: Math.max(STRETCH_Y_MIN, 1 - Math.min(pull / 120, 0.12)),
+    x: 1 + Math.min(pull / 48, STRETCH_X_MAX * stepBoost),
+    y: Math.max(STRETCH_Y_MIN, 1 - Math.min(pull / 120, 0.12 * stepBoost)),
   };
 }
 
-type BubbleTransition = typeof MOVE_SPRING | typeof RELEASE_SPRING | typeof STRETCH_TWEEN;
+type BubbleSpring = ReturnType<typeof getSpringForTabDistance>;
+type BubbleTransition = BubbleSpring | typeof STRETCH_TWEEN;
 
 function readCssRemVar(name: string): number {
   const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -91,6 +120,7 @@ export function BottomNav() {
   const dragStartX = useRef(0);
   const bubbleStartX = useRef(0);
   const lastDragHapticIndexRef = useRef(activeIndex);
+  const prevActiveIndexRef = useRef(activeIndex);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const highlightedIndex = previewIndex ?? activeIndex;
 
@@ -118,8 +148,8 @@ export function BottomNav() {
   );
 
   const applyStretchFromPull = useCallback(
-    (pull: number) => {
-      const { x, y } = stretchFromPull(pull);
+    (pull: number, tabSteps = 1) => {
+      const { x, y } = stretchFromPull(pull, tabSteps);
       scaleX.set(x);
       scaleY.set(y);
     },
@@ -132,32 +162,32 @@ export function BottomNav() {
     [scaleX, scaleY],
   );
 
-  const resetStretch = useCallback(
-    () => animateStretch(1, 1, RELEASE_SPRING),
-    [animateStretch],
-  );
-
   const animateBubbleX = useCallback(
-    (target: number, config: BubbleTransition = MOVE_SPRING) =>
-      animate(bubbleX, target, {
-        ...config,
-        onUpdate: (latest) => applyStretchFromPull(Math.abs(latest - target)),
+    (target: number, fromIndex: number, toIndex: number) => {
+      const tabSteps = Math.max(1, Math.abs(toIndex - fromIndex));
+      const moveSpring = getSpringForTabDistance(fromIndex, toIndex);
+      const releaseSpring = getReleaseSpringForTabDistance(fromIndex, toIndex);
+
+      return animate(bubbleX, target, {
+        ...moveSpring,
+        onUpdate: (latest) => applyStretchFromPull(Math.abs(latest - target), tabSteps),
         onComplete: () => {
-          void resetStretch();
+          void animateStretch(1, 1, releaseSpring);
         },
-      }),
-    [applyStretchFromPull, bubbleX, resetStretch],
+      });
+    },
+    [applyStretchFromPull, bubbleX, animateStretch],
   );
 
   const syncBubbleToIndex = useCallback(
-    (index: number, smooth = false) => {
+    (index: number, smooth = false, fromIndex = index) => {
       const track = trackRef.current;
       if (!track) return;
 
       const target = clampBubbleX(getTabCenterX(index), track.offsetWidth);
 
       if (smooth) {
-        void animateBubbleX(target, MOVE_SPRING);
+        void animateBubbleX(target, fromIndex, index);
       } else {
         bubbleX.set(target);
       }
@@ -175,14 +205,17 @@ export function BottomNav() {
   useEffect(() => {
     if (skipAnimateRef.current) {
       skipAnimateRef.current = false;
+      prevActiveIndexRef.current = activeIndex;
       return;
     }
     if (isDraggingRef.current) return;
     if (skipNavAnimateRef.current) {
       skipNavAnimateRef.current = false;
+      prevActiveIndexRef.current = activeIndex;
       return;
     }
-    syncBubbleToIndex(activeIndex, true);
+    syncBubbleToIndex(activeIndex, true, prevActiveIndexRef.current);
+    prevActiveIndexRef.current = activeIndex;
   }, [activeIndex, syncBubbleToIndex]);
 
   useEffect(() => {
@@ -251,7 +284,7 @@ export function BottomNav() {
 
     setPreviewIndex(nextIndex);
 
-    void animateBubbleX(targetX, RELEASE_SPRING).then(() => {
+    void animateBubbleX(targetX, activeIndex, nextIndex).then(() => {
       setPreviewIndex(null);
       if (target && target.id !== activeId) {
         skipNavAnimateRef.current = true;
@@ -313,11 +346,12 @@ export function BottomNav() {
                   aria-current={isActive ? "page" : undefined}
                   onPointerDown={onNavItemPointerDown}
                 >
-                  <item.icon
-                    className="bottom-nav-icon"
-                    strokeWidth={isHighlighted ? 1.9 : 1.65}
-                    aria-hidden
-                  />
+                  <span className="bottom-nav-icon-slot" aria-hidden>
+                    <item.icon
+                      className="bottom-nav-icon"
+                      strokeWidth={isHighlighted ? 1.85 : 1.65}
+                    />
+                  </span>
                   <span className="bottom-nav-label">{item.label}</span>
                 </NavLink>
               );
