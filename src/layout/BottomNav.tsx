@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { animate, motion, useMotionValue } from "framer-motion";
+import { triggerHaptic } from "@/utils/hapticManager";
 import { MAIN_NAV_ITEMS, getActiveNavId } from "./navigation";
 
 const TAB_COUNT = MAIN_NAV_ITEMS.length;
@@ -58,6 +59,7 @@ export function BottomNav() {
   const isDraggingRef = useRef(false);
   const dragStartX = useRef(0);
   const bubbleStartX = useRef(0);
+  const lastDragHapticIndexRef = useRef(activeIndex);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const highlightedIndex = previewIndex ?? activeIndex;
 
@@ -158,6 +160,8 @@ export function BottomNav() {
     isDraggingRef.current = true;
     dragStartX.current = event.clientX;
     bubbleStartX.current = bubbleX.get();
+    lastDragHapticIndexRef.current = activeIndex;
+    triggerHaptic("lightTap");
   };
 
   const onTrackPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -170,7 +174,12 @@ export function BottomNav() {
     const nextX = Math.max(minX, Math.min(maxX, bubbleStartX.current + delta));
 
     bubbleX.set(nextX);
-    setPreviewIndex(indexFromX(nextX, centers));
+    const nextPreviewIndex = indexFromX(nextX, centers);
+    setPreviewIndex(nextPreviewIndex);
+    if (nextPreviewIndex !== lastDragHapticIndexRef.current) {
+      lastDragHapticIndexRef.current = nextPreviewIndex;
+      triggerHaptic("selection");
+    }
 
     const anchor = getTabCenterX(activeIndex);
     const pull = Math.abs(nextX - anchor);
@@ -201,8 +210,17 @@ export function BottomNav() {
       if (target && target.id !== activeId) {
         skipNavAnimateRef.current = true;
         navigate(target.to);
+        return;
+      }
+      if (nextIndex === activeIndex) {
+        triggerHaptic("lightTap");
       }
     });
+  };
+
+  const onNavItemPointerDown = (event: React.PointerEvent<HTMLAnchorElement>) => {
+    if (event.button !== 0) return;
+    triggerHaptic("selection");
   };
 
   return (
@@ -248,6 +266,7 @@ export function BottomNav() {
                   className={`bottom-nav-item${isHighlighted ? " is-highlighted" : ""}`}
                   aria-label={item.label}
                   aria-current={isActive ? "page" : undefined}
+                  onPointerDown={onNavItemPointerDown}
                 >
                   <item.icon
                     className="bottom-nav-icon"
