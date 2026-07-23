@@ -617,11 +617,9 @@ function RoflModeBar({
       </div>
       {showHelp ? (
         <p className="text-xs text-cr-muted leading-snug px-0.5">
-          Включи — получишь meme-колоду уровня brainrot, не «все скелеты подряд».
+          На, поугарай. Случайная тупая колода — не для рейтинга.
           <br />
-          Skill issue, NPC pack, Ohio boss и прочий post-irony.
-          <br />
-          В ranked не заходи. Смейся и жми «Заново».
+          Не зашло — жми «Заново» и катай дальше.
         </p>
       ) : null}
     </div>
@@ -725,7 +723,7 @@ function RandomDeckPanel({
 
         <p className="text-xs text-cr-muted mb-4">
           {deck.rofl
-            ? (deck.rofl_tagline ?? "Meme-колода. В ranked не заходи. Skill issue чисто.")
+            ? (deck.rofl_tagline ?? "На, поугарай. В рейтинг не лезь.")
             : "8 случайных карт, как в игре. Нажмите «Заново», если колода не нравится."}
         </p>
 
