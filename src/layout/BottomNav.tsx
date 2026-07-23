@@ -6,7 +6,7 @@ import { MAIN_NAV_ITEMS, getActiveNavId } from "./navigation";
 
 const TAB_COUNT = MAIN_NAV_ITEMS.length;
 const BUBBLE_HIT_X = 58;
-const BUBBLE_HIT_Y = 46;
+const BUBBLE_HIT_Y = 50;
 
 const MOVE_SPRING = { type: "spring" as const, stiffness: 210, damping: 28, mass: 0.85 };
 const RELEASE_SPRING = { type: "spring" as const, stiffness: 165, damping: 22, mass: 1.05 };
