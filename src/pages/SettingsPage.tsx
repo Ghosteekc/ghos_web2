@@ -73,14 +73,18 @@ export function SettingsPage() {
   };
 
   const handleClearCache = async () => {
-    const ok = await showConfirm?.("Очистить кеш боёв и статистики на сервере?");
+    const ok = await showConfirm?.(
+      "Сбросить временный кеш приложения?\n\nИстория боёв на сервере сохранится. Данные в интерфейсе обновятся при следующем открытии разделов или синхронизации.",
+    );
     if (!ok) return;
 
     setClearing(true);
     try {
       await api.clearCache();
       hapticManager.success();
-      await showAlert?.("Кеш очищен. Данные обновятся при следующей синхронизации.");
+      await showAlert?.(
+        "Кеш приложения сброшен. История боёв сохранена — откройте разделы заново или нажмите «Синхронизировать».",
+      );
     } catch (e) {
       hapticManager.error();
       await showAlert?.(e instanceof Error ? e.message : "Не удалось очистить кеш");
@@ -258,7 +262,7 @@ export function SettingsPage() {
                 disabled={clearing}
               >
                 <Trash2 className="w-6 h-6 text-cr-loss" />
-                <span>{clearing ? "Очистка…" : "Очистить кеш"}</span>
+                <span>{clearing ? "Сброс…" : "Сбросить кеш"}</span>
               </button>
             </Card>
             <Card className="!p-0 overflow-hidden">
