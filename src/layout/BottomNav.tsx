@@ -11,6 +11,8 @@ const MOVE_SPRING = { type: "spring" as const, stiffness: 210, damping: 28, mass
 const RELEASE_SPRING = { type: "spring" as const, stiffness: 165, damping: 22, mass: 1.05 };
 const STRETCH_TWEEN = { type: "tween" as const, duration: 0.24, ease: [0.22, 0.08, 0.24, 1] as const };
 
+type BubbleTransition = typeof MOVE_SPRING | typeof RELEASE_SPRING | typeof STRETCH_TWEEN;
+
 function indexFromX(x: number, centers: number[]): number {
   let nearest = 0;
   let minDist = Infinity;
@@ -83,12 +85,12 @@ export function BottomNav() {
   );
 
   const animateBubbleX = useCallback(
-    (target: number, config = MOVE_SPRING) => animate(bubbleX, target, config),
+    (target: number, config: BubbleTransition = MOVE_SPRING) => animate(bubbleX, target, config),
     [bubbleX],
   );
 
   const animateStretch = useCallback(
-    (x: number, y: number, config = STRETCH_TWEEN) =>
+    (x: number, y: number, config: BubbleTransition = STRETCH_TWEEN) =>
       Promise.all([animate(scaleX, x, config), animate(scaleY, y, config)]),
     [scaleX, scaleY],
   );
