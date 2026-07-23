@@ -7,6 +7,7 @@ import {
   User,
   Trophy,
   ChevronRight,
+  ArrowLeft,
 } from "lucide-react";
 import { Card, Button } from "@/components/ui";
 import { api, ApiError } from "@/api/client";
@@ -69,7 +70,17 @@ export function SearchPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="page-title">Поиск игроков</h1>
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/")}
+          className="!p-2 shrink-0"
+          aria-label="Назад к профилю"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </Button>
+        <h1 className="page-title !mb-0">Поиск игроков</h1>
+      </div>
 
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cr-muted" />
