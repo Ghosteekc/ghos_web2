@@ -9,13 +9,18 @@ const BUBBLE_HIT_X = 58;
 const BUBBLE_HIT_Y = 50;
 
 const STRETCH_TWEEN = { type: "tween" as const, duration: 0.18, ease: [0.22, 0.08, 0.24, 1] as const };
+const NEAR_TAB_TWEEN = { type: "tween" as const, duration: 0.24, ease: [0.33, 0.08, 0.25, 1] as const };
 
 const NEAR_TAB_SPRING = { stiffness: 215, damping: 37, mass: 0.86 };
 const FAR_TAB_SPRING = { stiffness: 270, damping: 23, mass: 0.72 };
 
+function getTabSteps(fromIndex: number, toIndex: number): number {
+  return Math.max(1, Math.abs(toIndex - fromIndex));
+}
+
 function getSpringForTabDistance(fromIndex: number, toIndex: number) {
-  const steps = Math.abs(toIndex - fromIndex);
-  if (steps <= 0) {
+  const steps = getTabSteps(fromIndex, toIndex);
+  if (steps <= 1) {
     return { type: "spring" as const, ...NEAR_TAB_SPRING };
   }
 
@@ -29,6 +34,20 @@ function getSpringForTabDistance(fromIndex: number, toIndex: number) {
   };
 }
 
+function getMoveTransition(fromIndex: number, toIndex: number) {
+  if (getTabSteps(fromIndex, toIndex) <= 1) {
+    return NEAR_TAB_TWEEN;
+  }
+  return getSpringForTabDistance(fromIndex, toIndex);
+}
+
+function getReleaseTransition(fromIndex: number, toIndex: number) {
+  if (getTabSteps(fromIndex, toIndex) <= 1) {
+    return STRETCH_TWEEN;
+  }
+  return getReleaseSpringForTabDistance(fromIndex, toIndex);
+}
+
 function getReleaseSpringForTabDistance(fromIndex: number, toIndex: number) {
   const moveSpring = getSpringForTabDistance(fromIndex, toIndex);
   return {
@@ -39,12 +58,19 @@ function getReleaseSpringForTabDistance(fromIndex: number, toIndex: number) {
 }
 
 const STRETCH_X_MAX = 0.32;
-const STRETCH_X_MIN = 0.1;
+const STRETCH_X_MIN = 0.03;
 const STRETCH_Y_MAX = 0.12;
-const STRETCH_Y_MIN = 0.04;
+const STRETCH_Y_MIN = 0.012;
 
 function stretchFromPull(pull: number, tabSteps = 1): { x: number; y: number } {
-  const t = Math.min(Math.max(tabSteps - 1, 0) / Math.max(TAB_COUNT - 2, 1), 1);
+  if (tabSteps <= 1) {
+    return {
+      x: 1 + Math.min(pull / 220, 0.03),
+      y: 1 - Math.min(pull / 320, 0.012),
+    };
+  }
+
+  const t = Math.min((tabSteps - 1) / Math.max(TAB_COUNT - 2, 1), 1);
   const stretchXMax = STRETCH_X_MIN + t * (STRETCH_X_MAX - STRETCH_X_MIN);
   const stretchYMax = STRETCH_Y_MIN + t * (STRETCH_Y_MAX - STRETCH_Y_MIN);
   const pullDivisorX = 92 - t * 32;
@@ -57,7 +83,7 @@ function stretchFromPull(pull: number, tabSteps = 1): { x: number; y: number } {
 }
 
 type BubbleSpring = ReturnType<typeof getSpringForTabDistance>;
-type BubbleTransition = BubbleSpring | typeof STRETCH_TWEEN;
+type BubbleTransition = BubbleSpring | typeof STRETCH_TWEEN | typeof NEAR_TAB_TWEEN;
 
 function readCssRemVar(name: string): number {
   const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -170,15 +196,15 @@ export function BottomNav() {
 
   const animateBubbleX = useCallback(
     (target: number, fromIndex: number, toIndex: number) => {
-      const tabSteps = Math.max(1, Math.abs(toIndex - fromIndex));
-      const moveSpring = getSpringForTabDistance(fromIndex, toIndex);
-      const releaseSpring = getReleaseSpringForTabDistance(fromIndex, toIndex);
+      const tabSteps = getTabSteps(fromIndex, toIndex);
+      const moveTransition = getMoveTransition(fromIndex, toIndex);
+      const releaseTransition = getReleaseTransition(fromIndex, toIndex);
 
       return animate(bubbleX, target, {
-        ...moveSpring,
+        ...moveTransition,
         onUpdate: (latest) => applyStretchFromPull(Math.abs(latest - target), tabSteps),
         onComplete: () => {
-          void animateStretch(1, 1, releaseSpring);
+          void animateStretch(1, 1, releaseTransition);
         },
       });
     },
@@ -352,13 +378,15 @@ export function BottomNav() {
                   aria-current={isActive ? "page" : undefined}
                   onPointerDown={onNavItemPointerDown}
                 >
-                  <span className="bottom-nav-icon-slot" aria-hidden>
-                    <item.icon
-                      className="bottom-nav-icon"
-                      strokeWidth={isHighlighted ? 1.85 : 1.65}
-                    />
+                  <span className="bottom-nav-item-content">
+                    <span className="bottom-nav-icon-slot" aria-hidden>
+                      <item.icon
+                        className="bottom-nav-icon"
+                        strokeWidth={isHighlighted ? 1.85 : 1.65}
+                      />
+                    </span>
+                    <span className="bottom-nav-label">{item.label}</span>
                   </span>
-                  <span className="bottom-nav-label">{item.label}</span>
                 </NavLink>
               );
             })}
