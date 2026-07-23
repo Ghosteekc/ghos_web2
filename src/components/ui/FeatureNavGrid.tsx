@@ -1,3 +1,5 @@
+import { ChevronRight } from "lucide-react";
+
 export interface FeatureNavItem {
   id: string;
   label: string;
@@ -12,7 +14,7 @@ interface FeatureNavGridProps {
 
 export function FeatureNavGrid({ items, activeId, onSelect }: FeatureNavGridProps) {
   return (
-    <div className="grid grid-cols-2 gap-1.5">
+    <div className="grid grid-cols-2 gap-2">
       {items.map((item) => {
         const isActive = activeId === item.id;
         return (
@@ -23,12 +25,11 @@ export function FeatureNavGrid({ items, activeId, onSelect }: FeatureNavGridProp
             className={`feature-nav-btn${isActive ? " feature-nav-btn--active" : ""}`}
             aria-pressed={isActive}
           >
-            <span className="text-xl leading-none" aria-hidden>
+            <span className="feature-nav-btn-icon" aria-hidden>
               {item.emoji}
             </span>
-            <span className="text-[11px] font-semibold text-cr-text leading-tight px-0.5">
-              {item.label}
-            </span>
+            <span className="feature-nav-btn-label">{item.label}</span>
+            <ChevronRight className="feature-nav-btn-chevron" aria-hidden />
           </button>
         );
       })}

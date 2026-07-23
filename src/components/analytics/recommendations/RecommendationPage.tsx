@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { MapPin, ChevronRight, ArrowUp } from "lucide-react";
+import { MapPin, ChevronRight } from "lucide-react";
 import { api, ApiError } from "@/api/client";
 import { cacheGet, cacheHas } from "@/api/cache";
 import { Card, Button, Loader } from "@/components/ui";
@@ -111,9 +111,7 @@ export function RecommendationsPanel() {
   );
   const [error, setError] = useState<string | null>(null);
   const [highlightedArena, setHighlightedArena] = useState<number | null>(null);
-  const [showScrollTop, setShowScrollTop] = useState(false);
   const blockRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-  const topRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     const needProfile = !cacheHas("profile-v4");
@@ -180,19 +178,6 @@ export function RecommendationsPanel() {
     scrollToArena(playerArena);
   }, [playerArena, scrollToArena]);
 
-  const scrollToTop = useCallback(() => {
-    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
-  useEffect(() => {
-    const onScroll = () => {
-      setShowScrollTop(window.scrollY > 320);
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   if (loading) return <Loader />;
   if (error) return <ErrorCard message={error} />;
   if (!profile?.player_tag) {
@@ -207,8 +192,7 @@ export function RecommendationsPanel() {
   }
 
   return (
-    <div className="relative space-y-5 pb-16">
-      <div ref={topRef} className="scroll-mt-24" aria-hidden />
+    <div className="space-y-5">
       <Card className="border-cr-gold/20 bg-cr-gold/5">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <div>
@@ -272,24 +256,6 @@ export function RecommendationsPanel() {
           />
         ))}
       </div>
-
-      <button
-        type="button"
-        aria-label="Наверх"
-        onClick={scrollToTop}
-        className={cn(
-          "fixed z-30 flex h-11 w-11 items-center justify-center rounded-full",
-          "border border-cr-gold/35 bg-[#0a0f2e]/95 text-cr-gold shadow-lg backdrop-blur-sm",
-          "transition-all duration-300 hover:border-cr-gold/60 hover:bg-cr-gold/15",
-          "right-[max(1rem,var(--tg-content-safe-right,0px))]",
-          "bottom-[max(1rem,var(--tg-content-safe-bottom,0px))]",
-          showScrollTop
-            ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-3 opacity-0",
-        )}
-      >
-        <ArrowUp className="h-5 w-5" />
-      </button>
     </div>
   );
 }

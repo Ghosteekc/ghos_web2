@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { TrendingUp, TrendingDown, Flame, Clock } from "lucide-react";
 import { StatsOverview } from "@/types";
-import { Card, FeatureNavGrid, Loader } from "@/components/ui";
+import { Card, FeatureNavGrid, Loader, ScrollToTopButton } from "@/components/ui";
 import { api } from "@/api/client";
 import { cacheHas, cacheGet } from "@/api/cache";
 import { usePageRefresh } from "@/hooks";
@@ -249,6 +249,8 @@ export function AnalyticsPage() {
       {section === "recommendations" && <RecommendationsPanel />}
       {section === "opponents" && <OpponentsPanel />}
       {section === "tools" && <DeckToolsPanel />}
+
+      {section !== null && <ScrollToTopButton />}
     </div>
   );
 }

@@ -12,7 +12,7 @@ import {
   BarChart3,
   ScanSearch,
 } from "lucide-react";
-import { Card, Button, Loader, ElixirIcon, FeatureNavGrid } from "@/components/ui";
+import { Card, Button, Loader, ElixirIcon, FeatureNavGrid, ScrollToTopButton } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { ConstructorPanel, ConstructorDeckGrid } from "@/components/decks/ConstructorPanel";
 import { FavoriteDeckButton } from "@/components/decks/FavoriteDeckButton";
@@ -319,6 +319,8 @@ export function DecksPage() {
       )}
 
       <DeckPassport deck={passportDeck} onClose={() => setPassportDeck(null)} />
+
+      <ScrollToTopButton />
     </div>
   );
 }
