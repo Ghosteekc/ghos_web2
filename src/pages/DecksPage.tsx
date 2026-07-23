@@ -767,26 +767,28 @@ function RandomDeckPanel({
               Анализ
             </Button>
           ) : null}
-          <div className="flex gap-2">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 items-stretch">
             <Button
               variant="secondary"
-              className="flex-1 !py-2 text-sm flex items-center justify-center gap-2"
+              className="min-w-0 !px-2.5 !py-2 text-xs sm:text-sm flex items-center justify-center gap-1.5"
               onClick={() => void roll()}
               disabled={loading}
             >
-              <RefreshCw className={"w-4 h-4 " + (loading ? "animate-spin" : "")} />
-              Перегенерировать
+              <RefreshCw className={"w-4 h-4 shrink-0 " + (loading ? "animate-spin" : "")} />
+              <span className="truncate">Перегенерировать</span>
             </Button>
             {deck.deck_link ? (
               <Button
                 variant="secondary"
-                className="flex-1 !py-2 text-sm flex items-center justify-center gap-2"
+                className="min-w-0 !px-2.5 !py-2 text-xs sm:text-sm flex items-center justify-center gap-1.5"
                 onClick={() => void importDeck()}
               >
-                <ExternalLink className="w-4 h-4" />
-                В игру
+                <ExternalLink className="w-4 h-4 shrink-0" />
+                <span className="truncate">В игру</span>
               </Button>
-            ) : null}
+            ) : (
+              <div />
+            )}
             {deck.cards.length === 8 ? (
               <FavoriteDeckButton cards={deck.cards} onMessage={onCopied} />
             ) : null}
