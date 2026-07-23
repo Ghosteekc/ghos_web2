@@ -529,28 +529,57 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
+    overflow: hidden;
     background: linear-gradient(
       180deg,
-      rgb(var(--cr-card-hover) / 0.88) 0%,
-      rgb(var(--cr-card) / 0.8) 52%,
-      rgb(var(--cr-surface) / 0.86) 100%
+      rgb(var(--cr-card) / 0.72) 0%,
+      rgb(var(--cr-surface) / 0.58) 52%,
+      rgb(var(--cr-bg) / 0.68) 100%
     );
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    backdrop-filter: blur(8px) saturate(130%);
+    -webkit-backdrop-filter: blur(8px) saturate(130%);
     box-shadow:
-      inset 0 1px 2px rgba(255, 255, 255, 0.16),
-      inset 0 -2px 6px rgba(0, 0, 0, 0.22),
-      inset 0 0 14px rgb(var(--cr-blue) / 0.08);
+      inset 0 1px 1px rgba(255, 255, 255, 0.08),
+      inset 0 0 24px rgb(var(--cr-blue) / 0.05),
+      inset 0 -8px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .bottom-nav-liquid-bubble-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 90% 85% at 50% 12%,
+      rgb(var(--cr-blue) / 0.08) 0%,
+      transparent 58%
+    );
+  }
+
+  .bottom-nav-liquid-bubble-glass::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--cr-accent) / 0.14),
+      inset 0 1px 10px rgb(var(--cr-blue) / 0.06);
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      transparent 36%,
+      rgba(0, 0, 0, 0.06) 100%
+    );
   }
 
   .bottom-nav-liquid-bubble-ring {
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    border: 1.5px solid rgb(var(--cr-blue) / 0.32);
-    box-shadow:
-      0 0 10px rgb(var(--cr-blue) / 0.18),
-      inset 0 0 10px rgb(var(--cr-blue) / 0.06);
+    border: 1px solid rgb(var(--cr-blue) / 0.22);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
     pointer-events: none;
   }
 
@@ -600,19 +629,24 @@
   [data-theme="light"] .bottom-nav-liquid-bubble-glass {
     background: linear-gradient(
       180deg,
-      rgb(var(--cr-accent) / 0.24) 0%,
-      rgb(var(--cr-blue) / 0.18) 100%
+      rgba(255, 255, 255, 0.32) 0%,
+      rgb(var(--cr-surface) / 0.55) 50%,
+      rgb(var(--cr-card) / 0.4) 100%
     );
     box-shadow:
-      inset 0 1px 2px rgba(255, 255, 255, 0.55),
-      inset 0 0 10px rgb(var(--cr-blue) / 0.05);
+      inset 0 1px 1px rgba(255, 255, 255, 0.55),
+      inset 0 0 18px rgb(var(--cr-blue) / 0.04);
+  }
+
+  [data-theme="light"] .bottom-nav-liquid-bubble-glass::after {
+    box-shadow:
+      inset 0 0 0 1px rgb(var(--cr-blue) / 0.1),
+      inset 0 1px 8px rgb(var(--cr-blue) / 0.05);
   }
 
   [data-theme="light"] .bottom-nav-liquid-bubble-ring {
-    border-color: rgb(var(--cr-accent) / 0.34);
-    box-shadow:
-      0 0 8px rgb(var(--cr-blue) / 0.14),
-      inset 0 0 8px rgb(var(--cr-blue) / 0.05);
+    border-color: rgb(var(--cr-blue) / 0.18);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
   }
 
   .sidebar-nav {
