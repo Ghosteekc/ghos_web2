@@ -213,14 +213,15 @@ export function AnalyticsPage() {
                         tickFormatter={(v) => `${v}%`}
                       />
                       <Tooltip
-                        contentStyle={{ backgroundColor: "#181830", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" }}
-                        formatter={(value, name) => {
-                          if (name === "winrate") return [`${Number(value).toFixed(1)}%`, "Винрейт"];
-                          if (name === "wins") return [value, "Победы"];
-                          if (name === "losses") return [value, "Поражения"];
-                          return [value, name];
+                        content={<WinrateDayTooltip />}
+                        cursor={{ stroke: "rgba(255,255,255,0.18)", strokeWidth: 1 }}
+                        wrapperStyle={{ outline: "none" }}
+                        contentStyle={{
+                          background: "transparent",
+                          border: "none",
+                          boxShadow: "none",
+                          padding: 0,
                         }}
-                        labelFormatter={(label) => `${label}`}
                       />
                       <Bar yAxisId="left" dataKey="wins" fill="#22c55e" radius={[4, 4, 0, 0]} />
                       <Bar yAxisId="left" dataKey="losses" fill="#ef4444" radius={[4, 4, 0, 0]} />
@@ -278,7 +279,7 @@ function TrophyGrowthTooltip({
   const point = payload[0].payload;
   const delta = point.trophyChange;
   return (
-    <div className="rounded-xl border border-white/10 bg-[#181830] px-3 py-2 text-xs shadow-lg">
+    <div className="chart-tooltip-glass px-3 py-2 text-xs shadow-lg">
       <p className="font-semibold text-cr-text">против {point.opponentName}</p>
       {(point.playedDate || point.playedTime) && (
         <p className="text-cr-muted mt-0.5">
@@ -292,6 +293,49 @@ function TrophyGrowthTooltip({
         {delta} кубков
       </p>
       <p className="text-cr-muted mt-0.5">{point.won ? "Победа" : "Поражение"}</p>
+    </div>
+  );
+}
+
+type WinrateTooltipRow = {
+  name?: string;
+  value?: number;
+  dataKey?: string;
+};
+
+function WinrateDayTooltip({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: WinrateTooltipRow[];
+  label?: string;
+}) {
+  if (!active || !payload?.length) return null;
+
+  const wins = payload.find((item) => item.dataKey === "wins")?.value;
+  const losses = payload.find((item) => item.dataKey === "losses")?.value;
+  const winrate = payload.find((item) => item.dataKey === "winrate")?.value;
+
+  return (
+    <div className="chart-tooltip-glass px-3 py-2 text-xs shadow-lg">
+      {label ? <p className="font-semibold text-cr-text mb-1.5">{label}</p> : null}
+      {wins != null ? (
+        <p className="font-semibold text-cr-win">
+          Победы : {wins}
+        </p>
+      ) : null}
+      {losses != null ? (
+        <p className="font-semibold text-cr-loss mt-0.5">
+          Поражения : {losses}
+        </p>
+      ) : null}
+      {winrate != null ? (
+        <p className="font-semibold text-[#a78bfa] mt-0.5">
+          Винрейт : {Number(winrate).toFixed(1)}%
+        </p>
+      ) : null}
     </div>
   );
 }
