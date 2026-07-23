@@ -196,7 +196,7 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
             <p className="text-xs text-cr-text leading-relaxed">{analysis.summary}</p>
           </Card>
 
-          <div className="grid grid-cols-4 gap-2 pb-2">
+          <div className="grid grid-cols-4 grid-rows-2 gap-2 pb-2">
             {[...(deck.cards ?? [])]
               .sort((a, b) => (a.slot ?? 0) - (b.slot ?? 0))
               .map((c, i) => (

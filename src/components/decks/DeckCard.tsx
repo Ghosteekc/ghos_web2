@@ -45,7 +45,7 @@ export function DeckCard({ deck, index, onOpen }: DeckCardProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-x-2 gap-y-1 mb-4">
+        <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-1 mb-4">
           {deck.cards.map((card) => (
             <div key={card.id} className="min-w-0 overflow-hidden">
               <CardTile name={card.name} icon={card.icon} size="deck" />

@@ -14,6 +14,27 @@ const STRETCH_TWEEN = { type: "tween" as const, duration: 0.24, ease: [0.22, 0.0
 
 type BubbleTransition = typeof MOVE_SPRING | typeof RELEASE_SPRING | typeof STRETCH_TWEEN;
 
+function readCssRemVar(name: string): number {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  if (raw.endsWith("rem")) return parseFloat(raw) * rootFontSize;
+  if (raw.endsWith("px")) return parseFloat(raw);
+  return parseFloat(raw) || 0;
+}
+
+function getBubbleTravelBounds(trackWidth: number): { min: number; max: number } {
+  const half = readCssRemVar("--bottom-nav-bubble-width") / 2;
+  const inset = readCssRemVar("--bottom-nav-bubble-inset");
+  const min = half + inset;
+  const max = trackWidth - half - inset;
+  return { min, max: Math.max(min, max) };
+}
+
+function clampBubbleX(x: number, trackWidth: number): number {
+  const { min, max } = getBubbleTravelBounds(trackWidth);
+  return Math.max(min, Math.min(max, x));
+}
+
 function indexFromX(x: number, centers: number[]): number {
   let nearest = 0;
   let minDist = Infinity;
@@ -104,8 +125,10 @@ export function BottomNav() {
 
   const syncBubbleToIndex = useCallback(
     (index: number, smooth = false) => {
-      const target = getTabCenterX(index);
-      if (!target) return;
+      const track = trackRef.current;
+      if (!track) return;
+
+      const target = clampBubbleX(getTabCenterX(index), track.offsetWidth);
 
       if (smooth) {
         void animateBubbleX(target, MOVE_SPRING);
@@ -168,10 +191,10 @@ export function BottomNav() {
     if (!isDraggingRef.current || !trackRef.current) return;
 
     const centers = getTabCenters();
-    const minX = centers[0] ?? 0;
-    const maxX = centers[centers.length - 1] ?? trackRef.current.offsetWidth;
+    const trackWidth = trackRef.current.offsetWidth;
+    const { min, max } = getBubbleTravelBounds(trackWidth);
     const delta = event.clientX - dragStartX.current;
-    const nextX = Math.max(minX, Math.min(maxX, bubbleStartX.current + delta));
+    const nextX = Math.max(min, Math.min(max, bubbleStartX.current + delta));
 
     bubbleX.set(nextX);
     const nextPreviewIndex = indexFromX(nextX, centers);
@@ -199,8 +222,9 @@ export function BottomNav() {
     isDraggingRef.current = false;
 
     const centers = getTabCenters();
+    const trackWidth = trackRef.current.offsetWidth;
     const nextIndex = indexFromX(bubbleX.get(), centers);
-    const targetX = getTabCenterX(nextIndex);
+    const targetX = clampBubbleX(getTabCenterX(nextIndex), trackWidth);
     const target = MAIN_NAV_ITEMS[nextIndex];
 
     setPreviewIndex(nextIndex);
@@ -229,16 +253,6 @@ export function BottomNav() {
         <div className="bottom-nav-panel">
           <div className="bottom-nav-bar" aria-hidden>
             <span className="bottom-nav-bar-rim" />
-          </div>
-
-          <div
-            ref={trackRef}
-            className="bottom-nav-track"
-            onPointerDown={onTrackPointerDown}
-            onPointerMove={onTrackPointerMove}
-            onPointerUp={finishDrag}
-            onPointerCancel={finishDrag}
-          >
             <motion.div
               className="bottom-nav-liquid-bubble"
               style={{
@@ -251,7 +265,16 @@ export function BottomNav() {
               <span className="bottom-nav-liquid-bubble-glass" />
               <span className="bottom-nav-liquid-bubble-ring" />
             </motion.div>
+          </div>
 
+          <div
+            ref={trackRef}
+            className="bottom-nav-track"
+            onPointerDown={onTrackPointerDown}
+            onPointerMove={onTrackPointerMove}
+            onPointerUp={finishDrag}
+            onPointerCancel={finishDrag}
+          >
             {MAIN_NAV_ITEMS.map((item, index) => {
               const isActive = activeId === item.id;
               const isHighlighted = index === highlightedIndex;

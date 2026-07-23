@@ -599,7 +599,7 @@ export function ConstructorDeckGrid({ cards }: { cards: DeckCard[] }) {
 
   return (
 
-    <div className="grid grid-cols-4 gap-x-2 gap-y-1 mb-4">
+    <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-1 mb-4">
 
       {sorted.map((card, i) => (
 

@@ -66,7 +66,7 @@ export function BattleCardSimple({ summary, onOpen, index }: BattleCardSimplePro
           </div>
 
           <div className="flex items-center justify-between gap-3">
-            <div className="grid grid-cols-4 gap-1 flex-1 max-w-[11rem]">
+            <div className="grid grid-cols-4 grid-rows-2 gap-1 flex-1 max-w-[11rem]">
               {(summary.user_deck ?? []).slice(0, 8).map((name, i) => (
                 <CardTile key={`${name}-${i}`} name={name} size="xs" />
               ))}

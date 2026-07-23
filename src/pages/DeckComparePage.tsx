@@ -67,7 +67,7 @@ function SummaryList({ title, items, tone }: { title: string; items: string[]; t
 
 function DeckGrid({ cards }: { cards: DeckCompareResult["user_deck"] }) {
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-4 grid-rows-2 gap-2">
       {cards.map((card) => (
         <div key={card.name} className="min-w-0">
           <CardTile name={card.name} icon={card.icon} size="deck" />

@@ -132,15 +132,16 @@ export function MineDeckStatsPage() {
       ) : null}
 
       <Card>
-        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 mb-4">
+        <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-1 mb-4">
           {data.cards.map((card) => (
-            <CardTile
-              key={card.id || card.name}
-              name={card.name}
-              icon={card.icon}
-              size="deck"
-              elixirCost={card.cost}
-            />
+            <div key={card.id || card.name} className="min-w-0 overflow-hidden">
+              <CardTile
+                name={card.name}
+                icon={card.icon}
+                size="deck"
+                elixirCost={card.cost}
+              />
+            </div>
           ))}
         </div>
 

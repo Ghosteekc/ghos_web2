@@ -223,7 +223,7 @@ export function BattleDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Card>
           <h3 className="font-semibold text-cr-text mb-4">Ваша колода</h3>
-          <div className="grid grid-cols-4 gap-x-2 gap-y-1 mb-4">
+          <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-1 mb-4">
             {battle.user_deck.map((name, i) => (
               <div key={i} className="min-w-0 overflow-hidden flex justify-center">
                 <CardTile name={name} size="lg" showLabel />
@@ -241,7 +241,7 @@ export function BattleDetailPage() {
 
         <Card>
           <h3 className="font-semibold text-cr-text mb-4">Колода противника</h3>
-          <div className="grid grid-cols-4 gap-x-2 gap-y-1 mb-4">
+          <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-1 mb-4">
             {battle.opponent_deck.map((name, i) => (
               <div key={i} className="min-w-0 overflow-hidden flex justify-center">
                 <CardTile name={name} size="lg" showLabel />

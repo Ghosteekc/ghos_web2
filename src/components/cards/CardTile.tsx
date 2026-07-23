@@ -261,26 +261,22 @@ export function CardDeckGrid({
   const hidden = cards.length - visible.length;
 
   return (
-    <div className={cn("flex flex-wrap gap-1.5", className)}>
-      {visible.map((name, i) => (
-        <CardTile
-          key={`${name}-${i}`}
-          name={name}
-          icon={icons?.[i]}
-          size={size}
-          showLabel={showLabels}
-        />
-      ))}
-      {hidden > 0 && (
-        <div
-          className={cn(
-            "flex shrink-0 items-center justify-center text-xs font-semibold text-cr-muted",
-            sizeClasses[size],
-          )}
-        >
-          +{hidden}
-        </div>
-      )}
+    <div className={cn("w-full", className)}>
+      <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-1 w-full">
+        {visible.map((name, i) => (
+          <div key={`${name}-${i}`} className="min-w-0 overflow-hidden">
+            <CardTile
+              name={name}
+              icon={icons?.[i]}
+              size={size}
+              showLabel={showLabels}
+            />
+          </div>
+        ))}
+      </div>
+      {hidden > 0 ? (
+        <p className="mt-1 text-center text-xs font-semibold text-cr-muted">+{hidden}</p>
+      ) : null}
     </div>
   );
 }
