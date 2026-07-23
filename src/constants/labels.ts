@@ -20,6 +20,7 @@ export const DECK_FILTER_LABELS: Record<string, string> = {
   arena: "Арена",
   constructor: "Конструктор",
   random: "Рандом",
+  favorites: "Избранное",
 };
 
 export const UI = {

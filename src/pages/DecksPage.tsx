@@ -18,6 +18,7 @@ import { Card, Button, Loader, ElixirIcon } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { ConstructorPanel, ConstructorDeckGrid } from "@/components/decks/ConstructorPanel";
 import { FavoriteDeckButton } from "@/components/decks/FavoriteDeckButton";
+import { FavoritesPanel } from "@/components/decks/FavoritesPanel";
 import { DeckPassport } from "@/analytics/deckPassport";
 import { api, ApiError } from "@/api/client";
 import { cacheHas, cacheGet } from "@/api/cache";
@@ -32,6 +33,7 @@ const DECK_FILTERS = [
   { id: "top", label: DECK_FILTER_LABELS.top },
   { id: "mine", label: DECK_FILTER_LABELS.mine },
   { id: "arena", label: DECK_FILTER_LABELS.arena },
+  { id: "favorites", label: DECK_FILTER_LABELS.favorites },
   { id: "constructor", label: DECK_FILTER_LABELS["constructor"] },
   { id: "random", label: DECK_FILTER_LABELS.random },
 ] as const;
@@ -105,7 +107,7 @@ export function DecksPage() {
   const [passportDeck, setPassportDeck] = useState<Deck | null>(null);
 
   const load = useCallback(async () => {
-    if (filter === "random" || filter === "top" || filter === "arena" || filter === "constructor") {
+    if (filter === "random" || filter === "top" || filter === "arena" || filter === "constructor" || filter === "favorites") {
       setLoading(false);
       setDecks([]);
       setError(null);
@@ -158,6 +160,8 @@ export function DecksPage() {
               ? "Рейтинг"
               : filter === "arena"
                 ? "Арена"
+                : filter === "favorites"
+                  ? "Избранное"
                 : `${decks.length} колод`}
         </span>
       </div>
@@ -173,6 +177,8 @@ export function DecksPage() {
           "Выберите 4 карты — бот соберёт полные колоды с лучшей синергией. Ячейки 1 и 3 — эволюция, 2 — герой, 4 — обычная карта."
         ) : filter === "mine" ? (
           "Ваши колоды из истории боёв. Нажмите «Статистика» для разбора матчапов и советов."
+        ) : filter === "favorites" ? (
+          "Сохранённые колоды — быстрый доступ к избранным сборкам."
         ) : (
           "Случайная колода из 8 карт."
         )}
@@ -183,7 +189,10 @@ export function DecksPage() {
           <button
             key={item.id}
             type="button"
-            onClick={() => setFilter(item.id)}
+            onClick={() => {
+              setFilter(item.id);
+              navigate(item.id === "meta" ? "/decks" : `/decks?tab=${item.id}`, { replace: true });
+            }}
             className={"filter-tab " + (filter === item.id ? "filter-tab--active" : "")}
           >
             {item.label}
@@ -204,9 +213,13 @@ export function DecksPage() {
         <Card className="text-center text-cr-loss text-sm">{error}</Card>
       )}
 
-      {loading && filter !== "random" && filter !== "top" && filter !== "arena" && filter !== "constructor" ? (
+      {loading && filter !== "random" && filter !== "top" && filter !== "arena" && filter !== "constructor" && filter !== "favorites" ? (
         <Loader />
       ) : null}
+
+      <div className={filter === "favorites" ? "" : "hidden"}>
+        <FavoritesPanel />
+      </div>
 
       <div className={filter === "random" ? "" : "hidden"}>
         <RandomDeckPanel
@@ -255,7 +268,7 @@ export function DecksPage() {
         />
       </div>
 
-      {filter !== "random" && filter !== "top" && filter !== "arena" && filter !== "constructor" ? (
+      {filter !== "random" && filter !== "top" && filter !== "arena" && filter !== "constructor" && filter !== "favorites" ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
           {decks.map((deck, i) => (
             <div key={`${deck.id}-${deck.name}`} className="w-full">

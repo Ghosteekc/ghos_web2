@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { MenuNavHint } from "./MenuNavHint";
-import { Menu, X } from "lucide-react";
-import { cn } from "@/utils";
+import { BottomNav } from "./BottomNav";
 import { PageRefreshProvider, CardCatalogProvider, FavoriteDecksProvider, useGlobalButtonHaptics, useHapticSettingsBootstrap } from "@/hooks";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 
@@ -32,7 +30,6 @@ function applyTelegramSafeArea() {
   const contentLeft = content?.left ?? device.left;
   const contentRight = content?.right ?? device.right;
 
-  // Всегда ниже шапки Telegram («Закрыть» / меню)
   contentTop = Math.max(contentTop, device.top + chromeTop);
 
   root.style.setProperty("--tg-content-safe-top", `${contentTop}px`);
@@ -42,20 +39,8 @@ function applyTelegramSafeArea() {
 }
 
 export function Layout() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const location = useLocation();
-
   useGlobalButtonHaptics();
   useHapticSettingsBootstrap();
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsDesktop(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
 
   useEffect(() => {
     const webApp = window.Telegram?.WebApp;
@@ -74,45 +59,9 @@ export function Layout() {
     };
   }, []);
 
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
-
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen && !isDesktop ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [mobileOpen, isDesktop]);
-
-  const sidebarOpen = isDesktop || mobileOpen;
-  const showMenuHint = location.pathname === "/" && !isDesktop && !mobileOpen;
-
   return (
     <div className="min-h-screen flex overflow-x-hidden">
-      <div
-        className={cn("sidebar-overlay", mobileOpen && !isDesktop && "open")}
-        onClick={() => setMobileOpen(false)}
-        aria-hidden={!mobileOpen || isDesktop}
-      />
-
-      <button
-        type="button"
-        onClick={() => setMobileOpen(!mobileOpen)}
-        className="mobile-burger lg:hidden"
-        aria-label={mobileOpen ? "Закрыть меню" : "Открыть меню"}
-        aria-expanded={mobileOpen}
-      >
-        {mobileOpen ? (
-          <X className="w-6 h-6 text-cr-text" />
-        ) : (
-          <Menu className="w-6 h-6 text-cr-text" />
-        )}
-      </button>
-
-      <MenuNavHint visible={showMenuHint} />
-
-      <Sidebar isOpen={sidebarOpen} onClose={() => setMobileOpen(false)} />
+      <Sidebar />
 
       <main className="app-main">
         <PageRefreshProvider>
@@ -127,6 +76,8 @@ export function Layout() {
           </CardCatalogProvider>
         </PageRefreshProvider>
       </main>
+
+      <BottomNav />
     </div>
   );
 }

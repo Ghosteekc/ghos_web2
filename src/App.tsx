@@ -13,7 +13,6 @@ const MineDeckStatsPage = lazy(() => import("@/pages/MineDeckStatsPage"));
 const BattlesPage = lazy(() => import("@/pages/BattlesPage"));
 const BattleDetailPage = lazy(() => import("@/pages/BattleDetailPage"));
 const SearchPage = lazy(() => import("@/pages/SearchPage"));
-const FavoritesPage = lazy(() => import("@/pages/FavoritesPage"));
 const PlayerPreviewPage = lazy(() => import("@/pages/PlayerPreviewPage"));
 const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 
@@ -39,6 +38,7 @@ export default function App() {
             }
           />
           <Route path="profile" element={<Navigate to="/" replace />} />
+          <Route path="search" element={<Navigate to="/profile/search" replace />} />
           <Route
             path="profile/cards"
             element={
@@ -112,21 +112,14 @@ export default function App() {
             }
           />
           <Route
-            path="search"
+            path="profile/search"
             element={
               <Suspense fallback={<PageLoader />}>
                 <SearchPage />
               </Suspense>
             }
           />
-          <Route
-            path="favorites"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <FavoritesPage />
-              </Suspense>
-            }
-          />
+          <Route path="favorites" element={<Navigate to="/decks?tab=favorites" replace />} />
           <Route
             path="player/:tag"
             element={
@@ -135,7 +128,7 @@ export default function App() {
               </Suspense>
             }
           />
-          <Route path="more" element={<Navigate to="/search" replace />} />
+          <Route path="more" element={<Navigate to="/" replace />} />
           <Route
             path="settings"
             element={

@@ -16,8 +16,8 @@ const quickLinks = [
   { to: "/analytics", icon: BarChart3, label: "Аналитика", hint: "Графики, соперники, улучшения" },
   { to: "/decks", icon: GitCompare, label: "Колоды", hint: "Мета, сравнение, рандом" },
   { to: "/battles", icon: History, label: "История", hint: "Разбор последних боёв" },
-  { to: "/search", icon: Search, label: "Поиск", hint: "Игрок по тегу" },
-  { to: "/favorites", icon: Star, label: "Избранное", hint: "Сохранённые колоды" },
+  { to: "/profile/search", icon: Search, label: "Поиск", hint: "Игрок по тегу" },
+  { to: "/decks?tab=favorites", icon: Star, label: "Избранное", hint: "Сохранённые колоды" },
 ] as const;
 
 interface HomeServicePanelProps {

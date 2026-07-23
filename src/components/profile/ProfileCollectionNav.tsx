@@ -1,8 +1,14 @@
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Layers, Sparkles } from "lucide-react";
+import { ChevronRight, Layers, Sparkles, Search } from "lucide-react";
 import { Card } from "@/components/ui";
 
 const ITEMS = [
+  {
+    to: "/profile/search",
+    label: "Поиск игроков",
+    hint: "Найти игрока по тегу Clash Royale",
+    icon: Search,
+  },
   {
     to: "/profile/cards",
     label: "Коллекция карт",
