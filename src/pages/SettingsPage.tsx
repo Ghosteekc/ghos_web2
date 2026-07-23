@@ -11,13 +11,14 @@ import {
   Bell,
   BellOff,
   RefreshCw,
+  Vibrate,
 } from "lucide-react";
 import { Card, Loader } from "@/components/ui";
 import { api } from "@/api/client";
 import { Profile, Settings } from "@/types";
 import { useTelegram, usePageRefresh } from "@/hooks";
 import { applyTheme, loadStoredTheme, type AppTheme } from "@/hooks/useTheme";
-import { hapticNotify } from "@/utils";
+import { hapticManager, setHapticEnabled } from "@/utils/hapticManager";
 
 export function SettingsPage() {
   const { tg, showAlert, showConfirm } = useTelegram();
@@ -26,6 +27,7 @@ export function SettingsPage() {
     language: "ru",
     notifications: true,
     telegram_notifications: true,
+    haptic_enabled: true,
   });
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,6 +39,7 @@ export function SettingsPage() {
       const [s, p] = await Promise.all([api.getSettings(), api.getProfile()]);
       const theme = (s.theme as AppTheme) || loadStoredTheme();
       setSettings({ ...s, theme });
+      setHapticEnabled(s.haptic_enabled);
       applyTheme(theme);
       setProfile(p);
     } catch (e) {
@@ -61,16 +64,22 @@ export function SettingsPage() {
     return () => webApp.offEvent?.("themeChanged", onThemeChanged);
   }, [settings.theme]);
 
-  const update = async (patch: Partial<Settings>) => {
+  const update = async (patch: Partial<Settings>, options?: { skipHaptic?: boolean }) => {
     const next = { ...settings, ...patch };
     setSettings(next);
     if (patch.theme) {
       applyTheme(patch.theme as AppTheme);
     }
+    if (patch.haptic_enabled !== undefined) {
+      setHapticEnabled(patch.haptic_enabled);
+    }
     try {
       await api.updateSettings(patch);
     } catch (e) {
       console.error(e);
+      if (!options?.skipHaptic) {
+        hapticManager.error();
+      }
     }
   };
 
@@ -81,9 +90,10 @@ export function SettingsPage() {
     setClearing(true);
     try {
       await api.clearCache();
-      hapticNotify("success");
+      hapticManager.success();
       await showAlert?.("Кеш очищен. Данные обновятся при следующей синхронизации.");
     } catch (e) {
+      hapticManager.error();
       await showAlert?.(e instanceof Error ? e.message : "Не удалось очистить кеш");
     } finally {
       setClearing(false);
@@ -100,13 +110,14 @@ export function SettingsPage() {
     try {
       const res = await api.syncData();
       window.dispatchEvent(new Event("app:sync"));
-      hapticNotify("success");
+      hapticManager.important();
       await showAlert?.(
         res.battles_loaded > 0
           ? `Данные обновлены: ${res.battles_loaded} боёв в журнале, статистика и списки актуализированы.`
           : "Синхронизация завершена. Списки боёв и статистика обновлены.",
       );
     } catch (e) {
+      hapticManager.error();
       await showAlert?.(e instanceof Error ? e.message : "Не удалось синхронизировать данные");
     } finally {
       setSyncing(false);
@@ -158,6 +169,32 @@ export function SettingsPage() {
                   </ThemeButton>
                 </div>
               </div>
+            </div>
+          </Card>
+        </section>
+
+        <section>
+          <h3 className="text-sm font-semibold text-cr-muted mb-3 uppercase tracking-wider">Интерфейс</h3>
+          <Card>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <Vibrate className="w-5 h-5 text-cr-blue shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-cr-text">Вибрация</p>
+                  <p className="text-xs text-cr-muted">Тактильная отдача при нажатиях</p>
+                </div>
+              </div>
+              <Toggle
+                checked={settings.haptic_enabled}
+                noHaptic
+                onChange={(c) => {
+                  void update({ haptic_enabled: c }, { skipHaptic: true });
+                  if (c) {
+                    setHapticEnabled(true);
+                    hapticManager.selection();
+                  }
+                }}
+              />
             </div>
           </Card>
         </section>
@@ -279,13 +316,22 @@ function ThemeButton({
   );
 }
 
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+function Toggle({
+  checked,
+  onChange,
+  noHaptic,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  noHaptic?: boolean;
+}) {
   return (
     <button
       type="button"
       role="switch"
       aria-checked={checked}
       data-checked={checked}
+      {...(noHaptic ? { "data-no-haptic": true } : {})}
       onClick={() => onChange(!checked)}
       className="toggle-switch"
     >

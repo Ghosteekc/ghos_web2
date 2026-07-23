@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import { hapticImpact, hapticSelection } from "@/utils/haptics";
+import { triggerHaptic } from "@/utils/hapticManager";
 
 const INTERACTIVE_SELECTOR =
   "button:not([disabled]), [role='switch']:not([disabled]), .filter-tab, .collection-filter-tab, .segment-tab, .sidebar-item, .sidebar-overlay, .toggle-switch";
@@ -16,12 +16,12 @@ function shouldUseSelectionHaptic(target: Element) {
   );
 }
 
-function triggerHaptic(target: Element) {
+function triggerElementHaptic(target: Element) {
   if (shouldUseSelectionHaptic(target)) {
-    hapticSelection();
+    triggerHaptic("selection");
     return;
   }
-  hapticImpact("light");
+  triggerHaptic("lightTap");
 }
 
 export function useGlobalButtonHaptics() {
@@ -34,7 +34,7 @@ export function useGlobalButtonHaptics() {
         return;
       }
 
-      triggerHaptic(target);
+      triggerElementHaptic(target);
     };
 
     document.addEventListener("pointerdown", onPointerDown, { capture: true });

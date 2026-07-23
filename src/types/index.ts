@@ -326,6 +326,7 @@ export interface Settings {
   language: "ru" | "en";
   notifications: boolean;
   telegram_notifications: boolean;
+  haptic_enabled: boolean;
 }
 
 export interface HomeData {

@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { TelegramWebApp } from "@/vite-env";
-import type { HapticImpact } from "@/utils/haptics";
-import { hapticImpact } from "@/utils/haptics";
+import type { HapticImpact } from "@/utils/hapticManager";
+import { hapticManager } from "@/utils/hapticManager";
 export { PageRefreshProvider, usePageRefresh } from "./PageRefreshProvider";
 export { CardCatalogProvider, useCardCatalog } from "./CardCatalogProvider";
 export { FavoriteDecksProvider, useFavoriteDecks } from "./FavoriteDecksProvider";
 export { usePullToRefresh } from "./usePullToRefresh";
 export { useGlobalButtonHaptics } from "./useGlobalButtonHaptics";
+export { useHapticSettingsBootstrap } from "./useHapticSettingsBootstrap";
 export { applyTheme, loadStoredTheme, resolveTheme, initTheme } from "./useTheme";
 export type { AppTheme } from "./useTheme";
 export function useTelegram() {
@@ -42,7 +43,9 @@ export function useTelegram() {
       }
     },
     hapticFeedback: (style: HapticImpact) => {
-      hapticImpact(style);
+      if (style === "heavy") hapticManager.heavyTap();
+      else if (style === "medium") hapticManager.mediumTap();
+      else hapticManager.lightTap();
     },
     showAlert: (message: string) => tg?.showAlert(message),
     showConfirm: (message: string) => tg?.showConfirm(message),

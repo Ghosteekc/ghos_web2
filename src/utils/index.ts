@@ -78,8 +78,12 @@ export const getTrophyChangeColor = (change: number): string => {
 
 export {
   hapticImpact,
-  hapticSelection,
+  hapticManager,
   hapticNotify,
+  hapticSelection,
+  isHapticEnabled,
+  setHapticEnabled,
+  triggerHaptic,
   withHaptic,
 } from "./haptics";
-export type { HapticImpact, HapticNotify } from "./haptics";
+export type { HapticEvent, HapticImpact, HapticNotify } from "./haptics";
