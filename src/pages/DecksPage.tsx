@@ -9,16 +9,15 @@ import {
   Trophy,
   Users,
   Swords,
-  ChevronLeft,
-  ChevronRight,
   BarChart3,
   ScanSearch,
 } from "lucide-react";
-import { Card, Button, Loader, ElixirIcon } from "@/components/ui";
+import { Card, Button, Loader, ElixirIcon, FeatureNavGrid } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { ConstructorPanel, ConstructorDeckGrid } from "@/components/decks/ConstructorPanel";
 import { FavoriteDeckButton } from "@/components/decks/FavoriteDeckButton";
 import { FavoritesPanel } from "@/components/decks/FavoritesPanel";
+import { DeckWinratesPanel } from "@/components/analytics/AnalyticsExtras";
 import { DeckPassport } from "@/analytics/deckPassport";
 import { api, ApiError } from "@/api/client";
 import { cacheHas, cacheGet } from "@/api/cache";
@@ -28,20 +27,22 @@ import { usePageRefresh, useTelegram } from "@/hooks";
 
 import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
 
-const DECK_FILTERS = [
-  { id: "meta", label: DECK_FILTER_LABELS.meta },
-  { id: "top", label: DECK_FILTER_LABELS.top },
-  { id: "mine", label: DECK_FILTER_LABELS.mine },
-  { id: "arena", label: DECK_FILTER_LABELS.arena },
-  { id: "favorites", label: DECK_FILTER_LABELS.favorites },
-  { id: "constructor", label: DECK_FILTER_LABELS["constructor"] },
-  { id: "random", label: DECK_FILTER_LABELS.random },
+const DECK_HOME = "stats";
+
+const DECK_NAV = [
+  { id: "top", label: DECK_FILTER_LABELS.top, emoji: "👑" },
+  { id: "meta", label: DECK_FILTER_LABELS.meta, emoji: "🔥" },
+  { id: "arena", label: DECK_FILTER_LABELS.arena, emoji: "🏟️" },
+  { id: "favorites", label: DECK_FILTER_LABELS.favorites, emoji: "⭐" },
+  { id: "constructor", label: DECK_FILTER_LABELS["constructor"], emoji: "🛠️" },
+  { id: "random", label: DECK_FILTER_LABELS.random, emoji: "🎲" },
 ] as const;
 
-const VALID_FILTERS = new Set(DECK_FILTERS.map((item) => item.id));
+const VALID_FILTERS = new Set<string>([DECK_HOME, "mine", ...DECK_NAV.map((item) => item.id)]);
 
 function filterFromTab(tab: string | null): string {
-  return tab && VALID_FILTERS.has(tab as (typeof DECK_FILTERS)[number]["id"]) ? tab : "meta";
+  if (!tab) return DECK_HOME;
+  return VALID_FILTERS.has(tab) ? tab : DECK_HOME;
 }
 
 const CATEGORY_LABELS = DECK_CATEGORY_LABELS;
@@ -107,7 +108,14 @@ export function DecksPage() {
   const [passportDeck, setPassportDeck] = useState<Deck | null>(null);
 
   const load = useCallback(async () => {
-    if (filter === "random" || filter === "top" || filter === "arena" || filter === "constructor" || filter === "favorites") {
+    if (
+      filter === DECK_HOME ||
+      filter === "random" ||
+      filter === "top" ||
+      filter === "arena" ||
+      filter === "constructor" ||
+      filter === "favorites"
+    ) {
       setLoading(false);
       setDecks([]);
       setError(null);
@@ -147,12 +155,26 @@ export function DecksPage() {
     void api.getArenaDecks().catch(() => {});
   }, []);
 
+  const navActiveId = filter === DECK_HOME || filter === "mine" ? null : filter;
+
+  const handleNavSelect = (id: string) => {
+    const next = filter === id ? DECK_HOME : id;
+    setFilter(next);
+    if (next === DECK_HOME) {
+      navigate("/decks", { replace: true });
+      return;
+    }
+    navigate(`/decks?tab=${next}`, { replace: true });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="page-title">Колоды</h1>
         <span className="text-sm text-cr-muted">
-          {filter === "random"
+          {filter === DECK_HOME
+            ? "Мои колоды"
+            : filter === "random"
             ? "Генератор"
             : filter === "constructor"
               ? "Конструктор"
@@ -167,7 +189,9 @@ export function DecksPage() {
       </div>
 
       <p className="text-xs text-cr-muted -mt-2">
-        {filter === "meta" ? (
+        {filter === DECK_HOME ? (
+          "Винрейт, победы и поражения по каждой колоде из ваших боёв."
+        ) : filter === "meta" ? (
           <>Классические мета-колоды — проверенные архетипы Clash Royale.</>
         ) : filter === "top" ? (
           "Топ-10 игроков из глобального списка лидеров (Легендарный путь): колода, винрейт на ней и кубки."
@@ -184,26 +208,7 @@ export function DecksPage() {
         )}
       </p>
 
-      <div className="filter-tab-row">
-        {DECK_FILTERS.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => {
-              setFilter(item.id);
-              navigate(item.id === "meta" ? "/decks" : `/decks?tab=${item.id}`, { replace: true });
-            }}
-            className={"filter-tab " + (filter === item.id ? "filter-tab--active" : "")}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-      <p className="text-[11px] text-cr-muted flex items-center gap-1 -mt-3 pb-1">
-        <ChevronLeft className="w-3 h-3 shrink-0 opacity-70" />
-        Листайте вкладки влево и вправо
-        <ChevronRight className="w-3 h-3 shrink-0 opacity-70" />
-      </p>
+      <FeatureNavGrid items={[...DECK_NAV]} activeId={navActiveId} onSelect={handleNavSelect} />
 
       {copyHint && (
         <Card className="text-center text-cr-win text-sm">{copyHint}</Card>
@@ -213,9 +218,19 @@ export function DecksPage() {
         <Card className="text-center text-cr-loss text-sm">{error}</Card>
       )}
 
-      {loading && filter !== "random" && filter !== "top" && filter !== "arena" && filter !== "constructor" && filter !== "favorites" ? (
+      {loading &&
+      filter !== DECK_HOME &&
+      filter !== "random" &&
+      filter !== "top" &&
+      filter !== "arena" &&
+      filter !== "constructor" &&
+      filter !== "favorites" ? (
         <Loader />
       ) : null}
+
+      <div className={filter === DECK_HOME ? "" : "hidden"}>
+        <DeckWinratesPanel />
+      </div>
 
       <div className={filter === "favorites" ? "" : "hidden"}>
         <FavoritesPanel />
@@ -268,7 +283,7 @@ export function DecksPage() {
         />
       </div>
 
-      {filter !== "random" && filter !== "top" && filter !== "arena" && filter !== "constructor" && filter !== "favorites" ? (
+      {(filter === "meta" || filter === "mine") && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
           {decks.map((deck, i) => (
             <div key={`${deck.id}-${deck.name}`} className="w-full">
@@ -301,7 +316,7 @@ export function DecksPage() {
             </Card>
           ) : null}
         </div>
-      ) : null}
+      )}
 
       <DeckPassport deck={passportDeck} onClose={() => setPassportDeck(null)} />
     </div>

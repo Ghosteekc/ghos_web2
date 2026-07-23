@@ -195,6 +195,16 @@
     @apply flex gap-2 overflow-x-auto pb-1;
   }
 
+  .feature-nav-btn {
+    @apply rounded-xl border border-cr-border bg-cr-card/70 px-2 py-3 text-center;
+    @apply flex flex-col items-center justify-center gap-1 min-h-[4rem] min-w-0 transition-all duration-200;
+    @apply hover:bg-cr-card-hover active:scale-[0.98];
+  }
+
+  .feature-nav-btn--active {
+    @apply border-cr-gold/55 bg-cr-gold/20 shadow-glow;
+  }
+
   .segment-tab {
     @apply p-2 rounded-md transition-all duration-200 border border-transparent;
     @apply text-cr-muted hover:text-cr-text;
