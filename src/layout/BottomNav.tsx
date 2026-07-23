@@ -10,7 +10,7 @@ const BUBBLE_HIT_Y = 50;
 
 const STRETCH_TWEEN = { type: "tween" as const, duration: 0.18, ease: [0.22, 0.08, 0.24, 1] as const };
 
-const NEAR_TAB_SPRING = { stiffness: 190, damping: 36, mass: 0.92 };
+const NEAR_TAB_SPRING = { stiffness: 215, damping: 37, mass: 0.86 };
 const FAR_TAB_SPRING = { stiffness: 270, damping: 23, mass: 0.72 };
 
 function getSpringForTabDistance(fromIndex: number, toIndex: number) {
@@ -39,14 +39,20 @@ function getReleaseSpringForTabDistance(fromIndex: number, toIndex: number) {
 }
 
 const STRETCH_X_MAX = 0.32;
-const STRETCH_Y_MIN = 0.86;
+const STRETCH_X_MIN = 0.1;
+const STRETCH_Y_MAX = 0.12;
+const STRETCH_Y_MIN = 0.04;
 
 function stretchFromPull(pull: number, tabSteps = 1): { x: number; y: number } {
-  const stepBoost = 1 + Math.min(Math.max(tabSteps - 1, 0) / Math.max(TAB_COUNT - 2, 1), 1) * 0.18;
+  const t = Math.min(Math.max(tabSteps - 1, 0) / Math.max(TAB_COUNT - 2, 1), 1);
+  const stretchXMax = STRETCH_X_MIN + t * (STRETCH_X_MAX - STRETCH_X_MIN);
+  const stretchYMax = STRETCH_Y_MIN + t * (STRETCH_Y_MAX - STRETCH_Y_MIN);
+  const pullDivisorX = 92 - t * 32;
+  const pullDivisorY = 170 - t * 45;
 
   return {
-    x: 1 + Math.min(pull / 48, STRETCH_X_MAX * stepBoost),
-    y: Math.max(STRETCH_Y_MIN, 1 - Math.min(pull / 120, 0.12 * stepBoost)),
+    x: 1 + Math.min(pull / pullDivisorX, stretchXMax),
+    y: Math.max(1 - stretchYMax, 1 - Math.min(pull / pullDivisorY, stretchYMax)),
   };
 }
 

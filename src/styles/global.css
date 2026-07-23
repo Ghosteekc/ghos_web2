@@ -438,12 +438,19 @@
     position: relative;
     z-index: 3;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0.15rem;
     height: 100%;
     min-width: 0;
+    padding: 0.28rem 0 0.36rem;
+    box-sizing: border-box;
     color: rgb(var(--cr-muted) / 0.82);
-    transition: color 0.36s ease;
+    transition:
+      color 0.36s ease,
+      gap 0.46s cubic-bezier(0.22, 0.08, 0.24, 1),
+      padding 0.46s cubic-bezier(0.22, 0.08, 0.24, 1);
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -453,6 +460,8 @@
 
   .bottom-nav-item.is-highlighted {
     color: #f5c842;
+    gap: 0;
+    padding: 0;
   }
 
   .bottom-nav-icon-slot {
@@ -462,14 +471,14 @@
     width: 1.25rem;
     height: 1.25rem;
     flex-shrink: 0;
-    transform: translateY(0.24rem) scale(1);
+    transform: scale(1);
     transform-origin: center center;
     transition: transform 0.46s cubic-bezier(0.22, 0.08, 0.24, 1);
     will-change: transform;
   }
 
   .bottom-nav-item.is-highlighted .bottom-nav-icon-slot {
-    transform: translateY(0) scale(1.24);
+    transform: scale(1.24);
   }
 
   .bottom-nav-item.is-highlighted .bottom-nav-icon {
@@ -477,11 +486,12 @@
   }
 
   .bottom-nav-item.is-highlighted .bottom-nav-label {
+    position: absolute;
     opacity: 0;
-    transform: translateX(-50%) translateY(0.15rem) scale(0.88);
     max-height: 0;
     margin: 0;
     pointer-events: none;
+    transform: scale(0.88);
   }
 
   .bottom-nav-icon {
@@ -497,9 +507,7 @@
   }
 
   .bottom-nav-label {
-    position: absolute;
-    left: 50%;
-    bottom: 0.42rem;
+    position: relative;
     z-index: 1;
     max-width: calc(100% - 0.25rem);
     max-height: 1rem;
@@ -511,7 +519,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     opacity: 0.88;
-    transform: translateX(-50%) translateY(0) scale(1);
+    transform: scale(1);
     transition:
       opacity 0.32s ease,
       transform 0.4s cubic-bezier(0.22, 0.08, 0.24, 1),
