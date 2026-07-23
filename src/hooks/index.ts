@@ -9,6 +9,7 @@ export { FavoriteDecksProvider, useFavoriteDecks } from "./FavoriteDecksProvider
 export { usePullToRefresh } from "./usePullToRefresh";
 export { useGlobalButtonHaptics } from "./useGlobalButtonHaptics";
 export { useHapticSettingsBootstrap } from "./useHapticSettingsBootstrap";
+export { useSettings } from "./useSettings";
 export { applyTheme, loadStoredTheme, resolveTheme, initTheme } from "./useTheme";
 export type { AppTheme } from "./useTheme";
 export function useTelegram() {

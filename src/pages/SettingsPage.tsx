@@ -15,46 +15,40 @@ import {
 } from "lucide-react";
 import { Card, Loader } from "@/components/ui";
 import { api } from "@/api/client";
-import { Profile, Settings } from "@/types";
-import { useTelegram, usePageRefresh } from "@/hooks";
-import { applyTheme, loadStoredTheme, type AppTheme } from "@/hooks/useTheme";
-import { hapticManager, setHapticEnabled } from "@/utils/hapticManager";
+import { useTelegram, usePageRefresh, useSettings } from "@/hooks";
+import { applyTheme, type AppTheme } from "@/hooks/useTheme";
+import { ensureSettingsLoaded } from "@/stores/settingsStore";
+import { Profile } from "@/types";
+import { hapticManager } from "@/utils/hapticManager";
 
 export function SettingsPage() {
   const { tg, showAlert, showConfirm } = useTelegram();
-  const [settings, setSettings] = useState<Settings>({
-    theme: loadStoredTheme(),
-    language: "ru",
-    notifications: true,
-    telegram_notifications: true,
-    haptic_enabled: true,
-  });
+  const { settings, loading: settingsLoading, update } = useSettings();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
-  const load = useCallback(async () => {
+  const loadProfile = useCallback(async () => {
     try {
-      const [s, p] = await Promise.all([api.getSettings(), api.getProfile()]);
-      const theme = (s.theme as AppTheme) || loadStoredTheme();
-      setSettings({ ...s, theme });
-      setHapticEnabled(s.haptic_enabled);
-      applyTheme(theme);
+      const p = await api.getProfile();
       setProfile(p);
     } catch (e) {
       console.error(e);
-      applyTheme(loadStoredTheme());
     } finally {
-      setLoading(false);
+      setProfileLoading(false);
     }
   }, []);
 
-  usePageRefresh(load);
+  const refresh = useCallback(async () => {
+    await Promise.all([ensureSettingsLoaded(true), loadProfile()]);
+  }, [loadProfile]);
+
+  usePageRefresh(refresh);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void loadProfile();
+  }, [loadProfile]);
 
   useEffect(() => {
     const webApp = window.Telegram?.WebApp;
@@ -64,17 +58,12 @@ export function SettingsPage() {
     return () => webApp.offEvent?.("themeChanged", onThemeChanged);
   }, [settings.theme]);
 
-  const update = async (patch: Partial<Settings>, options?: { skipHaptic?: boolean }) => {
-    const next = { ...settings, ...patch };
-    setSettings(next);
-    if (patch.theme) {
-      applyTheme(patch.theme as AppTheme);
-    }
-    if (patch.haptic_enabled !== undefined) {
-      setHapticEnabled(patch.haptic_enabled);
-    }
+  const updateSetting = async (
+    patch: Parameters<typeof update>[0],
+    options?: { skipHaptic?: boolean },
+  ) => {
     try {
-      await api.updateSettings(patch);
+      await update(patch);
     } catch (e) {
       console.error(e);
       if (!options?.skipHaptic) {
@@ -124,7 +113,7 @@ export function SettingsPage() {
     }
   };
 
-  if (loading) {
+  if (settingsLoading || profileLoading) {
     return <Loader />;
   }
 
@@ -149,21 +138,21 @@ export function SettingsPage() {
                   <ThemeButton
                     active={settings.theme === "dark"}
                     label="Тёмная"
-                    onClick={() => void update({ theme: "dark" })}
+                    onClick={() => void updateSetting({ theme: "dark" })}
                   >
                     <Moon className="w-4 h-4" />
                   </ThemeButton>
                   <ThemeButton
                     active={settings.theme === "light"}
                     label="Светлая"
-                    onClick={() => void update({ theme: "light" })}
+                    onClick={() => void updateSetting({ theme: "light" })}
                   >
                     <Sun className="w-4 h-4" />
                   </ThemeButton>
                   <ThemeButton
                     active={settings.theme === "auto"}
                     label="Системная"
-                    onClick={() => void update({ theme: "auto" })}
+                    onClick={() => void updateSetting({ theme: "auto" })}
                   >
                     <Smartphone className="w-4 h-4" />
                   </ThemeButton>
@@ -188,9 +177,8 @@ export function SettingsPage() {
                 checked={settings.haptic_enabled}
                 noHaptic
                 onChange={(c) => {
-                  void update({ haptic_enabled: c }, { skipHaptic: true });
+                  void updateSetting({ haptic_enabled: c }, { skipHaptic: true });
                   if (c) {
-                    setHapticEnabled(true);
                     hapticManager.selection();
                   }
                 }}
@@ -238,7 +226,10 @@ export function SettingsPage() {
                   <p className="text-xs text-cr-muted">Внутри приложения</p>
                 </div>
               </div>
-              <Toggle checked={settings.notifications} onChange={(c) => void update({ notifications: c })} />
+              <Toggle
+                checked={settings.notifications}
+                onChange={(c) => void updateSetting({ notifications: c })}
+              />
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -250,7 +241,7 @@ export function SettingsPage() {
               </div>
               <Toggle
                 checked={settings.telegram_notifications}
-                onChange={(c) => void update({ telegram_notifications: c })}
+                onChange={(c) => void updateSetting({ telegram_notifications: c })}
               />
             </div>
           </Card>

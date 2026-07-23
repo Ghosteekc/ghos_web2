@@ -455,19 +455,18 @@ export const api = {
 
 
 
-  getSettings: () => request<Settings>("/api/settings"),
+  getSettings: () => cachedGet<Settings>("settings-v1", "/api/settings", TTL.profile),
 
 
 
-  updateSettings: (settings: Partial<Settings>) =>
-
-    request<Settings>("/api/settings", {
-
+  updateSettings: async (settings: Partial<Settings>) => {
+    const result = await request<Settings>("/api/settings", {
       method: "PUT",
-
       body: JSON.stringify(settings),
-
-    }),
+    });
+    cacheSet("settings-v1", result, TTL.profile);
+    return result;
+  },
 
 
 
