@@ -77,6 +77,13 @@ export const getTrophyChangeColor = (change: number): string => {
 };
 
 export {
+  getLastSyncAt,
+  setLastSyncAt,
+  formatLastSyncLabel,
+  LAST_SYNC_EVENT,
+} from "./lastSync";
+
+export {
   hapticImpact,
   hapticManager,
   hapticNotify,

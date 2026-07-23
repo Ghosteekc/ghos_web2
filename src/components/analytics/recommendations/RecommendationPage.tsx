@@ -78,18 +78,18 @@ function ArenaBlock({
       <button
         type="button"
         onClick={onNavigate}
-        className="w-full flex items-center justify-between gap-3 text-left group"
+        className="w-full flex items-center justify-between gap-3 text-left"
       >
         <div>
           <p className="text-xs text-cr-muted">Арена {summary.arena}</p>
-          <h4 className="text-base font-semibold text-cr-text group-hover:text-cr-gold transition-colors">
+          <h4 className="text-base font-semibold text-cr-text">
             {summary.arenaName}
           </h4>
           <p className="text-[11px] text-cr-muted mt-1">
             Рекомендуемый уровень карт: {summary.recommendedLevel}+ · Прогресс {summary.progressPercent}%
           </p>
         </div>
-        <ChevronRight className="w-5 h-5 text-cr-muted shrink-0 group-hover:text-cr-gold transition-colors" />
+        <ChevronRight className="w-5 h-5 text-cr-muted shrink-0" />
       </button>
 
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -229,7 +229,7 @@ export function RecommendationsPanel() {
               type="button"
               onClick={() => scrollToArena(arena.arena)}
               className={cn(
-                "rounded-lg border px-2.5 py-1.5 text-left transition-colors hover:border-cr-gold/40 hover:bg-cr-gold/10",
+                "rounded-lg border px-2.5 py-1.5 text-left transition-colors",
                 playerArena === arena.arena
                   ? "border-cr-gold/40 bg-cr-gold/10"
                   : "border-white/10 bg-white/[0.03]",

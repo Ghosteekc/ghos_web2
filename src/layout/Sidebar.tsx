@@ -32,7 +32,7 @@ export function Sidebar() {
               <item.icon
                 className={cn(
                   "sidebar-icon",
-                  isActive ? "text-cr-gold" : "text-cr-muted group-hover:text-cr-text"
+                  isActive ? "text-cr-gold" : "text-cr-muted"
                 )}
               />
               <span className="text-sm font-medium tracking-wide truncate">{item.label}</span>

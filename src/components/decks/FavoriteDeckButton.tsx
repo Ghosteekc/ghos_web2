@@ -35,7 +35,7 @@ export function FavoriteDeckButton({ cards, onMessage, className }: FavoriteDeck
       variant="ghost"
       className={cn(
         "!px-3 shrink-0 transition-colors",
-        active && "text-cr-gold hover:bg-cr-gold/10",
+        active && "text-cr-gold",
         className,
       )}
       disabled={busy}

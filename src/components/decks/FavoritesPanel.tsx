@@ -79,7 +79,7 @@ export function FavoritesPanel() {
                   )}
                   <Button
                     variant="ghost"
-                    className="!p-2 text-cr-loss hover:bg-cr-loss/10"
+                    className="!p-2 text-cr-loss"
                     disabled={removing === i}
                     onClick={() => void remove(i)}
                     aria-label="Удалить"

@@ -88,7 +88,6 @@ export function ProfileStatGrid({ profile }: ProfileStatGridProps) {
         <Card
           key={item.label}
           delay={index * 0.04}
-          hover={false}
           className="!py-2 !px-2 text-center flex flex-col items-center justify-center gap-0.5 min-h-[3.75rem] min-w-0"
         >
           <item.icon className={`w-5 h-5 shrink-0 ${item.iconClass}`} />

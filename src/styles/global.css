@@ -167,20 +167,15 @@
 
   .glass-card {
     @apply bg-cr-card/80 backdrop-blur-lg border border-cr-border rounded-cr-lg shadow-card;
-    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-  }
-
-  .glass-card:hover {
-    @apply bg-cr-card-hover border-cr-border/80 shadow-glow;
   }
 
   .btn-gold {
-    @apply bg-gradient-to-r from-cr-gold to-yellow-400 text-white font-cr px-6 py-3 rounded-cr shadow-glow hover:shadow-glow-blue transition-all duration-300 active:scale-95;
+    @apply bg-gradient-to-r from-cr-gold to-yellow-400 text-white font-cr px-6 py-3 rounded-cr shadow-glow transition-all duration-300 active:scale-95;
     text-shadow: none;
   }
 
   .btn-blue {
-    @apply bg-cr-blue/20 text-cr-blue border border-cr-blue/30 px-4 py-2 rounded-cr hover:bg-cr-blue/30 transition-all duration-300 active:scale-95;
+    @apply bg-cr-blue/20 text-cr-blue border border-cr-blue/30 px-4 py-2 rounded-cr transition-all duration-300 active:scale-95;
   }
 
   .filter-tab {
@@ -270,11 +265,6 @@
     border: 1px solid transparent;
     box-sizing: border-box;
     transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .sidebar-item:hover {
-    @apply bg-white/5;
-    color: rgb(var(--cr-text));
   }
 
   .sidebar-item.active {
@@ -853,12 +843,8 @@
   .settings-data-btn {
     @apply w-full flex flex-col items-center justify-center gap-2 py-4 px-4 rounded-cr-lg
       border border-cr-border bg-cr-bg/40 font-semibold text-sm
-      transition-colors active:scale-[0.98];
+      transition-transform active:scale-[0.98];
     color: rgb(var(--cr-text));
-  }
-
-  .settings-data-btn:hover {
-    @apply bg-cr-card-hover;
   }
 
   .settings-data-btn:disabled {

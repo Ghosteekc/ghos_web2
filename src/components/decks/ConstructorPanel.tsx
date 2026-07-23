@@ -365,7 +365,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
                     ? "border-cr-gold bg-cr-gold/10"
 
-                    : "border-cr-border/60 bg-cr-bg/40 hover:border-cr-blue/40")
+                    : "border-cr-border/60 bg-cr-bg/40")
 
                 }
 
@@ -405,7 +405,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
                       }}
 
-                      className="absolute -top-1.5 -right-1.5 z-10 rounded-full bg-cr-bg border border-cr-border p-0.5 text-cr-muted hover:text-cr-loss"
+                      className="absolute -top-1.5 -right-1.5 z-10 rounded-full bg-cr-bg border border-cr-border p-0.5 text-cr-muted"
 
                       aria-label="Убрать карту"
 
@@ -489,7 +489,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
                 onClick={() => placeCard(card)}
 
-                className="rounded-lg p-1 hover:bg-cr-blue/10 transition-colors"
+                className="rounded-lg p-1 transition-colors"
 
                 title={nameRu(card.name)}
 

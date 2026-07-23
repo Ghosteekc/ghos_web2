@@ -28,7 +28,7 @@ export function MorePage() {
             key={item.to}
             type="button"
             onClick={() => navigate(item.to)}
-            className="flex items-center gap-3 p-4 rounded-xl bg-cr-card border border-cr-border hover:border-cr-gold/30 transition-colors text-left"
+            className="flex items-center gap-3 p-4 rounded-xl bg-cr-card border border-cr-border transition-colors text-left"
           >
             <div className="p-2 rounded-lg bg-cr-bg/80 shrink-0">
               <item.icon className="w-5 h-5 text-cr-muted" />

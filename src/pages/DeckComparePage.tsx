@@ -201,7 +201,7 @@ export function DeckComparePage() {
               "shrink-0 rounded-full px-4 py-2 text-xs font-semibold border transition-colors " +
               (tab === id
                 ? "border-cr-gold/50 bg-cr-gold/15 text-cr-gold"
-                : "border-cr-border bg-cr-card text-cr-muted hover:text-cr-text")
+                : "border-cr-border bg-cr-card text-cr-muted")
             }
           >
             {label}

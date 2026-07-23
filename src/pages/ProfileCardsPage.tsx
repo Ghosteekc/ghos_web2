@@ -199,7 +199,7 @@ export function ProfileCardsPage() {
                   "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors " +
                   (active
                     ? "border-cr-gold/50 bg-cr-gold/15 text-cr-gold"
-                    : "border-cr-border/40 text-cr-muted hover:text-cr-text")
+                    : "border-cr-border/40 text-cr-muted")
                 }
               >
                 {opt.label}
@@ -217,7 +217,7 @@ export function ProfileCardsPage() {
             type="button"
             onClick={toggleDirection}
             title={sortDirection === "asc" ? "По возрастанию" : "По убыванию"}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold border border-cr-border/40 text-cr-muted hover:text-cr-text"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold border border-cr-border/40 text-cr-muted"
           >
             {sortDirection === "asc" ? (
               <>

@@ -13,7 +13,7 @@ export function SupercellDisclaimer() {
           href={FAN_CONTENT_POLICY_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-cr-muted underline underline-offset-2 hover:text-cr-text"
+          className="text-cr-muted underline underline-offset-2"
         >
           правилам фан-контента
         </a>

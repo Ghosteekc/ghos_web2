@@ -22,7 +22,7 @@ export function BattleCardSimple({ summary, onOpen, index }: BattleCardSimplePro
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
     >
-      <Card hover delay={index * 0.05} className="cursor-pointer group relative overflow-hidden" onClick={onOpen}>
+      <Card delay={index * 0.05} className="cursor-pointer relative overflow-hidden" onClick={onOpen}>
         <div
           className={cn(
             "absolute left-0 top-0 bottom-0 w-1",
@@ -71,12 +71,9 @@ export function BattleCardSimple({ summary, onOpen, index }: BattleCardSimplePro
                 <CardTile key={`${name}-${i}`} name={name} size="xs" />
               ))}
             </div>
-            <motion.div
-              whileHover={{ x: 4 }}
-              className="text-cr-muted group-hover:text-cr-gold transition-colors shrink-0"
-            >
+            <div className="text-cr-muted shrink-0">
               <ChevronRight className="w-5 h-5" />
-            </motion.div>
+            </div>
           </div>
 
           {summary.top_reason ? (

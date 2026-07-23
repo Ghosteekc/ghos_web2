@@ -179,7 +179,7 @@ export function OpponentsPanel() {
                 variant="secondary"
                 className={cn(
                   "!py-1.5 !px-3 text-xs shrink-0",
-                  isOpen && "border-cr-gold/60 text-cr-gold bg-cr-gold/10 hover:bg-cr-gold/15 active:bg-cr-gold/20",
+                  isOpen && "border-cr-gold/60 text-cr-gold bg-cr-gold/10 active:bg-cr-gold/20",
                 )}
                 disabled={isLoadingCounter}
                 onClick={() => void loadCounter(opp.index)}
@@ -389,7 +389,7 @@ export function LossAnalysisPanel() {
             key={item.battle_index}
             type="button"
             onClick={() => navigate(battleDetailPath(item.timestamp, item.battle_index))}
-            className="w-full text-left rounded-xl border p-3 transition-colors hover:border-cr-gold/40 border-cr-loss/25 bg-cr-loss/5"
+            className="w-full text-left rounded-xl border p-3 transition-colors border-cr-loss/25 bg-cr-loss/5"
           >
             <div className="flex items-start gap-2 mb-1.5">
               <Swords className="w-4 h-4 text-cr-loss shrink-0 mt-0.5" />

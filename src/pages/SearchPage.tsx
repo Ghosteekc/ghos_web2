@@ -84,7 +84,7 @@ export function SearchPage() {
         {query && (
           <button
             onClick={() => setQuery("")}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-cr-muted hover:text-cr-text"
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-cr-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -167,11 +167,11 @@ export function SearchPage() {
             {history.map((item) => (
               <span
                 key={item}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-cr-card border border-cr-border text-xs text-cr-muted hover:text-cr-text hover:border-cr-gold/30 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-cr-card border border-cr-border text-xs text-cr-muted transition-colors cursor-pointer"
                 onClick={() => setQuery(item)}
               >
                 {item}
-                <button onClick={() => removeHistory(item)} className="hover:text-cr-loss">
+                <button onClick={() => removeHistory(item)} className="text-cr-muted">
                   <X className="w-3 h-3" />
                 </button>
               </span>

@@ -20,6 +20,7 @@ import { applyTheme, type AppTheme } from "@/hooks/useTheme";
 import { ensureSettingsLoaded } from "@/stores/settingsStore";
 import { Profile } from "@/types";
 import { hapticManager } from "@/utils/hapticManager";
+import { formatLastSyncLabel, getLastSyncAt, LAST_SYNC_EVENT } from "@/utils/lastSync";
 
 export function SettingsPage() {
   const { tg, showAlert, showConfirm } = useTelegram();
@@ -28,6 +29,9 @@ export function SettingsPage() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [lastSyncLabel, setLastSyncLabel] = useState<string | null>(() =>
+    formatLastSyncLabel(getLastSyncAt()),
+  );
 
   const loadProfile = useCallback(async () => {
     try {
@@ -57,6 +61,19 @@ export function SettingsPage() {
     webApp.onEvent?.("themeChanged", onThemeChanged);
     return () => webApp.offEvent?.("themeChanged", onThemeChanged);
   }, [settings.theme]);
+
+  useEffect(() => {
+    const refreshLastSync = () => {
+      setLastSyncLabel(formatLastSyncLabel(getLastSyncAt()));
+    };
+    refreshLastSync();
+    window.addEventListener(LAST_SYNC_EVENT, refreshLastSync);
+    window.addEventListener("app:sync", refreshLastSync);
+    return () => {
+      window.removeEventListener(LAST_SYNC_EVENT, refreshLastSync);
+      window.removeEventListener("app:sync", refreshLastSync);
+    };
+  }, []);
 
   const updateSetting = async (
     patch: Parameters<typeof update>[0],
@@ -209,7 +226,7 @@ export function SettingsPage() {
               <motion.button
                 type="button"
                 whileTap={{ scale: 0.95 }}
-                className="p-3 rounded-xl bg-cr-loss/10 hover:bg-cr-loss/20 transition-colors shrink-0"
+                className="p-3 rounded-xl bg-cr-loss/10 transition-colors shrink-0"
                 aria-label="Выход"
                 onClick={() => tg?.close?.()}
               >
@@ -277,6 +294,9 @@ export function SettingsPage() {
               </button>
             </Card>
           </div>
+          {lastSyncLabel ? (
+            <p className="text-center text-sm font-semibold text-cr-win mt-3">{lastSyncLabel}</p>
+          ) : null}
         </section>
       </div>
 

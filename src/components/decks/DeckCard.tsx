@@ -24,9 +24,8 @@ export function DeckCard({ deck, index, onOpen }: DeckCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-      whileHover={{ y: -6, transition: { duration: 0.2 } }}
       onClick={onOpen}
-      className="group relative"
+      className="relative"
     >
       <Card className="cursor-pointer overflow-hidden">
         <div className="flex items-center justify-between mb-4">

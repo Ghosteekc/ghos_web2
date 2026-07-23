@@ -591,7 +591,7 @@ function RoflModeBar({
             aria-label="Что такое рофл-режим"
             aria-expanded={showHelp}
             onClick={() => setShowHelp((v) => !v)}
-            className="w-6 h-6 shrink-0 rounded-full border border-cr-border bg-cr-card/60 text-xs font-bold text-cr-muted hover:text-cr-text hover:border-cr-gold/40 transition-colors"
+            className="w-6 h-6 shrink-0 rounded-full border border-cr-border bg-cr-card/60 text-xs font-bold text-cr-muted transition-colors"
           >
             ?
           </button>

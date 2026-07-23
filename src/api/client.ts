@@ -40,6 +40,7 @@ import {
 } from "@/types";
 
 import { cacheGet, cacheSet, cacheInvalidate, cacheHas, inflight, TTL, sleep } from "./cache";
+import { setLastSyncAt } from "@/utils/lastSync";
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? "").trim();
 
@@ -481,11 +482,10 @@ export const api = {
 
 
   syncData: async () => {
-
     cacheInvalidate();
-
-    return request<{ ok: boolean; battles_loaded: number }>("/api/sync", { method: "POST" });
-
+    const result = await request<{ ok: boolean; battles_loaded: number }>("/api/sync", { method: "POST" });
+    setLastSyncAt();
+    return result;
   },
 
 

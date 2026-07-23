@@ -71,16 +71,16 @@ export function HomeServicePanel({ profile, onNavigate }: HomeServicePanelProps)
               key={item.to}
               type="button"
               onClick={() => onNavigate(item.to)}
-              className="flex items-center gap-3 p-3 rounded-xl bg-cr-card border border-cr-border hover:border-cr-blue/40 hover:bg-cr-blue/5 transition-colors text-left group"
+              className="flex items-center gap-3 p-3 rounded-xl bg-cr-card border border-cr-border transition-colors text-left"
             >
-              <div className="p-2 rounded-lg bg-cr-bg/80 group-hover:bg-cr-blue/10 transition-colors shrink-0">
-                <item.icon className="w-5 h-5 text-cr-muted group-hover:text-cr-blue transition-colors" />
+              <div className="p-2 rounded-lg bg-cr-bg/80 shrink-0">
+                <item.icon className="w-5 h-5 text-cr-muted" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold text-cr-text">{item.label}</p>
                 <p className="text-[11px] text-cr-muted truncate">{item.hint}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-cr-muted/50 group-hover:text-cr-gold shrink-0" />
+              <ChevronRight className="w-4 h-4 text-cr-muted/50 shrink-0" />
             </button>
           ))}
         </div>

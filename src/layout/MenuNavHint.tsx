@@ -40,7 +40,7 @@ export function MenuNavHint({ visible }: { visible: boolean }) {
           dismissHint();
           setDismissed(true);
         }}
-        className="shrink-0 rounded-md p-1 text-cr-muted hover:text-cr-text"
+        className="shrink-0 rounded-md p-1 text-cr-muted"
         aria-label="Скрыть подсказку"
       >
         <X className="w-3.5 h-3.5" />
