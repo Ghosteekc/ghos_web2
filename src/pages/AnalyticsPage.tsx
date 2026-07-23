@@ -18,6 +18,7 @@ import { cacheHas, cacheGet } from "@/api/cache";
 import { usePageRefresh } from "@/hooks";
 import { OpponentsPanel, DeckToolsPanel, LossAnalysisPanel } from "@/components/analytics/AnalyticsExtras";
 import { RecommendationsPanel } from "@/components/analytics/recommendations";
+import { ChartGlassTooltipShell, ChartTooltipAnchor } from "@/components/charts/ChartGlassTooltip";
 
 const ANALYTICS_NAV = [
   { id: "recommendations", label: "Рекомендации", emoji: "💡" },
@@ -148,14 +149,23 @@ export function AnalyticsPage() {
             <Card>
               <h3 className="text-sm font-semibold text-cr-text mb-2">Рост трофеев</h3>
               <p className="text-[11px] text-cr-muted mb-3">Только рейтинговые 1v1 · наведите на точку для деталей</p>
-              <div className="h-[170px]">
+              <ChartTooltipAnchor className="h-[170px]">
                 {lastResults.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={lastResults} margin={CHART_MARGIN}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                       <XAxis dataKey="index" hide />
                       <YAxis stroke="#9ca3af" fontSize={11} tickLine={false} axisLine={false} width={CHART_YAXIS_WIDTH} />
-                      <Tooltip content={<TrophyGrowthTooltip />} />
+                      <Tooltip
+                        content={<TrophyGrowthTooltip />}
+                        wrapperStyle={{ outline: "none" }}
+                        contentStyle={{
+                          background: "transparent",
+                          border: "none",
+                          boxShadow: "none",
+                          padding: 0,
+                        }}
+                      />
                       <Line
                         type="monotone"
                         dataKey="trophyChange"
@@ -170,12 +180,12 @@ export function AnalyticsPage() {
                 ) : (
                   <p className="text-cr-muted text-sm text-center pt-10">Недостаточно рейтинговых боёв</p>
                 )}
-              </div>
+              </ChartTooltipAnchor>
             </Card>
 
             <Card className="lg:col-span-2">
               <h3 className="text-sm font-semibold text-cr-text mb-2">Винрейт по дням</h3>
-              <div className="h-[220px]">
+              <ChartTooltipAnchor className="h-[220px]">
                 {winrateByDay.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart
@@ -239,7 +249,7 @@ export function AnalyticsPage() {
                 ) : (
                   <p className="text-cr-muted text-sm text-center pt-16">Нет данных по дням</p>
                 )}
-              </div>
+              </ChartTooltipAnchor>
               <p className="text-[11px] text-cr-muted mt-2 text-center">
                 Фиолетовая линия — процент побед за день
               </p>
@@ -271,15 +281,17 @@ type TrophyChartPoint = {
 function TrophyGrowthTooltip({
   active,
   payload,
+  coordinate,
 }: {
   active?: boolean;
   payload?: { payload: TrophyChartPoint }[];
+  coordinate?: { x?: number; y?: number };
 }) {
   if (!active || !payload?.[0]) return null;
   const point = payload[0].payload;
   const delta = point.trophyChange;
   return (
-    <div className="chart-tooltip-glass px-3 py-2 text-xs shadow-lg">
+    <ChartGlassTooltipShell active={active} coordinate={coordinate}>
       <p className="font-semibold text-cr-text">против {point.opponentName}</p>
       {(point.playedDate || point.playedTime) && (
         <p className="text-cr-muted mt-0.5">
@@ -293,7 +305,7 @@ function TrophyGrowthTooltip({
         {delta} кубков
       </p>
       <p className="text-cr-muted mt-0.5">{point.won ? "Победа" : "Поражение"}</p>
-    </div>
+    </ChartGlassTooltipShell>
   );
 }
 
@@ -307,10 +319,12 @@ function WinrateDayTooltip({
   active,
   payload,
   label,
+  coordinate,
 }: {
   active?: boolean;
   payload?: WinrateTooltipRow[];
   label?: string;
+  coordinate?: { x?: number; y?: number };
 }) {
   if (!active || !payload?.length) return null;
 
@@ -319,7 +333,7 @@ function WinrateDayTooltip({
   const winrate = payload.find((item) => item.dataKey === "winrate")?.value;
 
   return (
-    <div className="chart-tooltip-glass px-3 py-2 text-xs shadow-lg">
+    <ChartGlassTooltipShell active={active} coordinate={coordinate}>
       {label ? <p className="font-semibold text-cr-text mb-1.5">{label}</p> : null}
       {wins != null ? (
         <p className="font-semibold text-cr-win">
@@ -336,6 +350,6 @@ function WinrateDayTooltip({
           Винрейт : {Number(winrate).toFixed(1)}%
         </p>
       ) : null}
-    </div>
+    </ChartGlassTooltipShell>
   );
 }
