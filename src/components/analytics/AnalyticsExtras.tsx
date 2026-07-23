@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
-import { Shield, Swords, Wand2, ChevronDown, ChevronUp, RefreshCw, ExternalLink } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Shield, Swords, Wand2, ChevronDown, ChevronUp, RefreshCw, ExternalLink, Brain, ChevronRight } from "lucide-react";
 import { api, ApiError } from "@/api/client";
-import { cacheInvalidate } from "@/api/cache";
+import { cacheGet, cacheHas, cacheInvalidate } from "@/api/cache";
 import { Card, Button, Loader } from "@/components/ui";
 import { CardDeckGrid } from "@/components/cards";
-import { useCardCatalog, useTelegram } from "@/hooks";
-import { cn } from "@/utils";
-import type { CounterDeckData, CustomizeData, OpponentEntry, WinrateEntry } from "@/types";
+import { useCardCatalog, usePageRefresh, useTelegram } from "@/hooks";
+import { battleDetailPath, cn } from "@/utils";
+import type { CounterDeckData, CustomizeData, InsightsData, OpponentEntry, WinrateEntry } from "@/types";
 
 function decksEqual(a: string[], b: string[]) {
   return a.length === b.length && a.every((card, i) => card === b[i]);
@@ -308,5 +309,111 @@ export function DeckToolsPanel() {
         </Card>
       )}
     </div>
+  );
+}
+
+export function LossAnalysisPanel() {
+  const navigate = useNavigate();
+  const [insights, setInsights] = useState<InsightsData | null>(() => cacheGet<InsightsData>("insights"));
+  const [loading, setLoading] = useState(() => !cacheHas("insights"));
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    const hasCache = cacheHas("insights");
+    if (!hasCache) {
+      setLoading(true);
+    }
+    try {
+      setError(null);
+      setInsights(await api.getInsights());
+    } catch (e) {
+      setInsights(null);
+      setError(e instanceof ApiError ? e.message : "Не удалось загрузить разбор поражений");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  usePageRefresh(load);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const lossInsights = useMemo(
+    () => (insights?.insights ?? []).filter((item) => !item.won).slice(0, 7),
+    [insights?.insights],
+  );
+
+  if (loading) return <Loader />;
+  if (error) return <ErrorCard message={error} />;
+  if (!insights) {
+    return (
+      <Card className="text-center text-cr-muted text-sm">
+        Сыграйте бои — здесь появится разбор ваших поражений
+      </Card>
+    );
+  }
+
+  if (!insights.patterns.length && !lossInsights.length) {
+    return (
+      <Card className="text-center text-cr-muted text-sm">
+        Сыграйте бои — здесь появится разбор ваших поражений
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <div className="flex items-center gap-2 mb-4">
+        <Brain className="w-5 h-5 text-cr-blue" />
+        <h3 className="text-sm font-semibold text-cr-text">Разбор поражений</h3>
+      </div>
+
+      {insights.patterns.length ? (
+        <div className="space-y-2 mb-4">
+          {insights.patterns.map((pattern, index) => (
+            <p
+              key={index}
+              className="text-xs text-cr-gold bg-cr-gold/10 border border-cr-gold/20 rounded-lg px-3 py-2"
+            >
+              {pattern}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="space-y-3">
+        {lossInsights.map((item) => (
+          <button
+            key={item.battle_index}
+            type="button"
+            onClick={() => navigate(battleDetailPath(item.timestamp, item.battle_index))}
+            className="w-full text-left rounded-xl border p-3 transition-colors hover:border-cr-gold/40 border-cr-loss/25 bg-cr-loss/5"
+          >
+            <div className="flex items-start gap-2 mb-1.5">
+              <Swords className="w-4 h-4 text-cr-loss shrink-0 mt-0.5" />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-cr-accent font-semibold mb-0.5">против {item.opponent_name}</p>
+                <p className="text-sm text-cr-text leading-snug">{item.summary}</p>
+                {item.matchup_score > 0 ? (
+                  <p className="text-[11px] text-cr-muted mt-1">Матчап: {item.matchup_score.toFixed(0)}/100</p>
+                ) : null}
+              </div>
+              <ChevronRight className="w-5 h-5 text-cr-muted shrink-0 mt-0.5" />
+            </div>
+            {item.details.length > 0 && (
+              <ul className="mt-2 space-y-1 pl-6">
+                {item.details.slice(0, 2).map((detail, detailIndex) => (
+                  <li key={detailIndex} className="text-[11px] text-cr-accent/90 font-medium leading-snug">
+                    {detail}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </button>
+        ))}
+      </div>
+    </Card>
   );
 }

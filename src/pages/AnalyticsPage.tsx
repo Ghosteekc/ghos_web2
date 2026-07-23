@@ -16,11 +16,12 @@ import { Card, FeatureNavGrid, Loader, ScrollToTopButton } from "@/components/ui
 import { api } from "@/api/client";
 import { cacheHas, cacheGet } from "@/api/cache";
 import { usePageRefresh } from "@/hooks";
-import { OpponentsPanel, DeckToolsPanel } from "@/components/analytics/AnalyticsExtras";
+import { OpponentsPanel, DeckToolsPanel, LossAnalysisPanel } from "@/components/analytics/AnalyticsExtras";
 import { RecommendationsPanel } from "@/components/analytics/recommendations";
 
 const ANALYTICS_NAV = [
   { id: "recommendations", label: "Рекомендации", emoji: "💡" },
+  { id: "losses", label: "Разбор поражений", emoji: "🧠" },
   { id: "opponents", label: "Соперники", emoji: "⚔️" },
   { id: "tools", label: "Улучшения", emoji: "🔧" },
 ] as const;
@@ -247,6 +248,7 @@ export function AnalyticsPage() {
       )}
 
       {section === "recommendations" && <RecommendationsPanel />}
+      {section === "losses" && <LossAnalysisPanel />}
       {section === "opponents" && <OpponentsPanel />}
       {section === "tools" && <DeckToolsPanel />}
 
