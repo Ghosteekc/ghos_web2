@@ -9,8 +9,18 @@ const BUBBLE_HIT_X = 58;
 const BUBBLE_HIT_Y = 50;
 
 const MOVE_SPRING = { type: "spring" as const, stiffness: 210, damping: 28, mass: 0.85 };
-const RELEASE_SPRING = { type: "spring" as const, stiffness: 165, damping: 22, mass: 1.05 };
-const STRETCH_TWEEN = { type: "tween" as const, duration: 0.24, ease: [0.22, 0.08, 0.24, 1] as const };
+const RELEASE_SPRING = { type: "spring" as const, stiffness: 180, damping: 18, mass: 0.92 };
+const STRETCH_TWEEN = { type: "tween" as const, duration: 0.18, ease: [0.22, 0.08, 0.24, 1] as const };
+
+const STRETCH_X_MAX = 0.32;
+const STRETCH_Y_MIN = 0.86;
+
+function stretchFromPull(pull: number): { x: number; y: number } {
+  return {
+    x: 1 + Math.min(pull / 48, STRETCH_X_MAX),
+    y: Math.max(STRETCH_Y_MIN, 1 - Math.min(pull / 120, 0.12)),
+  };
+}
 
 type BubbleTransition = typeof MOVE_SPRING | typeof RELEASE_SPRING | typeof STRETCH_TWEEN;
 
@@ -107,9 +117,13 @@ export function BottomNav() {
     [getTabCenters],
   );
 
-  const animateBubbleX = useCallback(
-    (target: number, config: BubbleTransition = MOVE_SPRING) => animate(bubbleX, target, config),
-    [bubbleX],
+  const applyStretchFromPull = useCallback(
+    (pull: number) => {
+      const { x, y } = stretchFromPull(pull);
+      scaleX.set(x);
+      scaleY.set(y);
+    },
+    [scaleX, scaleY],
   );
 
   const animateStretch = useCallback(
@@ -121,6 +135,18 @@ export function BottomNav() {
   const resetStretch = useCallback(
     () => animateStretch(1, 1, RELEASE_SPRING),
     [animateStretch],
+  );
+
+  const animateBubbleX = useCallback(
+    (target: number, config: BubbleTransition = MOVE_SPRING) =>
+      animate(bubbleX, target, {
+        ...config,
+        onUpdate: (latest) => applyStretchFromPull(Math.abs(latest - target)),
+        onComplete: () => {
+          void resetStretch();
+        },
+      }),
+    [applyStretchFromPull, bubbleX, resetStretch],
   );
 
   const syncBubbleToIndex = useCallback(
@@ -157,8 +183,7 @@ export function BottomNav() {
       return;
     }
     syncBubbleToIndex(activeIndex, true);
-    void resetStretch();
-  }, [activeIndex, resetStretch, syncBubbleToIndex]);
+  }, [activeIndex, syncBubbleToIndex]);
 
   useEffect(() => {
     const onResize = () => {
@@ -205,11 +230,8 @@ export function BottomNav() {
     }
 
     const anchor = getTabCenterX(activeIndex);
-    const pull = Math.abs(nextX - anchor);
-    void animateStretch(
-      1 + Math.min(pull / 80, 0.18),
-      Math.max(0.92, 1 - Math.min(pull / 200, 0.06)),
-    );
+    const { x, y } = stretchFromPull(Math.abs(nextX - anchor));
+    void animateStretch(x, y);
   };
 
   const finishDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -229,7 +251,7 @@ export function BottomNav() {
 
     setPreviewIndex(nextIndex);
 
-    void Promise.all([animateBubbleX(targetX, RELEASE_SPRING), resetStretch()]).then(() => {
+    void animateBubbleX(targetX, RELEASE_SPRING).then(() => {
       setPreviewIndex(null);
       if (target && target.id !== activeId) {
         skipNavAnimateRef.current = true;
