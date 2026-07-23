@@ -257,20 +257,24 @@ export function CardDeckGrid({
   maxVisible = 8,
   className,
 }: CardDeckGridProps) {
-  const visible = cards.slice(0, maxVisible);
+  const limit = Math.min(Math.max(maxVisible, 1), 8);
+  const visible = cards.slice(0, limit);
   const hidden = cards.length - visible.length;
+  const slots = Array.from({ length: 8 }, (_, index) => visible[index] ?? null);
 
   return (
     <div className={cn("w-full", className)}>
       <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-1 w-full">
-        {visible.map((name, i) => (
-          <div key={`${name}-${i}`} className="min-w-0 overflow-hidden">
-            <CardTile
-              name={name}
-              icon={icons?.[i]}
-              size={size}
-              showLabel={showLabels}
-            />
+        {slots.map((name, index) => (
+          <div key={name ? `${name}-${index}` : `empty-${index}`} className="min-w-0 overflow-hidden">
+            {name ? (
+              <CardTile
+                name={name}
+                icon={icons?.[index]}
+                size={size}
+                showLabel={showLabels}
+              />
+            ) : null}
           </div>
         ))}
       </div>

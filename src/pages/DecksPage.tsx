@@ -617,11 +617,11 @@ function RoflModeBar({
       </div>
       {showHelp ? (
         <p className="text-xs text-cr-muted leading-snug px-0.5">
-          Часто сливаешь из-за слабости своей колоды?
+          Включи — получишь meme-колоду уровня brainrot, не «все скелеты подряд».
           <br />
-          Включи тумблер и импортируй предложенную колоду в игру!
+          Skill issue, NPC pack, Ohio boss и прочий post-irony.
           <br />
-          С ней, ты будешь сливать куда чаще, зато веселее!
+          В ranked не заходи. Смейся и жми «Заново».
         </p>
       ) : null}
     </div>
@@ -725,8 +725,8 @@ function RandomDeckPanel({
 
         <p className="text-xs text-cr-muted mb-4">
           {deck.rofl
-            ? (deck.rofl_tagline ?? "Угарная колода ради смеха. В ranked не играйте.")
-            : "8 случайных карт, как в игре. Нажмите «Перегенерировать», если колода не нравится."}
+            ? (deck.rofl_tagline ?? "Meme-колода. В ranked не заходи. Skill issue чисто.")
+            : "8 случайных карт, как в игре. Нажмите «Заново», если колода не нравится."}
         </p>
 
         <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-1 mb-4">
@@ -775,7 +775,7 @@ function RandomDeckPanel({
               disabled={loading}
             >
               <RefreshCw className={"w-4 h-4 shrink-0 " + (loading ? "animate-spin" : "")} />
-              <span className="truncate">Перегенерировать</span>
+              <span className="truncate">Заново</span>
             </Button>
             {deck.deck_link ? (
               <Button
