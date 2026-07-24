@@ -29,6 +29,7 @@ export function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
+  const [clearingHistory, setClearingHistory] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [lastSyncLabel, setLastSyncLabel] = useState<string | null>(() =>
     formatLastSyncLabel(getLastSyncAt()),
@@ -92,7 +93,7 @@ export function SettingsPage() {
 
   const handleClearCache = async () => {
     const ok = await showConfirm?.(
-      "Сбросить временный кеш приложения?\n\nИстория боёв на сервере сохранится. Данные в интерфейсе обновятся при следующем открытии разделов или синхронизации.",
+      "Сбросить временный кеш приложения?\n\nИстория боёв на сервере не удаляется. Данные в интерфейсе обновятся при следующем открытии разделов или синхронизации.",
     );
     if (!ok) return;
 
@@ -101,13 +102,44 @@ export function SettingsPage() {
       await api.clearCache();
       haptic.success();
       await showAlert?.(
-        "Кеш приложения сброшен. История боёв сохранена — откройте разделы заново или нажмите «Синхронизировать».",
+        "Кеш приложения сброшен. Чтобы обновить списки, откройте разделы заново или нажмите «Синхронизировать».",
       );
     } catch (e) {
       haptic.error();
-      await showAlert?.(e instanceof Error ? e.message : "Не удалось очистить кеш");
+      await showAlert?.(e instanceof Error ? e.message : "Не удалось сбросить кеш");
     } finally {
       setClearing(false);
+    }
+  };
+
+  const handleClearBattleHistory = async () => {
+    if (!profile?.player_tag) {
+      void showAlert?.("Сначала привяжите аккаунт Clash Royale в боте: /link #ТЕГ");
+      return;
+    }
+
+    const ok = await showConfirm?.(
+      "Удалить сохранённую историю боёв?\n\nБудут удалены только бои вашего привязанного аккаунта (#"
+        + profile.player_tag.replace(/^#/, "")
+        + "). Другие пользователи не затронуты.\n\nДействие нельзя отменить.",
+    );
+    if (!ok) return;
+
+    haptic.confirm();
+    setClearingHistory(true);
+    try {
+      const res = await api.clearBattleHistory();
+      haptic.success();
+      await showAlert?.(
+        res.deleted_count > 0
+          ? `История боёв очищена. Удалено записей: ${res.deleted_count}. Новые бои появятся после синхронизации с Clash Royale.`
+          : "Сохранённая история уже пуста. Нажмите «Синхронизировать», чтобы загрузить бои из Clash Royale.",
+      );
+    } catch (e) {
+      haptic.error();
+      await showAlert?.(e instanceof Error ? e.message : "Не удалось очистить историю боёв");
+    } finally {
+      setClearingHistory(false);
     }
   };
 
@@ -305,6 +337,17 @@ export function SettingsPage() {
               </button>
             </Card>
           </div>
+          <Card className="!p-0 overflow-hidden mt-3">
+            <button
+              type="button"
+              className="settings-data-btn !rounded-none !border-0 w-full"
+              onClick={() => void handleClearBattleHistory()}
+              disabled={clearingHistory}
+            >
+              <Trash2 className="w-6 h-6 text-cr-loss" />
+              <span>{clearingHistory ? "Удаление…" : "Удалить историю боёв"}</span>
+            </button>
+          </Card>
           {lastSyncLabel ? (
             <p className="text-center text-sm font-semibold text-cr-win mt-3">{lastSyncLabel}</p>
           ) : null}

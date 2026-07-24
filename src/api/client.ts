@@ -484,6 +484,13 @@ export const api = {
 
 
 
+  clearBattleHistory: async () => {
+    cacheInvalidate();
+    return request<{ ok: boolean; deleted_count: number }>("/api/battles", { method: "DELETE" });
+  },
+
+
+
   syncData: async () => {
     cacheInvalidate();
     const result = await request<{ ok: boolean; battles_loaded: number }>("/api/sync", { method: "POST" });
