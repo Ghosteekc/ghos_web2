@@ -24,6 +24,7 @@ export function ProfilePage() {
       setError(null);
       const p = await api.getProfile();
       setProfile(p);
+      api.prefetchDeckTabs();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка загрузки профиля");
     } finally {
@@ -35,7 +36,6 @@ export function ProfilePage() {
 
   useEffect(() => {
     void load();
-    api.prefetchDeckTabs();
   }, [load]);
 
   if (loading) {

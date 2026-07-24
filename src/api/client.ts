@@ -96,6 +96,39 @@ function getInitData(): string {
 
 
 
+/** Telegram sometimes fills initData shortly after WebApp.ready — avoid racing the first fetch. */
+async function waitForInitData(maxWaitMs = 3000): Promise<void> {
+  if (getInitData()) return;
+  if (typeof window === "undefined" || !window.Telegram?.WebApp) return;
+  const deadline = Date.now() + maxWaitMs;
+  while (Date.now() < deadline) {
+    await sleep(50);
+    if (getInitData()) return;
+  }
+}
+
+
+
+function isTransientErrorCode(code: string): boolean {
+  return code === "E100" || code === "E101" || code === "E102" || code === "E103";
+}
+
+
+
+function isRetryableError(err: ApiError): boolean {
+  if (isTransientErrorCode(err.code)) return true;
+  return isRetryable(err.status);
+}
+
+
+
+function retryDelayMs(err: ApiError, attempt: number): number {
+  if (isTransientErrorCode(err.code)) return 900 * (attempt + 1);
+  return 600 * (attempt + 1);
+}
+
+
+
 function buildRequestHeaders(extra?: HeadersInit): HeadersInit {
 
   const headers: Record<string, string> = {
@@ -139,6 +172,8 @@ function isRetryable(status: number) {
 
 
 async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
+  await waitForInitData();
+
   let res: Response;
 
   const controller = new AbortController();
@@ -225,13 +260,13 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
-  const retries = 2;
+  const maxAttempts = 4;
 
   let lastError: ApiError | null = null;
 
 
 
-  for (let attempt = 0; attempt <= retries; attempt++) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
 
     try {
 
@@ -241,9 +276,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
       lastError = e instanceof ApiError ? e : new ApiError(formatApiError(DEFAULT_UNAVAILABLE, "E099"), 0, "E099");
 
-      if (isRetryable(lastError.status) && attempt < retries) {
+      if (isRetryableError(lastError) && attempt < maxAttempts - 1) {
 
-        await sleep(600 * (attempt + 1));
+        await sleep(retryDelayMs(lastError, attempt));
 
         continue;
 
