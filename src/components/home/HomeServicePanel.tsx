@@ -5,10 +5,9 @@ import {
   Search,
   Star,
   Link2,
-  ChevronRight,
   Sparkles,
 } from "lucide-react";
-import { Card } from "@/components/ui";
+import { Card, NavRowButton } from "@/components/ui";
 import { Profile } from "@/types";
 import { formatPlayerTag } from "@/utils";
 
@@ -67,21 +66,13 @@ export function HomeServicePanel({ profile, onNavigate }: HomeServicePanelProps)
         <h3 className="text-sm font-semibold text-cr-text mb-3 px-1">Разделы приложения</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {quickLinks.map((item) => (
-            <button
+            <NavRowButton
               key={item.to}
-              type="button"
+              icon={item.icon}
+              label={item.label}
+              hint={item.hint}
               onClick={() => onNavigate(item.to)}
-              className="flex items-center gap-3 p-3 rounded-xl bg-cr-card border border-cr-border transition-colors text-left"
-            >
-              <div className="p-2 rounded-lg bg-cr-bg/80 shrink-0">
-                <item.icon className="w-5 h-5 text-cr-muted" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-cr-text">{item.label}</p>
-                <p className="text-[11px] text-cr-muted truncate">{item.hint}</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-cr-muted/50 shrink-0" />
-            </button>
+            />
           ))}
         </div>
       </div>

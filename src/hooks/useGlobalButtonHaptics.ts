@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { triggerHaptic } from "@/utils/hapticManager";
 
 const INTERACTIVE_SELECTOR =
-  "button:not([disabled]), [role='switch']:not([disabled]), .filter-tab, .feature-nav-btn, .collection-filter-tab, .segment-tab, .sidebar-item, .sidebar-overlay, .toggle-switch";
+  "button:not([disabled]), [role='switch']:not([disabled]), .filter-tab, .feature-nav-btn, .pixel-btn, .collection-filter-tab, .segment-tab, .sidebar-item, .sidebar-overlay, .toggle-switch";
 
 function shouldUseSelectionHaptic(target: Element) {
   return (
@@ -11,6 +11,7 @@ function shouldUseSelectionHaptic(target: Element) {
     target.classList.contains("toggle-switch") ||
     target.classList.contains("filter-tab") ||
     target.classList.contains("feature-nav-btn") ||
+    target.classList.contains("pixel-btn") ||
     target.classList.contains("collection-filter-tab") ||
     target.classList.contains("segment-tab") ||
     target.classList.contains("sidebar-item")

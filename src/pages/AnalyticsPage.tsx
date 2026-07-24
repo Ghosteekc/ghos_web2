@@ -12,7 +12,7 @@ import {
 } from "recharts";
 import { TrendingUp, TrendingDown, Flame, Clock } from "lucide-react";
 import { StatsOverview } from "@/types";
-import { Card, FeatureNavGrid, Loader, ScrollToTopButton } from "@/components/ui";
+import { Card, FeatureNavGrid, Loader, ScrollToTopButton, Button } from "@/components/ui";
 import { api } from "@/api/client";
 import { cacheGet, lsGet, TTL } from "@/api/cache";
 
@@ -125,10 +125,8 @@ export function AnalyticsPage() {
   if ((error || !stats) && section === null) {
     return (
       <Card className="text-center">
-        <p className="text-cr-loss mb-2">{error ?? "Нет данных"}</p>
-        <button type="button" onClick={() => void load()} className="text-cr-gold text-sm">
-          Повторить
-        </button>
+        <p className="text-cr-loss mb-3">{error ?? "Нет данных"}</p>
+        <Button onClick={() => void load()}>Повторить</Button>
       </Card>
     );
   }

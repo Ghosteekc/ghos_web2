@@ -1,5 +1,7 @@
 export { Card } from "./Card";
 export { Button } from "./Button";
+export { NavRowButton } from "./NavRowButton";
+export type { NavRowButtonProps } from "./NavRowButton";
 export { FeatureNavGrid } from "./FeatureNavGrid";
 export type { FeatureNavItem } from "./FeatureNavGrid";
 export { ScrollToTopButton } from "./ScrollToTopButton";

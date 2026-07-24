@@ -78,18 +78,16 @@ function ArenaBlock({
       <button
         type="button"
         onClick={onNavigate}
-        className="w-full flex items-center justify-between gap-3 text-left"
+        className="pixel-btn pixel-btn--nav w-full mt-0"
       >
-        <div>
-          <p className="text-xs text-cr-muted">Арена {summary.arena}</p>
-          <h4 className="text-base font-semibold text-cr-text">
-            {summary.arenaName}
-          </h4>
-          <p className="text-[11px] text-cr-muted mt-1">
+        <span className="pixel-btn-text">
+          <span className="pixel-btn-hint">Арена {summary.arena}</span>
+          <span className="pixel-btn-label">{summary.arenaName}</span>
+          <span className="pixel-btn-hint">
             Рекомендуемый уровень карт: {summary.recommendedLevel}+ · Прогресс {summary.progressPercent}%
-          </p>
-        </div>
-        <ChevronRight className="w-5 h-5 text-cr-muted shrink-0" />
+          </span>
+        </span>
+        <ChevronRight className="pixel-btn-chevron" aria-hidden />
       </button>
 
       <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">

@@ -171,7 +171,7 @@ export function ProfileCardsPage() {
             {rarityFilter !== "all" && (
               <button
                 type="button"
-                className="text-xs text-cr-accent underline"
+                className="pixel-btn pixel-btn--text underline"
                 onClick={() => setRarityFilter("all")}
               >
                 Сбросить фильтр
@@ -196,10 +196,8 @@ export function ProfileCardsPage() {
                 type="button"
                 onClick={() => handleSortMode(opt.id)}
                 className={
-                  "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors " +
-                  (active
-                    ? "border-cr-gold/50 bg-cr-gold/15 text-cr-gold"
-                    : "border-cr-border/40 text-cr-muted")
+                  "pixel-btn pixel-btn--chip-sm " +
+                  (active ? "pixel-btn--active text-cr-gold" : "text-cr-muted")
                 }
               >
                 {opt.label}
@@ -217,7 +215,7 @@ export function ProfileCardsPage() {
             type="button"
             onClick={toggleDirection}
             title={sortDirection === "asc" ? "По возрастанию" : "По убыванию"}
-            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold border border-cr-border/40 text-cr-muted"
+            className="pixel-btn pixel-btn--chip-sm text-cr-muted"
           >
             {sortDirection === "asc" ? (
               <>

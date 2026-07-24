@@ -320,7 +320,7 @@ export function SettingsPage() {
             <Card className="!p-0 overflow-hidden">
               <button
                 type="button"
-                className="settings-data-btn !rounded-none !border-0 h-full"
+                className="settings-data-btn h-full"
                 onClick={() => void handleClearCache()}
                 disabled={clearing}
               >
@@ -331,7 +331,7 @@ export function SettingsPage() {
             <Card className="!p-0 overflow-hidden">
               <button
                 type="button"
-                className="settings-data-btn !rounded-none !border-0 h-full"
+                className="settings-data-btn h-full"
                 onClick={() => void handleSyncData()}
                 disabled={syncing}
               >
@@ -343,7 +343,7 @@ export function SettingsPage() {
           <Card className="!p-0 overflow-hidden mt-3">
             <button
               type="button"
-              className="settings-data-btn !rounded-none !border-0 w-full"
+              className="settings-data-btn w-full"
               onClick={() => void handleClearBattleHistory()}
               disabled={clearingHistory}
             >
