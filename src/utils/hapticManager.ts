@@ -15,6 +15,9 @@ export type HapticEvent =
   | "success"
   | "warning"
   | "error"
+  | "confirm"
+  | "double"
+  /** @deprecated Use `double` */
   | "important";
 
 let userHapticEnabled = true;
@@ -32,7 +35,12 @@ function tgHaptic() {
   return window.Telegram?.WebApp?.HapticFeedback;
 }
 
+function canPlayHaptic(): boolean {
+  return userHapticEnabled && Boolean(tgHaptic());
+}
+
 function safeImpact(style: HapticImpact): void {
+  if (!canPlayHaptic()) return;
   try {
     tgHaptic()?.impactOccurred?.(style);
   } catch {
@@ -41,6 +49,7 @@ function safeImpact(style: HapticImpact): void {
 }
 
 function safeSelection(): void {
+  if (!canPlayHaptic()) return;
   try {
     tgHaptic()?.selectionChanged?.();
   } catch {
@@ -49,6 +58,7 @@ function safeSelection(): void {
 }
 
 function safeNotification(type: HapticNotify): void {
+  if (!canPlayHaptic()) return;
   try {
     tgHaptic()?.notificationOccurred?.(type);
   } catch {
@@ -57,6 +67,7 @@ function safeNotification(type: HapticNotify): void {
 }
 
 function scheduleImpact(style: HapticImpact, delayMs: number): void {
+  if (!canPlayHaptic()) return;
   window.setTimeout(() => safeImpact(style), delayMs);
 }
 
@@ -65,8 +76,7 @@ function scheduleImpact(style: HapticImpact, delayMs: number): void {
  * Respects user setting and Telegram API availability.
  */
 export function triggerHaptic(event: HapticEvent): void {
-  if (!userHapticEnabled) return;
-  if (!tgHaptic()) return;
+  if (!canPlayHaptic()) return;
 
   switch (event) {
     case "lightTap":
@@ -90,6 +100,10 @@ export function triggerHaptic(event: HapticEvent): void {
     case "error":
       safeNotification("error");
       break;
+    case "confirm":
+      safeImpact("medium");
+      break;
+    case "double":
     case "important":
       safeImpact("medium");
       scheduleImpact("light", 90);
@@ -99,9 +113,23 @@ export function triggerHaptic(event: HapticEvent): void {
   }
 }
 
-/** @deprecated Prefer triggerHaptic("lightTap" | "mediumTap" | "heavyTap") */
+/** Primary haptic API for the Mini App. */
+export const haptic = {
+  setEnabled: setHapticEnabled,
+  isEnabled: isHapticEnabled,
+  light: () => triggerHaptic("lightTap"),
+  medium: () => triggerHaptic("mediumTap"),
+  heavy: () => triggerHaptic("heavyTap"),
+  success: () => triggerHaptic("success"),
+  warning: () => triggerHaptic("warning"),
+  error: () => triggerHaptic("error"),
+  selection: () => triggerHaptic("selection"),
+  double: () => triggerHaptic("double"),
+  confirm: () => triggerHaptic("confirm"),
+};
+
+/** @deprecated Prefer `haptic.light()` / `triggerHaptic()` */
 export function hapticImpact(style: HapticImpact = "light"): void {
-  if (!userHapticEnabled || !tgHaptic()) return;
   const map: Record<HapticImpact, HapticEvent> = {
     light: "lightTap",
     soft: "lightTap",
@@ -112,12 +140,12 @@ export function hapticImpact(style: HapticImpact = "light"): void {
   triggerHaptic(map[style]);
 }
 
-/** @deprecated Prefer triggerHaptic("selection") */
+/** @deprecated Prefer `haptic.selection()` */
 export function hapticSelection(): void {
   triggerHaptic("selection");
 }
 
-/** @deprecated Prefer triggerHaptic("success" | "warning" | "error") */
+/** @deprecated Prefer `haptic.success()` / `haptic.warning()` / `haptic.error()` */
 export function hapticNotify(type: HapticNotify): void {
   triggerHaptic(type);
 }
@@ -133,17 +161,19 @@ export function withHaptic<T extends (...args: never[]) => void>(
   }) as T;
 }
 
-/** Haptic manager facade for explicit imports. */
+/** Back-compat facade; prefer `haptic`. */
 export const hapticManager = {
-  setEnabled: setHapticEnabled,
-  isEnabled: isHapticEnabled,
+  setEnabled: haptic.setEnabled,
+  isEnabled: haptic.isEnabled,
   trigger: triggerHaptic,
-  lightTap: () => triggerHaptic("lightTap"),
-  mediumTap: () => triggerHaptic("mediumTap"),
-  heavyTap: () => triggerHaptic("heavyTap"),
-  selection: () => triggerHaptic("selection"),
-  success: () => triggerHaptic("success"),
-  warning: () => triggerHaptic("warning"),
-  error: () => triggerHaptic("error"),
-  important: () => triggerHaptic("important"),
+  lightTap: haptic.light,
+  mediumTap: haptic.medium,
+  heavyTap: haptic.heavy,
+  selection: haptic.selection,
+  success: haptic.success,
+  warning: haptic.warning,
+  error: haptic.error,
+  confirm: haptic.confirm,
+  double: haptic.double,
+  important: haptic.double,
 };

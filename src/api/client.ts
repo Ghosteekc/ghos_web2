@@ -456,7 +456,10 @@ export const api = {
 
 
 
-  getSettings: () => cachedGet<Settings>("settings-v1", "/api/settings", TTL.profile),
+  getSettings: (opts?: { fresh?: boolean }) => {
+    if (opts?.fresh) cacheInvalidate("settings-v1");
+    return cachedGet<Settings>("settings-v1", "/api/settings", TTL.profile);
+  },
 
 
 

@@ -19,7 +19,8 @@ import { useTelegram, usePageRefresh, useSettings } from "@/hooks";
 import { applyTheme, type AppTheme } from "@/hooks/useTheme";
 import { ensureSettingsLoaded } from "@/stores/settingsStore";
 import { Profile } from "@/types";
-import { hapticManager } from "@/utils/hapticManager";
+import { haptic } from "@/utils/hapticManager";
+import { translate } from "@/i18n";
 import { formatLastSyncLabel, getLastSyncAt, LAST_SYNC_EVENT } from "@/utils/lastSync";
 
 export function SettingsPage() {
@@ -84,7 +85,7 @@ export function SettingsPage() {
     } catch (e) {
       console.error(e);
       if (!options?.skipHaptic) {
-        hapticManager.error();
+        haptic.error();
       }
     }
   };
@@ -98,12 +99,12 @@ export function SettingsPage() {
     setClearing(true);
     try {
       await api.clearCache();
-      hapticManager.success();
+      haptic.success();
       await showAlert?.(
         "Кеш приложения сброшен. История боёв сохранена — откройте разделы заново или нажмите «Синхронизировать».",
       );
     } catch (e) {
-      hapticManager.error();
+      haptic.error();
       await showAlert?.(e instanceof Error ? e.message : "Не удалось очистить кеш");
     } finally {
       setClearing(false);
@@ -120,14 +121,14 @@ export function SettingsPage() {
     try {
       const res = await api.syncData();
       window.dispatchEvent(new Event("app:sync"));
-      hapticManager.important();
+      haptic.double();
       await showAlert?.(
         res.battles_loaded > 0
           ? `Данные обновлены: ${res.battles_loaded} боёв в журнале, статистика и списки актуализированы.`
           : "Синхронизация завершена. Списки боёв и статистика обновлены.",
       );
     } catch (e) {
-      hapticManager.error();
+      haptic.error();
       await showAlert?.(e instanceof Error ? e.message : "Не удалось синхронизировать данные");
     } finally {
       setSyncing(false);
@@ -190,8 +191,18 @@ export function SettingsPage() {
               <div className="flex items-center gap-3 min-w-0">
                 <Vibrate className="w-5 h-5 text-cr-blue shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-cr-text">Вибрация</p>
-                  <p className="text-xs text-cr-muted">Тактильная отдача при нажатиях</p>
+                  <p className="text-sm font-semibold text-cr-text">
+                    {translate("settings.haptic.title", settings.language)}
+                  </p>
+                  <p className="text-xs text-cr-muted">
+                    {settings.haptic_enabled
+                      ? translate("settings.haptic.enabled", settings.language)
+                      : translate("settings.haptic.disabled", settings.language)}
+                    {" · "}
+                    {settings.haptic_enabled
+                      ? translate("settings.haptic.subtitleOn", settings.language)
+                      : translate("settings.haptic.subtitleOff", settings.language)}
+                  </p>
                 </div>
               </div>
               <Toggle
@@ -200,7 +211,7 @@ export function SettingsPage() {
                 onChange={(c) => {
                   void updateSetting({ haptic_enabled: c }, { skipHaptic: true });
                   if (c) {
-                    hapticManager.selection();
+                    haptic.selection();
                   }
                 }}
               />

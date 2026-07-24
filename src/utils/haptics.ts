@@ -1,5 +1,6 @@
 export type { HapticEvent, HapticImpact, HapticNotify } from "./hapticManager";
 export {
+  haptic,
   hapticImpact,
   hapticManager,
   hapticNotify,

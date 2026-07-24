@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { cn } from "@/utils";
-import { triggerHaptic } from "@/utils/hapticManager";
+import { haptic } from "@/utils/hapticManager";
 
 interface CardProps {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ interface CardProps {
 export function Card({ children, className = "", delay = 0, onClick }: CardProps) {
   const handleClick = onClick
     ? () => {
-        triggerHaptic("lightTap");
+        haptic.light();
         onClick();
       }
     : undefined;

@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { animate, motion, useMotionValue } from "framer-motion";
-import { triggerHaptic } from "@/utils/hapticManager";
+import { haptic } from "@/utils/hapticManager";
 import { MAIN_NAV_ITEMS, getActiveNavId, type MainNavItem } from "./navigation";
 
 const TAB_COUNT = MAIN_NAV_ITEMS.length;
@@ -375,7 +375,7 @@ export function BottomNav() {
     bubbleStartX.current = bubbleX.get();
     lastDragHapticIndexRef.current = activeIndex;
     setBubbleAnimating(true);
-    triggerHaptic("lightTap");
+    haptic.light();
   };
 
   const onTrackPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -395,7 +395,7 @@ export function BottomNav() {
     }
     if (nextPreviewIndex !== lastDragHapticIndexRef.current) {
       lastDragHapticIndexRef.current = nextPreviewIndex;
-      triggerHaptic("selection");
+      haptic.selection();
     }
 
     const anchor = centers[activeIndex] ?? getTabCenterX(activeIndex);
@@ -429,14 +429,14 @@ export function BottomNav() {
         return;
       }
       if (nextIndex === activeIndex) {
-        triggerHaptic("lightTap");
+        haptic.light();
       }
     });
   };
 
   const onNavItemPointerDown = (event: React.PointerEvent<HTMLAnchorElement>) => {
     if (event.button !== 0) return;
-    triggerHaptic("selection");
+    haptic.selection();
   };
 
   const onNavItemRef = useCallback((index: number, el: HTMLAnchorElement | null) => {

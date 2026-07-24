@@ -20,9 +20,7 @@ function shouldUseSelectionHaptic(target: Element) {
 function triggerElementHaptic(target: Element) {
   if (shouldUseSelectionHaptic(target)) {
     triggerHaptic("selection");
-    return;
   }
-  triggerHaptic("lightTap");
 }
 
 export function useGlobalButtonHaptics() {

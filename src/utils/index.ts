@@ -84,6 +84,7 @@ export {
 } from "./lastSync";
 
 export {
+  haptic,
   hapticImpact,
   hapticManager,
   hapticNotify,

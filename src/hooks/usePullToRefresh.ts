@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { triggerHaptic } from "@/utils/hapticManager";
+import { haptic } from "@/utils/hapticManager";
 
 export function usePullToRefresh(onRefresh: () => Promise<void>) {
   const [refreshing, setRefreshing] = useState(false);
@@ -25,7 +25,7 @@ export function usePullToRefresh(onRefresh: () => Promise<void>) {
   const handleTouchEnd = useCallback(async () => {
     if (pullDistance > 60 && !refreshing) {
       setRefreshing(true);
-      triggerHaptic("mediumTap");
+      haptic.medium();
       try {
         await onRefresh();
       } finally {

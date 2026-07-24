@@ -91,7 +91,7 @@ export async function ensureSettingsLoaded(force = false): Promise<Settings> {
   }
 
   loadPromise = api
-    .getSettings()
+    .getSettings({ fresh: force })
     .then((server) => {
       const theme = (server.theme as AppTheme) || current.theme;
       const merged: Settings = { ...server, theme };
