@@ -6,6 +6,21 @@
     <title>GHOSTEEK - CR Assistant</title>
   </head>
   <body>
+    <svg aria-hidden="true" width="0" height="0" focusable="false" style="position: absolute">
+      <defs>
+        <!-- Side notches are part of the outer silhouette (objectBoundingBox units). -->
+        <clipPath id="cr-notch-btn" clipPathUnits="objectBoundingBox">
+          <path
+            d="M 0 0 H 1 V 0.34 A 0.055 0.16 0 0 1 1 0.66 V 1 H 0 V 0.66 A 0.055 0.16 0 0 1 0 0.34 Z"
+          />
+        </clipPath>
+        <clipPath id="cr-notch-btn-compact" clipPathUnits="objectBoundingBox">
+          <path
+            d="M 0 0 H 1 V 0.38 A 0.045 0.12 0 0 1 1 0.62 V 1 H 0 V 0.62 A 0.045 0.12 0 0 1 0 0.38 Z"
+          />
+        </clipPath>
+      </defs>
+    </svg>
     <div id="root"></div>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script type="module" src="/src/main.tsx"></script>
