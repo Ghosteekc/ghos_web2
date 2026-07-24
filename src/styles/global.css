@@ -230,17 +230,31 @@
   .scroll-to-top-btn {
     @apply fixed z-[44] flex h-11 w-11 items-center justify-center rounded-full;
     @apply border border-cr-gold/35 bg-[#0a0f2e]/95 text-cr-gold shadow-lg backdrop-blur-sm;
-    @apply transition-opacity duration-300 active:scale-95;
+    @apply pointer-events-none opacity-0;
     right: max(1rem, var(--app-content-right));
     bottom: var(--scroll-top-bottom);
+    transform: translateY(0.5rem);
+    transition:
+      opacity 0.38s ease,
+      transform 0.38s ease,
+      visibility 0.38s ease;
+    visibility: hidden;
   }
 
   .scroll-to-top-btn--visible {
-    @apply pointer-events-auto translate-y-0 opacity-100;
+    @apply pointer-events-auto opacity-100;
+    transform: translateY(0);
+    visibility: visible;
   }
 
   .scroll-to-top-btn--hidden {
-    @apply pointer-events-none translate-y-3 opacity-0;
+    @apply pointer-events-none opacity-0;
+    transform: translateY(0.5rem);
+    visibility: hidden;
+  }
+
+  .scroll-to-top-btn--visible:active {
+    transform: translateY(0) scale(0.96);
   }
 
   .chart-tooltip-glass {
@@ -446,7 +460,7 @@
     padding: 0;
     box-sizing: border-box;
     color: rgb(var(--cr-muted) / 0.82);
-    transition: color 0.36s ease;
+    transition: color 0.5s cubic-bezier(0.22, 0.06, 0.24, 1);
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -465,7 +479,7 @@
     justify-content: center;
     gap: 0.1rem;
     max-width: 100%;
-    transition: gap 0.46s cubic-bezier(0.22, 0.08, 0.24, 1);
+    transition: gap 0.52s cubic-bezier(0.22, 0.06, 0.24, 1);
   }
 
   .bottom-nav-item.is-highlighted .bottom-nav-item-content {
@@ -481,12 +495,13 @@
     flex-shrink: 0;
     transform: scale(1);
     transform-origin: center center;
-    transition: transform 0.46s cubic-bezier(0.22, 0.08, 0.24, 1);
+    transition: transform 0.58s cubic-bezier(0.22, 0.05, 0.24, 1);
     will-change: transform;
   }
 
   .bottom-nav-item.is-highlighted .bottom-nav-icon-slot {
     transform: scale(1.24);
+    transition-duration: 0.62s;
   }
 
   .bottom-nav-item.is-highlighted .bottom-nav-icon {
@@ -513,8 +528,8 @@
     flex-shrink: 0;
     filter: none;
     transition:
-      filter 0.36s ease,
-      color 0.36s ease;
+      filter 0.52s cubic-bezier(0.22, 0.06, 0.24, 1),
+      color 0.5s cubic-bezier(0.22, 0.06, 0.24, 1);
   }
 
   .bottom-nav-label {

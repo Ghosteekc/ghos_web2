@@ -8,11 +8,16 @@ interface ScrollToTopButtonProps {
 }
 
 export function ScrollToTopButton({ threshold = 320, className }: ScrollToTopButtonProps) {
-  const [visible, setVisible] = useState(false);
+  const [pastThreshold, setPastThreshold] = useState(false);
+  const [hidingAfterClick, setHidingAfterClick] = useState(false);
 
   useEffect(() => {
     const onScroll = () => {
-      setVisible(window.scrollY > threshold);
+      const y = window.scrollY;
+      setPastThreshold(y > threshold);
+      if (y <= threshold) {
+        setHidingAfterClick(false);
+      }
     };
 
     onScroll();
@@ -20,7 +25,10 @@ export function ScrollToTopButton({ threshold = 320, className }: ScrollToTopBut
     return () => window.removeEventListener("scroll", onScroll);
   }, [threshold]);
 
+  const visible = pastThreshold && !hidingAfterClick;
+
   const scrollToTop = useCallback(() => {
+    setHidingAfterClick(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
@@ -28,6 +36,7 @@ export function ScrollToTopButton({ threshold = 320, className }: ScrollToTopBut
     <button
       type="button"
       aria-label="Наверх"
+      aria-hidden={!visible}
       onClick={scrollToTop}
       className={cn(
         "scroll-to-top-btn",

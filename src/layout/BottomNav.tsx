@@ -9,7 +9,7 @@ const BUBBLE_HIT_X = 58;
 const BUBBLE_HIT_Y = 50;
 
 const STRETCH_TWEEN = { type: "tween" as const, duration: 0.18, ease: [0.22, 0.08, 0.24, 1] as const };
-const NEAR_TAB_TWEEN = { type: "tween" as const, duration: 0.24, ease: [0.33, 0.08, 0.25, 1] as const };
+const NEAR_TAB_TWEEN = { type: "tween" as const, duration: 0.34, ease: [0.28, 0.1, 0.22, 1] as const };
 
 const NEAR_TAB_SPRING = { stiffness: 215, damping: 37, mass: 0.86 };
 const FAR_TAB_SPRING = { stiffness: 270, damping: 23, mass: 0.72 };
@@ -153,8 +153,10 @@ export function BottomNav() {
   const bubbleStartX = useRef(0);
   const lastDragHapticIndexRef = useRef(activeIndex);
   const prevActiveIndexRef = useRef(activeIndex);
+  const bubbleFocusIndexRef = useRef(activeIndex);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
-  const highlightedIndex = previewIndex ?? activeIndex;
+  const [bubbleFocusIndex, setBubbleFocusIndex] = useState(activeIndex);
+  const highlightedIndex = previewIndex ?? bubbleFocusIndex;
 
   const getTabCenters = useCallback((): number[] => {
     const track = trackRef.current;
@@ -199,16 +201,27 @@ export function BottomNav() {
       const tabSteps = getTabSteps(fromIndex, toIndex);
       const moveTransition = getMoveTransition(fromIndex, toIndex);
       const releaseTransition = getReleaseTransition(fromIndex, toIndex);
+      const centers = getTabCenters();
 
       return animate(bubbleX, target, {
         ...moveTransition,
-        onUpdate: (latest) => applyStretchFromPull(Math.abs(latest - target), tabSteps),
+        onUpdate: (latest) => {
+          applyStretchFromPull(Math.abs(latest - target), tabSteps);
+          if (centers.length === 0) return;
+          const nextFocus = indexFromX(latest, centers);
+          if (nextFocus !== bubbleFocusIndexRef.current) {
+            bubbleFocusIndexRef.current = nextFocus;
+            setBubbleFocusIndex(nextFocus);
+          }
+        },
         onComplete: () => {
+          bubbleFocusIndexRef.current = toIndex;
+          setBubbleFocusIndex(toIndex);
           void animateStretch(1, 1, releaseTransition);
         },
       });
     },
-    [applyStretchFromPull, bubbleX, animateStretch],
+    [applyStretchFromPull, bubbleX, animateStretch, getTabCenters],
   );
 
   const syncBubbleToIndex = useCallback(
@@ -222,6 +235,8 @@ export function BottomNav() {
         void animateBubbleX(target, fromIndex, index);
       } else {
         bubbleX.set(target);
+        bubbleFocusIndexRef.current = index;
+        setBubbleFocusIndex(index);
       }
     },
     [animateBubbleX, bubbleX, getTabCenterX],
@@ -238,12 +253,16 @@ export function BottomNav() {
     if (skipAnimateRef.current) {
       skipAnimateRef.current = false;
       prevActiveIndexRef.current = activeIndex;
+      bubbleFocusIndexRef.current = activeIndex;
+      setBubbleFocusIndex(activeIndex);
       return;
     }
     if (isDraggingRef.current) return;
     if (skipNavAnimateRef.current) {
       skipNavAnimateRef.current = false;
       prevActiveIndexRef.current = activeIndex;
+      bubbleFocusIndexRef.current = activeIndex;
+      setBubbleFocusIndex(activeIndex);
       return;
     }
     syncBubbleToIndex(activeIndex, true, prevActiveIndexRef.current);
