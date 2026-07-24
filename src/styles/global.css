@@ -84,14 +84,16 @@
     --app-content-right: max(var(--device-safe-right), var(--tg-content-safe-right));
     --mobile-burger-size: 2.75rem;
     --mobile-burger-gap: 1.25rem;
-    --bottom-nav-bar-height: 4.75rem;
-    --bottom-nav-bubble-inset: 0.5rem;
+    --bottom-nav-edge-gap: 0.625rem;
+    --bottom-nav-bar-height: 5.125rem;
+    --bottom-nav-bubble-inset: 0.5625rem;
     --bottom-nav-bubble-height: calc(var(--bottom-nav-bar-height) - 2 * var(--bottom-nav-bubble-inset));
     --bottom-nav-bubble-width: 4.625rem;
     --bottom-nav-bubble-radius: calc(var(--bottom-nav-bubble-height) / 2);
     --bottom-nav-shell-height: var(--bottom-nav-bar-height);
-    --bottom-nav-offset: calc(var(--bottom-nav-shell-height) + var(--app-content-bottom) + 0.75rem);
-    --scroll-top-bottom: calc(var(--bottom-nav-shell-height) + var(--app-content-bottom) + 1rem);
+    --bottom-nav-dock-inset: calc(var(--device-safe-bottom) + var(--bottom-nav-edge-gap));
+    --bottom-nav-offset: calc(var(--bottom-nav-shell-height) + var(--bottom-nav-dock-inset) + 0.5rem);
+    --scroll-top-bottom: calc(var(--bottom-nav-shell-height) + var(--bottom-nav-dock-inset) + 0.75rem);
     --mobile-top-inset: calc(var(--app-content-top) + 0.75rem);
     --mobile-header-offset: var(--mobile-top-inset);
   }
@@ -334,9 +336,10 @@
     right: 0;
     bottom: 0;
     pointer-events: none;
-    padding-left: max(0.625rem, var(--app-content-left));
-    padding-right: max(0.625rem, var(--app-content-right));
-    padding-bottom: max(0.375rem, var(--app-content-bottom));
+    padding-left: max(var(--bottom-nav-edge-gap), var(--app-content-left));
+    padding-right: max(var(--bottom-nav-edge-gap), var(--app-content-right));
+    padding-bottom: var(--bottom-nav-dock-inset);
+    box-sizing: border-box;
     overflow: visible;
   }
 
@@ -446,7 +449,7 @@
     align-items: center;
     width: 100%;
     height: var(--bottom-nav-bar-height);
-    padding: 0.5rem 0.375rem;
+    padding: 0.625rem 0.375rem 0.5rem;
     box-sizing: border-box;
     touch-action: pan-y;
   }
