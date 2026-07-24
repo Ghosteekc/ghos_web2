@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { animate, motion, useMotionValue } from "framer-motion";
 import { triggerHaptic } from "@/utils/hapticManager";
-import { MAIN_NAV_ITEMS, getActiveNavId } from "./navigation";
+import { MAIN_NAV_ITEMS, getActiveNavId, type MainNavItem } from "./navigation";
 
 const TAB_COUNT = MAIN_NAV_ITEMS.length;
 const BUBBLE_HIT_X = 58;
@@ -85,25 +85,14 @@ function stretchFromPull(pull: number, tabSteps = 1): { x: number; y: number } {
 type BubbleSpring = ReturnType<typeof getSpringForTabDistance>;
 type BubbleTransition = BubbleSpring | typeof STRETCH_TWEEN | typeof NEAR_TAB_TWEEN;
 
+const STRETCH_EPSILON = 0.002;
+
 function readCssRemVar(name: string): number {
   const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
   if (raw.endsWith("rem")) return parseFloat(raw) * rootFontSize;
   if (raw.endsWith("px")) return parseFloat(raw);
   return parseFloat(raw) || 0;
-}
-
-function getBubbleTravelBounds(trackWidth: number): { min: number; max: number } {
-  const half = readCssRemVar("--bottom-nav-bubble-width") / 2;
-  const inset = readCssRemVar("--bottom-nav-bubble-inset");
-  const min = half + inset;
-  const max = trackWidth - half - inset;
-  return { min, max: Math.max(min, max) };
-}
-
-function clampBubbleX(x: number, trackWidth: number): number {
-  const { min, max } = getBubbleTravelBounds(trackWidth);
-  return Math.max(min, Math.min(max, x));
 }
 
 function indexFromX(x: number, centers: number[]): number {
@@ -132,6 +121,45 @@ function isNearBubble(
   );
 }
 
+type BottomNavItemProps = {
+  item: MainNavItem;
+  index: number;
+  isActive: boolean;
+  isHighlighted: boolean;
+  onItemRef: (index: number, el: HTMLAnchorElement | null) => void;
+  onPointerDown: (event: React.PointerEvent<HTMLAnchorElement>) => void;
+};
+
+const BottomNavItem = memo(function BottomNavItem({
+  item,
+  index,
+  isActive,
+  isHighlighted,
+  onItemRef,
+  onPointerDown,
+}: BottomNavItemProps) {
+  const Icon = item.icon;
+
+  return (
+    <NavLink
+      ref={(el) => onItemRef(index, el)}
+      to={item.to}
+      end={item.to === "/"}
+      className={`bottom-nav-item${isHighlighted ? " is-highlighted" : ""}`}
+      aria-label={item.label}
+      aria-current={isActive ? "page" : undefined}
+      onPointerDown={onPointerDown}
+    >
+      <span className="bottom-nav-item-content">
+        <span className="bottom-nav-icon-slot" aria-hidden>
+          <Icon className="bottom-nav-icon" strokeWidth={isHighlighted ? 1.85 : 1.65} />
+        </span>
+        <span className="bottom-nav-label">{item.label}</span>
+      </span>
+    </NavLink>
+  );
+});
+
 export function BottomNav() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -143,6 +171,11 @@ export function BottomNav() {
 
   const trackRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const bubbleLayerRef = useRef<HTMLDivElement>(null);
+  const bubbleAnimatingRef = useRef(false);
+  const tabCentersRef = useRef<number[]>([]);
+  const bubbleMetricsRef = useRef({ halfWidth: 0, inset: 0 });
+  const previewIndexRef = useRef<number | null>(null);
   const bubbleX = useMotionValue(0);
   const scaleX = useMotionValue(1);
   const scaleY = useMotionValue(1);
@@ -158,12 +191,28 @@ export function BottomNav() {
   const [bubbleFocusIndex, setBubbleFocusIndex] = useState(activeIndex);
   const highlightedIndex = previewIndex ?? bubbleFocusIndex;
 
-  const getTabCenters = useCallback((): number[] => {
+  const setBubbleAnimating = useCallback((active: boolean) => {
+    if (bubbleAnimatingRef.current === active) return;
+    bubbleAnimatingRef.current = active;
+    bubbleLayerRef.current?.classList.toggle("bottom-nav-liquid-bubble--animating", active);
+  }, []);
+
+  const refreshBubbleMetrics = useCallback(() => {
+    bubbleMetricsRef.current = {
+      halfWidth: readCssRemVar("--bottom-nav-bubble-width") / 2,
+      inset: readCssRemVar("--bottom-nav-bubble-inset"),
+    };
+  }, []);
+
+  const refreshTabCenters = useCallback(() => {
     const track = trackRef.current;
-    if (!track) return [];
+    if (!track) {
+      tabCentersRef.current = [];
+      return;
+    }
 
     const trackRect = track.getBoundingClientRect();
-    return MAIN_NAV_ITEMS.map((_, index) => {
+    tabCentersRef.current = MAIN_NAV_ITEMS.map((_, index) => {
       const item = itemRefs.current[index];
       if (!item) {
         return ((index + 0.5) / TAB_COUNT) * track.offsetWidth;
@@ -172,6 +221,28 @@ export function BottomNav() {
       return rect.left - trackRect.left + rect.width / 2;
     });
   }, []);
+
+  const refreshLayoutMetrics = useCallback(() => {
+    refreshBubbleMetrics();
+    refreshTabCenters();
+  }, [refreshBubbleMetrics, refreshTabCenters]);
+
+  const getTabCenters = useCallback((): number[] => tabCentersRef.current, []);
+
+  const getBubbleTravelBounds = useCallback((trackWidth: number): { min: number; max: number } => {
+    const { halfWidth, inset } = bubbleMetricsRef.current;
+    const min = halfWidth + inset;
+    const max = trackWidth - halfWidth - inset;
+    return { min, max: Math.max(min, max) };
+  }, []);
+
+  const clampBubbleXForTrack = useCallback(
+    (x: number, trackWidth: number): number => {
+      const { min, max } = getBubbleTravelBounds(trackWidth);
+      return Math.max(min, Math.min(max, x));
+    },
+    [getBubbleTravelBounds],
+  );
 
   const getTabCenterX = useCallback(
     (index: number): number => {
@@ -184,8 +255,12 @@ export function BottomNav() {
   const applyStretchFromPull = useCallback(
     (pull: number, tabSteps = 1) => {
       const { x, y } = stretchFromPull(pull, tabSteps);
-      scaleX.set(x);
-      scaleY.set(y);
+      if (Math.abs(scaleX.get() - x) > STRETCH_EPSILON) {
+        scaleX.set(x);
+      }
+      if (Math.abs(scaleY.get() - y) > STRETCH_EPSILON) {
+        scaleY.set(y);
+      }
     },
     [scaleX, scaleY],
   );
@@ -202,6 +277,7 @@ export function BottomNav() {
       const moveTransition = getMoveTransition(fromIndex, toIndex);
       const releaseTransition = getReleaseTransition(fromIndex, toIndex);
       const centers = getTabCenters();
+      setBubbleAnimating(true);
 
       return animate(bubbleX, target, {
         ...moveTransition,
@@ -217,11 +293,13 @@ export function BottomNav() {
         onComplete: () => {
           bubbleFocusIndexRef.current = toIndex;
           setBubbleFocusIndex(toIndex);
-          void animateStretch(1, 1, releaseTransition);
+          void animateStretch(1, 1, releaseTransition).finally(() => {
+            setBubbleAnimating(false);
+          });
         },
       });
     },
-    [applyStretchFromPull, bubbleX, animateStretch, getTabCenters],
+    [applyStretchFromPull, bubbleX, animateStretch, getTabCenters, setBubbleAnimating],
   );
 
   const syncBubbleToIndex = useCallback(
@@ -229,7 +307,8 @@ export function BottomNav() {
       const track = trackRef.current;
       if (!track) return;
 
-      const target = clampBubbleX(getTabCenterX(index), track.offsetWidth);
+      refreshLayoutMetrics();
+      const target = clampBubbleXForTrack(getTabCenterX(index), track.offsetWidth);
 
       if (smooth) {
         void animateBubbleX(target, fromIndex, index);
@@ -239,15 +318,16 @@ export function BottomNav() {
         setBubbleFocusIndex(index);
       }
     },
-    [animateBubbleX, bubbleX, getTabCenterX],
+    [animateBubbleX, bubbleX, clampBubbleXForTrack, getTabCenterX, refreshLayoutMetrics],
   );
 
   useLayoutEffect(() => {
+    refreshLayoutMetrics();
     syncBubbleToIndex(activeIndex, false);
     scaleX.set(1);
     scaleY.set(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [syncBubbleToIndex]);
+  }, [syncBubbleToIndex, refreshLayoutMetrics]);
 
   useEffect(() => {
     if (skipAnimateRef.current) {
@@ -271,11 +351,12 @@ export function BottomNav() {
 
   useEffect(() => {
     const onResize = () => {
+      refreshLayoutMetrics();
       if (!isDraggingRef.current) syncBubbleToIndex(activeIndex, false);
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [activeIndex, syncBubbleToIndex]);
+  }, [activeIndex, refreshLayoutMetrics, syncBubbleToIndex]);
 
   const onTrackPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     const track = trackRef.current;
@@ -293,6 +374,7 @@ export function BottomNav() {
     dragStartX.current = event.clientX;
     bubbleStartX.current = bubbleX.get();
     lastDragHapticIndexRef.current = activeIndex;
+    setBubbleAnimating(true);
     triggerHaptic("lightTap");
   };
 
@@ -307,15 +389,17 @@ export function BottomNav() {
 
     bubbleX.set(nextX);
     const nextPreviewIndex = indexFromX(nextX, centers);
-    setPreviewIndex(nextPreviewIndex);
+    if (nextPreviewIndex !== previewIndexRef.current) {
+      previewIndexRef.current = nextPreviewIndex;
+      setPreviewIndex(nextPreviewIndex);
+    }
     if (nextPreviewIndex !== lastDragHapticIndexRef.current) {
       lastDragHapticIndexRef.current = nextPreviewIndex;
       triggerHaptic("selection");
     }
 
-    const anchor = getTabCenterX(activeIndex);
-    const { x, y } = stretchFromPull(Math.abs(nextX - anchor));
-    void animateStretch(x, y);
+    const anchor = centers[activeIndex] ?? getTabCenterX(activeIndex);
+    applyStretchFromPull(Math.abs(nextX - anchor), getTabSteps(activeIndex, nextPreviewIndex));
   };
 
   const finishDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -330,12 +414,14 @@ export function BottomNav() {
     const centers = getTabCenters();
     const trackWidth = trackRef.current.offsetWidth;
     const nextIndex = indexFromX(bubbleX.get(), centers);
-    const targetX = clampBubbleX(getTabCenterX(nextIndex), trackWidth);
+    const targetX = clampBubbleXForTrack(getTabCenterX(nextIndex), trackWidth);
     const target = MAIN_NAV_ITEMS[nextIndex];
 
+    previewIndexRef.current = nextIndex;
     setPreviewIndex(nextIndex);
 
     void animateBubbleX(targetX, activeIndex, nextIndex).then(() => {
+      previewIndexRef.current = null;
       setPreviewIndex(null);
       if (target && target.id !== activeId) {
         skipNavAnimateRef.current = true;
@@ -353,6 +439,10 @@ export function BottomNav() {
     triggerHaptic("selection");
   };
 
+  const onNavItemRef = useCallback((index: number, el: HTMLAnchorElement | null) => {
+    itemRefs.current[index] = el;
+  }, []);
+
   return (
     <nav className="bottom-nav" aria-label="Основная навигация">
       <div className="bottom-nav-shell">
@@ -360,6 +450,7 @@ export function BottomNav() {
           <div className="bottom-nav-bar" aria-hidden>
             <span className="bottom-nav-bar-rim" />
             <motion.div
+              ref={bubbleLayerRef}
               className="bottom-nav-liquid-bubble"
               style={{
                 x: bubbleX,
@@ -381,34 +472,17 @@ export function BottomNav() {
             onPointerUp={finishDrag}
             onPointerCancel={finishDrag}
           >
-            {MAIN_NAV_ITEMS.map((item, index) => {
-              const isActive = activeId === item.id;
-              const isHighlighted = index === highlightedIndex;
-              return (
-                <NavLink
-                  key={item.id}
-                  ref={(el) => {
-                    itemRefs.current[index] = el;
-                  }}
-                  to={item.to}
-                  end={item.to === "/"}
-                  className={`bottom-nav-item${isHighlighted ? " is-highlighted" : ""}`}
-                  aria-label={item.label}
-                  aria-current={isActive ? "page" : undefined}
-                  onPointerDown={onNavItemPointerDown}
-                >
-                  <span className="bottom-nav-item-content">
-                    <span className="bottom-nav-icon-slot" aria-hidden>
-                      <item.icon
-                        className="bottom-nav-icon"
-                        strokeWidth={isHighlighted ? 1.85 : 1.65}
-                      />
-                    </span>
-                    <span className="bottom-nav-label">{item.label}</span>
-                  </span>
-                </NavLink>
-              );
-            })}
+            {MAIN_NAV_ITEMS.map((item, index) => (
+              <BottomNavItem
+                key={item.id}
+                item={item}
+                index={index}
+                isActive={activeId === item.id}
+                isHighlighted={index === highlightedIndex}
+                onItemRef={onNavItemRef}
+                onPointerDown={onNavItemPointerDown}
+              />
+            ))}
           </div>
         </div>
       </div>
