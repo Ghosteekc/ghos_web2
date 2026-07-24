@@ -14,7 +14,15 @@ import { TrendingUp, TrendingDown, Flame, Clock } from "lucide-react";
 import { StatsOverview } from "@/types";
 import { Card, FeatureNavGrid, Loader, ScrollToTopButton } from "@/components/ui";
 import { api } from "@/api/client";
-import { cacheHas, cacheGet } from "@/api/cache";
+import { cacheGet, lsGet, TTL } from "@/api/cache";
+
+const STATS_MEM_KEY = "stats-v5";
+const STATS_LS_KEY = "stats-overview-v1";
+const STATS_STALE_GRACE_MS = 7 * 24 * 60 * 60_000;
+
+function bootstrapStats(): StatsOverview | null {
+  return cacheGet<StatsOverview>(STATS_MEM_KEY) ?? lsGet<StatsOverview>(STATS_LS_KEY, TTL.stats, STATS_STALE_GRACE_MS);
+}
 import { usePageRefresh } from "@/hooks";
 import { OpponentsPanel, DeckToolsPanel, LossAnalysisPanel } from "@/components/analytics/AnalyticsExtras";
 import { RecommendationsPanel } from "@/components/analytics/recommendations";
@@ -34,23 +42,33 @@ const CHART_YAXIS_WIDTH = 32;
 
 export function AnalyticsPage() {
   const [section, setSection] = useState<AnalyticsSection>(null);
-  const [stats, setStats] = useState<StatsOverview | null>(() => cacheGet<StatsOverview>("stats-v5"));
-  const [loading, setLoading] = useState(() => !cacheHas("stats-v5"));
+  const [stats, setStats] = useState<StatsOverview | null>(() => bootstrapStats());
+  const [loading, setLoading] = useState(() => !bootstrapStats());
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    const hasStats = cacheHas("stats-v5");
+    const hasStats = Boolean(bootstrapStats());
     if (!hasStats) {
       setLoading(true);
+    } else {
+      setRefreshing(true);
     }
     try {
       setError(null);
       const data = await api.getStats();
       setStats(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Ошибка загрузки");
+      const fallback = bootstrapStats();
+      if (fallback) {
+        setStats(fallback);
+        setError(null);
+      } else {
+        setError(e instanceof Error ? e.message : "Ошибка загрузки");
+      }
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -120,6 +138,9 @@ export function AnalyticsPage() {
       <div>
         <h1 className="page-title">Аналитика</h1>
         <p className="page-subtitle mt-1">Статистика, соперники и улучшение колод</p>
+        {refreshing && (
+          <p className="text-[11px] text-cr-muted mt-1">Обновление данных…</p>
+        )}
       </div>
 
       <FeatureNavGrid

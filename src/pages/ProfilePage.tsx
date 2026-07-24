@@ -25,6 +25,7 @@ export function ProfilePage() {
       const p = await api.getProfile();
       setProfile(p);
       api.prefetchDeckTabs();
+      void api.getStats().catch(() => {});
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка загрузки профиля");
     } finally {

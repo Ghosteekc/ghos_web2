@@ -33,12 +33,16 @@ export function cacheInvalidate(prefix?: string) {
 
 const LS_PREFIX = "ghosteek-cache:";
 
-export function lsGet<T>(key: string, ttlMs: number): T | null {
+export function lsGet<T>(key: string, ttlMs: number, staleGraceMs = 0): T | null {
   try {
     const raw = localStorage.getItem(LS_PREFIX + key);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as { data: T; expires: number };
-    if (Date.now() > parsed.expires) {
+    const age = Date.now() - parsed.expires;
+    if (age > 0) {
+      if (staleGraceMs > 0 && age <= staleGraceMs) {
+        return parsed.data;
+      }
       localStorage.removeItem(LS_PREFIX + key);
       return null;
     }

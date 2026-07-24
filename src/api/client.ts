@@ -39,7 +39,7 @@ import {
   ConstructorData,
 } from "@/types";
 
-import { cacheGet, cacheSet, cacheInvalidate, cacheHas, inflight, TTL, sleep } from "./cache";
+import { cacheGet, cacheSet, cacheInvalidate, cacheHas, inflight, TTL, sleep, lsGet, lsSet } from "./cache";
 import { setLastSyncAt } from "@/utils/lastSync";
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? "").trim();
@@ -47,12 +47,26 @@ const API_BASE = (import.meta.env.VITE_API_URL ?? "").trim();
 const DEFAULT_UNAVAILABLE =
   "В данный момент сервер не отвечает. Подождите или зайдите позже.";
 
+const STATS_MEM_KEY = "stats-v5";
+const STATS_LS_KEY = "stats-overview-v1";
+const STATS_STALE_GRACE_MS = 7 * 24 * 60 * 60_000;
+
 function apiUrl(path: string): string {
   return `${API_BASE}${path}`;
 }
 
 function usesDirectTunnel(): boolean {
   return API_BASE.includes("loca.lt");
+}
+
+function requestTimeoutMs(path: string): number {
+  const slow =
+    path.startsWith("/api/stats") ||
+    path.startsWith("/api/home") ||
+    path.startsWith("/api/sync") ||
+    path.startsWith("/api/battles");
+  if (usesDirectTunnel()) return slow ? 55_000 : 35_000;
+  return slow ? 45_000 : 25_000;
 }
 
 function formatApiError(message: string, code?: string): string {
@@ -177,7 +191,7 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
   let res: Response;
 
   const controller = new AbortController();
-  const timeoutMs = usesDirectTunnel() ? 35_000 : 25_000;
+  const timeoutMs = requestTimeoutMs(path);
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
@@ -294,6 +308,43 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   throw lastError ?? new ApiError(formatApiError(DEFAULT_UNAVAILABLE, "E099"), 0, "E099");
 
+}
+
+
+
+async function cachedGetPersisted<T>(
+  memKey: string,
+  lsKey: string,
+  path: string,
+  ttlMs: number,
+  staleGraceMs: number,
+): Promise<T> {
+  const hit = cacheGet<T>(memKey);
+  if (hit) return hit;
+
+  const pending = inflight.get(memKey);
+  if (pending) return pending as Promise<T>;
+
+  const promise = request<T>(path)
+    .then((data) => {
+      cacheSet(memKey, data, ttlMs);
+      lsSet(lsKey, data, ttlMs);
+      return data;
+    })
+    .catch((err) => {
+      const stale = lsGet<T>(lsKey, ttlMs, staleGraceMs);
+      if (stale) {
+        cacheSet(memKey, stale, ttlMs);
+        return stale;
+      }
+      throw err;
+    })
+    .finally(() => {
+      inflight.delete(memKey);
+    });
+
+  inflight.set(memKey, promise);
+  return promise;
 }
 
 
@@ -481,7 +532,14 @@ export const api = {
 
 
 
-  getStats: () => cachedGet<StatsOverview>("stats-v5", "/api/stats", TTL.stats),
+  getStats: () =>
+    cachedGetPersisted<StatsOverview>(
+      STATS_MEM_KEY,
+      STATS_LS_KEY,
+      "/api/stats",
+      TTL.stats,
+      STATS_STALE_GRACE_MS,
+    ),
 
 
 
