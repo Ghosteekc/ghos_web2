@@ -48,12 +48,23 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
       setRecError(null);
       return;
     }
+    // Колода из конструктора уже прошла Engine с origin=builder — не переоцениваем как player.
+    if (deck.type === "constructor" && deck.recommendation) {
+      setRecommendation(deck.recommendation);
+      setRecError(null);
+      setLoadingRec(false);
+      return;
+    }
     const names = collectCardNames(deck.cards);
     let cancelled = false;
     setLoadingRec(true);
     setRecError(null);
+    const isBuilder = deck.type === "constructor";
     api
-      .recommendDeck(names, false)
+      .recommendDeck(names, false, {
+        origin: isBuilder ? "builder" : "player",
+        builderScore: isBuilder ? deck.score_breakdown?.total ?? null : null,
+      })
       .then((data) => {
         if (!cancelled) setRecommendation(data.recommendation);
       })
@@ -226,11 +237,18 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
                 </Card>
               </div>
 
-              {analysis.decisionExplanation &&
-              (analysis.decisionExplanation.swaps?.length ||
-                analysis.decisionExplanation.pick_explanations.length) ? (
+              {recommendation?.coaching ||
+              (analysis.decisionExplanation &&
+                (analysis.decisionExplanation.swaps?.length ||
+                  analysis.decisionExplanation.pick_explanations.some((p) => p.pick))) ? (
                 <Card className="!p-3">
-                  <DecisionExplanationView explanation={analysis.decisionExplanation} />
+                  <DecisionExplanationView
+                    explanation={analysis.decisionExplanation}
+                    coaching={recommendation?.coaching}
+                    title={recommendation?.coaching && !recommendation?.improvement_plan.needed
+                      ? "Как играть колодой"
+                      : "Рекомендации"}
+                  />
                 </Card>
               ) : analysis.improvements.length > 0 ? (
                 <Card className="!p-3">

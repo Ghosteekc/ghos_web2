@@ -174,6 +174,7 @@ export interface Deck {
   recommendation?: RecommendationResult | null;
   game_plan?: DeckGamePlan | null;
   improvements?: DeckImprovementSuggestion[];
+  score_breakdown?: ScoreBreakdown;
 }
 
 export interface CardInfo {
@@ -375,6 +376,13 @@ export interface RecommendationImprovementStep {
   reason?: string | null;
 }
 
+export interface DeckCoaching {
+  strengths: string[];
+  play_style: string;
+  key_combinations: string[];
+  usage_tips: string[];
+}
+
 export interface RecommendationResult {
   intent: RecommendationIntent;
   game_plan: DeckGamePlan;
@@ -395,6 +403,8 @@ export interface RecommendationResult {
     factors: string[];
     open_gaps: string[];
   };
+  origin?: "player" | "builder" | string;
+  coaching?: DeckCoaching | null;
 }
 
 export interface RecommendDeckResponse {

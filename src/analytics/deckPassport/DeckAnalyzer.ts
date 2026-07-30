@@ -84,6 +84,10 @@ function buildStrengths(metrics: DeckMetrics, roleBalance: RoleBalanceEntry[]): 
 
 /** Слабости / улучшения — только из RecommendationEngine (BE). */
 function weaknessesFromRecommendation(rec: RecommendationResult): string[] {
+  // Builder без критических замен: не показываем soft-претензии как опровержение сборки.
+  if (rec.origin === "builder" && !rec.improvement_plan.needed) {
+    return [];
+  }
   const out: string[] = [];
   for (const msg of rec.balance_issues.messages) {
     if (!out.includes(msg)) out.push(msg);

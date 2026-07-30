@@ -22,6 +22,7 @@ export function constructorEntryToDeck(entry: ConstructorDeckEntry): Deck {
     recommendation: entry.recommendation ?? null,
     game_plan: entry.game_plan ?? null,
     improvements: entry.improvements ?? [],
+    score_breakdown: entry.score_breakdown,
   };
 }
 

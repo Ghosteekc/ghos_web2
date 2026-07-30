@@ -480,14 +480,19 @@ export const api = {
 
 
 
-  recommendDeck: (cards: string[], applySwaps = false) =>
-
+  recommendDeck: (
+    cards: string[],
+    applySwaps = false,
+    opts?: { origin?: "player" | "builder"; builderScore?: number | null },
+  ) =>
     request<RecommendDeckResponse>("/api/decks/recommend", {
-
       method: "POST",
-
-      body: JSON.stringify({ cards, apply_swaps: applySwaps }),
-
+      body: JSON.stringify({
+        cards,
+        apply_swaps: applySwaps,
+        origin: opts?.origin ?? "player",
+        builder_score: opts?.builderScore ?? null,
+      }),
     }),
 
 

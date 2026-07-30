@@ -915,6 +915,7 @@ export function DeckCard({
             ) : null}
             <DecisionExplanationView
               explanation={deck.recommendation?.decision_explanation}
+              coaching={deck.recommendation?.coaching}
               title=""
               className="mb-3"
             />
