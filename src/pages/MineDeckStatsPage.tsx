@@ -224,6 +224,7 @@ export function MineDeckStatsPage() {
 
       <DecisionExplanationView
         explanation={data.recommendation?.decision_explanation}
+        showSwaps={false}
         className="rounded-2xl border border-cr-border bg-cr-card p-4"
       />
 

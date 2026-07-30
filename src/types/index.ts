@@ -381,6 +381,12 @@ export interface DeckCoaching {
   play_style: string;
   key_combinations: string[];
   usage_tips: string[];
+  card_choices: {
+    card: string;
+    roles: string[];
+    reason: string;
+    synergy: string;
+  }[];
 }
 
 export interface RecommendationResult {

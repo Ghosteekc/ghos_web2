@@ -70,6 +70,23 @@ function CoachingBlock({ coaching }: { coaching: DeckCoaching }) {
           </ul>
         </div>
       ) : null}
+      {(coaching.card_choices?.length ?? 0) > 0 ? (
+        <div>
+          <p className="text-2xs uppercase tracking-wide text-cr-muted">Почему выбраны карты</p>
+          <div className="mt-1 space-y-1.5">
+            {coaching.card_choices.map((choice) => (
+              <div key={choice.card} className="rounded-lg bg-cr-bg/40 px-2.5 py-2">
+                <p className="text-sm font-medium text-cr-text">{choice.card}</p>
+                {choice.roles.length > 0 ? (
+                  <p className="text-2xs text-cr-gold">{choice.roles.join(" · ")}</p>
+                ) : null}
+                <p className="text-2xs text-cr-muted mt-0.5">{choice.reason}</p>
+                <p className="text-2xs text-cr-muted">{choice.synergy}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -77,6 +94,8 @@ function CoachingBlock({ coaching }: { coaching: DeckCoaching }) {
 interface DecisionExplanationViewProps {
   explanation: DecisionExplanation | null | undefined;
   coaching?: DeckCoaching | null;
+  /** Swaps допустимы только в явном режиме «Улучшить мою колоду». */
+  showSwaps?: boolean;
   title?: string;
   className?: string;
   /** Показывать внутренние детали (только для режима разработчика). */
@@ -87,6 +106,7 @@ interface DecisionExplanationViewProps {
 export function DecisionExplanationView({
   explanation,
   coaching = null,
+  showSwaps = true,
   title = "Рекомендации",
   className = "",
   debug = false,
@@ -104,13 +124,14 @@ export function DecisionExplanationView({
             reason: pe.reason || "",
           }));
 
-  const hasSwaps = swaps.length > 0;
+  const hasSwaps = showSwaps && swaps.length > 0;
   const hasCoaching =
     !!coaching &&
     (coaching.strengths.length > 0 ||
       !!coaching.play_style ||
       coaching.key_combinations.length > 0 ||
-      coaching.usage_tips.length > 0);
+      coaching.usage_tips.length > 0 ||
+      (coaching.card_choices?.length ?? 0) > 0);
 
   if (!hasSwaps && !hasCoaching) return null;
 

@@ -245,6 +245,7 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
                   <DecisionExplanationView
                     explanation={analysis.decisionExplanation}
                     coaching={recommendation?.coaching}
+                    showSwaps={deck.type !== "constructor" && recommendation?.origin !== "builder"}
                     title={recommendation?.coaching && !recommendation?.improvement_plan.needed
                       ? "Как играть колодой"
                       : "Рекомендации"}

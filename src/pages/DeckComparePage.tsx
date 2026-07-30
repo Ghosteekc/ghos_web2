@@ -247,6 +247,7 @@ export function DeckComparePage() {
           </ul>
           <DecisionExplanationView
             explanation={data.user_recommendation?.decision_explanation}
+            showSwaps={false}
             title="Рекомендации по вашей колоде"
           />
         </Card>
@@ -262,6 +263,7 @@ export function DeckComparePage() {
           </ul>
           <DecisionExplanationView
             explanation={data.reference_recommendation?.decision_explanation}
+            showSwaps={false}
             title={`Рекомендации: ${refLabel}`}
           />
         </Card>
