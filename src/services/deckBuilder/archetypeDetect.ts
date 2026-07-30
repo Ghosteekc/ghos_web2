@@ -328,6 +328,43 @@ export function detectArchetypeFromCards(cards: string[]): string {
       best = arch;
     }
   }
-  if (bestScore < 38) return "Meta";
+
+  const metaScore = scoreArchetype(cards, "Meta");
+  if (bestScore < 42 || metaScore >= bestScore + 2) return "Meta";
+
+  const anchors = ARCHETYPE_ANCHORS[best] ?? new Set<string>();
+  const cardSet = new Set(cards);
+  const strict = new Set([
+    "Lava",
+    "Siege",
+    "Bridge Spam",
+    "Graveyard",
+    "Log Bait",
+    "Royal Giant",
+    "Fireball Bait",
+  ]);
+  if (strict.has(best)) {
+    let hit = false;
+    for (const a of anchors) {
+      if (cardSet.has(a)) {
+        hit = true;
+        break;
+      }
+    }
+    if (!hit) return "Meta";
+    if (best === "Lava" && !cardSet.has("Lava Hound") && !cardSet.has("Balloon")) return "Meta";
+    if (best === "Siege" && !cardSet.has("X-Bow") && !cardSet.has("Mortar")) return "Meta";
+    if (best === "Bridge Spam" && !intersectCount(cardSet, BRIDGE_MARKERS)) return "Meta";
+    if (
+      best === "Fireball Bait" &&
+      !cardSet.has("Goblin Barrel") &&
+      !cardSet.has("Princess") &&
+      !cardSet.has("Dart Goblin")
+    ) {
+      return "Meta";
+    }
+    if (best === "Log Bait" && !cardSet.has("Goblin Barrel")) return "Meta";
+  }
+
   return best;
 }
