@@ -11,11 +11,12 @@ import {
   GitCompareArrows,
   UserRound,
   Crosshair,
+  Gauge,
 } from "lucide-react";
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
-import { BattleDetail, TacticalMatchup } from "@/types";
+import { BattleDetail, ElixirEfficiency, TacticalMatchup } from "@/types";
 import { formatTime, getTrophyChangeColor, formatPlayerTag } from "@/utils";
 import { buildDeckComparePath } from "@/utils/deckActions";
 import { usePageRefresh } from "@/hooks";
@@ -130,6 +131,57 @@ function TacticalMatchupBlock({ data }: { data: TacticalMatchup }) {
           </div>
         ) : null}
       </div>
+    </Card>
+  );
+}
+
+const ELIXIR_METRICS: { key: keyof ElixirEfficiency; label: string }[] = [
+  { key: "cheap_rotation", label: "Дешёвая ротация" },
+  { key: "punish_speed", label: "Скорость наказания" },
+  { key: "recovery_speed", label: "Восстановление" },
+  { key: "double_elixir_power", label: "Дабл-эликсир" },
+  { key: "overtime_strength", label: "Овертайм" },
+];
+
+function ElixirEfficiencyCard({ title, data }: { title: string; data: ElixirEfficiency }) {
+  return (
+    <Card>
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Gauge className="w-5 h-5 text-cr-gold shrink-0" />
+          <h3 className="font-semibold text-cr-text truncate">{title}</h3>
+        </div>
+        <span className="text-xs font-semibold text-cr-accent shrink-0 px-2 py-1 rounded-lg bg-cr-accent/10 border border-cr-accent/20">
+          {data.elixir_profile}
+        </span>
+      </div>
+      <p className="text-xs text-cr-muted mb-3">
+        Только состав колоды · ср. {data.average_cost.toFixed(1)} · цикл {data.effective_cycle}
+      </p>
+      <div className="space-y-2 mb-3">
+        {ELIXIR_METRICS.map(({ key, label }) => {
+          const value = Number(data[key]) || 0;
+          return (
+            <div key={key}>
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="text-cr-muted">{label}</span>
+                <span className="text-cr-text font-medium">{value}</span>
+              </div>
+              <LinearProgress value={value} max={100} color="#fbbf24" showLabel={false} />
+            </div>
+          );
+        })}
+      </div>
+      {data.explanations.length > 0 ? (
+        <ul className="space-y-1.5">
+          {data.explanations.map((line, i) => (
+            <li key={i} className="text-sm text-cr-muted flex items-start gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-cr-gold mt-1.5 flex-shrink-0" />
+              {line}
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </Card>
   );
 }
@@ -303,6 +355,17 @@ export function BattleDetailPage() {
       ) : null}
 
       {battle.tactical_matchup ? <TacticalMatchupBlock data={battle.tactical_matchup} /> : null}
+
+      {(battle.user_elixir || battle.opponent_elixir) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {battle.user_elixir ? (
+            <ElixirEfficiencyCard title="Ваш эликсир-профиль" data={battle.user_elixir} />
+          ) : null}
+          {battle.opponent_elixir ? (
+            <ElixirEfficiencyCard title="Эликсир соперника" data={battle.opponent_elixir} />
+          ) : null}
+        </div>
+      )}
 
       {detailReasons.length > 0 && (
         <Card>

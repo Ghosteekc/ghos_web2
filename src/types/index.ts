@@ -136,6 +136,18 @@ export interface TacticalMatchup {
   worst_mistakes: string[];
 }
 
+export interface ElixirEfficiency {
+  average_cost: number;
+  effective_cycle: number;
+  cheap_rotation: number;
+  punish_speed: number;
+  recovery_speed: number;
+  double_elixir_power: number;
+  overtime_strength: number;
+  elixir_profile: string;
+  explanations: string[];
+}
+
 export interface BattleDetail {
   index: number;
   won: boolean;
@@ -159,6 +171,8 @@ export interface BattleDetail {
   opponent_key_cards?: KeyCardEntry[];
   low_impact_cards?: KeyCardEntry[];
   tactical_matchup?: TacticalMatchup | null;
+  user_elixir?: ElixirEfficiency | null;
+  opponent_elixir?: ElixirEfficiency | null;
 }
 
 export interface DeckCard {
