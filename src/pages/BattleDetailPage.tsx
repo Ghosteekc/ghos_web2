@@ -16,7 +16,7 @@ import {
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
-import { BattleDetail, ElixirEfficiency, TacticalMatchup } from "@/types";
+import { BattleDetail, ElixirEfficiency, MatchDifficulty, TacticalMatchup } from "@/types";
 import { formatTime, getTrophyChangeColor, formatPlayerTag } from "@/utils";
 import { buildDeckComparePath } from "@/utils/deckActions";
 import { usePageRefresh } from "@/hooks";
@@ -175,6 +175,46 @@ function ElixirEfficiencyCard({ title, data }: { title: string; data: ElixirEffi
       {data.explanations.length > 0 ? (
         <ul className="space-y-1.5">
           {data.explanations.map((line, i) => (
+            <li key={i} className="text-sm text-cr-muted flex items-start gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-cr-gold mt-1.5 flex-shrink-0" />
+              {line}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </Card>
+  );
+}
+
+function difficultyAccent(rating: string): string {
+  if (rating === "Очень лёгкий" || rating === "Лёгкий") return "text-cr-win";
+  if (rating === "Сложный" || rating === "Очень сложный") return "text-cr-loss";
+  return "text-cr-gold";
+}
+
+function MatchDifficultyBlock({ data }: { data: MatchDifficulty }) {
+  if (!data.reasons.length && data.difficulty === 50) return null;
+  return (
+    <Card>
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <div className="flex items-center gap-2">
+          <AlertTriangle className={`w-5 h-5 ${difficultyAccent(data.rating)}`} />
+          <h3 className="font-semibold text-cr-text">Сложность матчапа</h3>
+        </div>
+        <div className="text-right">
+          <p className={`text-2xl font-bold tabular-nums ${difficultyAccent(data.rating)}`}>
+            {data.difficulty}
+          </p>
+          <p className={`text-sm font-semibold ${difficultyAccent(data.rating)}`}>{data.rating}</p>
+        </div>
+      </div>
+      <p className="text-xs text-cr-muted mb-3">
+        Оценка по составу колод: контры, цикл, здания, воздух, спеллы и win-conditions.
+      </p>
+      <LinearProgress value={data.difficulty} max={100} color="#f87171" showLabel={false} />
+      {data.reasons.length > 0 ? (
+        <ul className="space-y-1.5 mt-4">
+          {data.reasons.map((line, i) => (
             <li key={i} className="text-sm text-cr-muted flex items-start gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-cr-gold mt-1.5 flex-shrink-0" />
               {line}
@@ -355,6 +395,8 @@ export function BattleDetailPage() {
       ) : null}
 
       {battle.tactical_matchup ? <TacticalMatchupBlock data={battle.tactical_matchup} /> : null}
+
+      {battle.match_difficulty ? <MatchDifficultyBlock data={battle.match_difficulty} /> : null}
 
       {(battle.user_elixir || battle.opponent_elixir) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

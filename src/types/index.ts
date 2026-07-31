@@ -148,6 +148,13 @@ export interface ElixirEfficiency {
   explanations: string[];
 }
 
+export interface MatchDifficulty {
+  difficulty: number;
+  rating: string;
+  reasons: string[];
+  factors?: Record<string, number>;
+}
+
 export interface BattleDetail {
   index: number;
   won: boolean;
@@ -173,6 +180,7 @@ export interface BattleDetail {
   tactical_matchup?: TacticalMatchup | null;
   user_elixir?: ElixirEfficiency | null;
   opponent_elixir?: ElixirEfficiency | null;
+  match_difficulty?: MatchDifficulty | null;
 }
 
 export interface DeckCard {
