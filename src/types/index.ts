@@ -155,6 +155,23 @@ export interface MatchDifficulty {
   factors?: Record<string, number>;
 }
 
+export interface MatchPlanSaveCard {
+  name: string;
+  name_ru: string;
+  reason: string;
+}
+
+export interface MatchPlan {
+  game_plan: {
+    phase_1: string[];
+    phase_2: string[];
+    phase_3: string[];
+  };
+  avoid: string[];
+  save_cards: MatchPlanSaveCard[];
+  win_condition_window: string;
+}
+
 export interface BattleDetail {
   index: number;
   won: boolean;
@@ -181,6 +198,7 @@ export interface BattleDetail {
   user_elixir?: ElixirEfficiency | null;
   opponent_elixir?: ElixirEfficiency | null;
   match_difficulty?: MatchDifficulty | null;
+  match_plan?: MatchPlan | null;
 }
 
 export interface DeckCard {

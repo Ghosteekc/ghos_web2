@@ -12,11 +12,12 @@ import {
   UserRound,
   Crosshair,
   Gauge,
+  Map,
 } from "lucide-react";
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
-import { BattleDetail, ElixirEfficiency, MatchDifficulty, TacticalMatchup } from "@/types";
+import { BattleDetail, ElixirEfficiency, MatchDifficulty, MatchPlan, TacticalMatchup } from "@/types";
 import { formatTime, getTrophyChangeColor, formatPlayerTag } from "@/utils";
 import { buildDeckComparePath } from "@/utils/deckActions";
 import { usePageRefresh } from "@/hooks";
@@ -226,6 +227,63 @@ function MatchDifficultyBlock({ data }: { data: MatchDifficulty }) {
   );
 }
 
+function MatchPlanBlock({ data }: { data: MatchPlan }) {
+  const gp = data.game_plan;
+  const hasPhases = gp.phase_1.length + gp.phase_2.length + gp.phase_3.length > 0;
+  if (!hasPhases && !data.avoid.length && !data.save_cards.length && !data.win_condition_window) {
+    return null;
+  }
+
+  return (
+    <Card>
+      <div className="flex items-center gap-2 mb-2">
+        <Map className="w-5 h-5 text-cr-gold" />
+        <h3 className="font-semibold text-cr-text">План на матчап</h3>
+      </div>
+      <p className="text-xs text-cr-muted mb-4">
+        Уникальный план из состава колод, GamePlan и тактических взаимодействий.
+      </p>
+      <div className="space-y-4">
+        {hasPhases ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <TipList title="Phase 1 — начало" items={gp.phase_1} />
+            <TipList title="Phase 2 — преимущество" items={gp.phase_2} />
+            <TipList title="Phase 3 — финиш" items={gp.phase_3} />
+          </div>
+        ) : null}
+        {data.win_condition_window ? (
+          <div className="rounded-xl border border-cr-accent/25 bg-cr-accent/5 p-3">
+            <h4 className="text-sm font-semibold text-cr-text mb-1">Окно атаки</h4>
+            <p className="text-sm text-cr-muted leading-snug">{data.win_condition_window}</p>
+          </div>
+        ) : null}
+        <TipList title="Категорически нельзя" items={data.avoid} />
+        {data.save_cards.length > 0 ? (
+          <div>
+            <h4 className="text-sm font-semibold text-cr-text mb-2">Не трать зря</h4>
+            <div className="space-y-2">
+              {data.save_cards.map((card) => (
+                <div
+                  key={card.name}
+                  className="rounded-xl border border-cr-border/40 bg-cr-border/10 p-3 flex items-center gap-3"
+                >
+                  <div className="w-12 shrink-0">
+                    <CardTile name={card.name} size="sm" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-cr-text">{card.name_ru}</p>
+                    <p className="text-sm text-cr-muted leading-snug">{card.reason}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </Card>
+  );
+}
+
 export function BattleDetailPage() {
   const { index, battleTime } = useParams();
   const navigate = useNavigate();
@@ -397,6 +455,8 @@ export function BattleDetailPage() {
       {battle.tactical_matchup ? <TacticalMatchupBlock data={battle.tactical_matchup} /> : null}
 
       {battle.match_difficulty ? <MatchDifficultyBlock data={battle.match_difficulty} /> : null}
+
+      {battle.match_plan ? <MatchPlanBlock data={battle.match_plan} /> : null}
 
       {(battle.user_elixir || battle.opponent_elixir) && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
