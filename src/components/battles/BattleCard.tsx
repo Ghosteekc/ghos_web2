@@ -172,7 +172,7 @@ function BattleCardSimpleInner({ summary, onOpen }: BattleCardSimpleProps) {
                 {(myAvg ?? fallbackAvg ?? 0).toFixed(1)}
               </span>
               <span className="text-cr-muted font-medium">/</span>
-              <span className="text-cr-loss">
+              <span className="text-cr-loss/80">
                 {(enemyAvg ?? fallbackAvg ?? 0).toFixed(1)}
               </span>
             </p>
