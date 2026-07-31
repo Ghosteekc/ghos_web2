@@ -430,7 +430,7 @@ export const api = {
   prefetchDeckTabs: () => {
     void cachedGet<DecksListData>("decks:meta", "/api/decks?type=meta", TTL.battles).catch(() => {});
     void cachedGet<TopPlayersData>("top-players-v3", "/api/decks/top-players?limit=10", TTL.topPlayers).catch(() => {});
-    void cachedGet<ArenaDecksData>("arena-decks-v9", "/api/decks/arena", TTL.arenaDecks).catch(() => {});
+    void cachedGet<ArenaDecksData>("arena-decks-v10", "/api/decks/arena", TTL.arenaDecks).catch(() => {});
   },
 
   getDecks: (type?: string) => {
@@ -450,17 +450,20 @@ export const api = {
 
 
   getArenaDecks: () =>
-    cachedGet<ArenaDecksData>("arena-decks-v9", "/api/decks/arena", TTL.arenaDecks),
+    cachedGet<ArenaDecksData>("arena-decks-v10", "/api/decks/arena", TTL.arenaDecks),
 
 
 
-  compareDeck: (referenceCards: string[]) =>
+  compareDeck: (referenceCards: string[], referenceLevels?: Array<number | null>) =>
 
     request<DeckCompareResult>("/api/decks/compare", {
 
       method: "POST",
 
-      body: JSON.stringify({ reference_cards: referenceCards }),
+      body: JSON.stringify({
+        reference_cards: referenceCards,
+        reference_levels: referenceLevels,
+      }),
 
     }),
 

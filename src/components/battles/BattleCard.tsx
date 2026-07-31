@@ -161,14 +161,14 @@ function BattleCardSimpleInner({ summary, onOpen }: BattleCardSimpleProps) {
           </div>
           <div className="text-right shrink-0">
             {playedAt ? (
-              <p className="text-sm font-semibold text-cr-accent">{playedAt}</p>
+              <p className="text-sm font-semibold text-cr-gold">{playedAt}</p>
             ) : null}
             {(summary.duration ?? 0) > 0 ? (
               <p className="text-sm text-cr-muted">{formatTime(summary.duration)}</p>
             ) : null}
             <p className="text-sm font-semibold flex items-center gap-1 justify-end tabular-nums">
               <ElixirIcon size={12} />
-              <span className="text-cr-blue">
+              <span className="text-cr-accent">
                 {(myAvg ?? fallbackAvg ?? 0).toFixed(1)}
               </span>
               <span className="text-cr-muted font-medium">/</span>

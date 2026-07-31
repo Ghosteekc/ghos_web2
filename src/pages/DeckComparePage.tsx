@@ -18,6 +18,15 @@ function parseReferenceCards(raw: string | null): string[] {
     .filter(Boolean);
 }
 
+function parseReferenceLevels(raw: string | null, expectedLength: number): Array<number | null> | undefined {
+  if (!raw) return undefined;
+  const levels = raw.split("|").map((value) => {
+    const level = Number(value);
+    return Number.isInteger(level) && level > 0 ? level : null;
+  });
+  return levels.length === expectedLength ? levels : undefined;
+}
+
 function noteToneClass(tone: DeckCompareCardNote["tone"]): string {
   if (tone === "good") return "border-cr-win/35 bg-cr-win/8";
   if (tone === "bad") return "border-cr-loss/35 bg-cr-loss/8";
@@ -77,6 +86,10 @@ export function DeckComparePage() {
     () => parseReferenceCards(searchParams.get("ref")),
     [searchParams],
   );
+  const referenceLevels = useMemo(
+    () => parseReferenceLevels(searchParams.get("lv"), referenceCards.length),
+    [searchParams, referenceCards.length],
+  );
   const referenceName = searchParams.get("name") ?? "Колода арены";
   const fromTab = searchParams.get("from") ?? "arena";
 
@@ -95,7 +108,7 @@ export function DeckComparePage() {
     }
     try {
       setError(null);
-      const result = await api.compareDeck(referenceCards);
+      const result = await api.compareDeck(referenceCards, referenceLevels);
       setData(result);
     } catch (e) {
       setData(null);
@@ -103,7 +116,7 @@ export function DeckComparePage() {
     } finally {
       setLoading(false);
     }
-  }, [referenceCards]);
+  }, [referenceCards, referenceLevels]);
 
   usePageRefresh(load);
 

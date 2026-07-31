@@ -2,7 +2,7 @@ import type { Deck, DeckCard } from "@/types";
 
 /** Build /decks/compare URL for an 8-card reference deck. */
 export function buildDeckComparePath(
-  cards: Array<string | Pick<DeckCard, "name">>,
+  cards: Array<string | Pick<DeckCard, "name" | "level">>,
   name: string,
   from: string,
 ): string {
@@ -11,7 +11,9 @@ export function buildDeckComparePath(
   const ref = names.map(encodeURIComponent).join("|");
   const encodedName = encodeURIComponent(name || "Колода");
   const encodedFrom = encodeURIComponent(from || "decks");
-  return `/decks/compare?ref=${ref}&name=${encodedName}&from=${encodedFrom}`;
+  const levels = cards.map((card) => (typeof card === "string" ? "" : String(card.level ?? "")));
+  const levelParam = levels.some(Boolean) ? `&lv=${levels.join("|")}` : "";
+  return `/decks/compare?ref=${ref}&name=${encodedName}&from=${encodedFrom}${levelParam}`;
 }
 
 export function deckToComparePath(deck: Deck, from: string): string {

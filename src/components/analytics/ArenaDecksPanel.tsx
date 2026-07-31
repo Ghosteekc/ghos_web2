@@ -7,7 +7,7 @@ import { Card, Button, Loader, ErrorState, EmptyState } from "@/components/ui";
 import type { ArenaDecksData, Deck } from "@/types";
 import { deckToComparePath } from "@/utils/deckActions";
 
-const ARENA_DECKS_CACHE = "arena-decks-v8";
+const ARENA_DECKS_CACHE = "arena-decks-v10";
 
 function formatArenaSubtitle(arenaName: string, trophies: number, source?: string): string {
   const base =
