@@ -163,7 +163,7 @@ export interface Deck {
   avg_elixir: number;
   best_matchups: BattleSummary[];
   worst_matchups: BattleSummary[];
-  type: "meta" | "mine" | "arena" | "rated" | "classic" | "2v2" | "tournament" | "legend_path" | "random" | "constructor";
+  type: "meta" | "mine" | "arena" | "rated" | "classic" | "2v2" | "tournament" | "legend_path" | "random" | "constructor" | "constructor_alt";
   category?: string;
   deck_link?: string | null;
   description?: string;
@@ -602,6 +602,18 @@ export interface ConstructorDeckEntry {
   improvements?: DeckImprovementSuggestion[];
   game_plan?: DeckGamePlan | null;
   recommendation?: RecommendationResult | null;
+  is_alternative?: boolean;
+}
+
+export interface CoreConflictInfo {
+  conflicting_card: string;
+  conflicting_card_ru: string;
+  reason: string;
+  baseline_score: number;
+  alternative_score: number;
+  quality_gain: number;
+  message: string;
+  drop_scores?: Record<string, number>;
 }
 
 export interface ScoreBreakdown {
@@ -621,6 +633,8 @@ export interface ScoreBreakdown {
 export interface ConstructorData {
   core: DeckCard[];
   decks: ConstructorDeckEntry[];
+  core_conflict?: CoreConflictInfo | null;
+  alternative_deck?: ConstructorDeckEntry | null;
 }
 
 export type TabType =

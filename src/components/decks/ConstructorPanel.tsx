@@ -15,7 +15,7 @@ import {
   constructorApiErrorMessage,
 } from "@/services/constructorAdapter";
 
-import type { CardDisplayMode, Deck, DeckCard } from "@/types";
+import type { CardDisplayMode, CoreConflictInfo, Deck, DeckCard } from "@/types";
 
 
 
@@ -111,9 +111,9 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const [catalog, setCatalog] = useState<CatalogCard[]>([]);
 
   const [decks, setDecks] = useState<Deck[]>([]);
-
+  const [alternativeDeck, setAlternativeDeck] = useState<Deck | null>(null);
+  const [coreConflict, setCoreConflict] = useState<CoreConflictInfo | null>(null);
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
 
 
@@ -208,6 +208,8 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     const picks = current.filter((s): s is NonNullable<SlotPick> => Boolean(s));
     if (picks.length !== 4) {
       setDecks([]);
+      setAlternativeDeck(null);
+      setCoreConflict(null);
       return;
     }
 
@@ -222,10 +224,14 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         .map((p) => ({ name: p.name, slot: p.slot }));
       const built = await fetchConstructorDecks(payload);
       if (requestId !== buildRequestRef.current) return;
-      setDecks(built);
+      setDecks(built.decks);
+      setAlternativeDeck(built.alternativeDeck);
+      setCoreConflict(built.coreConflict ?? null);
     } catch (e) {
       if (requestId !== buildRequestRef.current) return;
       setDecks([]);
+      setAlternativeDeck(null);
+      setCoreConflict(null);
       setError(constructorApiErrorMessage(e));
     } finally {
       if (requestId === buildRequestRef.current) {
@@ -240,6 +246,8 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
     if (filledCount !== 4) {
       setDecks([]);
+      setAlternativeDeck(null);
+      setCoreConflict(null);
       setError(null);
       return;
     }
@@ -293,15 +301,12 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
 
   const resetAll = () => {
-
     setSlots([null, null, null, null]);
-
     setActiveSlot(0);
-
     setDecks([]);
-
+    setAlternativeDeck(null);
+    setCoreConflict(null);
     setError(null);
-
   };
 
 
@@ -525,41 +530,65 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
       {loading ? <Loader /> : null}
 
-
-
       {error ? <ErrorState title={error} /> : null}
 
-
-
       {!loading && filledCount === 4 && decks.length > 0 ? (
-
         <div className="space-y-3">
-
           <div className="flex items-center gap-2">
-
             <Sparkles className="w-5 h-5 text-cr-gold" />
-
             <h3 className="text-base font-semibold text-cr-text">
-
               Варианты колод ({decks.length})
-
             </h3>
-
           </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-
             {decks.map((deck, i) => renderDeckCard(deck, i))}
-
           </div>
-
         </div>
-
       ) : null}
 
+      {!loading && filledCount === 4 && coreConflict ? (
+        <Card className="border border-cr-gold/30 bg-cr-gold/5 space-y-3">
+          <h3 className="text-base font-semibold text-cr-text">
+            Конфликт в ядре
+          </h3>
+          <p className="text-sm text-cr-text/90 whitespace-pre-line leading-relaxed">
+            {coreConflict.message}
+          </p>
+          <p className="text-sm text-cr-muted">
+            Конфликтующая карта:{" "}
+            <span className="text-cr-gold font-semibold">
+              {coreConflict.conflicting_card_ru || coreConflict.conflicting_card}
+            </span>
+            {coreConflict.quality_gain > 0
+              ? ` · прирост качества ≈ ${Math.round(coreConflict.quality_gain)}`
+              : null}
+          </p>
+        </Card>
+      ) : null}
 
+      {!loading && filledCount === 4 && alternativeDeck ? (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-cr-accent" />
+            <h3 className="text-base font-semibold text-cr-text">
+              Альтернативный вариант
+            </h3>
+          </div>
+          <p className="text-sm text-cr-muted">
+            Это не основная сборка. Core без конфликтующей карты — выбор за вами.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {renderDeckCard(alternativeDeck, 0)}
+          </div>
+        </div>
+      ) : null}
 
-      {!loading && filledCount === 4 && !error && decks.length === 0 ? (
+      {!loading &&
+      filledCount === 4 &&
+      !error &&
+      decks.length === 0 &&
+      !alternativeDeck &&
+      !coreConflict ? (
         <EmptyState title="Не удалось подобрать колоды для этой комбинации" className="py-6" />
       ) : null}
 

@@ -1,4 +1,4 @@
-import type { ConstructorDeckEntry, Deck } from "@/types";
+import type { ConstructorData, ConstructorDeckEntry, Deck } from "@/types";
 import { api, ApiError } from "@/api/client";
 
 export function constructorEntryToDeck(entry: ConstructorDeckEntry): Deck {
@@ -9,7 +9,7 @@ export function constructorEntryToDeck(entry: ConstructorDeckEntry): Deck {
     winrate: entry.synergy_score,
     total_games: 0,
     avg_elixir: entry.avg_elixir,
-    type: "constructor",
+    type: entry.is_alternative ? "constructor_alt" : "constructor",
     category: entry.category,
     deck_link: entry.deck_link,
     description: entry.description,
@@ -36,12 +36,24 @@ function constructorApiErrorMessage(error: unknown): string {
   return "Не удалось собрать колоды";
 }
 
+export type ConstructorBuildResult = {
+  decks: Deck[];
+  alternativeDeck: Deck | null;
+  coreConflict: ConstructorData["core_conflict"];
+};
+
 /** Генерация колод через backend (единственный источник истины для конструктора). */
 export async function fetchConstructorDecks(
   slots: { name: string; slot: number }[],
-): Promise<Deck[]> {
+): Promise<ConstructorBuildResult> {
   const data = await api.buildConstructorDecks(slots);
-  return data.decks.map(constructorEntryToDeck);
+  return {
+    decks: data.decks.map(constructorEntryToDeck),
+    alternativeDeck: data.alternative_deck
+      ? constructorEntryToDeck(data.alternative_deck)
+      : null,
+    coreConflict: data.core_conflict ?? null,
+  };
 }
 
 export { constructorApiErrorMessage };
