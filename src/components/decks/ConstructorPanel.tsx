@@ -528,7 +528,14 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
 
 
-      {loading ? <Loader /> : null}
+      {loading ? (
+        <div className="flex flex-col items-center gap-3 py-2">
+          <Loader />
+          <p className="text-sm text-cr-muted text-center px-4">
+            Изучение и создание колод может занять некоторое время...
+          </p>
+        </div>
+      ) : null}
 
       {error ? <ErrorState title={error} /> : null}
 
