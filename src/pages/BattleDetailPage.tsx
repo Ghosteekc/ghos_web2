@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
@@ -8,12 +8,15 @@ import {
   Shield,
   Swords,
   Target,
+  GitCompareArrows,
+  UserRound,
 } from "lucide-react";
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
 import { BattleDetail } from "@/types";
-import { formatTime, getTrophyChangeColor, formatBattlePlayedAt } from "@/utils";
+import { formatTime, getTrophyChangeColor, formatPlayerTag } from "@/utils";
+import { buildDeckComparePath } from "@/utils/deckActions";
 import { usePageRefresh } from "@/hooks";
 
 function KeyCardsBlock({
@@ -102,6 +105,24 @@ export function BattleDetailPage() {
     void load();
   }, [load]);
 
+  const opponentTagClean = useMemo(() => {
+    const raw = (battle?.opponent_tag || "").trim();
+    return raw.replace(/^#/, "");
+  }, [battle?.opponent_tag]);
+
+  const comparePath = useMemo(() => {
+    if (!battle) return "";
+    const cards =
+      battle.opponent_deck_cards?.length === 8
+        ? battle.opponent_deck_cards
+        : battle.opponent_deck;
+    return buildDeckComparePath(
+      cards,
+      battle.opponent_name || "Соперник",
+      location.pathname || "/battles",
+    );
+  }, [battle, location.pathname]);
+
   if (loading) return <Loader />;
   if (!battle) {
     return (
@@ -119,13 +140,53 @@ export function BattleDetailPage() {
     <div className="space-y-6">
       <PageHeader
         title="Детали боя"
-        subtitle={<p className="text-base text-cr-muted">против {battle.opponent_name}</p>}
+        subtitle={
+          <div className="space-y-0.5">
+            {opponentTagClean ? (
+              <button
+                type="button"
+                onClick={() => navigate(`/player/${opponentTagClean}`)}
+                className="text-base text-cr-gold hover:underline font-medium"
+              >
+                против {battle.opponent_name}
+              </button>
+            ) : (
+              <p className="text-base text-cr-muted">против {battle.opponent_name}</p>
+            )}
+            {opponentTagClean ? (
+              <p className="text-sm text-cr-muted">{formatPlayerTag(opponentTagClean)}</p>
+            ) : null}
+          </div>
+        }
         action={
           <Button variant="ghost" onClick={goBack} className="!p-2" aria-label="Назад">
             <ArrowLeft className="w-5 h-5" />
           </Button>
         }
       />
+
+      <div className="flex flex-wrap items-center gap-2">
+        {opponentTagClean ? (
+          <Button
+            variant="secondary"
+            className="!py-2 !px-3 text-sm"
+            onClick={() => navigate(`/player/${opponentTagClean}`)}
+          >
+            <UserRound className="w-4 h-4" />
+            Профиль соперника
+          </Button>
+        ) : null}
+        {comparePath ? (
+          <Button
+            variant="secondary"
+            className="!py-2 !px-3 text-sm"
+            onClick={() => navigate(comparePath)}
+          >
+            <GitCompareArrows className="w-4 h-4" />
+            Сравнить колоды
+          </Button>
+        ) : null}
+      </div>
 
       <div className="flex flex-wrap items-center gap-3">
         <div

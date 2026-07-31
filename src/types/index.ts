@@ -123,6 +123,7 @@ export interface BattleDetail {
   index: number;
   won: boolean;
   opponent_name: string;
+  opponent_tag?: string;
   trophy_change: number;
   matchup_score: number;
   duration: number;
