@@ -10,11 +10,12 @@ import {
   Target,
   GitCompareArrows,
   UserRound,
+  Crosshair,
 } from "lucide-react";
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
-import { BattleDetail } from "@/types";
+import { BattleDetail, TacticalMatchup } from "@/types";
 import { formatTime, getTrophyChangeColor, formatPlayerTag } from "@/utils";
 import { buildDeckComparePath } from "@/utils/deckActions";
 import { usePageRefresh } from "@/hooks";
@@ -53,6 +54,81 @@ function KeyCardsBlock({
             </div>
           </div>
         ))}
+      </div>
+    </Card>
+  );
+}
+
+function TipList({ title, items }: { title: string; items: string[] }) {
+  if (!items.length) return null;
+  return (
+    <div>
+      <h4 className="text-sm font-semibold text-cr-text mb-2">{title}</h4>
+      <ul className="space-y-1.5">
+        {items.map((line, i) => (
+          <li key={i} className="text-sm text-cr-muted flex items-start gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-cr-gold mt-1.5 flex-shrink-0" />
+            {line}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function TacticalMatchupBlock({ data }: { data: TacticalMatchup }) {
+  const hasPhases = data.early_game.length + data.mid_game.length + data.late_game.length > 0;
+  const hasTips =
+    data.pressure_points.length +
+      data.critical_interactions.length +
+      data.best_openings.length +
+      data.worst_mistakes.length +
+      data.danger_cards.length >
+    0;
+  if (!hasPhases && !hasTips) return null;
+
+  return (
+    <Card>
+      <div className="flex items-center gap-2 mb-2">
+        <Crosshair className="w-5 h-5 text-cr-gold" />
+        <h3 className="font-semibold text-cr-text">Тактический разбор матчапа</h3>
+      </div>
+      <p className="text-xs text-cr-muted mb-4">
+        Выводы только из состава двух колод: роли, контры, синергии и планы игры.
+      </p>
+      <div className="space-y-4">
+        {hasPhases ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <TipList title="Ранняя игра" items={data.early_game} />
+            <TipList title="Мид" items={data.mid_game} />
+            <TipList title="Дабл-эликсир" items={data.late_game} />
+          </div>
+        ) : null}
+        <TipList title="Ключевые взаимодействия" items={data.critical_interactions} />
+        <TipList title="Точки давления" items={data.pressure_points} />
+        <TipList title="Лучшие открытия" items={data.best_openings} />
+        <TipList title="Грубые ошибки" items={data.worst_mistakes} />
+        {data.danger_cards.length > 0 ? (
+          <div>
+            <h4 className="text-sm font-semibold text-cr-text mb-2">Опасные карты</h4>
+            <div className="space-y-2">
+              {data.danger_cards.map((card) => (
+                <div
+                  key={card.name}
+                  className="rounded-xl border border-cr-loss/25 bg-cr-loss/5 p-3 flex items-center gap-3"
+                >
+                  <div className="w-12 shrink-0">
+                    <CardTile name={card.name} size="sm" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-cr-text">{card.name_ru}</p>
+                    <p className="text-sm text-cr-muted leading-snug">{card.reason}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     </Card>
   );
@@ -225,6 +301,8 @@ export function BattleDetailPage() {
           </div>
         </Card>
       ) : null}
+
+      {battle.tactical_matchup ? <TacticalMatchupBlock data={battle.tactical_matchup} /> : null}
 
       {detailReasons.length > 0 && (
         <Card>

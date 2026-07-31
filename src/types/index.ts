@@ -119,6 +119,23 @@ export interface KeyCardEntry {
   note: string;
 }
 
+export interface TacticalDangerCard {
+  name: string;
+  name_ru: string;
+  reason: string;
+}
+
+export interface TacticalMatchup {
+  early_game: string[];
+  mid_game: string[];
+  late_game: string[];
+  pressure_points: string[];
+  critical_interactions: string[];
+  danger_cards: TacticalDangerCard[];
+  best_openings: string[];
+  worst_mistakes: string[];
+}
+
 export interface BattleDetail {
   index: number;
   won: boolean;
@@ -141,6 +158,7 @@ export interface BattleDetail {
   user_key_cards?: KeyCardEntry[];
   opponent_key_cards?: KeyCardEntry[];
   low_impact_cards?: KeyCardEntry[];
+  tactical_matchup?: TacticalMatchup | null;
 }
 
 export interface DeckCard {
