@@ -89,14 +89,24 @@ function weaknessesFromRecommendation(rec: RecommendationResult): string[] {
     return [];
   }
   const out: string[] = [];
+  const seen = new Set<string>();
+  const add = (message: string) => {
+    const text = message.trim().replace(/\s+/g, " ");
+    const key = text.toLocaleLowerCase("ru-RU");
+    if (text && !seen.has(key)) {
+      seen.add(key);
+      out.push(text);
+    }
+  };
+
   for (const msg of rec.balance_issues.messages) {
-    if (!out.includes(msg)) out.push(msg);
+    add(msg);
   }
   for (const step of rec.improvement_plan.steps) {
-    if (!out.includes(step.message)) out.push(step.message);
+    add(step.message);
   }
   for (const f of rec.risk_assessment.factors) {
-    if (!out.includes(f)) out.push(f);
+    add(f);
   }
   return out.slice(0, 6);
 }
