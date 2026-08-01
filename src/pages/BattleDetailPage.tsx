@@ -136,15 +136,49 @@ function TacticalMatchupBlock({ data }: { data: TacticalMatchup }) {
   );
 }
 
-const ELIXIR_METRICS: { key: keyof ElixirEfficiency; label: string }[] = [
-  { key: "cheap_rotation", label: "Дешёвая ротация" },
-  { key: "punish_speed", label: "Скорость наказания" },
-  { key: "recovery_speed", label: "Восстановление" },
-  { key: "double_elixir_power", label: "Дабл-эликсир" },
-  { key: "overtime_strength", label: "Овертайм" },
+const ELIXIR_PROFILE_RU: Record<string, string> = {
+  "Fast Cycle": "Быстрый цикл",
+  "Medium Cycle": "Средний цикл",
+  "Heavy Control": "Тяжёлый контроль",
+  "Heavy Beatdown": "Тяжёлый beatdown",
+  "Bridge Pressure": "Давление на мосту",
+  "Split Pressure": "Сплит-давление",
+};
+
+const ELIXIR_METRICS: {
+  key: keyof ElixirEfficiency;
+  label: string;
+  hint: string;
+}[] = [
+  {
+    key: "cheap_rotation",
+    label: "Лёгкие карты в колоде",
+    hint: "Сколько карт за 1–3 эликсира — чем выше, тем проще крутить руку",
+  },
+  {
+    key: "punish_speed",
+    label: "Скорость контрудара",
+    hint: "Насколько быстро можно наказать ошибку дешёвым win-condition",
+  },
+  {
+    key: "recovery_speed",
+    label: "Возврат после трат",
+    hint: "Как быстро колода снова готова атаковать после защиты",
+  },
+  {
+    key: "double_elixir_power",
+    label: "Сила в ×2 эликсире",
+    hint: "Тяжёлые танки и дорогие карты, которые раскрываются в дабле",
+  },
+  {
+    key: "overtime_strength",
+    label: "Сила в овертайме",
+    hint: "Добивание, осада, здания и спеллы для затяжного конца",
+  },
 ];
 
 function ElixirEfficiencyCard({ title, data }: { title: string; data: ElixirEfficiency }) {
+  const profileRu = ELIXIR_PROFILE_RU[data.elixir_profile] || data.elixir_profile;
   return (
     <Card>
       <div className="flex items-center justify-between gap-2 mb-2">
@@ -153,21 +187,23 @@ function ElixirEfficiencyCard({ title, data }: { title: string; data: ElixirEffi
           <h3 className="font-semibold text-cr-text truncate">{title}</h3>
         </div>
         <span className="text-xs font-semibold text-cr-accent shrink-0 px-2 py-1 rounded-lg bg-cr-accent/10 border border-cr-accent/20">
-          {data.elixir_profile}
+          {profileRu}
         </span>
       </div>
       <p className="text-xs text-cr-muted mb-3">
-        Только состав колоды · ср. {data.average_cost.toFixed(1)} · цикл {data.effective_cycle}
+        По составу колоды · средний эликсир {data.average_cost.toFixed(1)} · цикл 4
+        самых дешёвых = {data.effective_cycle}
       </p>
-      <div className="space-y-2 mb-3">
-        {ELIXIR_METRICS.map(({ key, label }) => {
+      <div className="space-y-3 mb-3">
+        {ELIXIR_METRICS.map(({ key, label, hint }) => {
           const value = Number(data[key]) || 0;
           return (
             <div key={key}>
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-cr-muted">{label}</span>
-                <span className="text-cr-text font-medium">{value}</span>
+              <div className="flex items-center justify-between text-xs mb-0.5 gap-2">
+                <span className="text-cr-text font-medium">{label}</span>
+                <span className="text-cr-muted tabular-nums shrink-0">{value}/100</span>
               </div>
+              <p className="text-[11px] text-cr-muted leading-snug mb-1">{hint}</p>
               <LinearProgress value={value} max={100} color="#fbbf24" showLabel={false} />
             </div>
           );
