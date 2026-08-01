@@ -17,6 +17,7 @@ import {
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader, ElixirIcon } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
+import { cacheGet, cacheHas } from "@/api/cache";
 import { BattleDetail, ElixirEfficiency, MatchDifficulty, MatchPlan, TacticalMatchup } from "@/types";
 import { formatTime, getTrophyChangeColor, formatPlayerTag } from "@/utils";
 import { buildDeckComparePath } from "@/utils/deckActions";
@@ -339,8 +340,17 @@ export function BattleDetailPage() {
     typeof (location.state as { from?: unknown } | null)?.from === "string"
       ? (location.state as { from: string }).from
       : null;
-  const [battle, setBattle] = useState<BattleDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  const cacheKey = battleTime
+    ? `battle-time-v1:${decodeURIComponent(battleTime)}`
+    : index !== undefined && index !== ""
+      ? `battle-v1:${Number(index)}`
+      : null;
+
+  const [battle, setBattle] = useState<BattleDetail | null>(() =>
+    cacheKey ? cacheGet<BattleDetail>(cacheKey) : null,
+  );
+  const [loading, setLoading] = useState(() => !(cacheKey && cacheHas(cacheKey)));
   const [error, setError] = useState<string | null>(null);
 
   const goBack = () => {
@@ -364,19 +374,23 @@ export function BattleDetailPage() {
       }
       setBattle(b);
     } catch (e) {
-      setBattle(null);
+      if (!(cacheKey && cacheHas(cacheKey))) {
+        setBattle(null);
+      }
       setError(e instanceof ApiError ? e.message : "Бой не найден");
     } finally {
       setLoading(false);
     }
-  }, [index, battleTime]);
+  }, [index, battleTime, cacheKey]);
 
   usePageRefresh(load);
 
   useEffect(() => {
-    setLoading(true);
+    if (!(cacheKey && cacheHas(cacheKey))) {
+      setLoading(true);
+    }
     void load();
-  }, [load]);
+  }, [load, cacheKey]);
 
   const opponentTagClean = useMemo(() => {
     const raw = (battle?.opponent_tag || "").trim();

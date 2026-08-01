@@ -396,12 +396,15 @@ export const api = {
       TTL.battles,
     ),
 
-
-
-  getBattle: (index: number) => request<BattleDetail>(`/api/battles/${index}`),
+  getBattle: (index: number) =>
+    cachedGet<BattleDetail>(`battle-v1:${index}`, `/api/battles/${index}`, TTL.battles),
 
   getBattleByTime: (timestamp: string) =>
-    request<BattleDetail>(`/api/battles/by-time/${encodeURIComponent(timestamp)}`),
+    cachedGet<BattleDetail>(
+      `battle-time-v1:${timestamp}`,
+      `/api/battles/by-time/${encodeURIComponent(timestamp)}`,
+      TTL.battles,
+    ),
 
   getWinrates: () => cachedGet<WinrateEntry[]>("winrates-v2", "/api/winrates", TTL.stats),
 

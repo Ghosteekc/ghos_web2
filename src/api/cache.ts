@@ -78,9 +78,9 @@ export function lsSet(key: string, data: unknown, ttlMs: number) {
 }
 
 export const TTL = {
-  home: 45_000,
+  home: 120_000,
   profile: 60_000,
-  battles: 60_000,
+  battles: 120_000,
   stats: 60_000,
   catalog: 24 * 60 * 60_000,
   topPlayers: 10 * 60_000,

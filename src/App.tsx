@@ -2,19 +2,19 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/layout/Layout";
 import { Loader } from "@/components/ui";
+import { ProfilePage } from "@/pages/ProfilePage";
+import { AnalyticsPage } from "@/pages/AnalyticsPage";
+import { DecksPage } from "@/pages/DecksPage";
+import { BattlesPage } from "@/pages/BattlesPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 
-const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const ProfileCardsPage = lazy(() => import("@/pages/ProfileCardsPage"));
 const ProfileMasteryPage = lazy(() => import("@/pages/ProfileMasteryPage"));
-const Analytics = lazy(() => import("@/pages/AnalyticsPage"));
-const DecksPage = lazy(() => import("@/pages/DecksPage"));
 const DeckComparePage = lazy(() => import("@/pages/DeckComparePage"));
 const MineDeckStatsPage = lazy(() => import("@/pages/MineDeckStatsPage"));
-const BattlesPage = lazy(() => import("@/pages/BattlesPage"));
 const BattleDetailPage = lazy(() => import("@/pages/BattleDetailPage"));
 const SearchPage = lazy(() => import("@/pages/SearchPage"));
 const PlayerPreviewPage = lazy(() => import("@/pages/PlayerPreviewPage"));
-const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 
 function PageLoader() {
   return (
@@ -29,14 +29,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route
-            index
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <ProfilePage />
-              </Suspense>
-            }
-          />
+          <Route index element={<ProfilePage />} />
           <Route path="profile" element={<Navigate to="/" replace />} />
           <Route path="search" element={<Navigate to="/profile/search" replace />} />
           <Route
@@ -55,14 +48,7 @@ export default function App() {
               </Suspense>
             }
           />
-          <Route
-            path="analytics"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <Analytics />
-              </Suspense>
-            }
-          />
+          <Route path="analytics" element={<AnalyticsPage />} />
           <Route
             path="decks/compare"
             element={
@@ -79,22 +65,8 @@ export default function App() {
               </Suspense>
             }
           />
-          <Route
-            path="decks"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <DecksPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path="battles"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <BattlesPage />
-              </Suspense>
-            }
-          />
+          <Route path="decks" element={<DecksPage />} />
+          <Route path="battles" element={<BattlesPage />} />
           <Route
             path="battles/t/:battleTime"
             element={
@@ -129,14 +101,7 @@ export default function App() {
             }
           />
           <Route path="more" element={<Navigate to="/" replace />} />
-          <Route
-            path="settings"
-            element={
-              <Suspense fallback={<PageLoader />}>
-                <SettingsPage />
-              </Suspense>
-            }
-          />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
