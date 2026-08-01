@@ -14,7 +14,7 @@ import {
   Gauge,
   Map,
 } from "lucide-react";
-import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader } from "@/components/ui";
+import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader, ElixirIcon } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
 import { BattleDetail, ElixirEfficiency, MatchDifficulty, MatchPlan, TacticalMatchup } from "@/types";
@@ -153,7 +153,7 @@ const ELIXIR_METRICS: {
   {
     key: "cheap_rotation",
     label: "Лёгкие карты в колоде",
-    hint: "Сколько карт за 1–3 эликсира — чем выше, тем проще крутить цикл",
+    hint: "Сколько карт за 1–3 эликсира — чем выше шкала, тем проще крутить цикл",
   },
   {
     key: "punish_speed",
@@ -190,9 +190,20 @@ function ElixirEfficiencyCard({ title, data }: { title: string; data: ElixirEffi
           {profileRu}
         </span>
       </div>
-      <p className="text-xs text-cr-muted mb-3">
-        По составу колоды · средний эликсир {data.average_cost.toFixed(1)} · цикл 4
-        самых дешёвых = {data.effective_cycle}
+      <p className="text-xs text-cr-muted mb-3 flex flex-wrap items-center gap-x-1.5 gap-y-1">
+        <span>По составу колоды</span>
+        <span className="text-cr-border">·</span>
+        <span className="inline-flex items-center gap-0.5">
+          средний
+          <ElixirIcon size={11} className="text-[#d946ef]" />
+          {data.average_cost.toFixed(1)}
+        </span>
+        <span className="text-cr-border">·</span>
+        <span className="inline-flex items-center gap-0.5">
+          цикл 4 самых дешёвых =
+          <span className="font-semibold text-cr-text tabular-nums">{data.effective_cycle}</span>
+          <ElixirIcon size={12} className="text-[#d946ef]" />
+        </span>
       </p>
       <div className="space-y-3 mb-3">
         {ELIXIR_METRICS.map(({ key, label, hint }) => {
