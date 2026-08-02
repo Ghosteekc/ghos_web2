@@ -22,7 +22,8 @@ const PRESETS = [
   { label: "Разбери колоду", message: "Разбери мою колоду" },
   { label: "А что заменить?", message: "А что заменить?" },
   { label: "Последний бой", message: "Разбери мой бой" },
-  { label: "Что такое cycle", message: "Что такое cycle?" },
+  { label: "Что такое Tempo", message: "Что такое Tempo?" },
+  { label: "Что такое Cycle", message: "Что такое Cycle?" },
   { label: "Апнуть кубки", message: "Как апнуть кубки?" },
 ] as const;
 
