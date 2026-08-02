@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ChevronRight, Send } from "lucide-react";
 import { Card, Button, PageHeader, ErrorState } from "@/components/ui";
@@ -47,11 +47,8 @@ export function AiCoachPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AiResponse | null>(null);
 
-  useEffect(() => {
-    return () => {
-      void api.clearGhosteekAiSession().catch(() => {});
-    };
-  }, []);
+  // Память сессии живёт на бэкенде (TTL). Не чистим при уходе со страницы —
+  // иначе follow-up и summary сразу теряются.
 
   const ask = useCallback(async (text: string) => {
     const trimmed = text.trim();
