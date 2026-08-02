@@ -69,7 +69,7 @@ export function AiCoachPage() {
         title="Ghosteek AI"
         subtitle={
           <p className="page-subtitle">
-            Тренер помнит колоду и бой в рамках этой сессии
+            Только факты из API, анализа и базы — без выдуманных цифр
           </p>
         }
         action={
