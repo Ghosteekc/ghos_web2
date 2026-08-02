@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Bot, ChevronRight, Send } from "lucide-react";
+import { ArrowLeft, ChevronRight, Send } from "lucide-react";
 import { Card, Button, PageHeader, ErrorState } from "@/components/ui";
 import { api, ApiError } from "@/api/client";
 
@@ -13,9 +13,22 @@ type AiResponse = {
   actions?: AiAction[];
 };
 
-function serviceLabel(result: AiResponse): string {
-  const s = result.sources?.service;
-  return typeof s === "string" && s ? s : result.intent;
+/** Подписи как у страниц/вкладок приложения — без путей из кода. */
+function actionLabel(path: string): string {
+  const raw = path.split("?")[0] || path;
+  if (raw === "/battles" || raw.startsWith("/battles/")) return "Бои";
+  if (raw === "/analytics" || raw.startsWith("/analytics")) return "Аналитика";
+  if (raw === "/decks/compare") return "Сравнение колод";
+  if (raw === "/decks/mine/stats") return "Статистика колоды";
+  if (raw.startsWith("/decks")) return "Колоды";
+  if (raw === "/" || raw === "/profile") return "Профиль";
+  if (raw.startsWith("/profile/search") || raw.startsWith("/search")) return "Поиск";
+  if (raw.startsWith("/profile/cards")) return "Карты";
+  if (raw.startsWith("/profile/mastery")) return "Мастерство";
+  if (raw.startsWith("/settings")) return "Настройки";
+  if (raw.startsWith("/ai")) return "Ghosteek AI";
+  if (raw.startsWith("/player/")) return "Игрок";
+  return "Открыть раздел";
 }
 
 const PRESETS = [
@@ -34,7 +47,6 @@ export function AiCoachPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AiResponse | null>(null);
 
-  // Конец сессии на /ai — очищаем серверный Session Context
   useEffect(() => {
     return () => {
       void api.clearGhosteekAiSession().catch(() => {});
@@ -67,11 +79,7 @@ export function AiCoachPage() {
     <div className="space-y-6">
       <PageHeader
         title="Ghosteek AI"
-        subtitle={
-          <p className="page-subtitle">
-            Только факты из API, анализа и базы — без выдуманных цифр
-          </p>
-        }
+        subtitle={<p className="page-subtitle">Только факты — без выдуманных цифр</p>}
         action={
           <Button
             variant="ghost"
@@ -123,12 +131,6 @@ export function AiCoachPage() {
 
       {result && (
         <Card className="space-y-4">
-          <div className="flex items-center gap-2 text-sm text-cr-muted">
-            <Bot className="w-4 h-4 text-cr-gold shrink-0" />
-            <span className="uppercase tracking-wide">
-              {serviceLabel(result)} · {result.intent}
-            </span>
-          </div>
           <pre className="whitespace-pre-wrap font-sans text-base text-cr-text leading-relaxed">
             {result.answer}
           </pre>
@@ -141,7 +143,7 @@ export function AiCoachPage() {
                   onClick={() => navigate(a.path)}
                   className="flex items-center justify-between gap-3 px-3 py-2 rounded-cr border border-cr-border hover:border-cr-gold/40 text-left transition-colors"
                 >
-                  <span className="text-sm text-cr-text truncate">{a.path}</span>
+                  <span className="text-sm text-cr-text truncate">{actionLabel(a.path)}</span>
                   <ChevronRight className="w-4 h-4 text-cr-muted shrink-0" />
                 </button>
               ))}
