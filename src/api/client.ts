@@ -682,6 +682,11 @@ export const api = {
       body: JSON.stringify({ message, context }),
     }),
 
+  clearGhosteekAiSession: () =>
+    request<{ ok: boolean; cleared: boolean }>("/api/ai/session", {
+      method: "DELETE",
+    }),
+
 };
 
 

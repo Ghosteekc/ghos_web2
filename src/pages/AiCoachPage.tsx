@@ -1,4 +1,4 @@
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Bot, ChevronRight, Send } from "lucide-react";
 import { Card, Button, PageHeader, ErrorState } from "@/components/ui";
@@ -19,8 +19,8 @@ function serviceLabel(result: AiResponse): string {
 }
 
 const PRESETS = [
-  { label: "Собери колоду", message: "Собери колоду вокруг Хог Терпила Мушкетёр Пушка" },
   { label: "Разбери колоду", message: "Разбери мою колоду" },
+  { label: "А что заменить?", message: "А что заменить?" },
   { label: "Последний бой", message: "Разбери мой бой" },
   { label: "Что такое cycle", message: "Что такое cycle?" },
   { label: "Апнуть кубки", message: "Как апнуть кубки?" },
@@ -32,6 +32,13 @@ export function AiCoachPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AiResponse | null>(null);
+
+  // Конец сессии на /ai — очищаем серверный Session Context
+  useEffect(() => {
+    return () => {
+      void api.clearGhosteekAiSession().catch(() => {});
+    };
+  }, []);
 
   const ask = useCallback(async (text: string) => {
     const trimmed = text.trim();
@@ -61,7 +68,7 @@ export function AiCoachPage() {
         title="Ghosteek AI"
         subtitle={
           <p className="page-subtitle">
-            Тренер Clash Royale: короткий вывод, почему, что делать
+            Тренер помнит колоду и бой в рамках этой сессии
           </p>
         }
         action={
@@ -94,7 +101,7 @@ export function AiCoachPage() {
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Например: разбери мою колоду, матчап vs последней, что делает Палач…"
+          placeholder="Например: разбери мою колоду → потом «а что заменить?»"
           rows={3}
           disabled={loading}
           className="w-full px-4 py-3 info-glass border border-cr-border rounded-cr text-cr-text placeholder:text-cr-muted focus:outline-none focus:border-cr-gold/50 focus:ring-2 focus:ring-cr-gold/20 transition-all resize-y min-h-[96px]"
