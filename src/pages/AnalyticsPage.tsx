@@ -186,6 +186,11 @@ export function AnalyticsPage() {
       <PageHeader
         title="Аналитика"
         subtitle={<p className="page-subtitle">Статистика, соперники и улучшение колод</p>}
+        action={
+          <Button variant="ghost" onClick={() => navigate("/ai")} className="text-sm shrink-0">
+            Ghosteek AI
+          </Button>
+        }
       >
         {refreshing ? <p className="text-xs text-cr-muted">Обновление данных…</p> : null}
       </PageHeader>

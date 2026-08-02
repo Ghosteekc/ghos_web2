@@ -663,6 +663,25 @@ export const api = {
 
   },
 
+  askGhosteekAi: (
+    message: string,
+    context?: {
+      cards?: string[];
+      opponent_cards?: string[];
+      battle_index?: number;
+      battle_time?: string;
+    },
+  ) =>
+    request<{
+      intent: string;
+      answer: string;
+      sources: Record<string, unknown>;
+      actions?: { type: string; path: string }[];
+    }>("/api/ai/ask", {
+      method: "POST",
+      body: JSON.stringify({ message, context }),
+    }),
+
 };
 
 

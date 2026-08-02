@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Bot,
   GitCompare,
   History,
   Search,
@@ -12,6 +13,7 @@ import { Profile } from "@/types";
 import { formatPlayerTag } from "@/utils";
 
 const quickLinks = [
+  { to: "/ai", icon: Bot, label: "Ghosteek AI", hint: "Разбор колоды, бой, мета" },
   { to: "/analytics", icon: BarChart3, label: "Аналитика", hint: "Графики, соперники, улучшения" },
   { to: "/decks", icon: GitCompare, label: "Колоды", hint: "Мета, сравнение, рандом" },
   { to: "/battles", icon: History, label: "История", hint: "Разбор последних боёв" },

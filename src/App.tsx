@@ -15,6 +15,7 @@ const MineDeckStatsPage = lazy(() => import("@/pages/MineDeckStatsPage"));
 const BattleDetailPage = lazy(() => import("@/pages/BattleDetailPage"));
 const SearchPage = lazy(() => import("@/pages/SearchPage"));
 const PlayerPreviewPage = lazy(() => import("@/pages/PlayerPreviewPage"));
+const AiCoachPage = lazy(() => import("@/pages/AiCoachPage"));
 
 function PageLoader() {
   return (
@@ -49,6 +50,14 @@ export default function App() {
             }
           />
           <Route path="analytics" element={<AnalyticsPage />} />
+          <Route
+            path="ai"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <AiCoachPage />
+              </Suspense>
+            }
+          />
           <Route
             path="decks/compare"
             element={
