@@ -61,7 +61,7 @@ export function AiCoachPage() {
         title="Ghosteek AI"
         subtitle={
           <p className="page-subtitle">
-            Ответы только из сервисов Ghosteek — без выдуманных цифр
+            Тренер Clash Royale: короткий вывод, почему, что делать
           </p>
         }
         action={
