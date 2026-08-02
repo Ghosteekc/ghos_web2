@@ -13,11 +13,17 @@ type AiResponse = {
   actions?: AiAction[];
 };
 
+function serviceLabel(result: AiResponse): string {
+  const s = result.sources?.service;
+  return typeof s === "string" && s ? s : result.intent;
+}
+
 const PRESETS = [
-  { label: "Последний бой", message: "Разбери последний бой" },
-  { label: "Разбери мою колоду", message: "Разбери мою колоду" },
-  { label: "Что в мете", message: "Что в мете сейчас?" },
-  { label: "Мой винрейт", message: "Какой у меня винрейт?" },
+  { label: "Собери колоду", message: "Собери колоду вокруг Хог Терпила Мушкетёр Пушка" },
+  { label: "Разбери колоду", message: "Разбери мою колоду" },
+  { label: "Последний бой", message: "Разбери мой бой" },
+  { label: "Что такое cycle", message: "Что такое cycle?" },
+  { label: "Апнуть кубки", message: "Как апнуть кубки?" },
 ] as const;
 
 export function AiCoachPage() {
@@ -111,7 +117,9 @@ export function AiCoachPage() {
         <Card className="space-y-4">
           <div className="flex items-center gap-2 text-sm text-cr-muted">
             <Bot className="w-4 h-4 text-cr-gold shrink-0" />
-            <span className="uppercase tracking-wide">intent: {result.intent}</span>
+            <span className="uppercase tracking-wide">
+              {serviceLabel(result)} · {result.intent}
+            </span>
           </div>
           <pre className="whitespace-pre-wrap font-sans text-base text-cr-text leading-relaxed">
             {result.answer}
