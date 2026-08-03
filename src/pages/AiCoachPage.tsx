@@ -174,7 +174,6 @@ export function AiCoachPage() {
             <Send className="w-5 h-5" />
           </button>
         </div>
-        <p className="ai-composer-hint">Enter — отправить · Shift+Enter — новая строка</p>
       </form>
     </div>
   );
