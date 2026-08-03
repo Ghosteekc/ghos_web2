@@ -166,11 +166,30 @@ export function CardTile({
   iconHero,
 }: CardTileProps) {
   const { nameRu, nameShort, iconUrl, getCard } = useCardCatalog();
+  const catalog = getCard(name);
   const src = icon || iconUrl(name);
-  const fallbackSrc =
-    name.trim().toLowerCase() === "ronin" ? "/cards/ronin.png" : iconUrl(name) || undefined;
+  const key = name.trim().toLowerCase();
+  const localFallback =
+    key === "elite barbarians" && displayMode === "evo"
+      ? "/cards/elite-barbarians-ev1.png"
+      : key === "valkyrie" && displayMode === "hero"
+        ? "/cards/valkyrie-hero.png"
+        : key === "berserker" && displayMode === "hero"
+          ? "/cards/berserker-hero.png"
+          : undefined;
+  const fallbackSrc = localFallback || iconUrl(name) || undefined;
+  const resolvedIconEvo = iconEvo || catalog?.icon_evo || (key === "elite barbarians" ? "/cards/elite-barbarians-ev1.png" : undefined);
+  const resolvedIconHero =
+    iconHero ||
+    catalog?.icon_hero ||
+    (key === "valkyrie"
+      ? "/cards/valkyrie-hero.png"
+      : key === "berserker"
+        ? "/cards/berserker-hero.png"
+        : undefined);
+  const resolvedIconBase = iconBase || catalog?.icon || src;
   const isCollection = size === "collection";
-  const catalogElixir = getCard(name)?.elixir;
+  const catalogElixir = catalog?.elixir;
   const resolvedElixir =
     elixirCost != null && elixirCost > 0 && elixirCost < 99
       ? elixirCost
@@ -218,9 +237,9 @@ export function CardTile({
             <CardArt
               name={nameRu(name)}
               src={src}
-              iconBase={iconBase ?? src}
-              iconEvo={iconEvo}
-              iconHero={iconHero}
+              iconBase={resolvedIconBase || src}
+              iconEvo={resolvedIconEvo}
+              iconHero={resolvedIconHero}
               displayMode={displayMode}
               fallbackSrc={fallbackSrc}
             />

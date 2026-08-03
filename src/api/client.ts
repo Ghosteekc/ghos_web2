@@ -504,7 +504,6 @@ export const api = {
 
 
   getCardCatalog: () =>
-
     cachedGet<{
       cards: {
         name: string;
@@ -518,15 +517,7 @@ export const api = {
         icon_evo?: string;
         icon_hero?: string;
       }[];
-    }>(
-
-      "catalog-v2",
-
-      "/api/cards/catalog",
-
-      TTL.stats,
-
-    ),
+    }>("catalog-v4", "/api/cards/catalog", TTL.stats),
 
 
 

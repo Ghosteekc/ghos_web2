@@ -2,7 +2,17 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { api } from "@/api/client";
 import { lsGet, lsSet, TTL } from "@/api/cache";
 
-const CATALOG_LS_KEY = "card-catalog-v6";
+const CATALOG_LS_KEY = "card-catalog-v8";
+
+/** Local season arts when official CDN lags (served from /public/cards). */
+const LOCAL_CARD_ART: Record<
+  string,
+  { base?: string; evo?: string; hero?: string; forceEvo?: boolean; forceHero?: boolean }
+> = {
+  "elite barbarians": { evo: "/cards/elite-barbarians-ev1.png", forceEvo: true },
+  valkyrie: { hero: "/cards/valkyrie-hero.png", forceHero: true },
+  berserker: { hero: "/cards/berserker-hero.png", forceHero: true },
+};
 
 export interface CardCatalogItem {
   name: string;
@@ -33,6 +43,33 @@ function normalize(name: string) {
   return name.trim().toLowerCase();
 }
 
+function applyLocalArt(card: CardCatalogItem): CardCatalogItem {
+  const local = LOCAL_CARD_ART[normalize(card.name)];
+  if (!local) return card;
+  const next = { ...card };
+  if (local.base) next.icon = local.base;
+  if (local.evo) next.icon_evo = local.evo;
+  if (local.hero) next.icon_hero = local.hero;
+  if (local.forceEvo) {
+    next.max_evolution_level = Math.max(next.max_evolution_level ?? 0, 1);
+    if (!next.icon_evo) next.icon_evo = local.evo || next.icon;
+  }
+  if (local.forceHero) {
+    next.has_hero = true;
+    if (!next.icon_hero) next.icon_hero = local.hero || next.icon;
+  }
+  return next;
+}
+
+function mapFromCards(cards: CardCatalogItem[]): Map<string, CardCatalogItem> {
+  const map = new Map<string, CardCatalogItem>();
+  for (const card of cards) {
+    const patched = applyLocalArt(card);
+    map.set(normalize(patched.name), patched);
+  }
+  return map;
+}
+
 export function CardCatalogProvider({ children }: { children: ReactNode }) {
   const [byName, setByName] = useState<Map<string, CardCatalogItem>>(new Map());
   const [ready, setReady] = useState(false);
@@ -42,21 +79,14 @@ export function CardCatalogProvider({ children }: { children: ReactNode }) {
 
     const cached = lsGet<{ cards: CardCatalogItem[] }>(CATALOG_LS_KEY, TTL.catalog);
     if (cached?.cards?.length) {
-      const map = new Map<string, CardCatalogItem>();
-      for (const card of cached.cards) {
-        map.set(normalize(card.name), card);
-      }
-      setByName(map);
+      setByName(mapFromCards(cached.cards));
       setReady(true);
     }
 
     void (async () => {
       try {
         const res = await api.getCardCatalog();
-        const map = new Map<string, CardCatalogItem>();
-        for (const card of res.cards) {
-          map.set(normalize(card.name), card);
-        }
+        const map = mapFromCards(res.cards);
         if (!cancelled) {
           setByName(map);
           lsSet(CATALOG_LS_KEY, res, TTL.catalog);
