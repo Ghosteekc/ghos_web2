@@ -44,6 +44,43 @@ function collectionFrameClass(displayMode: CardDisplayMode, rarity?: string): st
   return cardFrameClass(displayMode, rarity) ?? "card-frame-base";
 }
 
+function isLocalCardArt(url?: string): boolean {
+  if (!url) return false;
+  return url.startsWith("/cards/") || url.includes("/cards/");
+}
+
+function needsUpgradeOverlay(
+  displayMode: CardDisplayMode,
+  evoUrl: string,
+  heroUrl: string,
+): boolean {
+  if (displayMode === "base") return false;
+  // Official CDN portraits already bake evo/hero diamonds into the PNG.
+  // Local season arts (and identical split sides) need an explicit overlay.
+  if (displayMode === "split") {
+    return isLocalCardArt(evoUrl) || isLocalCardArt(heroUrl) || evoUrl === heroUrl;
+  }
+  if (displayMode === "hero") return isLocalCardArt(heroUrl);
+  if (displayMode === "evo") return isLocalCardArt(evoUrl);
+  return false;
+}
+
+function CardUpgradeBadges({ displayMode }: { displayMode: CardDisplayMode }) {
+  if (displayMode !== "evo" && displayMode !== "hero" && displayMode !== "split") {
+    return null;
+  }
+  return (
+    <div className="card-upgrade-badges" aria-hidden>
+      {(displayMode === "evo" || displayMode === "split") && (
+        <span className="card-upgrade-badge card-upgrade-badge--evo" title="Эволюция" />
+      )}
+      {(displayMode === "hero" || displayMode === "split") && (
+        <span className="card-upgrade-badge card-upgrade-badge--hero" title="Героизм" />
+      )}
+    </div>
+  );
+}
+
 function CardArt({
   name,
   src,
@@ -51,7 +88,9 @@ function CardArt({
   iconEvo,
   iconHero,
   displayMode = "base",
-  fallbackSrc,
+  fallbackBase,
+  fallbackEvo,
+  fallbackHero,
 }: {
   name: string;
   src: string;
@@ -59,51 +98,71 @@ function CardArt({
   iconEvo?: string;
   iconHero?: string;
   displayMode?: CardDisplayMode;
-  fallbackSrc?: string;
+  fallbackBase?: string;
+  fallbackEvo?: string;
+  fallbackHero?: string;
 }) {
   const base = iconBase || src;
   const evo = iconEvo || base;
   const hero = iconHero || base;
-  const [broken, setBroken] = useState(false);
+  const [brokenBase, setBrokenBase] = useState(false);
+  const [brokenEvo, setBrokenEvo] = useState(false);
+  const [brokenHero, setBrokenHero] = useState(false);
+  const showBadges = needsUpgradeOverlay(displayMode, evo, hero);
 
-  const pick = (url: string) => (broken && fallbackSrc ? fallbackSrc : url);
+  const pick = (url: string, broken: boolean, fallback?: string) =>
+    broken && fallback ? fallback : url;
 
   if (displayMode === "split" && evo && hero) {
     return (
       <div className="relative z-10 h-full w-full">
         <img
-          src={pick(evo)}
+          src={pick(evo, brokenEvo, fallbackEvo || fallbackBase)}
           alt={name}
           className="absolute inset-0 h-full w-full object-contain object-center drop-shadow-md [clip-path:inset(0_50%_0_0)]"
           loading="lazy"
-      decoding="async"
-          onError={() => setBroken(true)}
+          decoding="async"
+          onError={() => setBrokenEvo(true)}
         />
         <img
-          src={pick(hero)}
+          src={pick(hero, brokenHero, fallbackHero || fallbackBase)}
           alt={name}
           className="absolute inset-0 h-full w-full object-contain object-center drop-shadow-md [clip-path:inset(0_0_0_50%)]"
           loading="lazy"
-      decoding="async"
-          onError={() => setBroken(true)}
+          decoding="async"
+          onError={() => setBrokenHero(true)}
         />
-        <div className="absolute inset-y-[8%] left-1/2 z-20 w-px -translate-x-1/2 bg-black/50" aria-hidden />
+        <div className="absolute inset-y-[8%] left-1/2 z-20 w-px -translate-x-1/2 bg-black/55" aria-hidden />
+        {showBadges && <CardUpgradeBadges displayMode="split" />}
       </div>
     );
   }
 
   const active =
     displayMode === "evo" ? evo : displayMode === "hero" ? hero : base;
+  const activeBroken =
+    displayMode === "evo" ? brokenEvo : displayMode === "hero" ? brokenHero : brokenBase;
+  const activeFallback =
+    displayMode === "evo"
+      ? fallbackEvo || fallbackBase
+      : displayMode === "hero"
+        ? fallbackHero || fallbackBase
+        : fallbackBase;
+  const setActiveBroken =
+    displayMode === "evo" ? setBrokenEvo : displayMode === "hero" ? setBrokenHero : setBrokenBase;
 
   return (
-    <img
-      src={pick(active)}
-      alt={name}
-      className="relative z-10 h-full w-full object-contain object-center drop-shadow-md"
-      loading="lazy"
-      decoding="async"
-      onError={() => setBroken(true)}
-    />
+    <div className="relative z-10 h-full w-full">
+      <img
+        src={pick(active, activeBroken, activeFallback)}
+        alt={name}
+        className="relative z-10 h-full w-full object-contain object-center drop-shadow-md"
+        loading="lazy"
+        decoding="async"
+        onError={() => setActiveBroken(true)}
+      />
+      {showBadges && <CardUpgradeBadges displayMode={displayMode} />}
+    </div>
   );
 }
 
@@ -169,16 +228,11 @@ export function CardTile({
   const catalog = getCard(name);
   const src = icon || iconUrl(name);
   const key = name.trim().toLowerCase();
-  const localFallback =
-    key === "elite barbarians" && displayMode === "evo"
-      ? "/cards/elite-barbarians-ev1.png"
-      : key === "valkyrie" && displayMode === "hero"
-        ? "/cards/valkyrie-hero.png"
-        : key === "berserker" && displayMode === "hero"
-          ? "/cards/berserker-hero.png"
-          : undefined;
-  const fallbackSrc = localFallback || iconUrl(name) || undefined;
-  const resolvedIconEvo = iconEvo || catalog?.icon_evo || (key === "elite barbarians" ? "/cards/elite-barbarians-ev1.png" : undefined);
+  const resolvedIconBase = iconBase || catalog?.icon || src;
+  const resolvedIconEvo =
+    iconEvo ||
+    catalog?.icon_evo ||
+    (key === "elite barbarians" ? "/cards/elite-barbarians-ev1.png" : undefined);
   const resolvedIconHero =
     iconHero ||
     catalog?.icon_hero ||
@@ -187,7 +241,17 @@ export function CardTile({
       : key === "berserker"
         ? "/cards/berserker-hero.png"
         : undefined);
-  const resolvedIconBase = iconBase || catalog?.icon || src;
+  const fallbackBase = iconUrl(name) || resolvedIconBase || undefined;
+  const fallbackEvo =
+    key === "elite barbarians"
+      ? "/cards/elite-barbarians-ev1.png"
+      : catalog?.icon_evo || fallbackBase;
+  const fallbackHero =
+    key === "valkyrie"
+      ? "/cards/valkyrie-hero.png"
+      : key === "berserker"
+        ? "/cards/berserker-hero.png"
+        : catalog?.icon_hero || fallbackBase;
   const isCollection = size === "collection";
   const catalogElixir = catalog?.elixir;
   const resolvedElixir =
@@ -241,7 +305,9 @@ export function CardTile({
               iconEvo={resolvedIconEvo}
               iconHero={resolvedIconHero}
               displayMode={displayMode}
-              fallbackSrc={fallbackSrc}
+              fallbackBase={fallbackBase}
+              fallbackEvo={fallbackEvo}
+              fallbackHero={fallbackHero}
             />
           ) : (
             <div className="relative z-10 flex h-full w-full items-center justify-center text-sm font-bold text-cr-text">

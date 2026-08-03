@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { api } from "@/api/client";
 import { lsGet, lsSet, TTL } from "@/api/cache";
 
-const CATALOG_LS_KEY = "card-catalog-v8";
+const CATALOG_LS_KEY = "card-catalog-v9";
 
 /** Local season arts when official CDN lags (served from /public/cards). */
 const LOCAL_CARD_ART: Record<
@@ -10,7 +10,8 @@ const LOCAL_CARD_ART: Record<
   { base?: string; evo?: string; hero?: string; forceEvo?: boolean; forceHero?: boolean }
 > = {
   "elite barbarians": { evo: "/cards/elite-barbarians-ev1.png", forceEvo: true },
-  valkyrie: { hero: "/cards/valkyrie-hero.png", forceHero: true },
+  // Valkyrie: long-standing evo + new hero — both must light up in split mode.
+  valkyrie: { hero: "/cards/valkyrie-hero.png", forceHero: true, forceEvo: true },
   berserker: { hero: "/cards/berserker-hero.png", forceHero: true },
 };
 
@@ -51,12 +52,15 @@ function applyLocalArt(card: CardCatalogItem): CardCatalogItem {
   if (local.evo) next.icon_evo = local.evo;
   if (local.hero) next.icon_hero = local.hero;
   if (local.forceEvo) {
-    next.max_evolution_level = Math.max(next.max_evolution_level ?? 0, 1);
-    if (!next.icon_evo) next.icon_evo = local.evo || next.icon;
+    const dualFloor = local.forceHero ? 3 : 1;
+    next.max_evolution_level = Math.max(next.max_evolution_level ?? 0, dualFloor);
+    // Only override evo art when we have a local asset — never collapse to base.
+    if (local.evo) next.icon_evo = local.evo;
   }
   if (local.forceHero) {
     next.has_hero = true;
-    if (!next.icon_hero) next.icon_hero = local.hero || next.icon;
+    if (local.hero) next.icon_hero = local.hero;
+    else if (!next.icon_hero) next.icon_hero = next.icon;
   }
   return next;
 }
