@@ -23,6 +23,8 @@ interface CardCatalogContextValue {
   nameRu: (name: string) => string;
   nameShort: (name: string) => string;
   iconUrl: (name: string) => string | undefined;
+  /** EN + RU имена для подсветки в тексте (длинные первыми). */
+  mentionNames: string[];
 }
 
 const CardCatalogContext = createContext<CardCatalogContextValue | null>(null);
@@ -90,9 +92,18 @@ export function CardCatalogProvider({ children }: { children: ReactNode }) {
     [getCard],
   );
 
+  const mentionNames = useMemo(() => {
+    const names = new Set<string>();
+    for (const card of byName.values()) {
+      if (card.name?.trim()) names.add(card.name.trim());
+      if (card.name_ru?.trim()) names.add(card.name_ru.trim());
+    }
+    return Array.from(names).sort((a, b) => b.length - a.length);
+  }, [byName]);
+
   const value = useMemo(
-    () => ({ ready, getCard, nameRu, nameShort, iconUrl }),
-    [ready, getCard, nameRu, nameShort, iconUrl],
+    () => ({ ready, getCard, nameRu, nameShort, iconUrl, mentionNames }),
+    [ready, getCard, nameRu, nameShort, iconUrl, mentionNames],
   );
 
   return <CardCatalogContext.Provider value={value}>{children}</CardCatalogContext.Provider>;
@@ -107,6 +118,7 @@ export function useCardCatalog(): CardCatalogContextValue {
       nameRu: (name: string) => name,
       nameShort: (name: string) => name,
       iconUrl: () => undefined,
+      mentionNames: [],
     };
   }
   return ctx;

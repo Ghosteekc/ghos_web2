@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Swords, TrendingDown, TrendingUp } from "lucide-react";
+import { ArrowLeft, Bot, Swords, TrendingDown, TrendingUp } from "lucide-react";
 import { Card, Button, Loader, ErrorState, PageHeader } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
 import type { DeckCompareCardNote, DeckCompareResult } from "@/types";
 import { usePageRefresh } from "@/hooks";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
+import { contextFromMatchup, openGhosteekAi } from "@/utils/aiPageContext";
 
 type TabId = "overview" | "user" | "reference";
 
@@ -196,6 +197,23 @@ export function DeckComparePage() {
             <DeckGrid cards={data.reference_deck} />
           </div>
         </div>
+        <Button
+          variant="secondary"
+          className="w-full mt-4 !py-2.5 text-sm gap-2"
+          onClick={() =>
+            openGhosteekAi(
+              navigate,
+              contextFromMatchup({
+                userDeck: data.user_deck.map((c) => c.name),
+                opponentDeck: data.reference_deck.map((c) => c.name),
+                referenceName: referenceName || data.reference_name,
+              }),
+            )
+          }
+        >
+          <Bot className="w-4 h-4" />
+          Спросить Ghosteek про матчап
+        </Button>
       </Card>
 
       <div className="flex gap-2 overflow-x-auto pb-1">

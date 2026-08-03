@@ -1,12 +1,13 @@
 import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowDown, ArrowLeft, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Bot } from "lucide-react";
 import { Card, Button, Loader, ErrorState, PageHeader } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { CollectionStatsGrid, type CollectionRarityFilter } from "@/components/profile/CollectionStatsGrid";
 import { usePlayerCollection } from "@/hooks/usePlayerCollection";
 import { usePageRefresh, useCardCatalog } from "@/hooks";
 import type { CollectionCardEntry } from "@/types";
+import { contextFromCard, openGhosteekAi } from "@/utils/aiPageContext";
 
 type SortMode = "rarity" | "level" | "elixir";
 type SortDirection = "asc" | "desc";
@@ -255,10 +256,14 @@ export function ProfileCardsPage() {
             visibleCards.map((card) => {
               const elixir = resolveElixir(card);
               return (
-                <div
+                <button
                   key={card.name}
-                  className={cnCardCell(card.owned)}
-                  title={card.name_ru}
+                  type="button"
+                  className={cnCardCell(card.owned) + " text-left"}
+                  title={`${card.name_ru} — спросить Ghosteek`}
+                  onClick={() =>
+                    openGhosteekAi(navigate, contextFromCard(card.name, card.name_ru))
+                  }
                 >
                   <CardTile
                     name={card.name}
@@ -272,7 +277,11 @@ export function ProfileCardsPage() {
                     levelBadge={card.owned && card.level != null && card.level > 0 ? card.level : undefined}
                     elixirCost={elixir < 99 ? elixir : undefined}
                   />
-                </div>
+                  <span className="mt-1 flex items-center justify-center gap-1 text-2xs text-cr-gold/90">
+                    <Bot className="w-3 h-3" aria-hidden />
+                    AI
+                  </span>
+                </button>
               );
             })
           )}

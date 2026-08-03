@@ -172,6 +172,26 @@ export interface MatchPlan {
   win_condition_window: string;
 }
 
+export type CoachConfidence = "high" | "medium" | "low" | "insufficient";
+
+export interface CoachInsight {
+  title: string;
+  text: string;
+  evidence: string[];
+  confidence: CoachConfidence | string;
+}
+
+export interface BattleCoach {
+  main_mistakes: CoachInsight[];
+  best_moment: CoachInsight | null;
+  turning_point: CoachInsight | null;
+  outcome_decider: CoachInsight | null;
+  danger_moment: CoachInsight | null;
+  counterfactual: CoachInsight | null;
+  data_notes: string[];
+  sufficient: boolean;
+}
+
 export interface BattleDetail {
   index: number;
   won: boolean;
@@ -199,6 +219,7 @@ export interface BattleDetail {
   opponent_elixir?: ElixirEfficiency | null;
   match_difficulty?: MatchDifficulty | null;
   match_plan?: MatchPlan | null;
+  battle_coach?: BattleCoach | null;
 }
 
 export interface DeckCard {

@@ -10,6 +10,7 @@ import {
   Swords,
   BarChart3,
   ScanSearch,
+  Bot,
 } from "lucide-react";
 import { Card, Button, Loader, ElixirIcon, FeatureNavGrid, ScrollToTopButton, ErrorState, EmptyState, PageHeader } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
@@ -24,6 +25,7 @@ import { ArenaDecksPanel } from "@/components/analytics/ArenaDecksPanel";
 import type { Deck, DeckCard as DeckCardData, RandomDeck, TopPlayer, TopPlayersData } from "@/types";
 import { usePageRefresh, useTelegram } from "@/hooks";
 import { deckFromCardNames, deckToComparePath } from "@/utils/deckActions";
+import { contextFromConstructor, openGhosteekAi } from "@/utils/aiPageContext";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
 
 import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
@@ -262,11 +264,15 @@ export function DecksPage() {
                   setTimeout(() => setCopyHint(null), 3000);
                 }}
                 onAnalyze={() => setPassportDeck(deck)}
+                onAskAi={() => {
+                  const names = (deck.cards ?? []).map((c) => c.name).filter(Boolean);
+                  if (names.length < 8) return;
+                  openGhosteekAi(navigate, contextFromConstructor(names));
+                }}
               />
             </div>
           )}
-        />
-      </div>
+        />      </div>
 
       <div className={filter === "arena" ? "" : "hidden"}>
         <ArenaDecksPanel
@@ -818,6 +824,7 @@ export function DeckCard({
   onCompare,
   onOpenStats,
   onAnalyze,
+  onAskAi,
 }: {
   deck: Deck;
   index: number;
@@ -826,6 +833,7 @@ export function DeckCard({
   onCompare?: () => void;
   onOpenStats?: () => void;
   onAnalyze?: () => void;
+  onAskAi?: () => void;
 }) {
   const { openLink } = useTelegram();
   const cards = deck.cards ?? [];
@@ -953,11 +961,15 @@ export function DeckCard({
           </Button>
         ) : null}
 
-        {canFavorite && (onAnalyze || (showCompare && onCompare)) ? (
+        {canFavorite && (onAnalyze || (showCompare && onCompare) || onAskAi) ? (
           <div
             className={
               "grid gap-2 mb-3 " +
-              (onAnalyze && showCompare && onCompare ? "grid-cols-2" : "grid-cols-1")
+              (
+                [onAnalyze, showCompare && onCompare, onAskAi].filter(Boolean).length >= 2
+                  ? "grid-cols-2"
+                  : "grid-cols-1"
+              )
             }
           >
             {onAnalyze ? (
@@ -978,6 +990,16 @@ export function DeckCard({
               >
                 <Swords className="w-4 h-4" />
                 {onAnalyze ? "Сравнить" : "Сравнить с моей"}
+              </Button>
+            ) : null}
+            {onAskAi ? (
+              <Button
+                variant="secondary"
+                className="!py-2 text-base flex items-center justify-center gap-2 col-span-full"
+                onClick={onAskAi}
+              >
+                <Bot className="w-4 h-4" />
+                Спросить Ghosteek
               </Button>
             ) : null}
           </div>

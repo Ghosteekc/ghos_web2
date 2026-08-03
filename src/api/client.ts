@@ -397,11 +397,11 @@ export const api = {
     ),
 
   getBattle: (index: number) =>
-    cachedGet<BattleDetail>(`battle-v1:${index}`, `/api/battles/${index}`, TTL.battles),
+    cachedGet<BattleDetail>(`battle-v2:${index}`, `/api/battles/${index}`, TTL.battles),
 
   getBattleByTime: (timestamp: string) =>
     cachedGet<BattleDetail>(
-      `battle-time-v1:${timestamp}`,
+      `battle-time-v2:${timestamp}`,
       `/api/battles/by-time/${encodeURIComponent(timestamp)}`,
       TTL.battles,
     ),
@@ -682,11 +682,19 @@ export const api = {
       body: JSON.stringify({ message, context }),
     }),
 
+  /** История ConversationManager (если бэкенд отдаёт GET /api/ai/session). */
+  getGhosteekAiSession: () =>
+    request<{
+      ok: boolean;
+      exists: boolean;
+      messages: { role: string; content: string; intent?: string | null }[];
+      session?: Record<string, unknown>;
+    }>("/api/ai/session"),
+
   clearGhosteekAiSession: () =>
     request<{ ok: boolean; cleared: boolean }>("/api/ai/session", {
       method: "DELETE",
     }),
-
 };
 
 

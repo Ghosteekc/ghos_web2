@@ -12,7 +12,7 @@ import {
   Bar,
   ReferenceLine,
 } from "recharts";
-import { TrendingUp, TrendingDown, Swords } from "lucide-react";
+import { TrendingUp, TrendingDown, Swords, Bot } from "lucide-react";
 import { StatsOverview } from "@/types";
 import { Card, FeatureNavGrid, Loader, ScrollToTopButton, Button, ErrorState, PageHeader } from "@/components/ui";
 import { api } from "@/api/client";
@@ -187,7 +187,12 @@ export function AnalyticsPage() {
         title="Аналитика"
         subtitle={<p className="page-subtitle">Статистика, соперники и улучшение колод</p>}
         action={
-          <Button variant="ghost" onClick={() => navigate("/ai")} className="text-sm shrink-0">
+          <Button
+            variant="secondary"
+            onClick={() => navigate("/ai")}
+            className="text-sm shrink-0 !px-3 !py-2 !min-h-[2.5rem] gap-1.5"
+          >
+            <Bot className="w-4 h-4 shrink-0" aria-hidden />
             Ghosteek AI
           </Button>
         }

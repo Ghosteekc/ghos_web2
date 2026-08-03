@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
@@ -13,15 +13,187 @@ import {
   Crosshair,
   Gauge,
   Map,
+  Bot,
+  Sparkles,
+  Flame,
+  GitBranch,
+  CircleAlert,
 } from "lucide-react";
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader, ElixirIcon } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
 import { cacheGet, cacheHas } from "@/api/cache";
-import { BattleDetail, ElixirEfficiency, MatchDifficulty, MatchPlan, TacticalMatchup } from "@/types";
+import {
+  BattleCoach,
+  BattleDetail,
+  CoachInsight,
+  ElixirEfficiency,
+  MatchDifficulty,
+  MatchPlan,
+  TacticalMatchup,
+} from "@/types";
 import { formatTime, getTrophyChangeColor, formatPlayerTag } from "@/utils";
 import { buildDeckComparePath } from "@/utils/deckActions";
+import { contextFromBattle, openGhosteekAi } from "@/utils/aiPageContext";
 import { usePageRefresh } from "@/hooks";
+
+function confidenceLabel(confidence: string): string {
+  switch (confidence) {
+    case "high":
+      return "высокая уверенность";
+    case "medium":
+      return "средняя уверенность";
+    case "low":
+      return "низкая уверенность";
+    case "insufficient":
+      return "данных недостаточно";
+    default:
+      return confidence;
+  }
+}
+
+function CoachInsightCard({
+  insight,
+  icon,
+  accent = "default",
+}: {
+  insight: CoachInsight | null | undefined;
+  icon: ReactNode;
+  accent?: "default" | "loss" | "win" | "warn";
+}) {
+  if (!insight) return null;
+  const insufficient = insight.confidence === "insufficient";
+  const border =
+    accent === "loss"
+      ? "border-cr-loss/25 bg-cr-loss/5"
+      : accent === "win"
+        ? "border-cr-win/25 bg-cr-win/5"
+        : accent === "warn"
+          ? "border-cr-gold/30 bg-cr-gold/5"
+          : "border-cr-border/50 bg-cr-surface/40";
+
+  return (
+    <div className={`rounded-xl border p-3 ${border}`}>
+      <div className="flex items-start gap-2 mb-1.5">
+        <span className="shrink-0 mt-0.5">{icon}</span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h4 className="text-sm font-semibold text-cr-text">{insight.title}</h4>
+            <span className="text-[10px] uppercase tracking-wide text-cr-muted">
+              {confidenceLabel(insight.confidence)}
+            </span>
+          </div>
+          <p
+            className={
+              "text-sm leading-relaxed mt-1 " +
+              (insufficient ? "text-cr-muted italic" : "text-cr-text")
+            }
+          >
+            {insight.text}
+          </p>
+          {!insufficient && insight.evidence.length > 0 ? (
+            <ul className="mt-2 space-y-0.5">
+              {insight.evidence.map((line, i) => (
+                <li key={i} className="text-xs text-cr-muted flex items-start gap-1.5">
+                  <span className="w-1 h-1 rounded-full bg-cr-muted/60 mt-1.5 shrink-0" />
+                  {line}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BattleCoachBlock({ data }: { data: BattleCoach }) {
+  const usableMistakes = data.main_mistakes.filter((m) => m.confidence !== "insufficient");
+  const hasBody =
+    usableMistakes.length > 0 ||
+    (data.best_moment && data.best_moment.confidence !== "insufficient") ||
+    (data.turning_point && data.turning_point.confidence !== "insufficient") ||
+    (data.outcome_decider && data.outcome_decider.confidence !== "insufficient") ||
+    (data.danger_moment && data.danger_moment.confidence !== "insufficient") ||
+    (data.counterfactual && data.counterfactual.confidence !== "insufficient") ||
+    data.main_mistakes.some((m) => m.confidence === "insufficient") ||
+    data.data_notes.length > 0;
+
+  if (!hasBody) return null;
+
+  return (
+    <Card className="tint-glass-card">
+      <div className="flex items-center gap-2 mb-2">
+        <Sparkles className="w-5 h-5 text-cr-gold" />
+        <h3 className="font-semibold text-cr-text">Battle Coach</h3>
+      </div>
+      <p className="text-xs text-cr-muted mb-4">
+        Коучинг по составам, счёту и длительности. Реплей и таймлайн ходов API не отдаёт —
+        моменты не выдумываются.
+      </p>
+
+      {data.data_notes.length > 0 ? (
+        <div className="mb-4 rounded-lg border border-cr-border/40 bg-cr-surface/30 px-3 py-2 space-y-1">
+          {data.data_notes.map((note, i) => (
+            <p key={i} className="text-xs text-cr-muted leading-relaxed">
+              {note}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="space-y-3">
+        <div>
+          <h4 className="text-sm font-semibold text-cr-text mb-2 flex items-center gap-1.5">
+            <CircleAlert className="w-4 h-4 text-cr-loss" />
+            Три главные ошибки
+          </h4>
+          {usableMistakes.length > 0 ? (
+            <div className="space-y-2">
+              {usableMistakes.slice(0, 3).map((m, i) => (
+                <CoachInsightCard
+                  key={`${m.title}-${i}`}
+                  insight={m}
+                  accent="loss"
+                  icon={<span className="text-xs font-bold text-cr-loss w-4 text-center">{i + 1}</span>}
+                />
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-cr-muted italic">
+              По доступным данным устойчивых ошибок состава не найдено.
+            </p>
+          )}
+        </div>
+
+        <CoachInsightCard
+          insight={data.best_moment}
+          accent="win"
+          icon={<Trophy className="w-4 h-4 text-cr-win" />}
+        />
+        <CoachInsightCard
+          insight={data.turning_point}
+          accent="warn"
+          icon={<GitBranch className="w-4 h-4 text-cr-gold" />}
+        />
+        <CoachInsightCard
+          insight={data.outcome_decider}
+          icon={<Target className="w-4 h-4 text-cr-accent" />}
+        />
+        <CoachInsightCard
+          insight={data.danger_moment}
+          accent="loss"
+          icon={<Flame className="w-4 h-4 text-cr-loss" />}
+        />
+        <CoachInsightCard
+          insight={data.counterfactual}
+          accent="warn"
+          icon={<GitCompareArrows className="w-4 h-4 text-cr-gold" />}
+        />
+      </div>
+    </Card>
+  );
+}
 
 function KeyCardsBlock({
   title,
@@ -342,9 +514,9 @@ export function BattleDetailPage() {
       : null;
 
   const cacheKey = battleTime
-    ? `battle-time-v1:${decodeURIComponent(battleTime)}`
+    ? `battle-time-v2:${decodeURIComponent(battleTime)}`
     : index !== undefined && index !== ""
-      ? `battle-v1:${Number(index)}`
+      ? `battle-v2:${Number(index)}`
       : null;
 
   const [battle, setBattle] = useState<BattleDetail | null>(() =>
@@ -473,6 +645,25 @@ export function BattleDetailPage() {
             Сравнить колоды
           </Button>
         ) : null}
+        <Button
+          variant="secondary"
+          className="!py-2 !px-3 text-sm"
+          onClick={() =>
+            openGhosteekAi(
+              navigate,
+              contextFromBattle({
+                battleIndex: battle.index,
+                battleTime: battleTime ? decodeURIComponent(battleTime) : undefined,
+                userDeck: battle.user_deck,
+                opponentDeck: battle.opponent_deck,
+                opponentName: battle.opponent_name,
+              }),
+            )
+          }
+        >
+          <Bot className="w-4 h-4" />
+          Спросить Ghosteek
+        </Button>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -512,6 +703,8 @@ export function BattleDetailPage() {
           </div>
         </Card>
       ) : null}
+
+      {battle.battle_coach ? <BattleCoachBlock data={battle.battle_coach} /> : null}
 
       {battle.tactical_matchup ? <TacticalMatchupBlock data={battle.tactical_matchup} /> : null}
 
