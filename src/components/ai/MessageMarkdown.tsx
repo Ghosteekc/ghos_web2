@@ -12,6 +12,21 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+/** Граница слова с учётом кириллицы (\b в JS не видит буквы вне ASCII). */
+function wholeWordPattern(names: string[]): RegExp | null {
+  if (!names.length) return null;
+  const alt = names.map(escapeRegExp).join("|");
+  // (?<!letter) name (?!letter) — не матчить «Яд» внутри «СНАРЯДЫ»
+  return new RegExp(`(?<![\\p{L}\\p{N}_])(${alt})(?![\\p{L}\\p{N}_])`, "giu");
+}
+
+function textHasCardMention(haystack: string, name: string): boolean {
+  const re = wholeWordPattern([name]);
+  if (!re) return false;
+  re.lastIndex = 0;
+  return re.test(haystack);
+}
+
 function highlightCardNames(text: string, pattern: RegExp | null): ReactNode[] {
   if (!text || !pattern) return [text];
   pattern.lastIndex = 0;
@@ -47,11 +62,9 @@ export function MessageMarkdown({ content, className }: Props) {
 
   const pattern = useMemo(() => {
     if (!mentionNames.length) return null;
-    // Только имена, которые реально встречаются в сообщении (регистр неважен).
-    const lower = content.toLowerCase();
-    const hit = mentionNames.filter((n) => lower.includes(n.toLowerCase()));
-    if (!hit.length) return null;
-    return new RegExp(`(${hit.map(escapeRegExp).join("|")})`, "gi");
+    // Только целые названия карт, не подстроки вроде «Яд» в «СНАРЯДЫ».
+    const hit = mentionNames.filter((n) => textHasCardMention(content, n));
+    return wholeWordPattern(hit);
   }, [content, mentionNames]);
 
   return (
