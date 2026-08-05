@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { api, ApiError } from "@/api/client";
 import {
+  type AiDeckCardData,
   type ChatMessage,
   clearChatMessages,
   loadChatMessages,
@@ -34,6 +35,33 @@ function mapBackendMessages(rows: BackendTurn[]): ChatMessage[] {
       intent: r.intent ?? null,
       createdAt: now - (rows.length - i) * 1000,
     }));
+}
+
+function parseDeckCardFromApi(raw: unknown): AiDeckCardData | null {
+  if (!raw || typeof raw !== "object") return null;
+  const row = raw as Record<string, unknown>;
+  const deck = Array.isArray(row.deck)
+    ? row.deck.filter((c): c is string => typeof c === "string")
+    : [];
+  if (deck.length < 8) return null;
+  return {
+    deck: deck.slice(0, 8),
+    average_elixir: Number(row.average_elixir) || 0,
+    archetype: typeof row.archetype === "string" ? row.archetype : "",
+    arena: typeof row.arena === "string" ? row.arena : null,
+    import_url: typeof row.import_url === "string" ? row.import_url : "",
+    gameplan: Array.isArray(row.gameplan)
+      ? row.gameplan.filter((x): x is string => typeof x === "string")
+      : [],
+    weaknesses: Array.isArray(row.weaknesses)
+      ? row.weaknesses.filter((x): x is string => typeof x === "string")
+      : [],
+    evaluation:
+      row.evaluation && typeof row.evaluation === "object"
+        ? (row.evaluation as Record<string, unknown>)
+        : {},
+    title: typeof row.title === "string" ? row.title : null,
+  };
 }
 
 function messagesFromAskSources(sources: Record<string, unknown> | undefined): ChatMessage[] | null {
@@ -145,11 +173,25 @@ export function useGhosteekChat() {
         const data = await api.askGhosteekAi(trimmed, askContext);
         if (tick !== abortRef.current) return;
 
+        const deckCard = parseDeckCardFromApi(data.deck_card);
         const fromSources = messagesFromAskSources(
           data.sources as Record<string, unknown> | undefined,
         );
         if (fromSources && fromSources.length > 0) {
-          setMessages(fromSources);
+          const merged = [...fromSources];
+          for (let i = merged.length - 1; i >= 0; i -= 1) {
+            if (merged[i].role === "assistant") {
+              merged[i] = {
+                ...merged[i],
+                content: data.answer || merged[i].content,
+                intent: data.intent ?? merged[i].intent,
+                actions: data.actions ?? merged[i].actions,
+                deckCard: deckCard ?? merged[i].deckCard,
+              };
+              break;
+            }
+          }
+          setMessages(merged);
           return;
         }
 
@@ -159,6 +201,7 @@ export function useGhosteekChat() {
           content: data.answer,
           intent: data.intent,
           actions: data.actions,
+          deckCard,
           createdAt: Date.now(),
         };
         setMessages((prev) => [...prev, assistantMsg]);

@@ -668,6 +668,19 @@ export const api = {
       answer: string;
       sources: Record<string, unknown>;
       actions?: { type: string; path: string }[];
+      deck_card?: {
+        deck: string[];
+        average_elixir: number;
+        archetype: string;
+        arena?: string | null;
+        import_url?: string;
+        gameplan?: string[];
+        weaknesses?: string[];
+        evaluation?: Record<string, unknown>;
+        title?: string | null;
+      } | null;
+      battle_card?: Record<string, unknown> | null;
+      analysis_card?: Record<string, unknown> | null;
     }>("/api/ai/ask", {
       method: "POST",
       body: JSON.stringify({ message, context }),

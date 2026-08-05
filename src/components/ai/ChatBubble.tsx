@@ -1,5 +1,6 @@
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { DeckCard } from "@/components/ai/DeckCard";
 import { MessageMarkdown } from "@/components/ai/MessageMarkdown";
 import { TypingIndicator } from "@/components/ai/TypingIndicator";
 import { actionLabel, type ChatMessage } from "@/components/ai/chatTypes";
@@ -33,6 +34,7 @@ export function ChatBubble({ message }: Props) {
         ) : (
           <MessageMarkdown content={message.content} />
         )}
+        {!isUser && message.deckCard ? <DeckCard deck={message.deckCard} /> : null}
         {!isUser && message.actions && message.actions.length > 0 && (
           <div className="ai-actions">
             {message.actions.map((a) => (
