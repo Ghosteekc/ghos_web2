@@ -3,11 +3,19 @@
 const APP_HEADER_COLOR = "#00051a";
 const APP_BG_COLOR = "#00051a";
 
+/** Approximate Telegram header / close controls when insets are not ready yet. */
 function getTelegramChromeTop(webApp: NonNullable<typeof window.Telegram>["WebApp"]) {
-  if (webApp.isFullscreen) return 0;
   if (webApp.platform === "ios") return 56;
   if (webApp.platform === "android") return 48;
   return 44;
+}
+
+function readInset(
+  inset: { top?: number; bottom?: number; left?: number; right?: number } | undefined,
+  side: "top" | "bottom" | "left" | "right",
+): number {
+  const value = inset?.[side];
+  return typeof value === "number" && Number.isFinite(value) ? Math.max(0, value) : 0;
 }
 
 export function applyTelegramSafeArea() {
@@ -15,25 +23,46 @@ export function applyTelegramSafeArea() {
   if (!webApp) return;
 
   const root = document.documentElement;
-  const device = webApp.safeAreaInset ?? { top: 0, bottom: 0, left: 0, right: 0 };
+  const device = webApp.safeAreaInset;
   const content = webApp.contentSafeAreaInset;
 
-  root.style.setProperty("--tg-device-safe-top", `${device.top}px`);
-  root.style.setProperty("--tg-device-safe-bottom", `${device.bottom}px`);
-  root.style.setProperty("--tg-device-safe-left", `${device.left}px`);
-  root.style.setProperty("--tg-device-safe-right", `${device.right}px`);
+  const deviceTop = readInset(device, "top");
+  const deviceBottom = readInset(device, "bottom");
+  const deviceLeft = readInset(device, "left");
+  const deviceRight = readInset(device, "right");
+
+  const contentTopRaw = readInset(content, "top");
+  const contentBottomRaw = readInset(content, "bottom");
+  const contentLeftRaw = readInset(content, "left");
+  const contentRightRaw = readInset(content, "right");
+
+  root.style.setProperty("--tg-device-safe-top", `${deviceTop}px`);
+  root.style.setProperty("--tg-device-safe-bottom", `${deviceBottom}px`);
+  root.style.setProperty("--tg-device-safe-left", `${deviceLeft}px`);
+  root.style.setProperty("--tg-device-safe-right", `${deviceRight}px`);
 
   const chromeTop = getTelegramChromeTop(webApp);
-  let contentTop = content?.top ?? 0;
-  const contentBottom = content?.bottom ?? device.bottom;
-  const contentLeft = content?.left ?? device.left;
-  const contentRight = content?.right ?? device.right;
+  let contentTop: number;
+  let contentBottom: number;
+  let contentLeft: number;
+  let contentRight: number;
 
   if (webApp.isFullscreen) {
-    // Fullscreen: trust Telegram insets only (no fake header gap).
-    contentTop = Math.max(contentTop, device.top);
+    // Telegram docs / tma.js: safeArea (notch) + contentSafeArea (close/menu)
+    // must be SUMMED in fullscreen — not max()'d.
+    const telegramUiTop = contentTopRaw > 0 ? contentTopRaw : chromeTop;
+    contentTop = deviceTop + telegramUiTop;
+    contentBottom = deviceBottom + (contentBottomRaw > 0 ? contentBottomRaw : 0);
+    contentLeft = deviceLeft + contentLeftRaw;
+    // Close button sits top-right — keep a floor when content inset is late.
+    const telegramUiRight = contentRightRaw > 0 ? contentRightRaw : Math.round(chromeTop * 0.75);
+    contentRight = deviceRight + telegramUiRight;
   } else {
-    contentTop = Math.max(contentTop, device.top + chromeTop);
+    // Sheet mode: Telegram header is outside the webview; keep prior chrome floor.
+    contentTop = Math.max(contentTopRaw, deviceTop + chromeTop);
+    contentBottom = Math.max(contentBottomRaw, deviceBottom);
+    contentLeft = Math.max(contentLeftRaw, deviceLeft);
+    contentRight = Math.max(contentRightRaw, deviceRight);
   }
 
   root.style.setProperty("--tg-content-safe-top", `${contentTop}px`);
@@ -100,13 +129,24 @@ export function bindTelegramViewportListeners(): () => void {
   const webApp = window.Telegram?.WebApp;
   if (!webApp) return () => undefined;
 
-  const onFullscreen = () => applyTelegramSafeArea();
+  const timers: number[] = [];
+  const reapplySoon = () => {
+    // iOS often reports correct insets only after fullscreen settles.
+    for (const ms of [50, 200, 500, 1200]) {
+      timers.push(window.setTimeout(() => applyTelegramSafeArea(), ms));
+    }
+  };
+
+  const onFullscreen = () => {
+    applyTelegramSafeArea();
+    reapplySoon();
+  };
   const onActivated = () => {
     requestFullscreenSafe(webApp);
     applyTelegramSafeArea();
+    reapplySoon();
   };
   const onFullscreenFailed = () => {
-    // Stay expanded; safe-area still applies in sheet mode.
     applyTelegramSafeArea();
   };
 
@@ -117,11 +157,12 @@ export function bindTelegramViewportListeners(): () => void {
   webApp.onEvent?.("activated", onActivated);
   webApp.onEvent?.("viewportChanged", applyTelegramSafeArea);
 
-  // Retry once shortly after mount — some clients ignore the first call.
-  const retry = window.setTimeout(() => requestFullscreenSafe(webApp), 250);
+  // Retry fullscreen once shortly after mount — some clients ignore the first call.
+  timers.push(window.setTimeout(() => requestFullscreenSafe(webApp), 250));
+  reapplySoon();
 
   return () => {
-    window.clearTimeout(retry);
+    for (const id of timers) window.clearTimeout(id);
     webApp.offEvent?.("safeAreaChanged", applyTelegramSafeArea);
     webApp.offEvent?.("contentSafeAreaChanged", applyTelegramSafeArea);
     webApp.offEvent?.("fullscreenChanged", onFullscreen);
