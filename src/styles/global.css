@@ -1996,6 +1996,16 @@
     animation: ui-fade var(--ui-duration) var(--ui-ease-out) both;
   }
 
+  .ptr-spinner-spin {
+    animation: ptr-spin 0.75s linear infinite;
+  }
+
+  @keyframes ptr-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   .ui-progress-fill {
     transform-origin: left center;
     animation: ui-progress-grow var(--ui-duration) var(--ui-ease-out) both;

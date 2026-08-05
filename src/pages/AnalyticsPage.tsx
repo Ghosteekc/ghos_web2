@@ -230,6 +230,20 @@ export function AnalyticsPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <Card className="lg:col-span-2">
+              <h3 className="chart-section-title text-base font-semibold text-cr-text mb-2">Винрейт по дням</h3>
+              <p className="text-xs text-cr-muted mb-3">
+                Фиолетовая линия — процент побед · ведите пальцем, тап — закрепить
+              </p>
+              <ChartTooltipAnchor className="h-[220px]" pointCount={winrateByDay.length}>
+                {winrateByDay.length > 0 ? (
+                  <WinrateDayChart data={winrateByDay} />
+                ) : (
+                  <p className="text-cr-muted text-base text-center pt-16">Нет данных по дням</p>
+                )}
+              </ChartTooltipAnchor>
+            </Card>
+
             <Card>
               <div className="flex items-start justify-between gap-3 mb-2">
                 <h3 className="chart-section-title text-base font-semibold text-cr-text">Рост трофеев</h3>
@@ -248,20 +262,6 @@ export function AnalyticsPage() {
                   <TrophyGrowthChart data={lastResults} />
                 ) : (
                   <p className="text-cr-muted text-base text-center pt-10">Недостаточно рейтинговых боёв</p>
-                )}
-              </ChartTooltipAnchor>
-            </Card>
-
-            <Card className="lg:col-span-2">
-              <h3 className="chart-section-title text-base font-semibold text-cr-text mb-2">Винрейт по дням</h3>
-              <p className="text-xs text-cr-muted mb-3">
-                Фиолетовая линия — процент побед · ведите пальцем, тап — закрепить
-              </p>
-              <ChartTooltipAnchor className="h-[220px]" pointCount={winrateByDay.length}>
-                {winrateByDay.length > 0 ? (
-                  <WinrateDayChart data={winrateByDay} />
-                ) : (
-                  <p className="text-cr-muted text-base text-center pt-16">Нет данных по дням</p>
                 )}
               </ChartTooltipAnchor>
             </Card>

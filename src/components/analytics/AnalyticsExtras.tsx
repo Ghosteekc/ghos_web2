@@ -68,6 +68,8 @@ export function DeckWinratesPanel({ onAnalyze }: { onAnalyze?: (deck: Deck) => v
     }
   }, []);
 
+  usePageRefresh(load);
+
   useEffect(() => {
     void load();
   }, [load]);

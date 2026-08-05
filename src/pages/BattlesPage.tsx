@@ -47,13 +47,7 @@ export function BattlesPage() {
     }
   }, []);
 
-  usePageRefresh(load);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  const onRefresh = async () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await api.syncData();
@@ -65,7 +59,13 @@ export function BattlesPage() {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, []);
+
+  usePageRefresh(onRefresh);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const filtered = useMemo(
     () =>

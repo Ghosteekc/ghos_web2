@@ -4,24 +4,42 @@ import {
   useContext,
   useEffect,
   useRef,
+  type MutableRefObject,
   type ReactNode,
 } from "react";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { usePullToRefresh } from "./usePullToRefresh";
 
-type PageRefreshRegister = (fn: (() => Promise<void>) | null) => void;
-const PageRefreshContext = createContext<PageRefreshRegister>(() => {});
+type HandlerApi = {
+  register: (token: object, fn: () => Promise<void>) => void;
+  unregister: (token: object) => void;
+};
 
+const PageRefreshApiContext = createContext<MutableRefObject<HandlerApi> | null>(null);
+
+/**
+ * Pull-to-refresh вызывает все зарегистрированные обработчики текущей страницы
+ * (и вложенных панелей через usePageRefresh).
+ */
 export function PageRefreshProvider({ children }: { children: ReactNode }) {
-  const refreshRef = useRef<(() => Promise<void>) | null>(null);
+  const handlersRef = useRef(new Map<object, () => Promise<void>>());
 
   const handleRefresh = useCallback(async () => {
-    if (refreshRef.current) {
-      await refreshRef.current();
-    }
+    const handlers = [...handlersRef.current.values()];
+    if (!handlers.length) return;
+    await Promise.all(handlers.map((fn) => fn()));
   }, []);
 
-  const { refreshing, pullDistance } = usePullToRefresh(handleRefresh);
+  const { refreshing, pullDistance, threshold } = usePullToRefresh(handleRefresh);
+
+  const apiRef = useRef<HandlerApi>({
+    register: (token, fn) => {
+      handlersRef.current.set(token, fn);
+    },
+    unregister: (token) => {
+      handlersRef.current.delete(token);
+    },
+  });
 
   useEffect(() => {
     const onSync = () => {
@@ -31,27 +49,31 @@ export function PageRefreshProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("app:sync", onSync);
   }, [handleRefresh]);
 
-  const registerRefresh = useCallback<PageRefreshRegister>((fn) => {
-    refreshRef.current = fn;
-  }, []);
-
   return (
-    <PageRefreshContext.Provider value={registerRefresh}>
-      <PullToRefreshIndicator refreshing={refreshing} pullDistance={pullDistance} />
+    <PageRefreshApiContext.Provider value={apiRef}>
+      <PullToRefreshIndicator
+        refreshing={refreshing}
+        pullDistance={pullDistance}
+        threshold={threshold}
+      />
       {children}
-    </PageRefreshContext.Provider>
+    </PageRefreshApiContext.Provider>
   );
 }
 
 export function usePageRefresh(onRefresh: () => Promise<void>) {
-  const register = useContext(PageRefreshContext);
+  const apiRef = useContext(PageRefreshApiContext);
   const onRefreshRef = useRef(onRefresh);
   onRefreshRef.current = onRefresh;
+  const tokenRef = useRef<object>({});
 
   useEffect(() => {
-    register(async () => {
+    if (!apiRef) return;
+    const token = tokenRef.current;
+    const run = async () => {
       await onRefreshRef.current();
-    });
-    return () => register(null);
-  }, [register]);
+    };
+    apiRef.current.register(token, run);
+    return () => apiRef.current.unregister(token);
+  }, [apiRef]);
 }
