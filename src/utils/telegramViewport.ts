@@ -48,21 +48,32 @@ export function applyTelegramSafeArea() {
   let contentRight: number;
 
   if (webApp.isFullscreen) {
-    // Telegram docs / tma.js: safeArea (notch) + contentSafeArea (close/menu)
-    // must be SUMMED in fullscreen — not max()'d.
+    // Vertical: safeArea (notch) + contentSafeArea (Telegram close/menu strip).
     const telegramUiTop = contentTopRaw > 0 ? contentTopRaw : chromeTop;
     contentTop = deviceTop + telegramUiTop;
-    contentBottom = deviceBottom + (contentBottomRaw > 0 ? contentBottomRaw : 0);
-    contentLeft = deviceLeft + contentLeftRaw;
-    // Close button sits top-right — keep a floor when content inset is late.
-    const telegramUiRight = contentRightRaw > 0 ? contentRightRaw : Math.round(chromeTop * 0.75);
-    contentRight = deviceRight + telegramUiRight;
+    contentBottom = deviceBottom + contentBottomRaw;
+
+    // Horizontal: keep left/right equal so page + dock stay centered.
+    // Do NOT invent a right-only fallback for the close button — that shifts
+    // the whole UI left. Corner controls are covered by the top inset.
+    const horizontal = Math.max(
+      deviceLeft + contentLeftRaw,
+      deviceRight + contentRightRaw,
+    );
+    contentLeft = horizontal;
+    contentRight = horizontal;
   } else {
     // Sheet mode: Telegram header is outside the webview; keep prior chrome floor.
     contentTop = Math.max(contentTopRaw, deviceTop + chromeTop);
     contentBottom = Math.max(contentBottomRaw, deviceBottom);
-    contentLeft = Math.max(contentLeftRaw, deviceLeft);
-    contentRight = Math.max(contentRightRaw, deviceRight);
+    const horizontal = Math.max(
+      contentLeftRaw,
+      contentRightRaw,
+      deviceLeft,
+      deviceRight,
+    );
+    contentLeft = horizontal;
+    contentRight = horizontal;
   }
 
   root.style.setProperty("--tg-content-safe-top", `${contentTop}px`);
