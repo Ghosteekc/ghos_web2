@@ -10,6 +10,23 @@
   <body>
     <div id="root"></div>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+      (function () {
+        var tg = window.Telegram && window.Telegram.WebApp;
+        if (!tg) return;
+        try { tg.ready(); } catch (e) {}
+        try { tg.expand(); } catch (e) {}
+        try { tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (e) {}
+        try { tg.setHeaderColor && tg.setHeaderColor("#00051a"); } catch (e) {}
+        try { tg.setBackgroundColor && tg.setBackgroundColor("#00051a"); } catch (e) {}
+        try { tg.setBottomBarColor && tg.setBottomBarColor("#00051a"); } catch (e) {}
+        try {
+          if (tg.requestFullscreen && !tg.isFullscreen) {
+            if (!tg.isVersionAtLeast || tg.isVersionAtLeast("8.0")) tg.requestFullscreen();
+          }
+        } catch (e) {}
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

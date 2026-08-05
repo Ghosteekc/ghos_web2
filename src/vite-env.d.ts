@@ -16,9 +16,18 @@ export interface TelegramWebApp {
       is_premium?: boolean;
     };
   };
+  version?: string;
   ready: () => void;
   expand: () => void;
   close: () => void;
+  /** Bot API 8.0+ */
+  isFullscreen?: boolean;
+  requestFullscreen?: () => void;
+  exitFullscreen?: () => void;
+  isVersionAtLeast?: (version: string) => boolean;
+  setHeaderColor?: (color: string) => void;
+  setBackgroundColor?: (color: string) => void;
+  setBottomBarColor?: (color: string) => void;
   /** Bot API 7.7+ — disable swipe-down to close/minimize the Mini App. */
   isVerticalSwipesEnabled?: boolean;
   enableVerticalSwipes?: () => void;
@@ -30,8 +39,8 @@ export interface TelegramWebApp {
   platform?: "ios" | "android" | "macos" | "tdesktop" | "weba" | "webk" | "unigram" | "unknown";
   safeAreaInset?: { top: number; bottom: number; left: number; right: number };
   contentSafeAreaInset?: { top: number; bottom: number; left: number; right: number };
-  onEvent?: (eventType: string, callback: () => void) => void;
-  offEvent?: (eventType: string, callback: () => void) => void;
+  onEvent?: (eventType: string, callback: (...args: unknown[]) => void) => void;
+  offEvent?: (eventType: string, callback: (...args: unknown[]) => void) => void;
   HapticFeedback?: {
     impactOccurred: (style: "light" | "medium" | "heavy" | "rigid" | "soft") => void;
     notificationOccurred: (type: "error" | "success" | "warning") => void;
