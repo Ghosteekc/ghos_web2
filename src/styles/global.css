@@ -1721,6 +1721,23 @@
     border-color: var(--comp-constructor-seed-border);
   }
 
+  /* Battle coach insight cards: readable text on tinted panes in light theme */
+  [data-theme="light"] .coach-insight-card {
+    color: #0b1220;
+  }
+
+  [data-theme="light"] .coach-insight-card h4,
+  [data-theme="light"] .coach-insight-card p,
+  [data-theme="light"] .coach-insight-card li,
+  [data-theme="light"] .coach-insight-card span:not(.text-cr-win):not(.text-cr-loss):not(.text-cr-gold) {
+    color: #0b1220 !important;
+  }
+
+  [data-theme="light"] .tint-glass-card.glass-card p.text-cr-text,
+  [data-theme="light"] .tint-glass-card.glass-card .text-cr-text {
+    color: #0b1220 !important;
+  }
+
   [data-theme="light"] .level-bar-track {
     background: rgb(232 236 243);
   }

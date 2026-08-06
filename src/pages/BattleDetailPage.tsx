@@ -32,7 +32,7 @@ import {
   MatchPlan,
   TacticalMatchup,
 } from "@/types";
-import { formatTime, getTrophyChangeColor, formatPlayerTag } from "@/utils";
+import { formatTime, getTrophyChangeColor, formatPlayerTag, cn } from "@/utils";
 import { buildDeckComparePath } from "@/utils/deckActions";
 import { contextFromBattle, openGhosteekAi } from "@/utils/aiPageContext";
 import { usePageRefresh } from "@/hooks";
@@ -73,20 +73,20 @@ function CoachInsightCard({
           : "border-cr-border/50 bg-cr-surface/40";
 
   return (
-    <div className={`rounded-xl border p-3 ${border}`}>
+    <div className={`rounded-xl border p-3 coach-insight-card ${border}`}>
       <div className="flex items-start gap-2 mb-1.5">
         <span className="shrink-0 mt-0.5">{icon}</span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <h4 className="text-sm font-semibold text-cr-text">{insight.title}</h4>
-            <span className="text-[10px] uppercase tracking-wide text-cr-muted">
+            <span className="text-[10px] uppercase tracking-wide text-cr-text/70">
               {confidenceLabel(insight.confidence)}
             </span>
           </div>
           <p
             className={
               "text-sm leading-relaxed mt-1 " +
-              (insufficient ? "text-cr-muted italic" : "text-cr-text")
+              (insufficient ? "text-cr-text/75 italic" : "text-cr-text")
             }
           >
             {insight.text}
@@ -94,8 +94,8 @@ function CoachInsightCard({
           {!insufficient && insight.evidence.length > 0 ? (
             <ul className="mt-2 space-y-0.5">
               {insight.evidence.map((line, i) => (
-                <li key={i} className="text-xs text-cr-muted flex items-start gap-1.5">
-                  <span className="w-1 h-1 rounded-full bg-cr-muted/60 mt-1.5 shrink-0" />
+                <li key={i} className="text-xs text-cr-text flex items-start gap-1.5">
+                  <span className="w-1 h-1 rounded-full bg-cr-text/50 mt-1.5 shrink-0" />
                   {line}
                 </li>
               ))}
@@ -666,34 +666,36 @@ export function BattleDetailPage() {
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div
-          className={
-            "flex items-center gap-2 px-4 py-2 rounded-xl " +
-            (battle.won ? "bg-cr-win/10 text-cr-win" : "bg-cr-loss/10 text-cr-loss")
-          }
-        >
-          <Trophy className="w-5 h-5" />
-          <span className="font-bold">{battle.won ? "Победа" : "Поражение"}</span>
+      <Card className="!py-3 !px-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <div
+            className={
+              "flex items-center gap-2 px-4 py-2 rounded-xl " +
+              (battle.won ? "bg-cr-win/10 text-cr-win" : "bg-cr-loss/10 text-cr-loss")
+            }
+          >
+            <Trophy className="w-5 h-5" />
+            <span className="font-bold">{battle.won ? "Победа" : "Поражение"}</span>
+          </div>
+          <div className={cn("text-base font-bold", getTrophyChangeColor(battle.trophy_change))}>
+            {battle.trophy_change >= 0 ? "+" : ""}
+            {battle.trophy_change} 🏆
+          </div>
+          {battle.crown_score ? (
+            <div className="text-base text-cr-text font-semibold">Короны: {battle.crown_score}</div>
+          ) : null}
+          <div className="text-base text-cr-text/80 font-semibold">
+            Матчап: {battle.matchup_score.toFixed(0)}/100
+          </div>
+          <div className="text-cr-text/80 text-base flex items-center gap-1">
+            <Clock className="w-4 h-4" />
+            {battle.played_at ? battle.played_at : null}
+            {battle.played_at && (battle.duration ?? 0) > 0 ? " · " : null}
+            {(battle.duration ?? 0) > 0 ? formatTime(battle.duration) : null}
+            {!battle.played_at && !(battle.duration ?? 0) ? "—" : null}
+          </div>
         </div>
-        <div className={getTrophyChangeColor(battle.trophy_change)}>
-          {battle.trophy_change >= 0 ? "+" : ""}
-          {battle.trophy_change} 🏆
-        </div>
-        {battle.crown_score ? (
-          <div className="text-base text-cr-accent font-semibold">Короны: {battle.crown_score}</div>
-        ) : null}
-        <div className="text-base text-cr-muted font-semibold">
-          Матчап: {battle.matchup_score.toFixed(0)}/100
-        </div>
-        <div className="text-cr-muted text-base flex items-center gap-1">
-          <Clock className="w-4 h-4" />
-          {battle.played_at ? battle.played_at : null}
-          {battle.played_at && (battle.duration ?? 0) > 0 ? " · " : null}
-          {(battle.duration ?? 0) > 0 ? formatTime(battle.duration) : null}
-          {!battle.played_at && !(battle.duration ?? 0) ? "—" : null}
-        </div>
-      </div>
+      </Card>
 
       {battle.outcome_summary ? (
         <Card className="tint-glass-card">

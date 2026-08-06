@@ -57,28 +57,48 @@ function getReleaseSpringForTabDistance(fromIndex: number, toIndex: number) {
   };
 }
 
-const STRETCH_X_MAX = 0.32;
-const STRETCH_X_MIN = 0.03;
-const STRETCH_Y_MAX = 0.12;
-const STRETCH_Y_MIN = 0.012;
+const STRETCH_X_MAX = 0.1;
+const STRETCH_X_MIN = 0.02;
+const STRETCH_Y_MAX = 0.045;
+const STRETCH_Y_MIN = 0.008;
+
+const PRESS_SCALE = 1.08;
+const PRESS_SPRING = { type: "spring" as const, stiffness: 520, damping: 20, mass: 0.52 };
+const RELEASE_PRESS_SPRING = { type: "spring" as const, stiffness: 420, damping: 28, mass: 0.58 };
+
+const DRAG_VELOCITY_STRETCH = 0.032;
+const DRAG_VELOCITY_CAP = 2.4;
+const DRAG_STRETCH_X_MAX = 0.08;
+const DRAG_STRETCH_Y_MAX = 0.028;
 
 function stretchFromPull(pull: number, tabSteps = 1): { x: number; y: number } {
   if (tabSteps <= 1) {
     return {
-      x: 1 + Math.min(pull / 220, 0.03),
-      y: 1 - Math.min(pull / 320, 0.012),
+      x: 1 + Math.min(pull / 420, STRETCH_X_MIN),
+      y: 1 - Math.min(pull / 560, STRETCH_Y_MIN),
     };
   }
 
   const t = Math.min((tabSteps - 1) / Math.max(TAB_COUNT - 2, 1), 1);
   const stretchXMax = STRETCH_X_MIN + t * (STRETCH_X_MAX - STRETCH_X_MIN);
   const stretchYMax = STRETCH_Y_MIN + t * (STRETCH_Y_MAX - STRETCH_Y_MIN);
-  const pullDivisorX = 92 - t * 32;
-  const pullDivisorY = 170 - t * 45;
+  const pullDivisorX = 180 - t * 55;
+  const pullDivisorY = 320 - t * 70;
 
   return {
     x: 1 + Math.min(pull / pullDivisorX, stretchXMax),
     y: Math.max(1 - stretchYMax, 1 - Math.min(pull / pullDivisorY, stretchYMax)),
+  };
+}
+
+function stretchFromVelocity(velocityX: number): { x: number; y: number } {
+  const speed = Math.min(Math.abs(velocityX), DRAG_VELOCITY_CAP);
+  const stretchX = Math.min(speed * DRAG_VELOCITY_STRETCH, DRAG_STRETCH_X_MAX);
+  const stretchY = Math.min(speed * DRAG_VELOCITY_STRETCH * 0.38, DRAG_STRETCH_Y_MAX);
+
+  return {
+    x: 1 + stretchX,
+    y: 1 - stretchY,
   };
 }
 
@@ -177,6 +197,7 @@ export function BottomNav() {
   const bubbleMetricsRef = useRef({ halfWidth: 0, inset: 0 });
   const previewIndexRef = useRef<number | null>(null);
   const bubbleX = useMotionValue(0);
+  const pressScale = useMotionValue(1);
   const scaleX = useMotionValue(1);
   const scaleY = useMotionValue(1);
   const skipAnimateRef = useRef(true);
@@ -184,10 +205,13 @@ export function BottomNav() {
   const isDraggingRef = useRef(false);
   const dragStartX = useRef(0);
   const bubbleStartX = useRef(0);
+  const lastDragXRef = useRef(0);
+  const lastDragTimeRef = useRef(0);
   const lastDragHapticIndexRef = useRef(activeIndex);
   const prevActiveIndexRef = useRef(activeIndex);
   const bubbleFocusIndexRef = useRef(activeIndex);
   const motionControlsRef = useRef<Array<{ stop: () => void }>>([]);
+  const pressControlRef = useRef<{ stop: () => void } | null>(null);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [bubbleFocusIndex, setBubbleFocusIndex] = useState(activeIndex);
   const highlightedIndex = previewIndex ?? bubbleFocusIndex;
@@ -241,16 +265,21 @@ export function BottomNav() {
     bubbleLayerRef.current?.classList.toggle("bottom-nav-liquid-bubble--animating", active);
   }, []);
 
-  const stopBubbleMotion = useCallback(() => {
+  const stopBubbleMotion = useCallback((options?: { keepPress?: boolean }) => {
     for (const control of motionControlsRef.current) {
       control.stop();
     }
     motionControlsRef.current = [];
     bubbleX.stop();
+    if (!options?.keepPress) {
+      pressControlRef.current?.stop();
+      pressControlRef.current = null;
+      pressScale.stop();
+    }
     scaleX.stop();
     scaleY.stop();
     setBubbleAnimating(false);
-  }, [bubbleX, scaleX, scaleY, setBubbleAnimating]);
+  }, [bubbleX, pressScale, scaleX, scaleY, setBubbleAnimating]);
 
   const registerMotionControl = useCallback((control: { stop: () => void }) => {
     motionControlsRef.current.push(control);
@@ -341,6 +370,20 @@ export function BottomNav() {
     [scaleX, scaleY, registerMotionControl],
   );
 
+  const animatePressScale = useCallback(
+    (target: number, config = target > 1 ? PRESS_SPRING : RELEASE_PRESS_SPRING) => {
+      pressControlRef.current?.stop();
+      const control = animate(pressScale, target, config);
+      pressControlRef.current = control;
+      return control.then(() => {
+        if (pressControlRef.current === control) {
+          pressControlRef.current = null;
+        }
+      });
+    },
+    [pressScale],
+  );
+
   const animateBubbleX = useCallback(
     (target: number, fromIndex: number, toIndex: number) => {
       if (fromIndex === toIndex && Math.abs(bubbleX.get() - target) < 0.5) {
@@ -353,7 +396,7 @@ export function BottomNav() {
         return Promise.resolve();
       }
 
-      stopBubbleMotion();
+      stopBubbleMotion({ keepPress: true });
       const tabSteps = getTabSteps(fromIndex, toIndex);
       const moveTransition = getMoveTransition(fromIndex, toIndex);
       const releaseTransition = getReleaseTransition(fromIndex, toIndex);
@@ -418,6 +461,7 @@ export function BottomNav() {
   useLayoutEffect(() => {
     refreshLayoutMetrics();
     syncBubbleToIndex(activeIndex, false);
+    pressScale.set(1);
     scaleX.set(1);
     scaleY.set(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -468,8 +512,13 @@ export function BottomNav() {
     isDraggingRef.current = true;
     dragStartX.current = event.clientX;
     bubbleStartX.current = bubbleX.get();
+    lastDragXRef.current = event.clientX;
+    lastDragTimeRef.current = performance.now();
     lastDragHapticIndexRef.current = activeIndex;
     setBubbleAnimating(true);
+    scaleX.set(1);
+    scaleY.set(1);
+    void animatePressScale(PRESS_SCALE);
     haptic.light();
   };
 
@@ -494,8 +543,20 @@ export function BottomNav() {
       haptic.selection();
     }
 
-    const anchor = centers[activeIndex] ?? getTabCenterX(activeIndex);
-    applyStretchFromPull(Math.abs(nextX - anchor), getTabSteps(activeIndex, nextPreviewIndex));
+    const now = performance.now();
+    const dt = Math.max(now - lastDragTimeRef.current, 12);
+    const frameDeltaX = event.clientX - lastDragXRef.current;
+    const velocityX = Math.max(-DRAG_VELOCITY_CAP, Math.min(DRAG_VELOCITY_CAP, frameDeltaX / dt));
+    lastDragXRef.current = event.clientX;
+    lastDragTimeRef.current = now;
+
+    const { x, y } = stretchFromVelocity(velocityX);
+    if (Math.abs(scaleX.get() - x) > STRETCH_EPSILON) {
+      scaleX.set(x);
+    }
+    if (Math.abs(scaleY.get() - y) > STRETCH_EPSILON) {
+      scaleY.set(y);
+    }
   };
 
   const finishDrag = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -516,7 +577,8 @@ export function BottomNav() {
     previewIndexRef.current = nextIndex;
     setPreviewIndex(nextIndex);
 
-    stopBubbleMotion();
+    stopBubbleMotion({ keepPress: true });
+    void animatePressScale(1);
     void animateBubbleX(targetX, activeIndex, nextIndex).then(() => {
       previewIndexRef.current = null;
       setPreviewIndex(null);
@@ -559,6 +621,7 @@ export function BottomNav() {
               className="bottom-nav-liquid-bubble"
               style={{
                 x: bubbleX,
+                scale: pressScale,
                 scaleX,
                 scaleY,
               }}
