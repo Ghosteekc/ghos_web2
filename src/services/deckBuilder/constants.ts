@@ -16,6 +16,33 @@ export const WIN_CONDITIONS = new Set([
   "Ram Rider", "Mighty Miner", "Goblin Machine", "Boss Bandit", "Rune Giant",
 ]);
 
+/** Chip / assassin pressure — не вторая независимая WC при наличии primary. */
+export const SECONDARY_PRESSURE = new Set([
+  "Miner",
+  "Mighty Miner",
+  "Wall Breakers",
+  "Boss Bandit",
+  "Goblinstein",
+]);
+
+export function isPrimaryWinCondition(name: string): boolean {
+  return WIN_CONDITIONS.has(name) && !SECONDARY_PRESSURE.has(name);
+}
+
+export function isSecondaryPressure(name: string): boolean {
+  return SECONDARY_PRESSURE.has(name);
+}
+
+export function isTowerThreat(name: string): boolean {
+  return isPrimaryWinCondition(name) || isSecondaryPressure(name);
+}
+
+export function countIndependentWins(deck: string[]): number {
+  const primaries = deck.filter(isPrimaryWinCondition);
+  if (primaries.length) return primaries.length;
+  return deck.filter(isSecondaryPressure).length;
+}
+
 /** Главная угроза архетипа — без неё шаблон нельзя брать */
 export const ARCHETYPE_PRIMARY_WIN: Record<string, string[]> = {
   Cycle: ["Hog Rider", "Mortar", "Miner", "Wall Breakers"],

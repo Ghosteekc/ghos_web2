@@ -462,9 +462,24 @@ export function DeckToolsPanel() {
           )}
           {showIssues && (
             <ul className="mt-2 space-y-1 text-sm text-cr-muted">
-              {customize.issues.map((issue, i) => (
-                <li key={i}>· {issue}</li>
-              ))}
+              {customize.issues.map((issue, i) => {
+                const isHeading =
+                  issue === "Что хорошо" ||
+                  issue === "Что можно улучшить" ||
+                  issue === "Итоговая рекомендация";
+                return (
+                  <li
+                    key={i}
+                    className={
+                      isHeading
+                        ? "mt-2 first:mt-0 font-medium text-cr-text"
+                        : undefined
+                    }
+                  >
+                    {isHeading ? issue : `· ${issue}`}
+                  </li>
+                );
+              })}
             </ul>
           )}
         </Card>

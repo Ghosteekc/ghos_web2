@@ -8,6 +8,8 @@ import {
   MAX_SPELLS,
   MAX_WINS,
   WIN_CONDITIONS,
+  countIndependentWins,
+  isTowerThreat,
 } from "./constants";
 import { avgElixir, cardHasRole, getCardMeta } from "./database";
 import { DeckIntentEngine } from "./deckIntent";
@@ -18,9 +20,9 @@ export function isSpellCard(name: string): boolean {
   return cardHasRole(name, "spell");
 }
 
-/** Primary tower-push attackers (Hog, Giant…) — Bandit/support push does not count. */
+/** Primary или secondary pressure — карта может вести план атаки. */
 export function isAttackWin(name: string): boolean {
-  return WIN_CONDITIONS.has(name);
+  return isTowerThreat(name);
 }
 
 export function isWinCard(name: string): boolean {
@@ -32,7 +34,7 @@ export function countSpells(deck: string[]): number {
 }
 
 export function countWins(deck: string[]): number {
-  return deck.filter(isAttackWin).length;
+  return countIndependentWins(deck);
 }
 
 export function meaningfulOverlap(core: string[], templateCards: string[]): string[] {

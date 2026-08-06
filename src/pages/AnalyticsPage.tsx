@@ -32,10 +32,10 @@ import { RecommendationsPanel } from "@/components/analytics/recommendations";
 import { ChartGlassTooltipShell, ChartTooltipAnchor, useChartScrub } from "@/components/charts/ChartGlassTooltip";
 
 const ANALYTICS_NAV = [
-  { id: "recommendations", label: "Рекомендации", emoji: "💡" },
+  { id: "recommendations", label: "Прокачка\nкарт", emoji: "💡" },
   { id: "losses", label: "Разбор поражений", emoji: "🧠" },
-  { id: "opponents", label: "Соперники", emoji: "⚔️" },
-  { id: "tools", label: "Улучшения", emoji: "🔧" },
+  { id: "opponents", label: "Контра\nпо боям", emoji: "⚔️" },
+  { id: "tools", label: "Улучшение\nколоды", emoji: "🔧" },
 ] as const;
 
 type AnalyticsSection = (typeof ANALYTICS_NAV)[number]["id"] | null;

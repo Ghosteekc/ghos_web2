@@ -221,14 +221,12 @@ export function RecommendationsPanel() {
               type="button"
               onClick={() => scrollToArena(arena.arena)}
               className={cn(
-                "rounded-lg border px-2.5 py-1.5 text-left transition-colors bg-cr-card",
-                playerArena === arena.arena
-                  ? "border-cr-gold/40"
-                  : "border-cr-border",
+                "recommendation-arena-chip text-left",
+                playerArena === arena.arena && "recommendation-arena-chip--current",
               )}
             >
               <span className="block text-2xs text-cr-muted">Арена {arena.arena}</span>
-              <span className="block text-sm text-cr-text max-w-[9rem] truncate">{arena.name}</span>
+              <span className="block text-sm text-cr-text leading-snug">{arena.name}</span>
             </button>
           ))}
         </div>
