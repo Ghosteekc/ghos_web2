@@ -36,7 +36,7 @@ export function PlayerCard({ profile, loading }: PlayerCardProps) {
               <img
                 src={profile.favorite_card_icon}
                 alt={profile.favorite_card ?? "Card"}
-                className="w-full h-full rounded-full object-contain bg-cr-surface p-1"
+                className="w-full h-full rounded-full object-cover bg-cr-surface scale-125"
               />
             ) : (
               <div className="w-full h-full rounded-full bg-cr-surface flex items-center justify-center text-2xl font-extrabold text-cr-gold">
