@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { HelpCircle, Search, Sparkles, X } from "lucide-react";
 
 import { api } from "@/api/client";
@@ -18,7 +18,7 @@ import { haptic } from "@/utils/hapticManager";
 import type { CardDisplayMode, CoreConflictInfo, Deck, DeckCard } from "@/types";
 
 /** Подписи слотов (семантика 0/2 evo, 1 hero, 3 base — без изменений логики). */
-const SLOT_HINTS = ["Эволюция", "Герой", "Любая карта", "Любая карта"] as const;
+const SLOT_HINTS = ["Эволюция", "Герой", "Эволюция", "Обычная"] as const;
 
 type BrowserTab = "all" | "troop" | "spell" | "building" | "champion" | "evo";
 
@@ -70,10 +70,17 @@ function slotCardProps(slotIndex: number, card: CatalogCard) {
   };
 }
 
+/** Только карты с реальной эволюцией — без героев и чемпионов. */
+function isEvolutionCard(card: CatalogCard): boolean {
+  if (!card.icon_evo) return false;
+  if (CHAMPION_CARDS.has(card.name)) return false;
+  return true;
+}
+
 function matchesBrowserTab(card: CatalogCard, tab: BrowserTab): boolean {
   if (tab === "all") return true;
   if (tab === "champion") return CHAMPION_CARDS.has(card.name);
-  if (tab === "evo") return Boolean(card.icon_evo) || (card.max_evolution_level ?? 0) >= 1;
+  if (tab === "evo") return isEvolutionCard(card);
   const meta = getCardMeta(card.name);
   const type = meta?.type ?? "troop";
   return type === tab;
@@ -147,7 +154,7 @@ function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
           <li>Нажми слот — он станет активным.</li>
           <li>Выбери карту внизу — она встанет в этот слот.</li>
           <li>
-            Слот 1 и 3 показывают эволюцию, слот 2 — героя, слот 4 — обычную версию.
+            Слоты 1 и 3 — эволюция, слот 2 — герой, слот 4 — обычная карта.
           </li>
           <li>Когда все 4 карты на месте, Ghosteek соберёт полные колоды.</li>
         </ul>
@@ -318,7 +325,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   }
 
   return (
-    <LayoutGroup id="constructor-layout">
       <div className="ctor">
         {/* 1. Header */}
         <header className="ctor-header">
@@ -364,68 +370,43 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                   <span className="ctor-slot-label">{SLOT_HINTS[index]}</span>
 
                   <div className="ctor-slot-well">
-                    <AnimatePresence mode="popLayout">
-                      {card ? (
-                        <motion.div
-                          key={card.name}
-                          layoutId={`ctor-card-${card.name}`}
-                          className="ctor-slot-card"
-                          initial={{ opacity: 0, scale: 0.72 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.6 }}
-                          transition={{ type: "spring", stiffness: 420, damping: 28 }}
+                    {card ? (
+                      <div key={card.name} className="ctor-slot-card ctor-slot-card--enter">
+                        <CardTile
+                          name={card.name}
+                          size="deck"
+                          showLabel
+                          {...slotCardProps(index, card as CatalogCard)}
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearSlot(index);
+                          }}
+                          className="ctor-slot-clear"
+                          aria-label="Убрать карту"
                         >
-                          <CardTile
-                            name={card.name}
-                            size="deck"
-                            showLabel
-                            {...slotCardProps(index, card as CatalogCard)}
-                          />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              clearSlot(index);
-                            }}
-                            className="ctor-slot-clear"
-                            aria-label="Убрать карту"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="empty"
-                          className="ctor-slot-placeholder"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                        >
-                          <span className="ctor-slot-plus">+</span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="ctor-slot-placeholder">
+                        <span className="ctor-slot-plus">+</span>
+                      </div>
+                    )}
                   </div>
                 </button>
               );
             })}
           </div>
 
-          <AnimatePresence>
-            {tip ? (
-              <motion.p
-                key={tip}
-                className="ctor-tip"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.22 }}
-              >
-                <Sparkles className="ctor-tip-icon" aria-hidden />
-                <span>{tip}</span>
-              </motion.p>
-            ) : null}
-          </AnimatePresence>
+          {tip ? (
+            <p className="ctor-tip">
+              <Sparkles className="ctor-tip-icon" aria-hidden />
+              <span>{tip}</span>
+            </p>
+          ) : null}
 
           {filledCount > 0 ? (
             <button type="button" className="ctor-reset" onClick={resetAll}>
@@ -470,26 +451,39 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
               ))}
             </div>
 
-            <div className="ctor-grid">
+            <div className={cn("ctor-grid", browserTab === "evo" && "ctor-grid--evo")}>
               {filteredCards.map((card) => (
-                <motion.button
+                <button
                   key={card.name}
                   type="button"
-                  layoutId={`ctor-card-${card.name}`}
                   onClick={() => placeCard(card)}
-                  className="ctor-grid-item"
+                  className={cn(
+                    "ctor-grid-item",
+                    browserTab === "evo" && "ctor-grid-item--evo",
+                  )}
                   title={nameRu(card.name)}
-                  whileTap={{ scale: 0.94 }}
-                  transition={{ type: "spring", stiffness: 480, damping: 32 }}
                 >
-                  <CardTile
-                    name={card.name}
-                    icon={card.icon}
-                    size="collection"
-                    showLabel
-                    elixirCost={card.elixir ?? undefined}
-                  />
-                </motion.button>
+                  {browserTab === "evo" ? (
+                    <CardTile
+                      name={card.name}
+                      icon={card.icon_evo || card.icon}
+                      iconBase={card.icon}
+                      iconEvo={card.icon_evo || card.icon}
+                      displayMode="evo"
+                      size="collection"
+                      showLabel
+                      elixirCost={card.elixir ?? undefined}
+                    />
+                  ) : (
+                    <CardTile
+                      name={card.name}
+                      icon={card.icon}
+                      size="collection"
+                      showLabel
+                      elixirCost={card.elixir ?? undefined}
+                    />
+                  )}
+                </button>
               ))}
             </div>
 
@@ -564,7 +558,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           {helpOpen ? <ConstructorHelpSheet onClose={() => setHelpOpen(false)} /> : null}
         </AnimatePresence>
       </div>
-    </LayoutGroup>
   );
 }
 
