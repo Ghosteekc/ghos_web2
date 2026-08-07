@@ -17,8 +17,13 @@ import { cn } from "@/utils";
 import { haptic } from "@/utils/hapticManager";
 import type { CardDisplayMode, CoreConflictInfo, Deck, DeckCard } from "@/types";
 
-/** Подписи слотов (семантика 0/2 evo, 1 hero, 3 base — без изменений логики). */
-const SLOT_HINTS = ["Эволюция", "Герой", "Эволюция", "Обычная"] as const;
+/** Подписи слотов: 0 evo, 1 hero+champion, 2 flexible (champ/hero/evo), 3 base. */
+const SLOT_HINTS: ReadonlyArray<string | readonly string[]> = [
+  "Эволюция",
+  ["Герой", "Чемпион"],
+  "Гибкая",
+  "Обычная",
+];
 
 type BrowserTab = "all" | "troop" | "spell" | "building" | "champion" | "evo";
 
@@ -71,16 +76,34 @@ type CatalogCard = {
   icon_hero?: string;
 };
 
+/**
+ * Режим арта в слоте:
+ * 0 — эволюция
+ * 1 — чемпион (рамка champion; иначе hero/evo если карта усилена)
+ * 2 — гибкий: чемпион / героизм / эволюция
+ * 3 — обычная
+ */
 function slotDisplayMode(slotIndex: number, card: CatalogCard): CardDisplayMode {
-  if (slotIndex === 1 && card.has_hero) return "hero";
-  if ((slotIndex === 0 || slotIndex === 2) && Boolean(card.icon_evo)) return "evo";
+  if (slotIndex === 0) {
+    return card.icon_evo ? "evo" : "base";
+  }
+
+  if (slotIndex === 1 || slotIndex === 2) {
+    if (CHAMPION_CARDS.has(card.name)) return "base";
+    if (card.has_hero) return "hero";
+    if (card.icon_evo) return "evo";
+    return "base";
+  }
+
   return "base";
 }
 
 function slotCardProps(slotIndex: number, card: CatalogCard) {
   const mode = slotDisplayMode(slotIndex, card);
+  const isChampion = CHAMPION_CARDS.has(card.name);
   return {
     displayMode: mode,
+    rarity: isChampion ? "champion" : undefined,
     iconBase: card.icon,
     iconEvo: card.icon_evo || card.icon,
     iconHero: card.icon_hero || card.icon,
@@ -179,7 +202,8 @@ function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
           <li>Нажми слот — он станет активным.</li>
           <li>Выбери карту внизу — она встанет в этот слот.</li>
           <li>
-            Слоты 1 и 3 — эволюция, слот 2 — герой, слот 4 — обычная карта.
+            Слот 1 — эволюция, слот 2 — герой или чемпион, слот 3 — гибкий (чемпион /
+            героизм / эволюция), слот 4 — обычная карта.
           </li>
           <li>Когда все 4 карты на месте, Ghosteek соберёт полные колоды.</li>
         </ul>
@@ -405,7 +429,20 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                     !card && "ctor-slot--empty",
                   )}
                 >
-                  <span className="ctor-slot-label">{SLOT_HINTS[index]}</span>
+                  <span
+                    className={cn(
+                      "ctor-slot-label",
+                      Array.isArray(SLOT_HINTS[index]) && "ctor-slot-label--stack",
+                    )}
+                  >
+                    {Array.isArray(SLOT_HINTS[index])
+                      ? (SLOT_HINTS[index] as readonly string[]).map((line) => (
+                          <span key={line} className="ctor-slot-label-line">
+                            {line}
+                          </span>
+                        ))
+                      : SLOT_HINTS[index]}
+                  </span>
 
                   <div className="ctor-slot-well">
                     {card ? (

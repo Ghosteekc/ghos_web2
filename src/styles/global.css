@@ -534,6 +534,21 @@
     hyphens: auto;
   }
 
+  .ctor-slot-label--stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.05rem;
+    min-height: 2.1em;
+    line-height: 1.05;
+  }
+
+  .ctor-slot-label-line {
+    display: block;
+    max-width: 100%;
+  }
+
   .ctor-slot--active .ctor-slot-label {
     color: rgb(var(--cr-gold));
   }

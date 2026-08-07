@@ -8,7 +8,7 @@ export const DECK_CATEGORY_LABELS: Record<string, string> = {
   beatdown: "Натиск",
   control: "Контроль",
   bait: "Бейт",
-  constructor: "Конструктор",
+  constructor: "Билдер",
   random: "Рандом",
   top: "Топ",
 };
@@ -18,7 +18,7 @@ export const DECK_FILTER_LABELS: Record<string, string> = {
   top: "Топ игроки",
   mine: "Мои",
   arena: "Арена",
-  constructor: "Конструктор",
+  constructor: "Билдер",
   random: "Рандом",
   favorites: "Избранное",
 };

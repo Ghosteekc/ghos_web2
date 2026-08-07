@@ -188,7 +188,7 @@ export function DecksPage() {
               : filter === "random"
               ? "Генератор"
               : filter === "constructor"
-                ? "Конструктор"
+                ? "Билдер"
                 : filter === "top"
                 ? "Рейтинг"
                 : filter === "arena"
