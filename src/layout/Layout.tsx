@@ -29,7 +29,7 @@ export function Layout() {
 
   return (
     <PerfProvider>
-      <div className="min-h-screen flex overflow-x-hidden">
+      <div className="min-h-screen flex overflow-x-hidden app-shell">
         <Sidebar />
 
         <main className="app-main">

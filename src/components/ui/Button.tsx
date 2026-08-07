@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/utils";
+import { internalPressableProps } from "@/utils/nativeCallout";
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -35,6 +36,7 @@ export function Button({
       disabled={disabled}
       onClick={handleClick}
       className={cn(variants[variant], className)}
+      {...internalPressableProps}
     >
       {children}
     </button>

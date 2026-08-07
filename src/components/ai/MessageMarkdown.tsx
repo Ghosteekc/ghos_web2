@@ -1,7 +1,9 @@
 import { useMemo, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useNavigate } from "react-router-dom";
 import { useCardCatalog } from "@/hooks";
+import { isInternalAppHref, preventNativeCallout } from "@/utils/nativeCallout";
 
 type Props = {
   content: string;
@@ -34,7 +36,7 @@ function highlightCardNames(text: string, pattern: RegExp | null): ReactNode[] {
   let last = 0;
   let match: RegExpExecArray | null;
   let key = 0;
-  while ((match = pattern.exec(text)) !== null) {
+  while ((match = pattern.exec(text)) != null) {
     if (match.index > last) parts.push(text.slice(last, match.index));
     parts.push(
       <span key={`card-${key++}`} className="ai-card-mention">
@@ -58,6 +60,7 @@ function walkHighlight(node: ReactNode, pattern: RegExp | null): ReactNode {
 }
 
 export function MessageMarkdown({ content, className }: Props) {
+  const navigate = useNavigate();
   const { mentionNames } = useCardCatalog();
 
   const pattern = useMemo(() => {
@@ -72,18 +75,45 @@ export function MessageMarkdown({ content, className }: Props) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          a: ({ href, children }) => (
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ai-md-link"
-              onContextMenu={(e) => e.preventDefault()}
-              draggable={false}
-            >
-              {walkHighlight(children, pattern)}
-            </a>
-          ),
+          a: ({ href, children }) => {
+            const url = href?.trim() ?? "";
+            const body = walkHighlight(children, pattern);
+
+            // Внутренние пути приложения — без href, только navigate().
+            if (isInternalAppHref(url)) {
+              const path = url.startsWith("/")
+                ? url
+                : `/${url.replace(/^\.\//, "")}`;
+              return (
+                <button
+                  type="button"
+                  className="ai-md-link"
+                  onClick={() => navigate(path)}
+                  onContextMenu={preventNativeCallout}
+                  draggable={false}
+                >
+                  {body}
+                </button>
+              );
+            }
+
+            // Якоря / пустые — не ссылки.
+            if (!url || url.startsWith("#")) {
+              return <span>{body}</span>;
+            }
+
+            // Настоящие внешние ссылки — оставляем <a>, callout не блокируем.
+            return (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ai-md-link"
+              >
+                {body}
+              </a>
+            );
+          },
           code: ({ className: codeClass, children, ...props }) => {
             const inline = !codeClass;
             if (inline) {

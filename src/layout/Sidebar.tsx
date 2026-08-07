@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Trophy } from "lucide-react";
 import { cn } from "@/utils";
+import { internalPressableProps } from "@/utils/nativeCallout";
 import { MAIN_NAV_ITEMS, getActiveNavId } from "./navigation";
 
 export function Sidebar() {
@@ -9,7 +10,7 @@ export function Sidebar() {
   const activeId = getActiveNavId(pathname);
 
   return (
-    <nav className="sidebar-nav" aria-label="Навигация">
+    <nav className="sidebar-nav tg-no-callout" aria-label="Навигация">
       <div className="flex items-center gap-3 px-4 py-4 shrink-0 min-w-0">
         <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-cr-gold to-yellow-600 flex items-center justify-center shadow-glow">
           <Trophy className="w-6 h-6 text-cr-bg" />
@@ -30,6 +31,7 @@ export function Sidebar() {
               className={cn("sidebar-item group", isActive && "active")}
               aria-current={isActive ? "page" : undefined}
               onClick={() => navigate(item.to)}
+              {...internalPressableProps}
             >
               <item.icon
                 className={cn(

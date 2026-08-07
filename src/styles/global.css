@@ -82,37 +82,28 @@
     min-height: 100%;
     min-height: 100dvh;
     -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
   }
 
-  /* Поля ввода — разрешаем выделение и системный callout */
-  input,
-  textarea,
-  select,
-  [contenteditable="true"] {
-    -webkit-user-select: text;
-    user-select: text;
-    -webkit-touch-callout: default;
-  }
-
-  /* Интерактивный UI и медиа — без long-press меню / drag preview */
+  /*
+   * Telegram Mini App / Android: без системного callout на UI.
+   * Не на body целиком — текст и внешние ссылки остаются доступными.
+   */
+  .tg-no-callout,
   button,
   [role="button"],
-  a,
-  img,
-  svg,
   .bottom-nav-item,
   .sidebar-item,
   .glass-card,
   .card-tile-wrap,
   .battle-history-card,
+  .battle-light-deck,
   .pixel-btn,
   .filter-tab,
   .feature-nav-btn,
   .collection-filter-tab,
-  .segment-tab {
+  .segment-tab,
+  .bottom-nav,
+  .sidebar-nav {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
@@ -122,7 +113,6 @@
 
   button,
   [role="button"],
-  a:not(.bottom-nav-item),
   .sidebar-item,
   .pixel-btn,
   .filter-tab,
@@ -133,8 +123,20 @@
   }
 
   img {
-    pointer-events: auto;
     -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Настоящие внешние ссылки — системное меню / callout разрешены */
+  a[href^="http"],
+  a[href^="//"],
+  a[href^="mailto:"],
+  a[href^="tel:"],
+  a[href^="tg:"] {
+    -webkit-touch-callout: default;
+    -webkit-user-select: auto;
+    user-select: auto;
+    -webkit-user-drag: auto;
   }
 
   /* Fixed wallpaper: scale tile to viewport width (no crop), keep ratio, seamless repeat */
@@ -3855,6 +3857,21 @@
   color: #7dd3fc;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+button.ai-md-link {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  cursor: pointer;
+  display: inline;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .ai-md-code-inline {

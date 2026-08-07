@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { ChevronRight } from "lucide-react";
 import { cn } from "@/utils";
+import { internalPressableProps } from "@/utils/nativeCallout";
 
 export interface NavRowButtonProps {
   label: string;
@@ -41,6 +42,7 @@ export function NavRowButton({
         active && "pixel-btn--active",
         className,
       )}
+      {...internalPressableProps}
     >
       <span className="pixel-btn-icon-slot" aria-hidden>
         {emoji ? (

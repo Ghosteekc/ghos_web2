@@ -171,6 +171,8 @@ const BottomNavItem = memo(function BottomNavItem({
       aria-current={isActive ? "page" : undefined}
       onPointerDown={onPointerDown}
       onClick={() => onNavigate(item.to)}
+      onContextMenu={(event) => event.preventDefault()}
+      draggable={false}
     >
       <span className="bottom-nav-item-content">
         <span className="bottom-nav-icon-slot" aria-hidden>
@@ -616,7 +618,7 @@ export function BottomNav() {
   );
 
   return (
-    <nav className="bottom-nav" aria-label="Основная навигация">
+    <nav className="bottom-nav tg-no-callout" aria-label="Основная навигация">
       <div
         className="bottom-nav-shell"
         onPointerDownCapture={onDockPointerDownCapture}

@@ -1,41 +1,39 @@
 import { useEffect } from "react";
-
-function isEditableEventTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof Element)) return false;
-  return Boolean(
-    target.closest("input, textarea, select, [contenteditable='true']"),
-  );
-}
+import {
+  isEditableElement,
+  isExternalAnchor,
+  preventNativeCalloutIfInternal,
+} from "@/utils/nativeCallout";
 
 /**
- * Блокирует системное меню Android/iOS (Open / Copy Link) при долгом тапе
- * по UI Mini App. Поля ввода не затрагиваются.
+ * Android / Telegram WebView: убирает «Открыть / Копировать ссылку» с URL приложения
+ * при long-press по UI. Внешние <a href="https://…"> и поля ввода не трогаем.
  */
 export function useDisableSystemGestures() {
   useEffect(() => {
     const onContextMenu = (event: Event) => {
-      if (isEditableEventTarget(event.target)) return;
-      event.preventDefault();
+      preventNativeCalloutIfInternal(event);
     };
 
     const onDragStart = (event: DragEvent) => {
-      if (isEditableEventTarget(event.target)) return;
-      event.preventDefault();
-    };
-
-    const onSelectStart = (event: Event) => {
-      if (isEditableEventTarget(event.target)) return;
-      event.preventDefault();
+      const target = event.target;
+      if (isEditableElement(target) || isExternalAnchor(target)) return;
+      // Блокируем drag preview у картинок и кнопок — частый триггер меню на Android.
+      if (
+        target instanceof HTMLImageElement ||
+        (target instanceof Element &&
+          target.closest("button, [role='button'], img, .tg-no-callout, .card-tile-wrap"))
+      ) {
+        event.preventDefault();
+      }
     };
 
     document.addEventListener("contextmenu", onContextMenu, { capture: true });
     document.addEventListener("dragstart", onDragStart, { capture: true });
-    document.addEventListener("selectstart", onSelectStart, { capture: true });
 
     return () => {
       document.removeEventListener("contextmenu", onContextMenu, { capture: true });
       document.removeEventListener("dragstart", onDragStart, { capture: true });
-      document.removeEventListener("selectstart", onSelectStart, { capture: true });
     };
   }, []);
 }
