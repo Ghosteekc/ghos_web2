@@ -169,7 +169,7 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
                 <dl className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
                   {[
                     ["Средний эликсир", analysis.basicInfo.avgElixir.toFixed(1)],
-                    ["Win Condition", nameRu(analysis.basicInfo.primaryWinCondition)],
+                    ["Главная угроза", nameRu(analysis.basicInfo.primaryWinCondition)],
                     ["Тип колоды", analysis.basicInfo.deckType],
                     ["Заклинания", String(analysis.basicInfo.spellCount)],
                     ["Постройки", String(analysis.basicInfo.buildingCount)],

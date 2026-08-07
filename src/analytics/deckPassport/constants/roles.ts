@@ -9,7 +9,7 @@ export interface RoleCheckItem {
 }
 
 export const ROLE_BALANCE_CHECKS: RoleCheckItem[] = [
-  { id: "win_condition", label: "Win Condition", roles: ["win_condition"] },
+  { id: "win_condition", label: "Главная угроза", roles: ["win_condition"] },
   { id: "big_spell", label: "Большое заклинание", roles: ["big_spell"] },
   { id: "small_spell", label: "Малое заклинание", roles: ["small_spell"] },
   { id: "mini_tank", label: "Мини-танк", roles: ["mini_tank"] },

@@ -25,7 +25,34 @@ function SwapBlock({
   );
 }
 
-function CoachingBlock({ coaching }: { coaching: DeckCoaching }) {
+/** Локализует EN-имена карт в фразах и парах ``CardA + CardB``. */
+function localizeCardPhrase(text: string, nameRu: (name: string) => string): string {
+  const raw = text.trim();
+  if (!raw) return raw;
+
+  const withCombos = raw.replace(
+    /([A-Za-z][A-Za-z0-9.'\-]*(?:\s+[A-Za-z][A-Za-z0-9.'\-]*)*)\s*\+\s*([A-Za-z][A-Za-z0-9.'\-]*(?:\s+[A-Za-z][A-Za-z0-9.'\-]*)*)/g,
+    (_m, left: string, right: string) =>
+      `${nameRu(left.trim())} + ${nameRu(right.trim())}`,
+  );
+
+  // Целиком английское имя карты (заголовок блока).
+  if (/^[A-Za-z0-9.'\-]+(?:\s+[A-Za-z0-9.'\-]+)*$/.test(withCombos)) {
+    return nameRu(withCombos);
+  }
+  return withCombos;
+}
+
+function CoachingBlock({
+  coaching,
+  nameRu,
+}: {
+  coaching: DeckCoaching;
+  nameRu: (name: string) => string;
+}) {
+  /** Пары «A + B» — это синергия, не сильные стороны. */
+  const strengths = coaching.strengths.filter((s) => !/\s\+\s/.test(s));
+
   return (
     <div className="space-y-3">
       {coaching.play_style ? (
@@ -34,25 +61,13 @@ function CoachingBlock({ coaching }: { coaching: DeckCoaching }) {
           <p className="text-sm text-cr-text mt-0.5">{coaching.play_style}</p>
         </div>
       ) : null}
-      {coaching.strengths.length > 0 ? (
+      {strengths.length > 0 ? (
         <div>
           <p className="text-2xs uppercase tracking-wide text-cr-muted">Сильные стороны</p>
           <ul className="mt-1 space-y-0.5">
-            {coaching.strengths.map((s) => (
+            {strengths.map((s) => (
               <li key={s} className="text-sm text-cr-text">
                 ✔ {s}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-      {coaching.key_combinations.length > 0 ? (
-        <div>
-          <p className="text-2xs uppercase tracking-wide text-cr-muted">Ключевые комбинации</p>
-          <ul className="mt-1 space-y-0.5">
-            {coaching.key_combinations.map((c) => (
-              <li key={c} className="text-sm text-cr-text">
-                {c}
               </li>
             ))}
           </ul>
@@ -74,16 +89,25 @@ function CoachingBlock({ coaching }: { coaching: DeckCoaching }) {
         <div>
           <p className="text-2xs uppercase tracking-wide text-cr-muted">Почему выбраны карты</p>
           <div className="mt-1 space-y-1.5">
-            {coaching.card_choices.map((choice) => (
-              <div key={choice.card} className="rounded-lg bg-cr-bg/40 px-2.5 py-2">
-                <p className="text-sm font-medium text-cr-text">{choice.card}</p>
-                {choice.roles.length > 0 ? (
-                  <p className="text-2xs text-cr-gold">{choice.roles.join(" · ")}</p>
-                ) : null}
-                <p className="text-2xs text-cr-muted mt-0.5">{choice.reason}</p>
-                <p className="text-2xs text-cr-muted">{choice.synergy}</p>
-              </div>
-            ))}
+            {coaching.card_choices.map((choice) => {
+              const synergy = localizeCardPhrase(choice.synergy, nameRu);
+              const synergyIsBareCombo = /^\S.+\s\+\s.+\S$/.test(synergy.trim());
+              return (
+                <div key={choice.card} className="rounded-lg bg-cr-bg/40 px-2.5 py-2">
+                  <p className="text-sm font-medium text-cr-text">
+                    {localizeCardPhrase(choice.card, nameRu)}
+                  </p>
+                  {choice.roles.length > 0 ? (
+                    <p className="text-2xs text-cr-gold">{choice.roles.join(" · ")}</p>
+                  ) : null}
+                  <p className="text-2xs text-cr-muted mt-0.5">{choice.reason}</p>
+                  {/* Голые «карта + карта» уже есть в блоке Синергия */}
+                  {!synergyIsBareCombo && synergy ? (
+                    <p className="text-2xs text-cr-muted">{synergy}</p>
+                  ) : null}
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : null}
@@ -127,9 +151,8 @@ export function DecisionExplanationView({
   const hasSwaps = showSwaps && swaps.length > 0;
   const hasCoaching =
     !!coaching &&
-    (coaching.strengths.length > 0 ||
+    (coaching.strengths.some((s) => !/\s\+\s/.test(s)) ||
       !!coaching.play_style ||
-      coaching.key_combinations.length > 0 ||
       coaching.usage_tips.length > 0 ||
       (coaching.card_choices?.length ?? 0) > 0);
 
@@ -151,7 +174,7 @@ export function DecisionExplanationView({
             />
           ))
         : hasCoaching && coaching
-          ? <CoachingBlock coaching={coaching} />
+          ? <CoachingBlock coaching={coaching} nameRu={nameRu} />
           : null}
       {debug && import.meta.env.DEV ? (
         <pre className="text-3xs text-cr-muted overflow-auto max-h-40 rounded-lg bg-cr-bg/60 p-2">

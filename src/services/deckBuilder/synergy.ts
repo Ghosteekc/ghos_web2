@@ -85,14 +85,18 @@ export function deckSynergyScore(cards: string[]): number {
   return Math.round((total / pairs) * 10) / 10;
 }
 
-export function synergyNotes(cards: string[], limit = 4): string[] {
+export function synergyNotes(
+  cards: string[],
+  limit = 4,
+  nameRu: (name: string) => string = (n) => n,
+): string[] {
   const notes: string[] = [];
   for (let i = 0; i < cards.length && notes.length < limit; i++) {
     for (let j = i + 1; j < cards.length && notes.length < limit; j++) {
       if (!isValidSynergyPair(cards[i], cards[j])) continue;
       const s = pairSynergy(cards[i], cards[j]);
       if (s >= SYNERGY_STRONG) {
-        notes.push(`${cards[i]} + ${cards[j]}`);
+        notes.push(`${nameRu(cards[i])} + ${nameRu(cards[j])}`);
       }
     }
   }

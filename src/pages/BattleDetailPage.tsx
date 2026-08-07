@@ -331,7 +331,7 @@ const ELIXIR_METRICS: {
   {
     key: "punish_speed",
     label: "Скорость контрудара",
-    hint: "Насколько быстро можно наказать ошибку дешёвым win-condition",
+    hint: "Насколько быстро можно наказать ошибку дешёвой угрозой для башни",
   },
   {
     key: "recovery_speed",
@@ -430,7 +430,7 @@ function MatchDifficultyBlock({ data }: { data: MatchDifficulty }) {
         </div>
       </div>
       <p className="text-xs text-cr-muted mb-3">
-        Оценка по составу колод: контры, цикл, здания, воздух, спеллы и win-conditions.
+        Оценка по составу колод: контры, цикл, здания, воздух, спеллы и главные угрозы.
       </p>
       <LinearProgress value={data.difficulty} max={100} color="#f87171" showLabel={false} />
       {data.reasons.length > 0 ? (
