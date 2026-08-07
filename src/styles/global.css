@@ -784,6 +784,26 @@
     background: rgb(var(--cr-gold) / 0.16);
   }
 
+  .ctor-slot-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0.15rem 0 0.35rem;
+    color: rgb(var(--cr-muted));
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ctor-slot-filter input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: rgb(var(--cr-gold));
+    cursor: pointer;
+  }
+
   .ctor-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

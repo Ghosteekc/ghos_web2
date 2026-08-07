@@ -264,6 +264,8 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   const [browserTab, setBrowserTab] = useState<BrowserTab>("all");
+  /** Если true — в браузере только карты, подходящие под активный слот (evo/hero/…). */
+  const [slotFilterOnly, setSlotFilterOnly] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [catalog, setCatalog] = useState<CatalogCard[]>([]);
   const [decks, setDecks] = useState<Deck[]>([]);
@@ -275,26 +277,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   useEffect(() => {
     writeCtorSession(slots, activeSlot);
   }, [slots, activeSlot]);
-
-  // Сбрасываем карты, которые больше не подходят правилам слота (старая сессия).
-  useEffect(() => {
-    if (!catalog.length) return;
-    setSlots((prev) => {
-      let changed = false;
-      const next = prev.map((pick, index) => {
-        if (!pick) return pick;
-        const card =
-          catalog.find((c) => c.name === pick.name) ??
-          (getCard(pick.name) as CatalogCard | undefined);
-        if (!card || !cardFitsSlot(index, card)) {
-          changed = true;
-          return null;
-        }
-        return pick;
-      });
-      return changed ? next : prev;
-    });
-  }, [catalog, getCard]);
 
   useEffect(() => {
     if (!ready) return;
@@ -338,7 +320,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     return catalog
       .filter((c) => {
         if (usedNames.has(c.name)) return false;
-        if (!cardFitsSlot(activeSlot, c)) return false;
+        if (slotFilterOnly && !cardFitsSlot(activeSlot, c)) return false;
         if (!matchesBrowserTab(c, browserTab)) return false;
         if (!q) return true;
         return (
@@ -348,7 +330,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         );
       })
       .sort((a, b) => (a.elixir ?? 99) - (b.elixir ?? 99) || a.name.localeCompare(b.name));
-  }, [catalog, deferredSearch, usedNames, browserTab, activeSlot]);
+  }, [catalog, deferredSearch, usedNames, browserTab, activeSlot, slotFilterOnly]);
 
   const buildRequestRef = useRef(0);
   const buildDecks = useCallback(async (current: (SlotPick)[]) => {
@@ -404,10 +386,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   }, [slots, filledCount, buildDecks]);
 
   const placeCard = (card: CatalogCard) => {
-    if (!cardFitsSlot(activeSlot, card)) {
-      haptic.light();
-      return;
-    }
     haptic.light();
     setSlots((prev) => {
       const next = [...prev];
@@ -567,6 +545,18 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                 className="ctor-search-input"
               />
             </div>
+
+            <label className="ctor-slot-filter">
+              <input
+                type="checkbox"
+                checked={slotFilterOnly}
+                onChange={(e) => {
+                  haptic.selection();
+                  setSlotFilterOnly(e.target.checked);
+                }}
+              />
+              <span>Только под слот</span>
+            </label>
 
             <div className="ctor-tabs" role="tablist" aria-label="Тип карты">
               {BROWSER_TABS.map((tab) => (
