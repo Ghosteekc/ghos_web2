@@ -77,7 +77,7 @@ export function FavoritesPanel({ onAnalyze, onCompare }: FavoritesPanelProps) {
           {entries.map((entry, i) => {
             const canAct = entry.cards.length === 8;
             return (
-              <Card key={i}>
+              <Card key={i} noMotion>
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2">
                     <Star className="w-5 h-5 text-cr-gold shrink-0" />

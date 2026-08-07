@@ -445,17 +445,11 @@
     border-radius: 1rem;
     border: 2px solid transparent;
     background: transparent;
-    transition:
-      opacity 0.28s ease,
-      transform 0.22s ease,
-      filter 0.28s ease,
-      border-color 0.22s ease,
-      box-shadow 0.28s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
   .ctor-slot--dim {
     opacity: 0.48;
-    filter: saturate(0.72);
   }
 
   .ctor-slot--active {
@@ -667,9 +661,7 @@
     width: 100%;
     border-radius: 999px;
     border: 1px solid rgb(var(--cr-border) / 0.55);
-    background: rgb(var(--cr-bg) / 0.55);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgb(var(--cr-bg) / 0.72);
     padding: 0.72rem 1rem 0.72rem 2.5rem;
     font-size: 1rem;
     color: rgb(var(--cr-text));
@@ -751,7 +743,9 @@
     background: transparent;
     border: none;
     overflow: visible;
-    transition: transform 0.12s ease, background 0.15s ease;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 7.5rem;
+    transition: transform 0.12s ease;
   }
 
   .ctor-grid-item:active {
@@ -1320,9 +1314,9 @@
   .chart-tooltip-glass {
     border-radius: 0.75rem;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(12, 16, 42, 0.72);
-    backdrop-filter: blur(28px) saturate(190%);
-    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    background: rgba(12, 16, 42, 0.88);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.12),
       0 12px 32px rgba(0, 0, 0, 0.35);
@@ -1330,11 +1324,7 @@
     color: rgba(255, 255, 255, 0.95);
     text-shadow: none !important;
     opacity: 0;
-    transition:
-      left var(--ui-duration-fast) var(--ui-ease-out),
-      top var(--ui-duration-fast) var(--ui-ease-out),
-      opacity var(--ui-duration) var(--ui-ease);
-    will-change: left, opacity;
+    transition: opacity var(--ui-duration-fast) var(--ui-ease-out);
   }
 
   .chart-tooltip-glass.is-shown {
@@ -3989,3 +3979,48 @@
 .ai-context-chip-dismiss:hover {
   color: rgb(var(--cr-text));
 }
+
+/* ===== Telegram / mid-phone performance ===== */
+.battles-list > * {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 7.5rem;
+}
+
+@media (hover: none), (pointer: coarse) {
+  :root,
+  [data-theme="dark"],
+  [data-theme="light"] {
+    --cr-glass-blur: none;
+    --comp-constructor-seed-blur: none;
+  }
+
+  .glass-card,
+  .constructor-seed-card.glass-card,
+  .tint-glass-card.glass-card,
+  .bottom-nav-bar,
+  .chart-tooltip-glass,
+  .deck-passport-backdrop,
+  .info-glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  .bottom-nav-bar {
+    background: rgb(var(--cr-card) / 0.94);
+  }
+
+  .chart-tooltip-glass {
+    background: rgb(var(--cr-card) / 0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctor-slot,
+  .ctor-grid-item,
+  .ctor-slot-card--enter,
+  .ui-enter {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+

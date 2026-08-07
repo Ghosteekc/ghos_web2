@@ -126,11 +126,6 @@ export function DecksPage() {
     void load();
   }, [load]);
 
-  useEffect(() => {
-    void api.getTopPlayers().catch(() => {});
-    void api.getArenaDecks().catch(() => {});
-  }, []);
-
   const navActiveId = filter === DECK_HOME || filter === "mine" ? null : filter;
 
   const handleNavSelect = (id: string) => {
@@ -205,11 +200,9 @@ export function DecksPage() {
         <Loader />
       ) : null}
 
-      <div className={filter === DECK_HOME ? "" : "hidden"}>
-        <DeckWinratesPanel onAnalyze={setPassportDeck} />
-      </div>
+      {filter === DECK_HOME ? <DeckWinratesPanel onAnalyze={setPassportDeck} /> : null}
 
-      <div className={filter === "favorites" ? "" : "hidden"}>
+      {filter === "favorites" ? (
         <FavoritesPanel
           onAnalyze={setPassportDeck}
           onCompare={(deck) => {
@@ -217,9 +210,9 @@ export function DecksPage() {
             if (path) navigate(path);
           }}
         />
-      </div>
+      ) : null}
 
-      <div className={filter === "random" ? "" : "hidden"}>
+      {filter === "random" ? (
         <RandomDeckPanel
           onCopied={(msg) => {
             setCopyHint(msg);
@@ -231,9 +224,9 @@ export function DecksPage() {
             if (path) navigate(path);
           }}
         />
-      </div>
+      ) : null}
 
-      <div className={filter === "top" ? "" : "hidden"}>
+      {filter === "top" ? (
         <TopPlayersPanel
           onCopied={(msg) => {
             setCopyHint(msg);
@@ -245,9 +238,9 @@ export function DecksPage() {
             if (path) navigate(path);
           }}
         />
-      </div>
+      ) : null}
 
-      <div className={filter === "constructor" ? "" : "hidden"}>
+      {filter === "constructor" ? (
         <ConstructorPanel
           renderDeckCard={(deck, i) => (
             <div key={`${deck.id}-${deck.name}`} className="w-full">
@@ -272,9 +265,10 @@ export function DecksPage() {
               />
             </div>
           )}
-        />      </div>
+        />
+      ) : null}
 
-      <div className={filter === "arena" ? "" : "hidden"}>
+      {filter === "arena" ? (
         <ArenaDecksPanel
           renderDeck={(deck, i, onCompare) => (
             <DeckCard
@@ -290,7 +284,7 @@ export function DecksPage() {
             />
           )}
         />
-      </div>
+      ) : null}
 
       {(filter === "meta" || filter === "mine") && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
@@ -861,7 +855,7 @@ export function DeckCard({
   const cardNames = cards.map((c) => c.name);
 
   return (
-    <div className="group ui-enter" style={{ animationDelay: `${index * 40}ms` }}>
+    <div className="group">
       <Card className="overflow-hidden" noMotion>
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-cr-blue bg-cr-blue/10 px-2.5 py-1 rounded-full border border-cr-blue/20">

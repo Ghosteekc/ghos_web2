@@ -118,7 +118,7 @@ export function BattlesPage() {
       {loading ? (
         <Loader />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 battles-list">
           {filtered.map((battle) => (
             <BattleCardSimple
               key={`${battle.timestamp}-${battle.index}`}

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DeckCard } from "@/components/ai/DeckCard";
@@ -9,7 +10,7 @@ type Props = {
   message: ChatMessage;
 };
 
-export function ChatBubble({ message }: Props) {
+export const ChatBubble = memo(function ChatBubble({ message }: Props) {
   const navigate = useNavigate();
   const isUser = message.role === "user";
 
@@ -53,7 +54,7 @@ export function ChatBubble({ message }: Props) {
       </div>
     </div>
   );
-}
+});
 
 export function ChatTypingRow() {
   return (

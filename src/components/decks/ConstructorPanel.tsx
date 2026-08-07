@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { HelpCircle, Search, Sparkles, X } from "lucide-react";
 
@@ -32,6 +32,31 @@ const BROWSER_TABS: { id: BrowserTab; label: string }[] = [
 ];
 
 type SlotPick = { name: string; slot: number } | null;
+
+const CTOR_SESSION_KEY = "ghosteek:ctor-core-v1";
+
+function readCtorSession(): { slots: SlotPick[]; activeSlot: number } | null {
+  try {
+    const raw = sessionStorage.getItem(CTOR_SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { slots?: SlotPick[]; activeSlot?: number };
+    if (!Array.isArray(parsed.slots) || parsed.slots.length !== 4) return null;
+    return {
+      slots: parsed.slots,
+      activeSlot: Math.min(3, Math.max(0, Number(parsed.activeSlot) || 0)),
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeCtorSession(slots: SlotPick[], activeSlot: number) {
+  try {
+    sessionStorage.setItem(CTOR_SESSION_KEY, JSON.stringify({ slots, activeSlot }));
+  } catch {
+    /* ignore quota */
+  }
+}
 
 type CatalogCard = {
   name: string;
@@ -172,9 +197,13 @@ interface ConstructorPanelProps {
 
 export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const { ready, getCard, nameRu } = useCardCatalog();
-  const [slots, setSlots] = useState<(SlotPick)[]>([null, null, null, null]);
-  const [activeSlot, setActiveSlot] = useState(0);
+  const saved = useMemo(() => readCtorSession(), []);
+  const [slots, setSlots] = useState<(SlotPick)[]>(
+    () => saved?.slots ?? [null, null, null, null],
+  );
+  const [activeSlot, setActiveSlot] = useState(() => saved?.activeSlot ?? 0);
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [browserTab, setBrowserTab] = useState<BrowserTab>("all");
   const [helpOpen, setHelpOpen] = useState(false);
   const [catalog, setCatalog] = useState<CatalogCard[]>([]);
@@ -183,6 +212,10 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const [coreConflict, setCoreConflict] = useState<CoreConflictInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    writeCtorSession(slots, activeSlot);
+  }, [slots, activeSlot]);
 
   useEffect(() => {
     if (!ready) return;
@@ -222,7 +255,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const tip = useMemo(() => ghosteekRecommendation(selectedNames), [selectedNames]);
 
   const filteredCards = useMemo(() => {
-    const q = search.trim().toLowerCase();
+    const q = deferredSearch.trim().toLowerCase();
     return catalog
       .filter((c) => {
         if (usedNames.has(c.name)) return false;
@@ -235,7 +268,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         );
       })
       .sort((a, b) => (a.elixir ?? 99) - (b.elixir ?? 99) || a.name.localeCompare(b.name));
-  }, [catalog, search, usedNames, browserTab]);
+  }, [catalog, deferredSearch, usedNames, browserTab]);
 
   const buildRequestRef = useRef(0);
   const buildDecks = useCallback(async (current: (SlotPick)[]) => {
@@ -318,6 +351,11 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     setAlternativeDeck(null);
     setCoreConflict(null);
     setError(null);
+    try {
+      sessionStorage.removeItem(CTOR_SESSION_KEY);
+    } catch {
+      /* ignore */
+    }
   };
 
   if (!ready && !catalog.length) {

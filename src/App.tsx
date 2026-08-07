@@ -3,11 +3,17 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/layout/Layout";
 import { Loader } from "@/components/ui";
 import { ProfilePage } from "@/pages/ProfilePage";
-import { AnalyticsPage } from "@/pages/AnalyticsPage";
-import { DecksPage } from "@/pages/DecksPage";
-import { BattlesPage } from "@/pages/BattlesPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 
+const AnalyticsPage = lazy(() =>
+  import("@/pages/AnalyticsPage").then((m) => ({ default: m.AnalyticsPage })),
+);
+const DecksPage = lazy(() =>
+  import("@/pages/DecksPage").then((m) => ({ default: m.DecksPage })),
+);
+const BattlesPage = lazy(() =>
+  import("@/pages/BattlesPage").then((m) => ({ default: m.BattlesPage })),
+);
 const ProfileCardsPage = lazy(() => import("@/pages/ProfileCardsPage"));
 const ProfileMasteryPage = lazy(() => import("@/pages/ProfileMasteryPage"));
 const DeckComparePage = lazy(() => import("@/pages/DeckComparePage"));
@@ -25,6 +31,10 @@ function PageLoader() {
   );
 }
 
+function LazyPage({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -36,77 +46,98 @@ export default function App() {
           <Route
             path="profile/cards"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <LazyPage>
                 <ProfileCardsPage />
-              </Suspense>
+              </LazyPage>
             }
           />
           <Route
             path="profile/mastery"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <LazyPage>
                 <ProfileMasteryPage />
-              </Suspense>
+              </LazyPage>
             }
           />
-          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route
+            path="analytics"
+            element={
+              <LazyPage>
+                <AnalyticsPage />
+              </LazyPage>
+            }
+          />
           <Route
             path="ai"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <LazyPage>
                 <AiCoachPage />
-              </Suspense>
+              </LazyPage>
             }
           />
           <Route
             path="decks/compare"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <LazyPage>
                 <DeckComparePage />
-              </Suspense>
+              </LazyPage>
             }
           />
           <Route
             path="decks/mine/stats"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <LazyPage>
                 <MineDeckStatsPage />
-              </Suspense>
+              </LazyPage>
             }
           />
-          <Route path="decks" element={<DecksPage />} />
-          <Route path="battles" element={<BattlesPage />} />
+          <Route
+            path="decks"
+            element={
+              <LazyPage>
+                <DecksPage />
+              </LazyPage>
+            }
+          />
+          <Route
+            path="battles"
+            element={
+              <LazyPage>
+                <BattlesPage />
+              </LazyPage>
+            }
+          />
           <Route
             path="battles/t/:battleTime"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <LazyPage>
                 <BattleDetailPage />
-              </Suspense>
+              </LazyPage>
             }
           />
           <Route
             path="battles/:index"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <LazyPage>
                 <BattleDetailPage />
-              </Suspense>
+              </LazyPage>
             }
           />
           <Route
             path="profile/search"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <LazyPage>
                 <SearchPage />
-              </Suspense>
+              </LazyPage>
             }
           />
           <Route path="favorites" element={<Navigate to="/decks?tab=favorites" replace />} />
           <Route
             path="player/:tag"
             element={
-              <Suspense fallback={<PageLoader />}>
+              <LazyPage>
                 <PlayerPreviewPage />
-              </Suspense>
+              </LazyPage>
             }
           />
           <Route path="more" element={<Navigate to="/" replace />} />

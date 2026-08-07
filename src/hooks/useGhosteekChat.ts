@@ -146,7 +146,11 @@ export function useGhosteekChat() {
   }, []);
 
   useEffect(() => {
-    if (!booting) saveChatMessages(messages);
+    if (booting) return;
+    const timer = window.setTimeout(() => {
+      saveChatMessages(messages);
+    }, 280);
+    return () => window.clearTimeout(timer);
   }, [messages, booting]);
 
   const send = useCallback(

@@ -1,5 +1,5 @@
+import { memo, useState } from "react";
 import { cn } from "@/utils";
-import { useState } from "react";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 import { ElixirIcon } from "@/components/ui/ElixirIcon";
 import type { CardDisplayMode } from "@/types";
@@ -119,7 +119,7 @@ function CardArt({
         <img
           src={pick(evo, brokenEvo, fallbackEvo || fallbackBase)}
           alt={name}
-          className="absolute inset-0 h-full w-full object-contain object-center drop-shadow-md [clip-path:inset(0_50%_0_0)]"
+          className="absolute inset-0 h-full w-full object-contain object-center [clip-path:inset(0_50%_0_0)]"
           loading="lazy"
           decoding="async"
           onError={() => setBrokenEvo(true)}
@@ -127,7 +127,7 @@ function CardArt({
         <img
           src={pick(hero, brokenHero, fallbackHero || fallbackBase)}
           alt={name}
-          className="absolute inset-0 h-full w-full object-contain object-center drop-shadow-md [clip-path:inset(0_0_0_50%)]"
+          className="absolute inset-0 h-full w-full object-contain object-center [clip-path:inset(0_0_0_50%)]"
           loading="lazy"
           decoding="async"
           onError={() => setBrokenHero(true)}
@@ -156,7 +156,7 @@ function CardArt({
       <img
         src={pick(active, activeBroken, activeFallback)}
         alt={name}
-        className="relative z-10 h-full w-full object-contain object-center drop-shadow-md"
+        className="relative z-10 h-full w-full object-contain object-center"
         loading="lazy"
         decoding="async"
         onError={() => setActiveBroken(true)}
@@ -205,7 +205,11 @@ interface CardTileProps {
   iconHero?: string;
 }
 
-export function CardTile({
+export function CardTile(props: CardTileProps) {
+  return <CardTileImpl {...props} />;
+}
+
+const CardTileImpl = memo(function CardTileImpl({
   name,
   icon,
   size = "md",
@@ -353,7 +357,7 @@ export function CardTile({
       )}
     </div>
   );
-}
+});
 
 interface CardDeckGridProps {
   cards: string[];
