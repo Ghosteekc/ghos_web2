@@ -31,12 +31,14 @@ export function PlayerCard({ profile, loading }: PlayerCardProps) {
                 src={profile.avatar_url}
                 alt={profile.player_name ?? "Player"}
                 className="w-full h-full rounded-full object-cover bg-cr-surface scale-110"
+                draggable={false}
               />
             ) : profile.favorite_card_icon ? (
               <img
                 src={profile.favorite_card_icon}
                 alt={profile.favorite_card ?? "Card"}
                 className="w-full h-full rounded-full object-cover bg-cr-surface scale-125"
+                draggable={false}
               />
             ) : (
               <div className="w-full h-full rounded-full bg-cr-surface flex items-center justify-center text-2xl font-extrabold text-cr-gold">

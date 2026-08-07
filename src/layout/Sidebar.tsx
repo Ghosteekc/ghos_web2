@@ -1,9 +1,10 @@
-import { NavLink, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Trophy } from "lucide-react";
 import { cn } from "@/utils";
 import { MAIN_NAV_ITEMS, getActiveNavId } from "./navigation";
 
 export function Sidebar() {
+  const navigate = useNavigate();
   const { pathname } = useLocation();
   const activeId = getActiveNavId(pathname);
 
@@ -23,11 +24,12 @@ export function Sidebar() {
         {MAIN_NAV_ITEMS.map((item) => {
           const isActive = activeId === item.id;
           return (
-            <NavLink
+            <button
               key={item.id}
-              to={item.to}
-              end={item.to === "/"}
+              type="button"
               className={cn("sidebar-item group", isActive && "active")}
+              aria-current={isActive ? "page" : undefined}
+              onClick={() => navigate(item.to)}
             >
               <item.icon
                 className={cn(
@@ -36,7 +38,7 @@ export function Sidebar() {
                 )}
               />
               <span className="text-base font-medium tracking-wide truncate">{item.label}</span>
-            </NavLink>
+            </button>
           );
         })}
       </div>

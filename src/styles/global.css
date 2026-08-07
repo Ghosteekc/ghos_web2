@@ -71,6 +71,7 @@
   html {
     overflow-x: hidden;
     background-color: var(--cr-bg-top);
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -81,6 +82,59 @@
     min-height: 100%;
     min-height: 100dvh;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Поля ввода — разрешаем выделение и системный callout */
+  input,
+  textarea,
+  select,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+
+  /* Интерактивный UI и медиа — без long-press меню / drag preview */
+  button,
+  [role="button"],
+  a,
+  img,
+  svg,
+  .bottom-nav-item,
+  .sidebar-item,
+  .glass-card,
+  .card-tile-wrap,
+  .battle-history-card,
+  .pixel-btn,
+  .filter-tab,
+  .feature-nav-btn,
+  .collection-filter-tab,
+  .segment-tab {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  [role="button"],
+  a:not(.bottom-nav-item),
+  .sidebar-item,
+  .pixel-btn,
+  .filter-tab,
+  .feature-nav-btn,
+  .collection-filter-tab,
+  .segment-tab {
+    touch-action: manipulation;
+  }
+
+  img {
+    pointer-events: auto;
+    -webkit-user-drag: none;
   }
 
   /* Fixed wallpaper: scale tile to viewport width (no crop), keep ratio, seamless repeat */
@@ -1933,10 +1987,18 @@
     min-width: 0;
     padding: 0;
     box-sizing: border-box;
+    appearance: none;
+    background: transparent;
+    border: none;
+    font: inherit;
+    cursor: pointer;
     touch-action: none;
     color: rgb(var(--cr-muted) / 0.82);
     transition: color 0.28s cubic-bezier(0.22, 0.06, 0.24, 1);
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .bottom-nav-item:active {

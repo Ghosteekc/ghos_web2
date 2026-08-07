@@ -7,6 +7,7 @@ import {
   CardCatalogProvider,
   FavoriteDecksProvider,
   useGlobalButtonHaptics,
+  useDisableSystemGestures,
   useHapticSettingsBootstrap,
 } from "@/hooks";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
@@ -18,6 +19,7 @@ import {
 
 export function Layout() {
   useGlobalButtonHaptics();
+  useDisableSystemGestures();
   useHapticSettingsBootstrap();
 
   useEffect(() => {

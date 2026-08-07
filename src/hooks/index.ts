@@ -7,6 +7,7 @@ export { CardCatalogProvider, useCardCatalog } from "./CardCatalogProvider";
 export { FavoriteDecksProvider, useFavoriteDecks } from "./FavoriteDecksProvider";
 export { usePullToRefresh } from "./usePullToRefresh";
 export { useGlobalButtonHaptics } from "./useGlobalButtonHaptics";
+export { useDisableSystemGestures } from "./useDisableSystemGestures";
 export { useHapticSettingsBootstrap } from "./useHapticSettingsBootstrap";
 export { useSettings } from "./useSettings";
 export { applyTheme, loadStoredTheme, resolveTheme, initTheme } from "./useTheme";

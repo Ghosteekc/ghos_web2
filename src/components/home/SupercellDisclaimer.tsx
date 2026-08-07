@@ -14,6 +14,8 @@ export function SupercellDisclaimer() {
           target="_blank"
           rel="noopener noreferrer"
           className="underline underline-offset-2"
+          onContextMenu={(e) => e.preventDefault()}
+          draggable={false}
         >
           правилам фан-контента
         </a>

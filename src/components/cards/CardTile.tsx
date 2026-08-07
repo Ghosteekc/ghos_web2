@@ -122,6 +122,7 @@ function CardArt({
           className="absolute inset-0 h-full w-full object-contain object-center [clip-path:inset(0_50%_0_0)]"
           loading="lazy"
           decoding="async"
+          draggable={false}
           onError={() => setBrokenEvo(true)}
         />
         <img
@@ -130,6 +131,7 @@ function CardArt({
           className="absolute inset-0 h-full w-full object-contain object-center [clip-path:inset(0_0_0_50%)]"
           loading="lazy"
           decoding="async"
+          draggable={false}
           onError={() => setBrokenHero(true)}
         />
         <div className="absolute inset-y-[8%] left-1/2 z-20 w-px -translate-x-1/2 bg-black/55" aria-hidden />
@@ -159,6 +161,7 @@ function CardArt({
         className="relative z-10 h-full w-full object-contain object-center"
         loading="lazy"
         decoding="async"
+        draggable={false}
         onError={() => setActiveBroken(true)}
       />
       {showBadges && <CardUpgradeBadges displayMode={displayMode} />}

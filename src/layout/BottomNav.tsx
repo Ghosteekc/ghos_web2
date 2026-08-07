@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { animate, motion, useMotionValue } from "framer-motion";
 import { haptic } from "@/utils/hapticManager";
 import { MAIN_NAV_ITEMS, getActiveNavId, type MainNavItem } from "./navigation";
@@ -146,8 +146,9 @@ type BottomNavItemProps = {
   index: number;
   isActive: boolean;
   isHighlighted: boolean;
-  onItemRef: (index: number, el: HTMLAnchorElement | null) => void;
-  onPointerDown: (event: React.PointerEvent<HTMLAnchorElement>) => void;
+  onItemRef: (index: number, el: HTMLButtonElement | null) => void;
+  onPointerDown: (event: React.PointerEvent<HTMLButtonElement>) => void;
+  onNavigate: (to: string) => void;
 };
 
 const BottomNavItem = memo(function BottomNavItem({
@@ -157,18 +158,19 @@ const BottomNavItem = memo(function BottomNavItem({
   isHighlighted,
   onItemRef,
   onPointerDown,
+  onNavigate,
 }: BottomNavItemProps) {
   const Icon = item.icon;
 
   return (
-    <NavLink
+    <button
+      type="button"
       ref={(el) => onItemRef(index, el)}
-      to={item.to}
-      end={item.to === "/"}
       className={`bottom-nav-item${isHighlighted ? " is-highlighted" : ""}`}
       aria-label={item.label}
       aria-current={isActive ? "page" : undefined}
       onPointerDown={onPointerDown}
+      onClick={() => onNavigate(item.to)}
     >
       <span className="bottom-nav-item-content">
         <span className="bottom-nav-icon-slot" aria-hidden>
@@ -176,7 +178,7 @@ const BottomNavItem = memo(function BottomNavItem({
         </span>
         <span className="bottom-nav-label">{item.label}</span>
       </span>
-    </NavLink>
+    </button>
   );
 });
 
@@ -190,7 +192,7 @@ export function BottomNav() {
   );
 
   const trackRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const bubbleLayerRef = useRef<HTMLDivElement>(null);
   const bubbleAnimatingRef = useRef(false);
   const tabCentersRef = useRef<number[]>([]);
@@ -594,16 +596,24 @@ export function BottomNav() {
   };
 
   const onNavItemPointerDown = useCallback(
-    (event: React.PointerEvent<HTMLAnchorElement>) => {
+    (event: React.PointerEvent<HTMLButtonElement>) => {
       if (event.button !== 0 || isDraggingRef.current) return;
       haptic.selection();
     },
     [],
   );
 
-  const onNavItemRef = useCallback((index: number, el: HTMLAnchorElement | null) => {
+  const onNavItemRef = useCallback((index: number, el: HTMLButtonElement | null) => {
     itemRefs.current[index] = el;
   }, []);
+
+  const onNavItemNavigate = useCallback(
+    (to: string) => {
+      if (isDraggingRef.current) return;
+      navigate(to);
+    },
+    [navigate],
+  );
 
   return (
     <nav className="bottom-nav" aria-label="Основная навигация">
@@ -649,6 +659,7 @@ export function BottomNav() {
                 isHighlighted={index === highlightedIndex}
                 onItemRef={onNavItemRef}
                 onPointerDown={onNavItemPointerDown}
+                onNavigate={onNavItemNavigate}
               />
             ))}
           </div>

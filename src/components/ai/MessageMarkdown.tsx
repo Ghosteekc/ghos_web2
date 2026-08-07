@@ -78,6 +78,8 @@ export function MessageMarkdown({ content, className }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               className="ai-md-link"
+              onContextMenu={(e) => e.preventDefault()}
+              draggable={false}
             >
               {walkHighlight(children, pattern)}
             </a>
