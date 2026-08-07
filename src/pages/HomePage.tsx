@@ -24,7 +24,6 @@ export function HomePage() {
       setProfile(data.profile);
       setLastBattle(data.battles[0] ?? null);
       setTodayStats(data.stats);
-      api.prefetchDeckTabs();
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Ошибка загрузки");
     } finally {

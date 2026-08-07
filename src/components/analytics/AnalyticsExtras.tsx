@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, Swords, Wand2, ChevronDown, ChevronUp, RefreshCw, ExternalLink, Brain, ChevronRight, ScanSearch } from "lucide-react";
+import { Shield, Swords, Wand2, ChevronDown, ChevronUp, RefreshCw, ExternalLink, Brain, ChevronRight, ScanSearch, BarChart3 } from "lucide-react";
 import { api, ApiError } from "@/api/client";
 import { cacheGet, cacheHas, cacheInvalidate } from "@/api/cache";
 import { Card, Button, Loader, ErrorState, EmptyState } from "@/components/ui";
@@ -51,6 +51,7 @@ function DeckImportButton({ deckLink, label }: { deckLink?: string | null; label
 }
 
 export function DeckWinratesPanel({ onAnalyze }: { onAnalyze?: (deck: Deck) => void }) {
+  const navigate = useNavigate();
   const { iconUrl } = useCardCatalog();
   const [rows, setRows] = useState<WinrateEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,9 +96,12 @@ export function DeckWinratesPanel({ onAnalyze }: { onAnalyze?: (deck: Deck) => v
                 is_hero: false,
                 slot,
               }));
+        const cardNames = deckCards.map((c) => c.name).filter(Boolean);
+        const deckKey = [...cardNames].sort().join("|");
         const canAnalyze = Boolean(onAnalyze) && deckCards.length === 8;
+        const canOpenStats = cardNames.length === 8 && Boolean(deckKey);
         return (
-          <Card key={i} delay={i * 0.03}>
+          <Card key={deckKey || i} noMotion>
             <div className="flex items-center justify-between mb-3">
               <span className="text-base font-semibold text-cr-text">
                 <span className="text-cr-win">{row.wins} побед</span>
@@ -131,10 +135,22 @@ export function DeckWinratesPanel({ onAnalyze }: { onAnalyze?: (deck: Deck) => v
                 );
               })}
             </div>
-            {canAnalyze ? (
+            {canOpenStats ? (
               <Button
                 variant="secondary"
                 className="w-full !py-2 text-base flex items-center justify-center gap-2 mt-3"
+                onClick={() =>
+                  navigate(`/decks/mine/stats?deck=${encodeURIComponent(deckKey)}`)
+                }
+              >
+                <BarChart3 className="w-4 h-4" />
+                Статистика колоды
+              </Button>
+            ) : null}
+            {canAnalyze ? (
+              <Button
+                variant="secondary"
+                className="w-full !py-2 text-base flex items-center justify-center gap-2 mt-2"
                 onClick={() =>
                   onAnalyze?.({
                     id: i + 1,

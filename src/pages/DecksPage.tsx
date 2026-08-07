@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, lazy, Suspense } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   SlidersHorizontal,
@@ -14,14 +14,11 @@ import {
 } from "lucide-react";
 import { Card, Button, Loader, ElixirIcon, FeatureNavGrid, ScrollToTopButton, ErrorState, EmptyState, PageHeader } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
-import { ConstructorPanel, ConstructorDeckGrid } from "@/components/decks/ConstructorPanel";
 import { FavoriteDeckButton } from "@/components/decks/FavoriteDeckButton";
-import { FavoritesPanel } from "@/components/decks/FavoritesPanel";
 import { DeckWinratesPanel } from "@/components/analytics/AnalyticsExtras";
 import { DeckPassport } from "@/analytics/deckPassport";
 import { api, ApiError } from "@/api/client";
 import { cacheHas, cacheGet } from "@/api/cache";
-import { ArenaDecksPanel } from "@/components/analytics/ArenaDecksPanel";
 import type { Deck, DeckCard as DeckCardData, RandomDeck, TopPlayer, TopPlayersData } from "@/types";
 import { usePageRefresh, useTelegram } from "@/hooks";
 import { deckFromCardNames, deckToComparePath } from "@/utils/deckActions";
@@ -29,6 +26,23 @@ import { contextFromConstructor, openGhosteekAi } from "@/utils/aiPageContext";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
 
 import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
+
+const FavoritesPanel = lazy(() =>
+  import("@/components/decks/FavoritesPanel").then((m) => ({ default: m.FavoritesPanel })),
+);
+const ArenaDecksPanel = lazy(() =>
+  import("@/components/analytics/ArenaDecksPanel").then((m) => ({ default: m.ArenaDecksPanel })),
+);
+const ConstructorPanel = lazy(() =>
+  import("@/components/decks/ConstructorPanel").then((m) => ({ default: m.ConstructorPanel })),
+);
+const ConstructorDeckGrid = lazy(() =>
+  import("@/components/decks/ConstructorPanel").then((m) => ({ default: m.ConstructorDeckGrid })),
+);
+
+function TabSuspense({ children }: { children: React.ReactNode }) {
+  return <Suspense fallback={<Loader />}>{children}</Suspense>;
+}
 
 const DECK_HOME = "stats";
 
@@ -67,7 +81,11 @@ function formatUpdatedAt(iso: string | null | undefined) {
 
 function DeckCardsGrid({ cards, useVariants = false }: { cards: DeckCardData[]; useVariants?: boolean }) {
   if (useVariants) {
-    return <ConstructorDeckGrid cards={cards} />;
+    return (
+      <Suspense fallback={null}>
+        <ConstructorDeckGrid cards={cards} />
+      </Suspense>
+    );
   }
   return <PlayerDeckGrid cards={cards} size="lg" showLabels className="mb-4" />;
 }
@@ -203,13 +221,15 @@ export function DecksPage() {
       {filter === DECK_HOME ? <DeckWinratesPanel onAnalyze={setPassportDeck} /> : null}
 
       {filter === "favorites" ? (
-        <FavoritesPanel
-          onAnalyze={setPassportDeck}
-          onCompare={(deck) => {
-            const path = deckToComparePath(deck, "favorites");
-            if (path) navigate(path);
-          }}
-        />
+        <TabSuspense>
+          <FavoritesPanel
+            onAnalyze={setPassportDeck}
+            onCompare={(deck) => {
+              const path = deckToComparePath(deck, "favorites");
+              if (path) navigate(path);
+            }}
+          />
+        </TabSuspense>
       ) : null}
 
       {filter === "random" ? (
@@ -241,49 +261,53 @@ export function DecksPage() {
       ) : null}
 
       {filter === "constructor" ? (
-        <ConstructorPanel
-          renderDeckCard={(deck, i) => (
-            <div key={`${deck.id}-${deck.name}`} className="w-full">
+        <TabSuspense>
+          <ConstructorPanel
+            renderDeckCard={(deck, i) => (
+              <div key={`${deck.id}-${deck.name}`} className="w-full">
+                <DeckCard
+                  deck={deck}
+                  index={i}
+                  showCompare
+                  onCompare={() => {
+                    const path = deckToComparePath(deck, "constructor");
+                    if (path) navigate(path);
+                  }}
+                  onCopied={(msg) => {
+                    setCopyHint(msg);
+                    setTimeout(() => setCopyHint(null), 3000);
+                  }}
+                  onAnalyze={() => setPassportDeck(deck)}
+                  onAskAi={() => {
+                    const names = (deck.cards ?? []).map((c) => c.name).filter(Boolean);
+                    if (names.length < 8) return;
+                    openGhosteekAi(navigate, contextFromConstructor(names));
+                  }}
+                />
+              </div>
+            )}
+          />
+        </TabSuspense>
+      ) : null}
+
+      {filter === "arena" ? (
+        <TabSuspense>
+          <ArenaDecksPanel
+            renderDeck={(deck, i, onCompare) => (
               <DeckCard
                 deck={deck}
                 index={i}
                 showCompare
-                onCompare={() => {
-                  const path = deckToComparePath(deck, "constructor");
-                  if (path) navigate(path);
-                }}
+                onCompare={onCompare}
                 onCopied={(msg) => {
                   setCopyHint(msg);
                   setTimeout(() => setCopyHint(null), 3000);
                 }}
                 onAnalyze={() => setPassportDeck(deck)}
-                onAskAi={() => {
-                  const names = (deck.cards ?? []).map((c) => c.name).filter(Boolean);
-                  if (names.length < 8) return;
-                  openGhosteekAi(navigate, contextFromConstructor(names));
-                }}
               />
-            </div>
-          )}
-        />
-      ) : null}
-
-      {filter === "arena" ? (
-        <ArenaDecksPanel
-          renderDeck={(deck, i, onCompare) => (
-            <DeckCard
-              deck={deck}
-              index={i}
-              showCompare
-              onCompare={onCompare}
-              onCopied={(msg) => {
-                setCopyHint(msg);
-                setTimeout(() => setCopyHint(null), 3000);
-              }}
-              onAnalyze={() => setPassportDeck(deck)}
-            />
-          )}
-        />
+            )}
+          />
+        </TabSuspense>
       ) : null}
 
       {(filter === "meta" || filter === "mine") && (

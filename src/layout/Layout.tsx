@@ -10,6 +10,7 @@ import {
   useHapticSettingsBootstrap,
 } from "@/hooks";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { PerfProvider, PerfDevOverlay } from "@/perf";
 import {
   bindTelegramViewportListeners,
   bootstrapTelegramViewport,
@@ -25,24 +26,27 @@ export function Layout() {
   }, []);
 
   return (
-    <div className="min-h-screen flex overflow-x-hidden">
-      <Sidebar />
+    <PerfProvider>
+      <div className="min-h-screen flex overflow-x-hidden">
+        <Sidebar />
 
-      <main className="app-main">
-        <PageRefreshProvider>
-          <CardCatalogProvider>
-            <FavoriteDecksProvider>
-              <div className="page-shell">
-                <ErrorBoundary>
-                  <Outlet />
-                </ErrorBoundary>
-              </div>
-            </FavoriteDecksProvider>
-          </CardCatalogProvider>
-        </PageRefreshProvider>
-      </main>
+        <main className="app-main">
+          <PageRefreshProvider>
+            <CardCatalogProvider>
+              <FavoriteDecksProvider>
+                <div className="page-shell">
+                  <ErrorBoundary>
+                    <Outlet />
+                  </ErrorBoundary>
+                </div>
+              </FavoriteDecksProvider>
+            </CardCatalogProvider>
+          </PageRefreshProvider>
+        </main>
 
-      <BottomNav />
-    </div>
+        <BottomNav />
+        {import.meta.env.DEV ? <PerfDevOverlay /> : null}
+      </div>
+    </PerfProvider>
   );
 }

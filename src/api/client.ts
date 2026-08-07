@@ -430,12 +430,6 @@ export const api = {
     });
   },
 
-  prefetchDeckTabs: () => {
-    void cachedGet<DecksListData>("decks:meta", "/api/decks?type=meta", TTL.battles).catch(() => {});
-    void cachedGet<TopPlayersData>("top-players-v3", "/api/decks/top-players?limit=10", TTL.topPlayers).catch(() => {});
-    void cachedGet<ArenaDecksData>("arena-decks-v10", "/api/decks/arena", TTL.arenaDecks).catch(() => {});
-  },
-
   getDecks: (type?: string) => {
     const key = type === "mine" ? "decks:mine-v3" : `decks:${type ?? "all"}`;
     return cachedGet<DecksListData>(
