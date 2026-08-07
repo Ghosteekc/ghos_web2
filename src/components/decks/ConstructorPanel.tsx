@@ -17,11 +17,11 @@ import { cn } from "@/utils";
 import { haptic } from "@/utils/hapticManager";
 import type { CardDisplayMode, CoreConflictInfo, Deck, DeckCard } from "@/types";
 
-/** Подписи слотов: 0 evo, 1 hero+champion, 2 flexible (champ/hero/evo), 3 base. */
+/** Подписи слотов: 0 evo, 1 hero|champion, 2 hybrid, 3 base. */
 const SLOT_HINTS: ReadonlyArray<string | readonly string[]> = [
   "Эволюция",
   ["Герой", "Чемпион"],
-  "Гибкая",
+  "Гибрид",
   "Обычная",
 ];
 
@@ -78,23 +78,57 @@ type CatalogCard = {
 
 /**
  * Режим арта в слоте:
- * 0 — эволюция
- * 1 — чемпион (рамка champion; иначе hero/evo если карта усилена)
- * 2 — гибкий: чемпион / героизм / эволюция
- * 3 — обычная
+ * 0 — только эволюция
+ * 1 — только чемпион / героизм
+ * 2 — гибрид: чемпион / героизм / эволюция
+ * 3 — обычная, без улучшений
  */
+function isChampionCard(card: CatalogCard): boolean {
+  return CHAMPION_CARDS.has(card.name);
+}
+
+function isHeroCard(card: CatalogCard): boolean {
+  return Boolean(card.has_hero);
+}
+
+function isEvoCard(card: CatalogCard): boolean {
+  return Boolean(card.icon_evo);
+}
+
+function cardFitsSlot(slotIndex: number, card: CatalogCard): boolean {
+  switch (slotIndex) {
+    case 0:
+      return isEvoCard(card);
+    case 1:
+      return isChampionCard(card) || isHeroCard(card);
+    case 2:
+      return isChampionCard(card) || isHeroCard(card) || isEvoCard(card);
+    case 3:
+      return true;
+    default:
+      return false;
+  }
+}
+
 function slotDisplayMode(slotIndex: number, card: CatalogCard): CardDisplayMode {
   if (slotIndex === 0) {
-    return card.icon_evo ? "evo" : "base";
+    return isEvoCard(card) ? "evo" : "base";
   }
 
-  if (slotIndex === 1 || slotIndex === 2) {
-    if (CHAMPION_CARDS.has(card.name)) return "base";
-    if (card.has_hero) return "hero";
-    if (card.icon_evo) return "evo";
+  if (slotIndex === 1) {
+    if (isChampionCard(card)) return "base";
+    if (isHeroCard(card)) return "hero";
     return "base";
   }
 
+  if (slotIndex === 2) {
+    if (isChampionCard(card)) return "base";
+    if (isHeroCard(card)) return "hero";
+    if (isEvoCard(card)) return "evo";
+    return "base";
+  }
+
+  // Слот 4 — без улучшений
   return "base";
 }
 
@@ -202,8 +236,9 @@ function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
           <li>Нажми слот — он станет активным.</li>
           <li>Выбери карту внизу — она встанет в этот слот.</li>
           <li>
-            Слот 1 — эволюция, слот 2 — герой или чемпион, слот 3 — гибкий (чемпион /
-            героизм / эволюция), слот 4 — обычная карта.
+            Слот 1 — только эволюция, слот 2 — только герой или чемпион, слот 3 —
+            гибрид (эволюция / героизм / чемпион), слот 4 — обычная карта без
+            улучшений.
           </li>
           <li>Когда все 4 карты на месте, Ghosteek соберёт полные колоды.</li>
         </ul>
@@ -240,6 +275,26 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   useEffect(() => {
     writeCtorSession(slots, activeSlot);
   }, [slots, activeSlot]);
+
+  // Сбрасываем карты, которые больше не подходят правилам слота (старая сессия).
+  useEffect(() => {
+    if (!catalog.length) return;
+    setSlots((prev) => {
+      let changed = false;
+      const next = prev.map((pick, index) => {
+        if (!pick) return pick;
+        const card =
+          catalog.find((c) => c.name === pick.name) ??
+          (getCard(pick.name) as CatalogCard | undefined);
+        if (!card || !cardFitsSlot(index, card)) {
+          changed = true;
+          return null;
+        }
+        return pick;
+      });
+      return changed ? next : prev;
+    });
+  }, [catalog, getCard]);
 
   useEffect(() => {
     if (!ready) return;
@@ -283,6 +338,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     return catalog
       .filter((c) => {
         if (usedNames.has(c.name)) return false;
+        if (!cardFitsSlot(activeSlot, c)) return false;
         if (!matchesBrowserTab(c, browserTab)) return false;
         if (!q) return true;
         return (
@@ -292,7 +348,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         );
       })
       .sort((a, b) => (a.elixir ?? 99) - (b.elixir ?? 99) || a.name.localeCompare(b.name));
-  }, [catalog, deferredSearch, usedNames, browserTab]);
+  }, [catalog, deferredSearch, usedNames, browserTab, activeSlot]);
 
   const buildRequestRef = useRef(0);
   const buildDecks = useCallback(async (current: (SlotPick)[]) => {
@@ -348,6 +404,10 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   }, [slots, filledCount, buildDecks]);
 
   const placeCard = (card: CatalogCard) => {
+    if (!cardFitsSlot(activeSlot, card)) {
+      haptic.light();
+      return;
+    }
     haptic.light();
     setSlots((prev) => {
       const next = [...prev];
