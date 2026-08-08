@@ -85,6 +85,9 @@ export function ProfilePage() {
                 {formatPlayerTag(profile.player_tag)}
               </p>
               <p className="text-sm text-cr-accent font-semibold mt-2 truncate">
+                {profile.clan_name?.trim() || "Без клана"}
+              </p>
+              <p className="text-sm text-cr-accent font-semibold mt-1 truncate">
                 {profile.arena_name ?? "Арена не указана"}
               </p>
               {profile.favorite_card && (
