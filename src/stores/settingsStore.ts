@@ -15,7 +15,6 @@ function defaultSettings(): Settings {
   return {
     theme: loadStoredTheme(),
     language: "ru",
-    notifications: true,
     telegram_notifications: true,
     haptic_enabled: true,
     haptic_intensity: "standard",
@@ -34,7 +33,6 @@ function readStoredSettings(): Settings | null {
           ? parsed.theme
           : base.theme,
       language: parsed.language === "en" ? "en" : "ru",
-      notifications: parsed.notifications ?? base.notifications,
       telegram_notifications: parsed.telegram_notifications ?? base.telegram_notifications,
       haptic_enabled: parsed.haptic_enabled ?? base.haptic_enabled,
       haptic_intensity: normalizeIntensity(parsed.haptic_intensity, base.haptic_intensity),

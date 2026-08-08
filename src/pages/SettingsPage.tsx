@@ -5,7 +5,6 @@ import {
   Trash2,
   Eraser,
   Bell,
-  BellOff,
   RefreshCw,
   Vibrate,
   Unlink2,
@@ -359,21 +358,8 @@ export function SettingsPage() {
               <div className="flex items-center gap-3">
                 <Bell className="w-5 h-5 text-cr-gold" />
                 <div>
-                  <p className="text-base font-semibold text-cr-text">Уведомления</p>
-                  <p className="text-sm text-cr-muted">Внутри приложения</p>
-                </div>
-              </div>
-              <Toggle
-                checked={settings.notifications}
-                onChange={(c) => void updateSetting({ notifications: c })}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <BellOff className="w-5 h-5 text-cr-blue" />
-                <div>
                   <p className="text-base font-semibold text-cr-text">Telegram</p>
-                  <p className="text-sm text-cr-muted">Уведомления в чате</p>
+                  <p className="text-sm text-cr-muted">Еженедельная сводка в чате бота</p>
                 </div>
               </div>
               <Toggle

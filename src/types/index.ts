@@ -576,7 +576,8 @@ export type HapticIntensity = "weak" | "standard" | "strong";
 export interface Settings {
   theme: "dark" | "light" | "auto";
   language: "ru" | "en";
-  notifications: boolean;
+  /** @deprecated unused — kept for API compat */
+  notifications?: boolean;
   telegram_notifications: boolean;
   haptic_enabled: boolean;
   haptic_intensity: HapticIntensity;
