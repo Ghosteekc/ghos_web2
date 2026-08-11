@@ -431,7 +431,7 @@ export const api = {
   },
 
   getDecks: (type?: string) => {
-    const key = type === "mine" ? "decks:mine-v3" : `decks:${type ?? "all"}`;
+    const key = type === "mine" ? "decks:mine-v4" : `decks:${type ?? "all"}`;
     return cachedGet<DecksListData>(
       key,
       type ? `/api/decks?type=${type}` : "/api/decks",
