@@ -11,9 +11,11 @@ export const CHAMPION_CARDS = new Set([
   "Boss Bandit", "Goblinstein",
 ]);
 
+/** Flying units (is_flying) — not anti-air. Prefer cardIsFlying() / role "flying". */
 export const AIR_UNITS = new Set([
   "Minions", "Minion Horde", "Balloon", "Lava Hound", "Baby Dragon", "Inferno Dragon",
   "Mega Minion", "Bats", "Phoenix", "Electro Dragon", "Flying Machine", "Skeleton Barrel",
+  "Skeleton Dragons",
 ]);
 
 export const METRIC_WEIGHTS = {

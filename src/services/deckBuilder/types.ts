@@ -8,6 +8,7 @@ export type CardRole =
   | "big_spell"
   | "building"
   | "air_defense"
+  | "flying"
   | "swarm"
   | "cycle"
   | "anti_tank"

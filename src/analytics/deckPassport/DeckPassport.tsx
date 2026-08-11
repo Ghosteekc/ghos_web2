@@ -173,7 +173,7 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
                     ["Тип колоды", analysis.basicInfo.deckType],
                     ["Заклинания", String(analysis.basicInfo.spellCount)],
                     ["Постройки", String(analysis.basicInfo.buildingCount)],
-                    ["Воздух", String(analysis.basicInfo.airCount)],
+                    ["Анти-воздух", String(analysis.basicInfo.airCount)],
                     ["Поддержка", String(analysis.basicInfo.supportCount)],
                     ["Цикл", String(analysis.basicInfo.cycleCount)],
                   ].map(([k, v]) => (

@@ -79,12 +79,16 @@ export function cardRoles(name: string): ReadonlySet<string> {
   return new Set(getCardMeta(name)?.roles ?? []);
 }
 
-/** Проверка по всем roles[], не только «основной». Синонимы air/spell/building. */
+/** Проверка по всем roles[], не только «основной». */
 export function cardHasRole(name: string, role: string): boolean {
   const roles = cardRoles(name);
   const meta = getCardMeta(name);
+  // Legacy: "air" means anti-air (air_defense), NOT flying.
   if (role === "air" || role === "air_defense") {
     return roles.has("air_defense") || roles.has("air");
+  }
+  if (role === "flying") {
+    return roles.has("flying") || FLYING_FALLBACK.has(name);
   }
   if (role === "spell") {
     return (
@@ -102,3 +106,29 @@ export function cardHasRole(name: string, role: string): boolean {
   }
   return roles.has(role);
 }
+
+/** Airborne unit — independent of anti-air capability. */
+export function cardIsFlying(name: string): boolean {
+  return cardHasRole(name, "flying");
+}
+
+/** Can attack airborne targets (anti-air). */
+export function cardCanTargetAir(name: string): boolean {
+  return cardHasRole(name, "air_defense");
+}
+
+const FLYING_FALLBACK = new Set([
+  "Minions",
+  "Minion Horde",
+  "Mega Minion",
+  "Inferno Dragon",
+  "Baby Dragon",
+  "Balloon",
+  "Lava Hound",
+  "Bats",
+  "Skeleton Dragons",
+  "Phoenix",
+  "Flying Machine",
+  "Electro Dragon",
+  "Skeleton Barrel",
+]);

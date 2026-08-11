@@ -1,4 +1,4 @@
-import { avgElixir, cardHasRole, getCardMeta } from "@/services/deckBuilder/database";
+import { avgElixir, cardCanTargetAir, cardHasRole, getCardMeta } from "@/services/deckBuilder/database";
 import { isSpellCard, isWinCard } from "@/services/deckBuilder/balance";
 import { CHAMPION_CARDS, LEGENDARY_CARDS } from "./constants/ratings";
 import type { DeckCard } from "@/types";
@@ -9,6 +9,7 @@ export interface DeckBasicInfo {
   deckType: string;
   spellCount: number;
   buildingCount: number;
+  /** Count of anti-air cards (can_target_air) — not flying units. */
   airCount: number;
   supportCount: number;
   cycleCount: number;
@@ -18,8 +19,8 @@ function isBuilding(name: string): boolean {
   return cardHasRole(name, "building");
 }
 
-function isAir(name: string): boolean {
-  return cardHasRole(name, "air_defense");
+function isAntiAir(name: string): boolean {
+  return cardCanTargetAir(name);
 }
 
 function isSupport(name: string): boolean {
@@ -46,7 +47,7 @@ export function computeBasicInfo(cardNames: string[], deckType: string): DeckBas
     deckType,
     spellCount: cardNames.filter(isSpellCard).length,
     buildingCount: cardNames.filter(isBuilding).length,
-    airCount: cardNames.filter(isAir).length,
+    airCount: cardNames.filter(isAntiAir).length,
     supportCount: cardNames.filter(isSupport).length,
     cycleCount: cardNames.filter(isCycle).length,
   };
