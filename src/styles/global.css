@@ -3556,6 +3556,7 @@
   min-height: 0;
   height: calc(100dvh - var(--mobile-header-offset) - var(--bottom-nav-offset) - 0.5rem);
   margin: -0.25rem 0 0;
+  overscroll-behavior-y: none;
 }
 
 @media (min-width: 1024px) {
@@ -3580,9 +3581,10 @@
   position: absolute;
   z-index: -1;
   pointer-events: none;
-  left: -0.75rem;
-  right: -0.75rem;
-  top: -0.35rem;
+  /* Bleed past .app-main padding so blur reaches the screen edge */
+  left: calc(-1 * max(1rem, var(--app-content-left)));
+  right: calc(-1 * max(1rem, var(--app-content-right)));
+  top: calc(-1 * var(--mobile-header-offset));
   bottom: -0.45rem;
   background: linear-gradient(
     to bottom,
@@ -3605,12 +3607,20 @@
   );
 }
 
+@media (min-width: 1024px) {
+  .ai-chat-header::before {
+    top: -2rem;
+    left: -2rem;
+    right: -2rem;
+  }
+}
+
 .ai-chat-scroll {
   flex: 1;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior: none;
   padding: 0.65rem 0.1rem 0.85rem;
   -webkit-overflow-scrolling: touch;
 }

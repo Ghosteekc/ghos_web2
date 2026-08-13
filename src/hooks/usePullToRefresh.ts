@@ -13,7 +13,11 @@ function getScrollTop(): number {
   );
 }
 
-export function usePullToRefresh(onRefresh: () => Promise<void>) {
+export function usePullToRefresh(
+  onRefresh: () => Promise<void>,
+  options?: { enabled?: boolean },
+) {
+  const enabled = options?.enabled !== false;
   const [refreshing, setRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
 
@@ -35,6 +39,13 @@ export function usePullToRefresh(onRefresh: () => Promise<void>) {
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      pulling.current = false;
+      startY.current = 0;
+      setPull(0);
+      return;
+    }
+
     const onTouchStart = (e: TouchEvent) => {
       if (refreshingRef.current) return;
       if (getScrollTop() > 1) {
@@ -112,7 +123,7 @@ export function usePullToRefresh(onRefresh: () => Promise<void>) {
       window.removeEventListener("touchend", onTouchEnd);
       window.removeEventListener("touchcancel", onTouchEnd);
     };
-  }, [setPull]);
+  }, [enabled, setPull]);
 
   return { refreshing, pullDistance, threshold: PULL_THRESHOLD };
 }

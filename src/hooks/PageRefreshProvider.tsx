@@ -7,6 +7,7 @@ import {
   type MutableRefObject,
   type ReactNode,
 } from "react";
+import { useLocation } from "react-router-dom";
 import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { usePullToRefresh } from "./usePullToRefresh";
 
@@ -17,11 +18,18 @@ type HandlerApi = {
 
 const PageRefreshApiContext = createContext<MutableRefObject<HandlerApi> | null>(null);
 
+function isAiChatPath(pathname: string): boolean {
+  return pathname === "/ai" || pathname.startsWith("/ai/");
+}
+
 /**
  * Pull-to-refresh вызывает все зарегистрированные обработчики текущей страницы
  * (и вложенных панелей через usePageRefresh).
+ * На чате Ghosteek AI жест отключён.
  */
 export function PageRefreshProvider({ children }: { children: ReactNode }) {
+  const location = useLocation();
+  const ptrEnabled = !isAiChatPath(location.pathname);
   const handlersRef = useRef(new Map<object, () => Promise<void>>());
 
   const handleRefresh = useCallback(async () => {
@@ -30,7 +38,9 @@ export function PageRefreshProvider({ children }: { children: ReactNode }) {
     await Promise.all(handlers.map((fn) => fn()));
   }, []);
 
-  const { refreshing, pullDistance, threshold } = usePullToRefresh(handleRefresh);
+  const { refreshing, pullDistance, threshold } = usePullToRefresh(handleRefresh, {
+    enabled: ptrEnabled,
+  });
 
   const apiRef = useRef<HandlerApi>({
     register: (token, fn) => {
@@ -51,11 +61,13 @@ export function PageRefreshProvider({ children }: { children: ReactNode }) {
 
   return (
     <PageRefreshApiContext.Provider value={apiRef}>
-      <PullToRefreshIndicator
-        refreshing={refreshing}
-        pullDistance={pullDistance}
-        threshold={threshold}
-      />
+      {ptrEnabled ? (
+        <PullToRefreshIndicator
+          refreshing={refreshing}
+          pullDistance={pullDistance}
+          threshold={threshold}
+        />
+      ) : null}
       {children}
     </PageRefreshApiContext.Provider>
   );
