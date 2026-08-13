@@ -198,6 +198,15 @@
     text-shadow: var(--cr-stroke-title);
   }
 
+  /* Light: gold TEXT → dark blue; SVG icons keep --cr-gold */
+  [data-theme="light"] .text-cr-gold:not(svg) {
+    color: rgb(var(--cr-gold-text) / var(--tw-text-opacity, 1)) !important;
+  }
+
+  [data-theme="light"] svg.text-cr-gold {
+    color: rgb(var(--cr-gold) / var(--tw-text-opacity, 1)) !important;
+  }
+
   .text-cr-win,
   .text-cr-loss,
   .text-cr-blue {
@@ -317,7 +326,7 @@
     font-weight: 800;
     letter-spacing: 0.08em;
     line-height: 1;
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   }
 
@@ -550,7 +559,7 @@
   }
 
   .ctor-slot--active .ctor-slot-label {
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
   }
 
   .ctor-slot-well {
@@ -1036,7 +1045,7 @@
   }
 
   .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary).pixel-btn--active {
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     text-shadow: var(--cr-stroke-title);
   }
 
@@ -1057,7 +1066,7 @@
   }
 
   .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary):active:not(:disabled) {
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     text-shadow: var(--cr-stroke-title);
   }
 
@@ -1275,7 +1284,7 @@
     background: var(--pb-bg-pressed);
     box-shadow: var(--pb-shadow-pressed), var(--pb-glow-active);
     filter: var(--pb-filter-pressed);
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     text-shadow: var(--cr-stroke-title);
   }
 
@@ -1357,7 +1366,7 @@
 
   [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary).pixel-btn--active,
   [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary):active:not(:disabled) {
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     text-shadow: none;
   }
 
@@ -1769,6 +1778,10 @@
     color: rgb(var(--cr-gold));
   }
 
+  .theme-segment-tab--label.is-active {
+    color: rgb(var(--cr-gold-text));
+  }
+
   .theme-segment-tab:active:not(:disabled) {
     transform: none;
   }
@@ -1800,6 +1813,10 @@
 
   [data-theme="light"] .theme-segment-tab.is-active {
     color: rgb(var(--cr-gold));
+  }
+
+  [data-theme="light"] .theme-segment-tab--label.is-active {
+    color: rgb(var(--cr-gold-text));
   }
 
   .theme-segment-track--intensity {
@@ -2268,6 +2285,10 @@
     color: rgb(var(--cr-gold));
   }
 
+  [data-theme="light"] .bottom-nav-item.is-highlighted .bottom-nav-label {
+    color: rgb(var(--cr-gold-text));
+  }
+
   [data-theme="light"] .bottom-nav-item.is-highlighted .bottom-nav-icon {
     filter: drop-shadow(0 0 5px rgb(var(--cr-gold) / 0.35));
   }
@@ -2387,7 +2408,7 @@
   }
 
   [data-theme="light"] .page-title {
-    color: #000;
+    color: rgb(var(--cr-gold-text));
     text-shadow: none;
   }
 
@@ -2397,7 +2418,7 @@
   }
 
   [data-theme="light"] .section-title {
-    color: #000;
+    color: rgb(var(--cr-gold-text));
     text-shadow: none;
   }
 
@@ -2457,7 +2478,7 @@
   [data-theme="light"] .filter-tab.filter-tab--active,
   [data-theme="light"] .filter-tab:active:not(:disabled),
   [data-theme="light"] .collection-filter-tab.collection-filter-tab--active {
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
   }
 
   /* Keep rarity chip colors like dark theme (fade / stroke to dark). */
@@ -2488,7 +2509,7 @@
   [data-theme="light"] .profile-stat-collection,
   [data-theme="light"] .recommendation-accent,
   [data-theme="light"] .recommendations-panel .text-cr-gold {
-    color: rgb(var(--cr-gold)) !important;
+    color: rgb(var(--cr-gold-text)) !important;
     text-shadow: none !important;
   }
 
@@ -2501,7 +2522,7 @@
   [data-theme="light"] .card-name-glow,
   [data-theme="light"] .card-name-deck,
   [data-theme="light"] .card-name-deck-overlay {
-    color: rgb(var(--cr-gold)) !important;
+    color: rgb(var(--cr-gold-text)) !important;
   }
 
   [data-theme="light"] .card-level-chip {
@@ -2827,7 +2848,7 @@
 
   .page-title {
     @apply text-2xl font-cr tracking-tight;
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     text-shadow: var(--cr-stroke-title);
     line-height: 1.15;
     letter-spacing: -0.01em;
@@ -2845,7 +2866,7 @@
 
   .section-title {
     @apply text-base font-semibold uppercase tracking-wider;
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     letter-spacing: 0.06em;
     line-height: 1.3;
   }
@@ -2870,7 +2891,7 @@
 
   .card-name-glow {
     @apply font-cr leading-none;
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     text-shadow: var(--cr-stroke-title);
   }
 
@@ -2882,7 +2903,7 @@
     @apply font-cr leading-[1.05];
     font-size: 9px;
     letter-spacing: 0;
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     text-shadow: var(--cr-stroke-body);
   }
 
@@ -2901,7 +2922,7 @@
     line-height: 1;
     letter-spacing: 0;
     text-align: center;
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     background: rgba(2, 8, 28, 0.92);
     border: 1px solid rgb(var(--cr-accent) / 0.22);
     overflow: hidden;
@@ -2920,7 +2941,7 @@
   }
 
   [data-theme="light"] .card-name-caption {
-    color: rgb(var(--cr-blue));
+    color: rgb(var(--cr-gold-text));
     background: rgba(255, 255, 255, 0.96);
     border-color: rgb(var(--cr-blue) / 0.28);
     text-shadow: none;
@@ -2943,7 +2964,7 @@
     line-height: 1;
     letter-spacing: 0;
     text-align: center;
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     background: rgba(2, 8, 28, 0.92);
     border-top: 1px solid rgb(var(--cr-accent) / 0.28);
     overflow: hidden;
@@ -2956,7 +2977,7 @@
   }
 
   [data-theme="light"] .card-name-deck-overlay {
-    color: rgb(var(--cr-gold));
+    color: rgb(var(--cr-gold-text));
     background: rgba(255, 255, 255, 0.94);
     border-top-color: rgb(var(--cr-border) / 0.28);
   }
@@ -3879,7 +3900,7 @@
 
 .ai-md-strong {
   font-weight: 700;
-  color: rgb(var(--cr-gold));
+  color: rgb(var(--cr-gold-text));
 }
 
 .ai-md-link {
