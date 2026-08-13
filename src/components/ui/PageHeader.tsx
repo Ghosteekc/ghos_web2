@@ -4,7 +4,10 @@ import { cn } from "@/utils";
 export type PageHeaderProps = {
   title: string;
   subtitle?: ReactNode;
+  /** Back / primary chrome control (leading when aria-label contains «Назад»). */
   action?: ReactNode;
+  /** Optional right-side control (e.g. «Новый») alongside a leading back button. */
+  trailing?: ReactNode;
   children?: ReactNode;
   className?: string;
 };
@@ -37,10 +40,21 @@ function isLeadingAction(action: ReactNode): boolean {
  * Safe-area and horizontal page padding come from `.app-main`; this component
  * only owns header spacing and alignment (no negative margins).
  */
-export function PageHeader({ title, subtitle, action, children, className }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  action,
+  trailing,
+  children,
+  className,
+}: PageHeaderProps) {
   const leading = action != null && isLeadingAction(action);
   const actionEl =
     action != null ? <div className="page-header-action">{action}</div> : null;
+  const trailingEl =
+    trailing != null ? (
+      <div className="page-header-action page-header-trailing">{trailing}</div>
+    ) : null;
 
   return (
     <header className={cn("page-header", className)}>
@@ -48,6 +62,7 @@ export function PageHeader({ title, subtitle, action, children, className }: Pag
         className={cn(
           "page-header-bar",
           action != null && (leading ? "page-header-bar--leading" : "page-header-bar--trailing"),
+          trailing != null && "page-header-bar--has-trailing",
         )}
       >
         {leading ? actionEl : null}
@@ -60,6 +75,7 @@ export function PageHeader({ title, subtitle, action, children, className }: Pag
             <div className="page-header-subtitle">{subtitle}</div>
           ) : null}
         </div>
+        {trailingEl}
       </div>
       {children != null ? <div className="page-header-children">{children}</div> : null}
     </header>

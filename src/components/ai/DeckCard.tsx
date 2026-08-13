@@ -1,8 +1,9 @@
 import { Download } from "lucide-react";
 import { CardTile } from "@/components/cards";
-import { ElixirIcon } from "@/components/ui";
+import { Button, ElixirIcon } from "@/components/ui";
 import { useTelegram } from "@/hooks";
 import type { AiDeckCardData } from "@/components/ai/chatTypes";
+import { cn } from "@/utils";
 
 type Props = {
   deck: AiDeckCardData;
@@ -15,6 +16,7 @@ export function DeckCard({ deck }: Props) {
   const canImport = Boolean(importUrl);
   const elixir = Number(deck.average_elixir) || 0;
   const title = deck.title || deck.archetype || "Колода";
+  const showArchetype = Boolean(deck.archetype && deck.archetype !== title);
 
   const onImport = () => {
     if (!importUrl) return;
@@ -31,35 +33,51 @@ export function DeckCard({ deck }: Props) {
 
   if (cards.length < 8) return null;
 
+  const elixirTone =
+    elixir > 3.5 ? "text-cr-loss" : elixir < 2.8 ? "text-cr-win" : "text-cr-text";
+
   return (
     <div className="ai-deck-card">
       <div className="ai-deck-card-head">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="ai-deck-card-title truncate">{title}</p>
-          {deck.archetype && deck.archetype !== title ? (
-            <p className="ai-deck-card-meta truncate">{deck.archetype}</p>
-          ) : null}
-          {deck.arena ? <p className="ai-deck-card-meta truncate">{deck.arena}</p> : null}
-        </div>
-        <div className="ai-deck-card-elixir" title="Средний эликсир">
-          <ElixirIcon size={14} />
-          <span>{elixir.toFixed(1)}</span>
+          {(showArchetype || deck.arena) && (
+            <div className="ai-deck-card-tags">
+              {showArchetype ? (
+                <span className="ai-deck-card-tag">{deck.archetype}</span>
+              ) : null}
+              {deck.arena ? <span className="ai-deck-card-tag">{deck.arena}</span> : null}
+            </div>
+          )}
         </div>
       </div>
 
       <div className="ai-deck-card-grid">
         {cards.map((name, index) => (
-          <div key={`${name}-${index}`} className="min-w-0">
+          <div key={`${name}-${index}`} className="min-w-0 overflow-hidden">
             <CardTile name={name} size="deck" showLabel={false} />
           </div>
         ))}
       </div>
 
+      <div className="ai-deck-card-elixir-row">
+        <span className="text-cr-muted">Средний эликсир</span>
+        <div className={cn("ai-deck-card-elixir", elixirTone)} title="Средний эликсир">
+          <ElixirIcon size={14} />
+          <span>{elixir.toFixed(1)}</span>
+        </div>
+      </div>
+
       {canImport ? (
-        <button type="button" className="ai-deck-card-import" onClick={onImport}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={onImport}
+          className="ai-deck-card-import"
+        >
           <Download className="w-4 h-4 shrink-0" aria-hidden />
           Импортировать
-        </button>
+        </Button>
       ) : null}
     </div>
   );

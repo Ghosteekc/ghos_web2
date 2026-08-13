@@ -9,6 +9,7 @@ interface ButtonProps {
   className?: string;
   disabled?: boolean;
   type?: "button" | "submit";
+  "aria-label"?: string;
 }
 
 export function Button({
@@ -18,6 +19,7 @@ export function Button({
   className = "",
   disabled = false,
   type = "button",
+  "aria-label": ariaLabel,
 }: ButtonProps) {
   const variants = {
     primary: "pixel-btn pixel-btn--primary",
@@ -36,6 +38,7 @@ export function Button({
       disabled={disabled}
       onClick={handleClick}
       className={cn(variants[variant], className)}
+      aria-label={ariaLabel}
       {...internalPressableProps}
     >
       {children}
