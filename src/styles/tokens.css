@@ -94,7 +94,8 @@
   --palette-btn-alt: 248 250 253;
   --palette-btn-gold-pressed: 175 115 12;
 
-  --palette-gold: 200 148 18;
+  /* Gold text (dark theme) → dark blue text in light; CTA gold uses gold-bright/mid. */
+  --palette-gold: 30 58 138;
   --palette-blue: 61 108 242;
   --palette-success: 35 165 89;
   --palette-danger: 214 69 69;

@@ -1357,7 +1357,7 @@
 
   [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary).pixel-btn--active,
   [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary):active:not(:disabled) {
-    color: rgb(200 148 18);
+    color: rgb(var(--cr-gold));
     text-shadow: none;
   }
 
@@ -2265,11 +2265,11 @@
   }
 
   [data-theme="light"] .bottom-nav-item.is-highlighted {
-    color: rgb(196 140 18);
+    color: rgb(var(--cr-gold));
   }
 
   [data-theme="light"] .bottom-nav-item.is-highlighted .bottom-nav-icon {
-    filter: drop-shadow(0 0 5px rgba(196, 140, 18, 0.45));
+    filter: drop-shadow(0 0 5px rgb(var(--cr-gold) / 0.35));
   }
 
   [data-theme="light"] .bottom-nav-liquid-bubble-glass {
@@ -2457,7 +2457,7 @@
   [data-theme="light"] .filter-tab.filter-tab--active,
   [data-theme="light"] .filter-tab:active:not(:disabled),
   [data-theme="light"] .collection-filter-tab.collection-filter-tab--active {
-    color: rgb(200 148 18);
+    color: rgb(var(--cr-gold));
   }
 
   /* Keep rarity chip colors like dark theme (fade / stroke to dark). */
@@ -2488,7 +2488,7 @@
   [data-theme="light"] .profile-stat-collection,
   [data-theme="light"] .recommendation-accent,
   [data-theme="light"] .recommendations-panel .text-cr-gold {
-    color: rgb(var(--cr-blue)) !important;
+    color: rgb(var(--cr-gold)) !important;
     text-shadow: none !important;
   }
 
@@ -2501,7 +2501,7 @@
   [data-theme="light"] .card-name-glow,
   [data-theme="light"] .card-name-deck,
   [data-theme="light"] .card-name-deck-overlay {
-    color: rgb(var(--cr-blue)) !important;
+    color: rgb(var(--cr-gold)) !important;
   }
 
   [data-theme="light"] .card-level-chip {

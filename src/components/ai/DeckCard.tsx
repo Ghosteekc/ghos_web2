@@ -46,7 +46,9 @@ export function DeckCard({ deck }: Props) {
               {showArchetype ? (
                 <span className="ai-deck-card-tag">{deck.archetype}</span>
               ) : null}
-              {deck.arena ? <span className="ai-deck-card-tag">{deck.arena}</span> : null}
+              {deck.arena && !/^Арена\s+\d{5,}$/i.test(deck.arena) ? (
+                <span className="ai-deck-card-tag">{deck.arena}</span>
+              ) : null}
             </div>
           )}
         </div>
