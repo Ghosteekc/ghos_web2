@@ -27,7 +27,7 @@ function MetricBar({ label, value }: { label: string; value: number }) {
       </div>
       <div className="h-2 rounded-full bg-cr-border overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-cr-gold/80 to-yellow-400 transition-[width] duration-[220ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]"
+          className="accent-meter-fill h-full rounded-full bg-gradient-to-r from-cr-gold/80 to-yellow-400 transition-[width] duration-[220ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]"
           style={{ width: `${pct}%` }}
         />
       </div>

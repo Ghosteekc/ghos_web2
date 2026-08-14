@@ -174,8 +174,8 @@
   --cr-surface: var(--palette-surface);
   --cr-card: var(--palette-elevated);
   --cr-card-hover: var(--palette-elevated-hover);
-  --cr-gold: var(--palette-gold);
-  /* Gold body/title text from dark → dark blue in light (icons/borders keep --cr-gold) */
+  /* Light chrome accent: gold from dark → navy (card evo/hero rims stay hardcoded) */
+  --cr-gold: 30 58 138;
   --cr-gold-text: 30 58 138;
   --cr-blue: var(--palette-blue);
   --cr-win: var(--palette-success);
