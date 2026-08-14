@@ -125,7 +125,8 @@ export function AiCoachPage() {
         ) : null}
       </div>
 
-      <div className="ai-chat-scroll">
+      <div className="ai-chat-body">
+        <div className="ai-chat-scroll">
         {booting ? (
           <div className="flex justify-center py-10">
             <Loader />
@@ -160,6 +161,7 @@ export function AiCoachPage() {
             <div ref={endRef} className="h-px shrink-0" />
           </div>
         )}
+        </div>
       </div>
 
       <form onSubmit={onSubmit} className="ai-composer">

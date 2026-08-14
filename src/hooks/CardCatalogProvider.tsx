@@ -128,8 +128,9 @@ const EXTRA_ALIASES: Record<string, string[]> = {
   lumberjack: ["лесоруб"],
   guards: ["гварды"],
   "mega knight": ["мегарыцарь", "megaknight"],
+  "mega minion": ["мегаминьон", "мегамуха", "мегавилла"],
   "lava hound": ["lavahound", "лавхаунд"],
-  tombstone: ["томбстоун"],
+  tombstone: ["томбстоун", "тумба", "тумбе", "тумбы"],
 };
 
 function gamerTranslit(en: string): string {

@@ -3692,15 +3692,21 @@
     0 0 0 1px rgb(150 175 215 / 0.28);
 }
 
-.ai-chat-scroll {
+.ai-chat-body {
   position: relative;
   z-index: 1;
   flex: 1;
   min-height: 0;
+  overflow: hidden;
+  margin-bottom: -1.55rem;
+}
+
+.ai-chat-scroll {
+  height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: none;
-  padding: var(--ai-chrome-top) 0.1rem 0.35rem;
+  padding: var(--ai-chrome-top) 0.1rem 1.7rem;
   -webkit-overflow-scrolling: touch;
 }
 
