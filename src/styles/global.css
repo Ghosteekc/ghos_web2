@@ -3607,6 +3607,8 @@
 
 /* ===== Ghosteek AI chat (layout-only; surfaces via glass-card / pixel-btn) ===== */
 .ai-chat {
+  --ai-chrome-top: 5.65rem;
+  --ai-chrome-bottom: 4.2rem;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -3615,6 +3617,10 @@
   height: calc(100dvh - var(--mobile-header-offset) - var(--bottom-nav-offset) - 0.5rem);
   margin: -0.25rem 0 0;
   overscroll-behavior-y: none;
+}
+
+.ai-chat:has(.ai-context-chip) {
+  --ai-chrome-top: 7.35rem;
 }
 
 @media (min-width: 1024px) {
@@ -3626,27 +3632,44 @@
   }
 }
 
+.ai-chat-chrome-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding: 0 0.1rem;
+  pointer-events: none;
+}
+
+.ai-chat-chrome-top > * {
+  pointer-events: auto;
+}
+
 .ai-chat-header {
   position: relative;
   z-index: 5;
-  flex-shrink: 0;
   padding-bottom: 0.35rem;
   background: transparent;
 }
 
-.ai-chat::before {
+.ai-chat::before,
+.ai-chat::after {
   content: "";
-  position: fixed;
+  position: absolute;
   left: 0;
   right: 0;
-  top: 0;
-  z-index: 3;
+  z-index: 4;
   pointer-events: none;
-  height: calc(var(--mobile-header-offset) + 6.75rem);
+}
+
+.ai-chat::before {
+  top: calc(-1 * var(--mobile-header-offset));
+  height: calc(var(--mobile-header-offset) + var(--ai-chrome-top) + 1.35rem);
   background: linear-gradient(
     to bottom,
-    rgb(8 14 28 / 0.38) 0%,
-    rgb(8 14 28 / 0.16) 52%,
+    rgb(8 14 28 / 0.5) 0%,
+    rgb(8 14 28 / 0.28) 58%,
     rgb(8 14 28 / 0) 100%
   );
   backdrop-filter: blur(18px) saturate(1.08);
@@ -3654,19 +3677,46 @@
   mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 32%,
-    rgb(0 0 0 / 0.82) 52%,
-    rgb(0 0 0 / 0.42) 74%,
-    rgb(0 0 0 / 0.12) 90%,
+    #000 55%,
+    rgb(0 0 0 / 0.7) 72%,
+    rgb(0 0 0 / 0.28) 88%,
     transparent 100%
   );
   -webkit-mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 32%,
-    rgb(0 0 0 / 0.82) 52%,
-    rgb(0 0 0 / 0.42) 74%,
-    rgb(0 0 0 / 0.12) 90%,
+    #000 55%,
+    rgb(0 0 0 / 0.7) 72%,
+    rgb(0 0 0 / 0.28) 88%,
+    transparent 100%
+  );
+}
+
+.ai-chat::after {
+  bottom: 0;
+  height: calc(var(--ai-chrome-bottom) + 0.85rem);
+  background: linear-gradient(
+    to top,
+    rgb(8 14 28 / 0.42) 0%,
+    rgb(8 14 28 / 0.16) 58%,
+    rgb(8 14 28 / 0) 100%
+  );
+  backdrop-filter: blur(16px) saturate(1.06);
+  -webkit-backdrop-filter: blur(16px) saturate(1.06);
+  mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    #000 42%,
+    rgb(0 0 0 / 0.65) 68%,
+    rgb(0 0 0 / 0.2) 88%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    #000 42%,
+    rgb(0 0 0 / 0.65) 68%,
+    rgb(0 0 0 / 0.2) 88%,
     transparent 100%
   );
 }
@@ -3674,16 +3724,19 @@
 [data-theme="light"] .ai-chat::before {
   background: linear-gradient(
     to bottom,
-    rgb(232 236 243 / 0.4) 0%,
-    rgb(232 236 243 / 0.16) 52%,
+    rgb(232 236 243 / 0.55) 0%,
+    rgb(232 236 243 / 0.22) 58%,
     rgb(232 236 243 / 0) 100%
   );
 }
 
-@media (min-width: 1024px) {
-  .ai-chat::before {
-    left: 16rem;
-  }
+[data-theme="light"] .ai-chat::after {
+  background: linear-gradient(
+    to top,
+    rgb(232 236 243 / 0.42) 0%,
+    rgb(232 236 243 / 0.14) 58%,
+    rgb(232 236 243 / 0) 100%
+  );
 }
 
 .ai-chat-scroll {
@@ -3694,7 +3747,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: none;
-  padding: 0.45rem 0.1rem 0.35rem;
+  padding: var(--ai-chrome-top) 0.1rem var(--ai-chrome-bottom);
   -webkit-overflow-scrolling: touch;
 }
 
@@ -3885,10 +3938,12 @@
 }
 
 .ai-composer {
-  position: relative;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 5;
-  flex-shrink: 0;
-  padding-top: 0.35rem;
+  padding: 0.35rem 0.1rem 0.15rem;
   background: transparent;
 }
 
