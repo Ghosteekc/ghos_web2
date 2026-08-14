@@ -374,7 +374,64 @@ async function cachedGet<T>(key: string, path: string, ttlMs: number): Promise<T
   return promise;
 }
 
+export type ReplayAnalyzeSuccess = {
+  ok: true;
+  status: "validated" | "cr_replay" | "not_cr_replay" | "uncertain";
+  filename: string;
+  mime_type: string;
+  size_bytes: number;
+  duration_seconds: number;
+  width: number;
+  height: number;
+  fps: number | null;
+  replay_detection?: {
+    status: "cr_replay" | "not_cr_replay" | "uncertain";
+    confidence: number;
+    frames_analyzed: number;
+    observations: string[];
+  } | null;
+};
 
+async function uploadReplayVideo(file: File): Promise<ReplayAnalyzeSuccess> {
+  await waitForInitData();
+
+  const form = new FormData();
+  form.append("file", file, file.name);
+
+  const headers: Record<string, string> = {
+    "X-Telegram-Init-Data": getInitData(),
+  };
+  if (usesDirectTunnel()) {
+    headers["Bypass-Tunnel-Reminder"] = "true";
+  }
+
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), 120_000);
+
+  let res: Response;
+  try {
+    res = await fetch(apiUrl("/api/ai/replay/analyze"), {
+      method: "POST",
+      body: form,
+      headers,
+      signal: controller.signal,
+    });
+  } catch (err) {
+    const aborted = err instanceof DOMException && err.name === "AbortError";
+    const code = aborted ? "E101" : "E100";
+    throw new ApiError(formatApiError(DEFAULT_UNAVAILABLE, code), 0, code);
+  } finally {
+    window.clearTimeout(timer);
+  }
+
+  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  const errorCode = typeof body.error_code === "string" ? body.error_code : "";
+  if (!res.ok || body.ok === false) {
+    throw new ApiError(errorCode || DEFAULT_UNAVAILABLE, res.status, errorCode || `E1${Math.min(res.status, 999)}`);
+  }
+
+  return body as ReplayAnalyzeSuccess;
+}
 
 export const api = {
 
@@ -693,6 +750,8 @@ export const api = {
     request<{ ok: boolean; cleared: boolean }>("/api/ai/session", {
       method: "DELETE",
     }),
+
+  analyzeReplay: (file: File) => uploadReplayVideo(file),
 };
 
 

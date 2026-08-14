@@ -1,5 +1,10 @@
 /** Типы и локальное хранение истории Ghosteek AI-чата. */
 
+import type { AiReplayCardData } from "@/components/ai/replay";
+import { parseReplayCard } from "@/components/ai/replay";
+
+export type { AiReplayCardData, ReplayStatus } from "@/components/ai/replay";
+
 export type ChatRole = "user" | "assistant";
 
 export type ChatAction = {
@@ -27,6 +32,7 @@ export type ChatMessage = {
   intent?: string | null;
   actions?: ChatAction[];
   deckCard?: AiDeckCardData | null;
+  replayCard?: AiReplayCardData | null;
   createdAt: number;
   error?: boolean;
 };
@@ -93,6 +99,7 @@ export function loadChatMessages(): ChatMessage[] {
         intent: m.intent ?? null,
         actions: Array.isArray(m.actions) ? m.actions : undefined,
         deckCard: parseDeckCard(m.deckCard),
+        replayCard: parseReplayCard(m.replayCard),
         createdAt: typeof m.createdAt === "number" ? m.createdAt : Date.now(),
         error: Boolean(m.error),
       }));

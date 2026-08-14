@@ -1,9 +1,10 @@
-import { useEffect, useRef, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useRef, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Bot, RotateCcw, Send, X } from "lucide-react";
 import { Button, EmptyState, Loader, PageHeader } from "@/components/ui";
 import { ChatBubble, ChatTypingRow } from "@/components/ai/ChatBubble";
 import { CHAT_PRESETS } from "@/components/ai/chatTypes";
+import { REPLAY_MSG } from "@/components/ai/replay";
 import { useGhosteekChat } from "@/hooks/useGhosteekChat";
 import { cn } from "@/utils";
 import { internalPressableProps } from "@/utils/nativeCallout";
@@ -46,18 +47,25 @@ export function AiCoachPage() {
     loading,
     booting,
     send,
+    beginReplaySelect,
+    cancelReplaySelect,
+    submitReplayFile,
     startNewConversation,
     hasMessages,
     pageContext,
     dismissPageContext,
+    replayStatus,
   } = useGhosteekChat();
 
   const endRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const replayInputRef = useRef<HTMLInputElement>(null);
+  const replayBusy = replayStatus === "uploading" || replayStatus === "validating";
+  const busy = loading || replayBusy;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
-  }, [messages, loading, booting]);
+  }, [messages, loading, booting, replayStatus]);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -68,16 +76,34 @@ export function AiCoachPage() {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (loading || !draft.trim()) return;
+    if (busy || !draft.trim()) return;
     void send(draft);
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (!loading && draft.trim()) void send(draft);
+      if (!busy && draft.trim()) void send(draft);
     }
   };
+
+  const onReplayButtonClick = () => {
+    if (busy) return;
+    beginReplaySelect();
+    replayInputRef.current?.click();
+  };
+
+  const onReplayFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    e.target.value = "";
+    void submitReplayFile(file);
+  };
+
+  useEffect(() => {
+    const onFocus = () => cancelReplaySelect();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [cancelReplaySelect]);
 
   return (
     <div className="ai-chat">
@@ -131,7 +157,7 @@ export function AiCoachPage() {
           <div className="flex justify-center py-10">
             <Loader />
           </div>
-        ) : !hasMessages && !loading ? (
+        ) : !hasMessages && !loading && !replayBusy ? (
           <div className="ai-empty">
             <EmptyState
               icon={Bot}
@@ -146,7 +172,7 @@ export function AiCoachPage() {
             {!pageContext ? (
               <PresetChips
                 presets={CHAT_PRESETS}
-                disabled={loading}
+                disabled={busy}
                 onPick={(msg) => void send(msg)}
                 className="ai-chip-row--empty"
               />
@@ -158,6 +184,7 @@ export function AiCoachPage() {
               <ChatBubble key={m.id} message={m} />
             ))}
             {loading && <ChatTypingRow />}
+            {replayBusy && <ChatTypingRow detail={REPLAY_MSG.checking} />}
             <div ref={endRef} className="h-px shrink-0" />
           </div>
         )}
@@ -165,6 +192,26 @@ export function AiCoachPage() {
       </div>
 
       <form onSubmit={onSubmit} className="ai-composer">
+        <input
+          ref={replayInputRef}
+          type="file"
+          accept="video/*"
+          className="hidden"
+          tabIndex={-1}
+          aria-hidden
+          onChange={onReplayFileChange}
+        />
+        <div className="ai-composer-actions">
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={busy}
+            onClick={onReplayButtonClick}
+            className="ai-replay-btn"
+          >
+            Разобрать реплей
+          </Button>
+        </div>
         <div className="ai-composer-box glass-card !p-0">
           <textarea
             ref={textareaRef}
@@ -173,13 +220,13 @@ export function AiCoachPage() {
             onKeyDown={onKeyDown}
             placeholder={pageContext ? "Уточни вопрос…" : "Напиши вопрос…"}
             rows={1}
-            disabled={loading}
+            disabled={busy}
             className="ai-composer-input"
           />
           <Button
             type="submit"
             variant="primary"
-            disabled={loading || !draft.trim()}
+            disabled={busy || !draft.trim()}
             className="ai-send-btn"
             aria-label="Отправить"
           >

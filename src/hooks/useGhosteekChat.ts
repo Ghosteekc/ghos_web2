@@ -10,6 +10,16 @@ import {
   saveChatMessages,
 } from "@/components/ai/chatTypes";
 import {
+  isAllowedReplayVideo,
+  REPLAY_MAX_SIZE_BYTES,
+  REPLAY_MSG,
+  replayDetectionMessage,
+  replayErrorMessage,
+  replayStatusFromApi,
+  type ReplayDetectionStatus,
+  type ReplayStatus,
+} from "@/components/ai/replay";
+import {
   type AiPageContext,
   clearAiPageContext,
   markAiPageContextAutoDone,
@@ -105,10 +115,16 @@ export function useGhosteekChat() {
   );
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
+  const [replayStatus, setReplayStatus] = useState<ReplayStatus>("idle");
   const [booting, setBooting] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef(0);
   const autoSentRef = useRef(false);
+  const replayBusyRef = useRef(false);
+
+  useEffect(() => {
+    replayBusyRef.current = replayStatus === "uploading" || replayStatus === "validating";
+  }, [replayStatus]);
 
   useEffect(() => {
     const next = readInitialPageContext(location.state);
@@ -130,8 +146,10 @@ export function useGhosteekChat() {
         const turns = remote?.messages;
         if (Array.isArray(turns) && turns.length > 0) {
           const mapped = mapBackendMessages(turns);
-          setMessages(mapped);
-          saveChatMessages(mapped);
+          const replayMsgs = local.filter((m) => m.replayCard);
+          const next = replayMsgs.length > 0 ? [...mapped, ...replayMsgs] : mapped;
+          setMessages(next);
+          saveChatMessages(next);
         }
       } catch {
         /* keep local */
@@ -157,6 +175,7 @@ export function useGhosteekChat() {
     async (text: string, opts?: { keepDraft?: boolean }) => {
       const trimmed = text.trim();
       if (!trimmed) return;
+      if (replayBusyRef.current) return;
 
       const tick = ++abortRef.current;
       const userMsg: ChatMessage = {
@@ -195,7 +214,10 @@ export function useGhosteekChat() {
               break;
             }
           }
-          setMessages(merged);
+          setMessages((prev) => {
+            const replayMsgs = prev.filter((m) => m.replayCard);
+            return replayMsgs.length > 0 ? [...merged, ...replayMsgs] : merged;
+          });
           return;
         }
 
@@ -230,6 +252,114 @@ export function useGhosteekChat() {
     [pageContext],
   );
 
+  const beginReplaySelect = useCallback(() => {
+    if (loading) return;
+    setReplayStatus("selecting");
+    setError(null);
+  }, [loading]);
+
+  const cancelReplaySelect = useCallback(() => {
+    setReplayStatus((current) => (current === "selecting" ? "idle" : current));
+  }, []);
+
+  const submitReplayFile = useCallback(
+    async (file: File | null) => {
+      if (!file) {
+        setReplayStatus((current) => (current === "selecting" ? "idle" : current));
+        return;
+      }
+      if (loading || replayBusyRef.current) return;
+
+      if (!isAllowedReplayVideo(file)) {
+        setReplayStatus("error");
+        setError(REPLAY_MSG.notVideo);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: newMessageId(),
+            role: "assistant",
+            content: REPLAY_MSG.notVideo,
+            createdAt: Date.now(),
+            error: true,
+          },
+        ]);
+        return;
+      }
+
+      if (file.size > REPLAY_MAX_SIZE_BYTES) {
+        setReplayStatus("error");
+        setError(REPLAY_MSG.tooLarge);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: newMessageId(),
+            role: "assistant",
+            content: REPLAY_MSG.tooLarge,
+            createdAt: Date.now(),
+            error: true,
+          },
+        ]);
+        return;
+      }
+
+      const tick = ++abortRef.current;
+      replayBusyRef.current = true;
+      setReplayStatus("uploading");
+      setError(null);
+
+      try {
+        setReplayStatus("validating");
+        const data = await api.analyzeReplay(file);
+        if (tick !== abortRef.current) return;
+
+        replayBusyRef.current = false;
+        const detectionStatus = (data.replay_detection?.status || data.status) as ReplayDetectionStatus;
+        setReplayStatus(replayStatusFromApi(data.status));
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: newMessageId(),
+            role: "assistant",
+            content: replayDetectionMessage(data.status),
+            replayCard: {
+              filename: data.filename,
+              durationSeconds: data.duration_seconds,
+              width: data.width,
+              height: data.height,
+              accepted: data.status === "cr_replay" || data.status === "uncertain",
+              detectionStatus:
+                detectionStatus === "cr_replay" ||
+                detectionStatus === "not_cr_replay" ||
+                detectionStatus === "uncertain"
+                  ? detectionStatus
+                  : null,
+              confidence: data.replay_detection?.confidence ?? null,
+            },
+            createdAt: Date.now(),
+          },
+        ]);
+      } catch (e) {
+        if (tick !== abortRef.current) return;
+        replayBusyRef.current = false;
+        const code = e instanceof ApiError ? e.code : "";
+        const msg = replayErrorMessage(code);
+        setReplayStatus(code === "REPLAY_NOT_CR" ? "not_cr" : "error");
+        setError(msg);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: newMessageId(),
+            role: "assistant",
+            content: msg,
+            createdAt: Date.now(),
+            error: true,
+          },
+        ]);
+      }
+    },
+    [loading],
+  );
+
   // Авто-старт: контекст страницы → сразу вопрос с GhosteekAiContext.
   useEffect(() => {
     if (booting || loading || autoSentRef.current) return;
@@ -249,6 +379,8 @@ export function useGhosteekChat() {
   const startNewConversation = useCallback(async () => {
     abortRef.current += 1;
     autoSentRef.current = false;
+    replayBusyRef.current = false;
+    setReplayStatus("idle");
     setLoading(true);
     setError(null);
     try {
@@ -261,6 +393,7 @@ export function useGhosteekChat() {
       setPageContext(null);
       setMessages([]);
       setDraft("");
+      setReplayStatus("idle");
       setLoading(false);
     }
   }, []);
@@ -270,9 +403,13 @@ export function useGhosteekChat() {
     draft,
     setDraft,
     loading,
+    replayStatus,
     booting,
     error,
     send,
+    beginReplaySelect,
+    cancelReplaySelect,
+    submitReplayFile,
     startNewConversation,
     hasMessages: messages.length > 0,
     pageContext,

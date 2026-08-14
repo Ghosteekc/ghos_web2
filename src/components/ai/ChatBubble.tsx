@@ -3,6 +3,7 @@ import { Bot, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DeckCard } from "@/components/ai/DeckCard";
 import { MessageMarkdown } from "@/components/ai/MessageMarkdown";
+import { ReplayAcceptedCard } from "@/components/ai/ReplayAcceptedCard";
 import { TypingIndicator } from "@/components/ai/TypingIndicator";
 import { actionLabel, type ChatMessage } from "@/components/ai/chatTypes";
 import { Button } from "@/components/ui";
@@ -54,6 +55,7 @@ export const ChatBubble = memo(function ChatBubble({ message }: Props) {
           />
         )}
         {!isUser && message.deckCard ? <DeckCard deck={message.deckCard} /> : null}
+        {!isUser && message.replayCard ? <ReplayAcceptedCard card={message.replayCard} /> : null}
         {!isUser && message.actions && message.actions.length > 0 ? (
           <div className="ai-actions">
             {message.actions.map((a) => (
@@ -75,10 +77,10 @@ export const ChatBubble = memo(function ChatBubble({ message }: Props) {
   );
 });
 
-export function ChatTypingRow() {
+export function ChatTypingRow({ detail = "· Анализирую…" }: { detail?: string }) {
   return (
     <div className="ai-row ai-row--bot ai-msg-enter">
-      <AiIdentity detail="· Анализирую…" />
+      <AiIdentity detail={detail} />
       <div className="ai-bubble ai-bubble--bot glass-card ai-bubble--typing">
         <TypingIndicator />
       </div>
