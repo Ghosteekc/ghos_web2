@@ -3608,7 +3608,6 @@
 /* ===== Ghosteek AI chat (layout-only; surfaces via glass-card / pixel-btn) ===== */
 .ai-chat {
   --ai-chrome-top: 3.9rem;
-  --ai-chrome-bottom: 4.2rem;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -3616,6 +3615,7 @@
   min-height: 0;
   height: calc(100dvh - var(--mobile-header-offset) - var(--bottom-nav-offset) - 0.5rem);
   margin: -0.25rem 0 0;
+  overflow: hidden;
   overscroll-behavior-y: none;
 }
 
@@ -3661,10 +3661,35 @@
 .ai-chat-header .page-header-text {
   display: flex;
   align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-.ai-chat-header .page-title {
+.ai-chat-header .page-title,
+.ai-chat-title {
+  position: relative;
+  flex: 0 1 auto;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.85rem;
+  font-size: 1.125rem;
   line-height: 1;
+  --pb-bg: rgb(var(--palette-btn-alt));
+  background: var(--pb-bg);
+}
+
+[data-theme="light"] .ai-chat-title {
+  --pb-bg: rgb(var(--ui-panel-raised));
+  --pb-filter-raised: none;
+  box-shadow:
+    inset 0 1px 0 rgb(var(--palette-white) / 0.98),
+    inset 0 -1px 0 rgb(120 145 190 / 0.14),
+    0 1px 2px rgb(100 130 180 / 0.14),
+    0 8px 18px rgb(120 150 195 / 0.22),
+    0 0 0 1px rgb(150 175 215 / 0.28);
 }
 
 .ai-chat-scroll {
@@ -3675,7 +3700,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: none;
-  padding: var(--ai-chrome-top) 0.1rem var(--ai-chrome-bottom);
+  padding: var(--ai-chrome-top) 0.1rem 0.35rem;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -3781,7 +3806,7 @@
 
 .ai-bubble--bot {
   width: fit-content;
-  max-width: min(92%, 36rem);
+  max-width: 100%;
   border-bottom-left-radius: 0.3rem !important;
   color: rgb(var(--cr-text));
 }
@@ -3789,7 +3814,7 @@
 .ai-bubble--bot.glass-card {
   padding: 0.55rem 0.7rem;
   width: fit-content;
-  max-width: min(92%, 36rem);
+  max-width: 100%;
 }
 
 /* Soft app-style error — not a dump / not a loud exception tile */
@@ -3871,11 +3896,10 @@
 }
 
 .ai-composer {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
   z-index: 5;
+  flex-shrink: 0;
+  width: 100%;
   padding: 0.35rem 0.1rem 0.15rem;
   background: transparent;
 }

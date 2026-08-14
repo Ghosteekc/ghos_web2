@@ -10,6 +10,7 @@ export type PageHeaderProps = {
   trailing?: ReactNode;
   children?: ReactNode;
   className?: string;
+  titleClassName?: string;
 };
 
 function nodeName(node: unknown): string {
@@ -47,6 +48,7 @@ export function PageHeader({
   trailing,
   children,
   className,
+  titleClassName,
 }: PageHeaderProps) {
   const leading = action != null && isLeadingAction(action);
   const actionEl =
@@ -68,7 +70,7 @@ export function PageHeader({
         {leading ? actionEl : null}
         <div className="page-header-text">
           <div className="page-header-title-row">
-            <h1 className="page-title">{title}</h1>
+            <h1 className={cn("page-title", titleClassName)}>{title}</h1>
             {!leading ? actionEl : null}
           </div>
           {subtitle != null && subtitle !== false && subtitle !== "" ? (

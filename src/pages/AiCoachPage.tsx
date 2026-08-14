@@ -85,6 +85,7 @@ export function AiCoachPage() {
         <PageHeader
           className="ai-chat-header"
           title="Ghosteek AI"
+          titleClassName="pixel-bevel pixel-bevel--compact ai-chat-title"
           action={
             <Button
               variant="ghost"
