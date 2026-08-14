@@ -4,7 +4,7 @@ import { ArrowLeft, Bot, RotateCcw, Send, X } from "lucide-react";
 import { Button, EmptyState, Loader, PageHeader } from "@/components/ui";
 import { ChatBubble, ChatTypingRow } from "@/components/ai/ChatBubble";
 import { CHAT_PRESETS } from "@/components/ai/chatTypes";
-import { REPLAY_MSG } from "@/components/ai/replay";
+import { isReplayBusyStatus, REPLAY_MSG } from "@/components/ai/replay";
 import { useGhosteekChat } from "@/hooks/useGhosteekChat";
 import { cn } from "@/utils";
 import { internalPressableProps } from "@/utils/nativeCallout";
@@ -60,7 +60,7 @@ export function AiCoachPage() {
   const endRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const replayInputRef = useRef<HTMLInputElement>(null);
-  const replayBusy = replayStatus === "uploading" || replayStatus === "validating";
+  const replayBusy = isReplayBusyStatus(replayStatus);
   const busy = loading || replayBusy;
 
   useEffect(() => {
@@ -184,7 +184,11 @@ export function AiCoachPage() {
               <ChatBubble key={m.id} message={m} />
             ))}
             {loading && <ChatTypingRow />}
-            {replayBusy && <ChatTypingRow detail={REPLAY_MSG.checking} />}
+            {replayBusy && (
+              <ChatTypingRow
+                detail={replayStatus === "compressing" ? REPLAY_MSG.compressing : REPLAY_MSG.checking}
+              />
+            )}
             <div ref={endRef} className="h-px shrink-0" />
           </div>
         )}

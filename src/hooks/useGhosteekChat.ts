@@ -9,8 +9,11 @@ import {
   newMessageId,
   saveChatMessages,
 } from "@/components/ai/chatTypes";
+import { compressReplayVideo, ReplayClientError } from "@/components/ai/compressReplay";
 import {
   isAllowedReplayVideo,
+  isReplayBusyStatus,
+  REPLAY_CLIENT_COMPRESS_OVER_BYTES,
   REPLAY_MAX_SIZE_BYTES,
   REPLAY_MSG,
   replayDetectionMessage,
@@ -123,7 +126,7 @@ export function useGhosteekChat() {
   const replayBusyRef = useRef(false);
 
   useEffect(() => {
-    replayBusyRef.current = replayStatus === "uploading" || replayStatus === "validating";
+    replayBusyRef.current = isReplayBusyStatus(replayStatus);
   }, [replayStatus]);
 
   useEffect(() => {
@@ -304,12 +307,19 @@ export function useGhosteekChat() {
 
       const tick = ++abortRef.current;
       replayBusyRef.current = true;
-      setReplayStatus("uploading");
+      setReplayStatus(
+        file.size > REPLAY_CLIENT_COMPRESS_OVER_BYTES ? "compressing" : "uploading",
+      );
       setError(null);
 
       try {
+        let payload = file;
+        if (file.size > REPLAY_CLIENT_COMPRESS_OVER_BYTES) {
+          payload = await compressReplayVideo(file);
+          if (tick !== abortRef.current) return;
+        }
         setReplayStatus("validating");
-        const data = await api.analyzeReplay(file);
+        const data = await api.analyzeReplay(payload);
         if (tick !== abortRef.current) return;
 
         replayBusyRef.current = false;
@@ -341,7 +351,8 @@ export function useGhosteekChat() {
       } catch (e) {
         if (tick !== abortRef.current) return;
         replayBusyRef.current = false;
-        const code = e instanceof ApiError ? e.code : "";
+        const code =
+          e instanceof ReplayClientError ? e.code : e instanceof ApiError ? e.code : "";
         const msg = replayErrorMessage(code);
         setReplayStatus(code === "REPLAY_NOT_CR" ? "not_cr" : "error");
         setError(msg);

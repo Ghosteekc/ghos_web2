@@ -406,7 +406,7 @@ async function uploadReplayVideo(file: File): Promise<ReplayAnalyzeSuccess> {
   }
 
   const controller = new AbortController();
-  const timer = window.setTimeout(() => controller.abort(), 120_000);
+  const timer = window.setTimeout(() => controller.abort(), 300_000);
 
   let res: Response;
   try {

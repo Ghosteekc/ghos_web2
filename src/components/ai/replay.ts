@@ -1,6 +1,8 @@
 /** Replay upload UX helpers. Stage 3: CR / not CR / uncertain. */
 
-export const REPLAY_MAX_SIZE_BYTES = 80 * 1024 * 1024;
+export const REPLAY_MAX_SIZE_BYTES = 250 * 1024 * 1024;
+export const REPLAY_CLIENT_COMPRESS_OVER_BYTES = 32 * 1024 * 1024;
+export const REPLAY_MAX_DURATION_SECONDS = 8 * 60;
 
 export const REPLAY_ALLOWED_EXTENSIONS = [".mp4", ".webm", ".mov"] as const;
 export const REPLAY_ALLOWED_MIME = ["video/mp4", "video/webm", "video/quicktime"] as const;
@@ -8,6 +10,7 @@ export const REPLAY_ALLOWED_MIME = ["video/mp4", "video/webm", "video/quicktime"
 export type ReplayStatus =
   | "idle"
   | "selecting"
+  | "compressing"
   | "uploading"
   | "validating"
   | "validated"
@@ -15,6 +18,10 @@ export type ReplayStatus =
   | "not_cr"
   | "uncertain"
   | "error";
+
+export function isReplayBusyStatus(status: ReplayStatus): boolean {
+  return status === "compressing" || status === "uploading" || status === "validating";
+}
 
 export type ReplayDetectionStatus = "cr_replay" | "not_cr_replay" | "uncertain";
 
@@ -31,13 +38,14 @@ export type AiReplayCardData = {
 export const REPLAY_MSG = {
   notVideo: "Нужен именно видеофайл с записью боя Clash Royale.",
   checking: "Проверяю видео…",
+  compressing: "Сжимаю видео…",
   accepted: "Видео принято. Проверяю, похоже ли оно на реплей Clash Royale…",
   crReplay:
     "🎥 Похоже, это реплей Clash Royale.\nВидео подготовлено к следующему этапу анализа.",
   notCr: "Похоже, это не реплей Clash Royale. Пришли запись боя из игры.",
   uncertain:
     "Не смог уверенно определить Clash Royale на видео. Если это запись боя, попробуй отправить видео целиком и без сильного сжатия.",
-  tooLarge: "Видео слишком большое. Максимальный размер — 80 МБ.",
+  tooLarge: "Видео слишком большое. Максимум для загрузки — 250 МБ.",
   tooLong: "Видео слишком длинное. Для разбора реплея используй запись до 8 минут.",
   busy: "Сейчас уже проверяется другой реплей. Подожди немного.",
   invalidVideo: "Не удалось прочитать видео. Пришли запись боя из Clash Royale.",
@@ -83,6 +91,7 @@ export function replayErrorMessage(code: string): string {
     case "REPLAY_FRAME_EXTRACTION_FAILED":
     case "REPLAY_FRAME_ANALYSIS_FAILED":
     case "REPLAY_ANALYSIS_TIMEOUT":
+    case "REPLAY_COMPRESS_FAILED":
       return REPLAY_MSG.prepareFailed;
     case "REPLAY_INTERNAL_ERROR":
       return REPLAY_MSG.internal;
