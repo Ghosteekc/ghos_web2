@@ -307,17 +307,13 @@ export function useGhosteekChat() {
 
       const tick = ++abortRef.current;
       replayBusyRef.current = true;
-      setReplayStatus(
-        file.size > REPLAY_CLIENT_COMPRESS_OVER_BYTES ? "compressing" : "uploading",
-      );
+      setReplayStatus(file.size > REPLAY_CLIENT_COMPRESS_OVER_BYTES ? "compressing" : "uploading");
       setError(null);
 
       try {
-        let payload = file;
-        if (file.size > REPLAY_CLIENT_COMPRESS_OVER_BYTES) {
-          payload = await compressReplayVideo(file);
-          if (tick !== abortRef.current) return;
-        }
+        // Client only peeks duration; FFmpeg on the bot does the real shrink.
+        const payload = await compressReplayVideo(file);
+        if (tick !== abortRef.current) return;
         setReplayStatus("validating");
         const data = await api.analyzeReplay(payload);
         if (tick !== abortRef.current) return;

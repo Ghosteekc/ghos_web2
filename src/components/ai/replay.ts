@@ -38,7 +38,7 @@ export type AiReplayCardData = {
 export const REPLAY_MSG = {
   notVideo: "Нужен именно видеофайл с записью боя Clash Royale.",
   checking: "Проверяю видео…",
-  compressing: "Сжимаю видео…",
+  compressing: "Загружаю и сжимаю видео…",
   accepted: "Видео принято. Проверяю, похоже ли оно на реплей Clash Royale…",
   crReplay:
     "🎥 Похоже, это реплей Clash Royale.\nВидео подготовлено к следующему этапу анализа.",
