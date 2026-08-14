@@ -3607,6 +3607,7 @@
 
 /* ===== Ghosteek AI chat (layout-only; surfaces via glass-card / pixel-btn) ===== */
 .ai-chat {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -3626,71 +3627,120 @@
 }
 
 .ai-chat-header {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 5;
   flex-shrink: 0;
   padding-bottom: 0.35rem;
-  isolation: isolate;
   background: transparent;
 }
 
-.ai-chat-header::before {
+.ai-chat::before,
+.ai-composer::before {
   content: "";
-  position: absolute;
-  z-index: -1;
+  position: fixed;
+  left: 0;
+  right: 0;
   pointer-events: none;
-  /* Bleed past .app-main padding so blur reaches the screen edge */
-  left: calc(-1 * max(1rem, var(--app-content-left)));
-  right: calc(-1 * max(1rem, var(--app-content-right)));
-  top: calc(-1 * var(--mobile-header-offset));
-  bottom: -1.25rem;
+}
+
+.ai-chat::before {
+  top: 0;
+  z-index: 3;
+  height: calc(var(--mobile-header-offset) + 6.75rem);
   background: linear-gradient(
     to bottom,
-    rgb(8 14 28 / 0.4) 0%,
-    rgb(8 14 28 / 0.18) 72%,
+    rgb(8 14 28 / 0.38) 0%,
+    rgb(8 14 28 / 0.16) 52%,
     rgb(8 14 28 / 0) 100%
   );
-  backdrop-filter: blur(20px) saturate(1.08);
-  -webkit-backdrop-filter: blur(20px) saturate(1.08);
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
   mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 calc(100% - 1.25rem),
+    #000 32%,
+    rgb(0 0 0 / 0.82) 52%,
+    rgb(0 0 0 / 0.42) 74%,
+    rgb(0 0 0 / 0.12) 90%,
     transparent 100%
   );
   -webkit-mask-image: linear-gradient(
     to bottom,
     #000 0%,
-    #000 calc(100% - 1.25rem),
+    #000 32%,
+    rgb(0 0 0 / 0.82) 52%,
+    rgb(0 0 0 / 0.42) 74%,
+    rgb(0 0 0 / 0.12) 90%,
     transparent 100%
   );
 }
 
-[data-theme="light"] .ai-chat-header::before {
+.ai-composer::before {
+  bottom: 0;
+  z-index: 0;
+  height: calc(var(--bottom-nav-offset) + 3.5rem);
+  background: linear-gradient(
+    to top,
+    rgb(8 14 28 / 0.34) 0%,
+    rgb(8 14 28 / 0.14) 48%,
+    rgb(8 14 28 / 0) 100%
+  );
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    #000 42%,
+    rgb(0 0 0 / 0.78) 62%,
+    rgb(0 0 0 / 0.38) 80%,
+    rgb(0 0 0 / 0.1) 92%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    #000 42%,
+    rgb(0 0 0 / 0.78) 62%,
+    rgb(0 0 0 / 0.38) 80%,
+    rgb(0 0 0 / 0.1) 92%,
+    transparent 100%
+  );
+}
+
+[data-theme="light"] .ai-chat::before {
   background: linear-gradient(
     to bottom,
-    rgb(232 236 243 / 0.42) 0%,
-    rgb(232 236 243 / 0.18) 72%,
+    rgb(232 236 243 / 0.4) 0%,
+    rgb(232 236 243 / 0.16) 52%,
+    rgb(232 236 243 / 0) 100%
+  );
+}
+
+[data-theme="light"] .ai-composer::before {
+  background: linear-gradient(
+    to top,
+    rgb(232 236 243 / 0.38) 0%,
+    rgb(232 236 243 / 0.14) 48%,
     rgb(232 236 243 / 0) 100%
   );
 }
 
 @media (min-width: 1024px) {
-  .ai-chat-header::before {
-    top: -2rem;
-    left: -2rem;
-    right: -2rem;
+  .ai-chat::before,
+  .ai-composer::before {
+    left: 16rem;
   }
 }
 
 .ai-chat-scroll {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: none;
-  padding: 0.15rem 0.1rem 0.85rem;
+  padding: 0.45rem 0.1rem 0.35rem;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -3881,11 +3931,15 @@
 }
 
 .ai-composer {
+  position: relative;
+  z-index: 5;
   flex-shrink: 0;
-  padding-top: 0.4rem;
+  padding-top: 0.55rem;
 }
 
 .ai-composer-box {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: flex-end;
   gap: 0.4rem;
@@ -4193,6 +4247,8 @@ button.ai-md-link {
 }
 
 .ai-context-chip {
+  position: relative;
+  z-index: 5;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
