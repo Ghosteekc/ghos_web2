@@ -712,6 +712,14 @@ export const api = {
       opponent_cards?: string[];
       battle_index?: number;
       battle_time?: string;
+      replay?: {
+        status: string;
+        filename?: string;
+        duration_seconds?: number;
+        width?: number;
+        height?: number;
+        confidence?: number | null;
+      };
     },
   ) =>
     request<{

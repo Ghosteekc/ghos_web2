@@ -30,6 +30,11 @@ import {
   stashAiPageContext,
   toAskContext,
 } from "@/utils/aiPageContext";
+import {
+  clearAcceptedReplay,
+  peekAcceptedReplay,
+  stashAcceptedReplay,
+} from "@/utils/aiReplayContext";
 
 type BackendTurn = {
   role: string;
@@ -193,10 +198,22 @@ export function useGhosteekChat() {
       setLoading(true);
       setError(null);
 
-      const askContext = toAskContext(peekAiPageContext() ?? pageContext);
+      const askContext = toAskContext(peekAiPageContext() ?? pageContext) ?? {};
+      const replay = peekAcceptedReplay();
+      if (replay) {
+        askContext.replay = {
+          status: replay.status,
+          filename: replay.filename,
+          duration_seconds: replay.duration_seconds,
+          width: replay.width,
+          height: replay.height,
+          confidence: replay.confidence ?? null,
+        };
+      }
+      const askPayload = Object.keys(askContext).length ? askContext : undefined;
 
       try {
-        const data = await api.askGhosteekAi(trimmed, askContext);
+        const data = await api.askGhosteekAi(trimmed, askPayload);
         if (tick !== abortRef.current) return;
 
         const deckCard = parseDeckCardFromApi(data.deck_card);
@@ -321,6 +338,20 @@ export function useGhosteekChat() {
         replayBusyRef.current = false;
         const detectionStatus = (data.replay_detection?.status || data.status) as ReplayDetectionStatus;
         setReplayStatus(replayStatusFromApi(data.status));
+        if (
+          data.status === "cr_replay" ||
+          data.status === "uncertain" ||
+          data.status === "not_cr_replay"
+        ) {
+          stashAcceptedReplay({
+            status: data.status,
+            filename: data.filename,
+            duration_seconds: data.duration_seconds,
+            width: data.width,
+            height: data.height,
+            confidence: data.replay_detection?.confidence ?? null,
+          });
+        }
         setMessages((prev) => [
           ...prev,
           {
@@ -397,6 +428,7 @@ export function useGhosteekChat() {
     } finally {
       clearChatMessages();
       clearAiPageContext();
+      clearAcceptedReplay();
       setPageContext(null);
       setMessages([]);
       setDraft("");
