@@ -81,49 +81,49 @@ export function AiCoachPage() {
 
   return (
     <div className="ai-chat">
-      <PageHeader
-        className="ai-chat-header"
-        title="Ghosteek AI"
-        subtitle={<p className="page-subtitle">Тренер CR · коротко и по механике</p>}
-        action={
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className="!p-2 shrink-0"
-            aria-label="Назад"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-        }
-        trailing={
-          <Button
-            variant="secondary"
-            onClick={() => void startNewConversation()}
-            disabled={loading}
-            className="!px-3 !py-2 !min-h-[2.5rem] text-sm gap-1.5 shrink-0"
-          >
-            <RotateCcw className="w-4 h-4" aria-hidden />
-            Новый
-          </Button>
-        }
-      />
-
-      {pageContext ? (
-        <div className="ai-context-chip" role="status">
-          <span className="ai-context-chip-text truncate">{pageContext.label}</span>
-          <button
-            type="button"
-            className="ai-context-chip-dismiss"
-            onClick={dismissPageContext}
-            aria-label="Убрать контекст страницы"
-            {...internalPressableProps}
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      ) : null}
-
       <div className="ai-chat-scroll">
+        <PageHeader
+          className="ai-chat-header"
+          title="Ghosteek AI"
+          subtitle={<p className="page-subtitle">Тренер CR · коротко и по механике</p>}
+          action={
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/")}
+              className="!p-2 shrink-0"
+              aria-label="Назад"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          }
+          trailing={
+            <Button
+              variant="secondary"
+              onClick={() => void startNewConversation()}
+              disabled={loading}
+              className="!px-3 !py-2 !min-h-[2.5rem] text-sm gap-1.5 shrink-0"
+            >
+              <RotateCcw className="w-4 h-4" aria-hidden />
+              Новый
+            </Button>
+          }
+        />
+
+        {pageContext ? (
+          <div className="ai-context-chip" role="status">
+            <span className="ai-context-chip-text truncate">{pageContext.label}</span>
+            <button
+              type="button"
+              className="ai-context-chip-dismiss"
+              onClick={dismissPageContext}
+              aria-label="Убрать контекст страницы"
+              {...internalPressableProps}
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        ) : null}
+
         {booting ? (
           <div className="flex justify-center py-10">
             <Loader />

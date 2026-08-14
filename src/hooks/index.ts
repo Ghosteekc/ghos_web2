@@ -4,6 +4,7 @@ import type { TelegramWebApp } from "@/vite-env";
 import { haptic, type HapticImpact } from "@/utils/hapticManager";
 export { PageRefreshProvider, usePageRefresh } from "./PageRefreshProvider";
 export { CardCatalogProvider, useCardCatalog } from "./CardCatalogProvider";
+export type { CardMention } from "./CardCatalogProvider";
 export { FavoriteDecksProvider, useFavoriteDecks } from "./FavoriteDecksProvider";
 export { usePullToRefresh } from "./usePullToRefresh";
 export { useGlobalButtonHaptics } from "./useGlobalButtonHaptics";

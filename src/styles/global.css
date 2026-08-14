@@ -3626,11 +3626,13 @@
 }
 
 .ai-chat-header {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 5;
   flex-shrink: 0;
   padding-bottom: 0.35rem;
   isolation: isolate;
+  background: transparent;
 }
 
 .ai-chat-header::before {
@@ -3642,24 +3644,34 @@
   left: calc(-1 * max(1rem, var(--app-content-left)));
   right: calc(-1 * max(1rem, var(--app-content-right)));
   top: calc(-1 * var(--mobile-header-offset));
-  bottom: -0.45rem;
+  bottom: -1.25rem;
   background: linear-gradient(
     to bottom,
-    rgb(8 14 28 / 0.55) 0%,
-    rgb(8 14 28 / 0.28) 55%,
+    rgb(8 14 28 / 0.4) 0%,
+    rgb(8 14 28 / 0.18) 72%,
     rgb(8 14 28 / 0) 100%
   );
-  backdrop-filter: blur(14px) saturate(1.05);
-  -webkit-backdrop-filter: blur(14px) saturate(1.05);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%);
+  backdrop-filter: blur(20px) saturate(1.08);
+  -webkit-backdrop-filter: blur(20px) saturate(1.08);
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(100% - 1.25rem),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 calc(100% - 1.25rem),
+    transparent 100%
+  );
 }
 
 [data-theme="light"] .ai-chat-header::before {
   background: linear-gradient(
     to bottom,
-    rgb(232 236 243 / 0.72) 0%,
-    rgb(232 236 243 / 0.35) 55%,
+    rgb(232 236 243 / 0.42) 0%,
+    rgb(232 236 243 / 0.18) 72%,
     rgb(232 236 243 / 0) 100%
   );
 }
@@ -3678,7 +3690,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: none;
-  padding: 0.65rem 0.1rem 0.85rem;
+  padding: 0.15rem 0.1rem 0.85rem;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -4019,12 +4031,11 @@ button.ai-md-link {
 
 .ai-card-mention {
   display: inline;
-  padding: 0.04rem 0.26rem;
-  border-radius: 0.28rem;
-  font-weight: 700;
-  color: rgb(var(--cr-text));
-  background: rgb(var(--cr-gold) / 0.16);
-  border: 1px solid rgb(var(--cr-gold) / 0.28);
+  padding: 0;
+  font-weight: 800;
+  color: rgb(var(--cr-gold-text));
+  background: none;
+  border: none;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
 }
