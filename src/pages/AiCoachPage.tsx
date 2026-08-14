@@ -85,7 +85,6 @@ export function AiCoachPage() {
         <PageHeader
           className="ai-chat-header"
           title="Ghosteek AI"
-          subtitle={<p className="page-subtitle">Тренер CR · коротко и по механике</p>}
           action={
             <Button
               variant="ghost"

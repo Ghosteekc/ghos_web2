@@ -3607,7 +3607,7 @@
 
 /* ===== Ghosteek AI chat (layout-only; surfaces via glass-card / pixel-btn) ===== */
 .ai-chat {
-  --ai-chrome-top: 5.65rem;
+  --ai-chrome-top: 3.9rem;
   --ai-chrome-bottom: 4.2rem;
   position: relative;
   display: flex;
@@ -3620,7 +3620,7 @@
 }
 
 .ai-chat:has(.ai-context-chip) {
-  --ai-chrome-top: 7.35rem;
+  --ai-chrome-top: 5.6rem;
 }
 
 @media (min-width: 1024px) {
@@ -3649,97 +3649,22 @@
 .ai-chat-header {
   position: relative;
   z-index: 5;
-  padding-bottom: 0.35rem;
+  padding-bottom: 0;
   background: transparent;
 }
 
-.ai-chat::before,
-.ai-chat::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  right: auto;
-  width: 100vw;
-  transform: translateX(-50%);
-  border-radius: 0;
-  z-index: 4;
-  pointer-events: none;
+.ai-chat-header .page-header-bar {
+  min-height: 2.5rem;
+  align-items: center;
 }
 
-.ai-chat::before {
-  top: calc(-1 * var(--mobile-header-offset));
-  height: calc(var(--mobile-header-offset) + var(--ai-chrome-top) + 1.35rem);
-  background: linear-gradient(
-    to bottom,
-    rgb(8 14 28 / 0.5) 0%,
-    rgb(8 14 28 / 0.28) 58%,
-    rgb(8 14 28 / 0) 100%
-  );
-  backdrop-filter: blur(18px) saturate(1.08);
-  -webkit-backdrop-filter: blur(18px) saturate(1.08);
-  mask-image: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 55%,
-    rgb(0 0 0 / 0.7) 72%,
-    rgb(0 0 0 / 0.28) 88%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 55%,
-    rgb(0 0 0 / 0.7) 72%,
-    rgb(0 0 0 / 0.28) 88%,
-    transparent 100%
-  );
+.ai-chat-header .page-header-text {
+  display: flex;
+  align-items: center;
 }
 
-.ai-chat::after {
-  bottom: 0;
-  height: calc(var(--ai-chrome-bottom) + 0.85rem);
-  background: linear-gradient(
-    to top,
-    rgb(8 14 28 / 0.42) 0%,
-    rgb(8 14 28 / 0.16) 58%,
-    rgb(8 14 28 / 0) 100%
-  );
-  backdrop-filter: blur(16px) saturate(1.06);
-  -webkit-backdrop-filter: blur(16px) saturate(1.06);
-  mask-image: linear-gradient(
-    to top,
-    #000 0%,
-    #000 42%,
-    rgb(0 0 0 / 0.65) 68%,
-    rgb(0 0 0 / 0.2) 88%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to top,
-    #000 0%,
-    #000 42%,
-    rgb(0 0 0 / 0.65) 68%,
-    rgb(0 0 0 / 0.2) 88%,
-    transparent 100%
-  );
-}
-
-[data-theme="light"] .ai-chat::before {
-  background: linear-gradient(
-    to bottom,
-    rgb(232 236 243 / 0.55) 0%,
-    rgb(232 236 243 / 0.22) 58%,
-    rgb(232 236 243 / 0) 100%
-  );
-}
-
-[data-theme="light"] .ai-chat::after {
-  background: linear-gradient(
-    to top,
-    rgb(232 236 243 / 0.42) 0%,
-    rgb(232 236 243 / 0.14) 58%,
-    rgb(232 236 243 / 0) 100%
-  );
+.ai-chat-header .page-title {
+  line-height: 1;
 }
 
 .ai-chat-scroll {
@@ -3843,10 +3768,15 @@
   max-width: min(78%, 26rem);
   border-radius: 0.8rem;
   border-bottom-right-radius: 0.28rem;
-  border: 1px solid rgb(var(--cr-border) / var(--cr-border-alpha));
-  background: rgb(var(--ui-panel-sunken) / 0.78);
-  box-shadow: inset 0 0 0 1px rgb(var(--cr-gold) / 0.1);
+  border: 1px solid rgb(var(--palette-gold-bright) / 0.72);
+  background: rgb(var(--ui-panel));
+  box-shadow: none;
   color: rgb(var(--cr-gold-text));
+}
+
+[data-theme="light"] .ai-bubble--user {
+  background: #fff;
+  border-color: rgb(var(--palette-sky-300) / 0.7);
 }
 
 .ai-bubble--bot {
