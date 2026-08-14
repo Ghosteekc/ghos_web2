@@ -3800,10 +3800,6 @@
   justify-content: flex-start;
 }
 
-.ai-chip-row--composer {
-  margin: 0 0 0.4rem;
-}
-
 .ai-chip-row .pixel-btn--chip-sm {
   max-width: 100%;
   white-space: normal;

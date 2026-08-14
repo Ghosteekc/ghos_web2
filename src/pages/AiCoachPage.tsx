@@ -161,14 +161,6 @@ export function AiCoachPage() {
       </div>
 
       <form onSubmit={onSubmit} className="ai-composer">
-        {hasMessages && !pageContext ? (
-          <PresetChips
-            presets={CHAT_PRESETS.slice(0, 4)}
-            disabled={loading}
-            onPick={(msg) => void send(msg)}
-            className="ai-chip-row--composer"
-          />
-        ) : null}
         <div className="ai-composer-box glass-card !p-0">
           <textarea
             ref={textareaRef}
