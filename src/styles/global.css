@@ -4058,48 +4058,69 @@ button.ai-md-link {
 .ai-typing {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  min-height: 1rem;
+  justify-content: center;
+  gap: 0.28rem;
+  min-height: 1.15rem;
+  padding: 0.1rem 0.05rem;
 }
 
 .ai-typing-dot {
-  width: 0.4rem;
-  height: 0.4rem;
+  display: block;
+  flex-shrink: 0;
+  width: 0.42rem;
+  height: 0.42rem;
   border-radius: 999px;
   background: rgb(var(--cr-gold));
-  opacity: 0.35;
-  animation: ai-typing-bounce 1.05s var(--ui-ease) infinite;
+  opacity: 0.28;
+  transform: scale(0.7);
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: ai-typing-pulse 1.05s ease-in-out infinite;
 }
 
 .ai-typing-dot:nth-child(2) {
-  animation-delay: 0.15s;
+  animation-delay: 0.18s;
 }
 
 .ai-typing-dot:nth-child(3) {
-  animation-delay: 0.3s;
+  animation-delay: 0.36s;
 }
 
-@keyframes ai-typing-bounce {
+@keyframes ai-typing-pulse {
   0%,
-  70%,
+  80%,
   100% {
-    transform: translateY(0);
-    opacity: 0.35;
+    transform: scale(0.7);
+    opacity: 0.28;
   }
-  35% {
-    transform: translateY(-3px);
+  40% {
+    transform: scale(1);
     opacity: 1;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ai-typing-dot,
   .ai-msg-enter {
     animation: none !important;
-  }
-  .ai-msg-enter {
     opacity: 1;
     transform: none;
+  }
+
+  /* Status indicator: keep a fade so Telegram/iOS Reduce Motion doesn't freeze the dots. */
+  .ai-typing-dot {
+    animation-name: ai-typing-fade;
+    animation-duration: 1.35s;
+    transform: none;
+  }
+}
+
+@keyframes ai-typing-fade {
+  0%,
+  100% {
+    opacity: 0.28;
+  }
+  50% {
+    opacity: 1;
   }
 }
 
