@@ -3607,7 +3607,7 @@
 
 /* ===== Ghosteek AI chat (layout-only; surfaces via glass-card / pixel-btn) ===== */
 .ai-chat {
-  --ai-chrome-top: 3.9rem;
+  --ai-chrome-top: 3.15rem;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -3620,7 +3620,7 @@
 }
 
 .ai-chat:has(.ai-context-chip) {
-  --ai-chrome-top: 5.6rem;
+  --ai-chrome-top: 5.1rem;
 }
 
 @media (min-width: 1024px) {
@@ -3698,7 +3698,15 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
+  /* Clip under the header bottom edge (not above it). */
+  margin-top: var(--ai-chrome-top);
+  /* Mid of the text field (legacy overlap). */
   margin-bottom: -1.55rem;
+}
+
+/* Replay action sits above the input — extend under it so clip stays at mid-input. */
+.ai-chat:has(.ai-composer-actions) .ai-chat-body {
+  margin-bottom: -4.25rem;
 }
 
 .ai-chat-scroll {
@@ -3706,8 +3714,13 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: none;
-  padding: var(--ai-chrome-top) 0.1rem 1.7rem;
+  /* Top clip is on .ai-chat-body; keep only a small gap under the header. */
+  padding: 0.35rem 0.1rem 1.7rem;
   -webkit-overflow-scrolling: touch;
+}
+
+.ai-chat:has(.ai-composer-actions) .ai-chat-scroll {
+  padding-bottom: 4.4rem;
 }
 
 .ai-thread {
