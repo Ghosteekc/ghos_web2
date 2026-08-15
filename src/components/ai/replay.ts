@@ -154,13 +154,20 @@ export function formatReplayMomentTime(seconds: number): string {
   return `${t.toFixed(1)}s`;
 }
 
+/** @deprecated Prefer formatReplayConfidenceLabel for UI. Kept for callers expecting %. */
 export function formatReplayConfidencePercent(confidence: number | null | undefined): string | null {
+  return formatReplayConfidenceLabel(confidence);
+}
+
+/** User-facing confidence: высокая / средняя / низкая (no raw %). */
+export function formatReplayConfidenceLabel(confidence: number | null | undefined): string | null {
   if (typeof confidence !== "number" || !Number.isFinite(confidence) || confidence <= 0) {
     return null;
   }
-  const pct = confidence <= 1 ? Math.round(confidence * 100) : Math.round(confidence);
-  if (pct <= 0) return null;
-  return `${Math.min(100, pct)}%`;
+  const value = confidence > 1 ? confidence / 100 : confidence;
+  if (value >= 0.75) return "высокая";
+  if (value >= 0.45) return "средняя";
+  return "низкая";
 }
 
 export function formatReplayFramesLabel(frames: number | null | undefined): string | null {
@@ -175,52 +182,89 @@ export function formatReplayFramesLabel(frames: number | null | undefined): stri
 }
 
 const INSUFFICIENT_COACH_SUMMARY =
-  "Похоже на реплей Clash Royale, но по этой записи пока мало уверенных деталей для полного разбора. Пришли видео целиком и покрупнее — так проще поймать карты и ключевые моменты.";
+  "Реплей распознался, но по этому видео я пока не могу надёжно определить сыгранные карты и конкретные моменты. Поэтому не буду придумывать разбор из воздуха.\n\nПопробуй отправить запись в более высоком качестве или с полностью видимой ареной и панелью карт.";
+
+const WITH_MOMENTS_LEAD =
+  "Я нашёл несколько моментов, которые можно разобрать уверенно. Вот что бросается в глаза.";
 
 const TECHNICAL_COACH_RE =
-  /grounded\s+replay|confirmed\s+event|card\s+interval|unknown\s+gaps|confidence\s*[≥>=]|card_play|card-level|database[- ]counter|timeline\s+remain|\bplays\b|heuristic|observation_type|frame_index/i;
+  /grounded|confirmed\s+event|event\(s\)|card\s+interval|unknown\s+gaps|confidence\s*[≥>=]|source\s*=\s*heuristic|event_type|card_play|card-level|database[- ]counter|timeline\s+remain|\bplays\b|heuristic|observation_type|frame_index|ReplayEvent|ReplayFacts|TimelineObservation|дождитесь\s+подтвержд/i;
 
 function isTechnicalCoachLine(text: string): boolean {
   return TECHNICAL_COACH_RE.test(text);
 }
 
-function humanizeCoachSummary(raw: string): string {
-  const text = raw.trim();
-  if (!text) return INSUFFICIENT_COACH_SUMMARY;
-  if (isTechnicalCoachLine(text)) return INSUFFICIENT_COACH_SUMMARY;
-  // Strip leftover English technical sentences glued to Russian coach voice.
-  const cleaned = text
-    .replace(/Grounded replay analysis:[^.]*\.\s*/gi, "")
-    .replace(/Unknown gaps:[^.]*\.\s*/gi, "")
-    .replace(/Дождитесь подтверждённых карт[^.]*(?:\.|$)/gi, "")
+function stripTechnicalFragments(text: string): string {
+  return text
+    .replace(/Grounded\s+replay\s+analysis\s*:[^.!?\n]*(?:[.!?]\s*|\n+|$)/gi, "")
+    .replace(/Unknown\s+gaps\s*:[^.!?\n]*(?:[.!?]\s*|\n+|$)/gi, "")
+    .replace(/\b\d+\s+confirmed\s+event\(s\)[^.!?\n]*/gi, "")
+    .replace(/\b\d+\s+confirmed\s+card\s+interval\(s\)[^.!?\n]*/gi, "")
+    .replace(/Дождитесь\s+подтверждённых\s+карт[^.!?\n]*(?:[.!?]\s*|\n+|$)/gi, "")
     .replace(/\(confidence\s*[≥>=]\s*0\.90\)/gi, "")
+    .replace(/source\s*=\s*heuristic/gi, "")
+    .replace(/\bevent_type\s*[:=]\s*\w+/gi, "")
+    .replace(/\s{2,}/g, " ")
     .trim();
-  if (!cleaned || isTechnicalCoachLine(cleaned)) return INSUFFICIENT_COACH_SUMMARY;
+}
+
+function humanizeCoachSummary(raw: string, options?: { hasMoments?: boolean }): string {
+  const hasMoments = Boolean(options?.hasMoments);
+  const text = (raw || "").trim();
+  if (!text || isTechnicalCoachLine(text)) {
+    return hasMoments ? WITH_MOMENTS_LEAD : INSUFFICIENT_COACH_SUMMARY;
+  }
+  const cleaned = stripTechnicalFragments(text);
+  if (!cleaned || isTechnicalCoachLine(cleaned)) {
+    return hasMoments ? WITH_MOMENTS_LEAD : INSUFFICIENT_COACH_SUMMARY;
+  }
   return cleaned;
 }
 
-function humanizeImprovementLines(lines: string[]): string[] {
+function humanizeImprovementLines(
+  lines: string[],
+  options?: { hasEvidence?: boolean },
+): string[] {
+  const hasEvidence = Boolean(options?.hasEvidence);
   const out = lines
     .map((x) => x.trim())
     .filter(Boolean)
+    .map(stripTechnicalFragments)
+    .filter(Boolean)
     .filter((x) => !isTechnicalCoachLine(x))
-    .filter((x) => !/confidence\s*[≥>=]|card-level|confirmed events\/cards|unknown/i.test(x));
+    .filter((x) => !/дождитесь\s+подтвержд/i.test(x))
+    .filter((x) => !/confidence\s*[≥>=]|card-level|confirmed events\/cards|\bunknown\b/i.test(x));
   if (out.length > 0) return out.slice(0, 6);
+  if (hasEvidence) {
+    return ["Опирайся на то, что уже видно уверенно — остальное пока не угадываю."];
+  }
   return [
-    "Пришли запись боя целиком и покрупнее — так проще подтвердить карты и ключевые моменты.",
+    "Попробуй отправить запись в более высоком качестве или с полностью видимой ареной и панелью карт.",
   ];
 }
 
-type ApiEvent = NonNullable<NonNullable<ReplayAnalyzeSuccess["replay_facts"]>["events"]>[number];
+type ApiEvent = {
+  timestamp_seconds: number;
+  event_type: string;
+  player?: string;
+  card_id?: string | null;
+  confidence?: number;
+  source?: string;
+};
 
 const EVENT_TITLE_RU: Record<string, string> = {
   battle_started: "Начало боя",
+  battle_start: "Начало боя",
   battle_ended: "Конец боя",
+  battle_end: "Конец боя",
   overtime_started: "Овертайм",
+  overtime_visible: "Овертайм",
   result_visible: "Экран результата",
   card_visible: "Карта на экране",
+  card_identity_visible: "Карта на экране",
   card_play_candidate: "Возможный розыгрыш",
   card_play: "Розыгрыш",
+  card_play_confirmed: "Розыгрыш",
 };
 
 function isRecord(raw: unknown): raw is Record<string, unknown> {
@@ -250,7 +294,13 @@ function momentFromEvent(
   if (!type || type === "unknown") return null;
 
   const cardName = cardNameById(ev.card_id, cards);
-  if (type === "card_visible" || type === "card_play_candidate" || type === "card_play") {
+  if (
+    type === "card_visible" ||
+    type === "card_identity_visible" ||
+    type === "card_play_candidate" ||
+    type === "card_play" ||
+    type === "card_play_confirmed"
+  ) {
     if (!cardName) return null;
     return {
       timestampSeconds: Number(ev.timestamp_seconds) || 0,
@@ -258,6 +308,15 @@ function momentFromEvent(
       cardName,
       kind: type === "card_play_candidate" ? "candidate" : "confirmed",
     };
+  }
+  // HUD-only visibility signals stay in API facts — not shown as timeline jargon.
+  if (
+    type === "card_bar_visible" ||
+    type === "battle_ui_visible" ||
+    type === "arena_visible" ||
+    type === "elixir_hud_visible"
+  ) {
+    return null;
   }
 
   const title = EVENT_TITLE_RU[type];
@@ -277,14 +336,6 @@ export function buildReplayAnalysis(
   if (!facts) return null;
 
   const tactical = facts.tactical_analysis ?? null;
-  const coachSummary = humanizeCoachSummary(facts.coach_reply || tactical?.summary || "");
-  const improvements = humanizeImprovementLines([
-    ...parseStringList(tactical?.recommendations, 6),
-    ...parseStringList(tactical?.possible_mistakes, 4),
-  ]);
-  const positives = parseStringList(tactical?.positive_actions, 6).filter(
-    (x) => !isTechnicalCoachLine(x),
-  );
   const confirmedCards = Array.isArray(facts.confirmed_cards) ? facts.confirmed_cards : [];
   const confirmedCardNames = confirmedCards
     .map((c) => (typeof c.card_name === "string" ? c.card_name.trim() : ""))
@@ -297,6 +348,9 @@ export function buildReplayAnalysis(
       ? facts.battle_timeline.confirmed_events
       : [];
   const allEvents = Array.isArray(facts.events) ? facts.events : [];
+  const candidateEvents = Array.isArray(facts.candidate_events)
+    ? facts.candidate_events
+    : allEvents.filter((ev) => ev.event_type === "card_play_candidate");
 
   const moments: ReplayTimelineMoment[] = [];
   const seen = new Set<string>();
@@ -312,12 +366,25 @@ export function buildReplayAnalysis(
   for (const ev of confirmedRaw) {
     push(momentFromEvent(ev, "confirmed", confirmedCards));
   }
-  for (const ev of allEvents) {
+  for (const ev of candidateEvents) {
     if (ev.event_type !== "card_play_candidate") continue;
     push(momentFromEvent(ev, "candidate", confirmedCards));
   }
 
   moments.sort((a, b) => a.timestampSeconds - b.timestampSeconds || a.kind.localeCompare(b.kind));
+
+  const hasEvidence = moments.length > 0 || confirmedCardNames.length > 0;
+  const coachSummary = humanizeCoachSummary(facts.coach_reply || tactical?.summary || "", {
+    hasMoments: hasEvidence,
+  });
+  const improvements = humanizeImprovementLines(
+    [...parseStringList(tactical?.recommendations, 6), ...parseStringList(tactical?.possible_mistakes, 4)],
+    { hasEvidence },
+  );
+  const positives = parseStringList(tactical?.positive_actions, 6)
+    .map(stripTechnicalFragments)
+    .filter(Boolean)
+    .filter((x) => !isTechnicalCoachLine(x));
 
   if (!coachSummary && improvements.length === 0 && moments.length === 0 && positives.length === 0) {
     return null;
@@ -325,12 +392,9 @@ export function buildReplayAnalysis(
 
   return {
     coachSummary:
-      coachSummary ||
-      (moments.length > 0
-        ? "Собрал ключевые моменты по видео. Ниже — что видно уверенно."
-        : INSUFFICIENT_COACH_SUMMARY),
-    improvements,
-    positives,
+      coachSummary || (hasEvidence ? WITH_MOMENTS_LEAD : INSUFFICIENT_COACH_SUMMARY),
+    improvements: hasEvidence ? improvements : improvements.slice(0, 1),
+    positives: hasEvidence ? positives : [],
     moments: moments.slice(0, 14),
     confirmedCardNames,
   };
@@ -360,12 +424,17 @@ function parseAnalysis(raw: unknown): ReplayAnalysisView | null {
   if (!coachSummary && improvements.length === 0 && moments.length === 0 && positives.length === 0) {
     return null;
   }
+  const hasEvidence = moments.length > 0 || confirmedCardNames.length > 0;
   return {
     coachSummary: humanizeCoachSummary(
-      coachSummary || "Собрал ключевые моменты по видео. Ниже — что видно уверенно.",
+      coachSummary || (hasEvidence ? WITH_MOMENTS_LEAD : INSUFFICIENT_COACH_SUMMARY),
+      { hasMoments: hasEvidence },
     ),
-    improvements: humanizeImprovementLines(improvements),
-    positives: positives.filter((x) => !isTechnicalCoachLine(x)),
+    improvements: humanizeImprovementLines(improvements, { hasEvidence }),
+    positives: positives
+      .map(stripTechnicalFragments)
+      .filter(Boolean)
+      .filter((x) => !isTechnicalCoachLine(x)),
     moments,
     confirmedCardNames,
   };

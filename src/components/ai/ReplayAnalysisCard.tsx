@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Clapperboard } from "lucide-react";
 import { CardTile } from "@/components/cards";
 import {
-  formatReplayConfidencePercent,
+  formatReplayConfidenceLabel,
   formatReplayDuration,
   formatReplayFramesLabel,
   formatReplayMomentTime,
@@ -21,7 +21,7 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
   const analysis = card.analysis;
   if (!analysis) return null;
 
-  const confidenceLabel = formatReplayConfidencePercent(card.confidence);
+  const confidenceLabel = formatReplayConfidenceLabel(card.confidence);
   const framesLabel = formatReplayFramesLabel(card.framesAnalyzed);
 
   const previewMoments = analysis.moments.slice(0, expanded ? analysis.moments.length : 6);
@@ -45,7 +45,7 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
             <span className="ai-deck-card-tag">{formatReplayDuration(card.durationSeconds)}</span>
             {framesLabel ? <span className="ai-deck-card-tag">{framesLabel}</span> : null}
             {confidenceLabel ? (
-              <span className="ai-deck-card-tag">Уверенность {confidenceLabel}</span>
+              <span className="ai-deck-card-tag">Уверенность анализа: {confidenceLabel}</span>
             ) : null}
           </div>
         </div>

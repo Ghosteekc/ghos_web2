@@ -445,6 +445,21 @@ export type ReplayAnalyzeSuccess = {
         timestamps: number[];
       };
     }[];
+    candidate_events?: {
+      timestamp_seconds: number;
+      event_type: string;
+      player: string;
+      card_id: string | null;
+      confidence: number;
+      source: string;
+      evidence?: {
+        frame_indices: number[];
+        observation_ids: string[];
+        timestamps: number[];
+      };
+      evidence_frame_indexes?: number[];
+      details?: Record<string, unknown>;
+    }[];
     battle_timeline?: {
       duration_seconds: number;
       events: {

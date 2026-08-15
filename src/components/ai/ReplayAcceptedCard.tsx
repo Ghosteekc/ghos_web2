@@ -1,5 +1,10 @@
 import type { AiReplayCardData } from "@/components/ai/replay";
-import { formatReplayDuration, formatReplayFramesLabel, REPLAY_MSG } from "@/components/ai/replay";
+import {
+  formatReplayConfidenceLabel,
+  formatReplayDuration,
+  formatReplayFramesLabel,
+  REPLAY_MSG,
+} from "@/components/ai/replay";
 
 type Props = {
   card: AiReplayCardData;
@@ -20,10 +25,7 @@ export function ReplayAcceptedCard({ card }: Props) {
             ? "✓ Видео принято"
             : null;
 
-  const confidenceLabel =
-    typeof card.confidence === "number" && card.confidence > 0
-      ? `${Math.round(card.confidence * 100)}%`
-      : null;
+  const confidenceLabel = formatReplayConfidenceLabel(card.confidence);
   const framesLabel = formatReplayFramesLabel(card.framesAnalyzed);
 
   return (
@@ -35,7 +37,9 @@ export function ReplayAcceptedCard({ card }: Props) {
           <div className="ai-deck-card-tags">
             <span className="ai-deck-card-tag">{formatReplayDuration(card.durationSeconds)}</span>
             {sizeLabel ? <span className="ai-deck-card-tag">{sizeLabel}</span> : null}
-            {confidenceLabel ? <span className="ai-deck-card-tag">{confidenceLabel}</span> : null}
+            {confidenceLabel ? (
+              <span className="ai-deck-card-tag">Уверенность анализа: {confidenceLabel}</span>
+            ) : null}
             {framesLabel ? <span className="ai-deck-card-tag">{framesLabel}</span> : null}
           </div>
         </div>
