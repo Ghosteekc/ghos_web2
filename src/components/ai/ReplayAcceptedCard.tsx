@@ -1,5 +1,5 @@
 import type { AiReplayCardData } from "@/components/ai/replay";
-import { formatReplayDuration, REPLAY_MSG } from "@/components/ai/replay";
+import { formatReplayDuration, formatReplayFramesLabel, REPLAY_MSG } from "@/components/ai/replay";
 
 type Props = {
   card: AiReplayCardData;
@@ -24,10 +24,7 @@ export function ReplayAcceptedCard({ card }: Props) {
     typeof card.confidence === "number" && card.confidence > 0
       ? `${Math.round(card.confidence * 100)}%`
       : null;
-  const framesLabel =
-    typeof card.framesAnalyzed === "number" && card.framesAnalyzed > 0
-      ? `${card.framesAnalyzed} кадров`
-      : null;
+  const framesLabel = formatReplayFramesLabel(card.framesAnalyzed);
 
   return (
     <div className="ai-deck-card ai-replay-card">

@@ -163,6 +163,54 @@ export function formatReplayConfidencePercent(confidence: number | null | undefi
   return `${Math.min(100, pct)}%`;
 }
 
+export function formatReplayFramesLabel(frames: number | null | undefined): string | null {
+  if (typeof frames !== "number" || !Number.isFinite(frames) || frames <= 0) return null;
+  const n = Math.round(frames);
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  let word = "кадров";
+  if (mod10 === 1 && mod100 !== 11) word = "кадр";
+  else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) word = "кадра";
+  return `${n} ${word}`;
+}
+
+const INSUFFICIENT_COACH_SUMMARY =
+  "Похоже на реплей Clash Royale, но по этой записи пока мало уверенных деталей для полного разбора. Пришли видео целиком и покрупнее — так проще поймать карты и ключевые моменты.";
+
+const TECHNICAL_COACH_RE =
+  /grounded\s+replay|confirmed\s+event|card\s+interval|unknown\s+gaps|confidence\s*[≥>=]|card_play|card-level|database[- ]counter|timeline\s+remain|\bplays\b|heuristic|observation_type|frame_index/i;
+
+function isTechnicalCoachLine(text: string): boolean {
+  return TECHNICAL_COACH_RE.test(text);
+}
+
+function humanizeCoachSummary(raw: string): string {
+  const text = raw.trim();
+  if (!text) return INSUFFICIENT_COACH_SUMMARY;
+  if (isTechnicalCoachLine(text)) return INSUFFICIENT_COACH_SUMMARY;
+  // Strip leftover English technical sentences glued to Russian coach voice.
+  const cleaned = text
+    .replace(/Grounded replay analysis:[^.]*\.\s*/gi, "")
+    .replace(/Unknown gaps:[^.]*\.\s*/gi, "")
+    .replace(/Дождитесь подтверждённых карт[^.]*(?:\.|$)/gi, "")
+    .replace(/\(confidence\s*[≥>=]\s*0\.90\)/gi, "")
+    .trim();
+  if (!cleaned || isTechnicalCoachLine(cleaned)) return INSUFFICIENT_COACH_SUMMARY;
+  return cleaned;
+}
+
+function humanizeImprovementLines(lines: string[]): string[] {
+  const out = lines
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .filter((x) => !isTechnicalCoachLine(x))
+    .filter((x) => !/confidence\s*[≥>=]|card-level|confirmed events\/cards|unknown/i.test(x));
+  if (out.length > 0) return out.slice(0, 6);
+  return [
+    "Пришли запись боя целиком и покрупнее — так проще подтвердить карты и ключевые моменты.",
+  ];
+}
+
 type ApiEvent = NonNullable<NonNullable<ReplayAnalyzeSuccess["replay_facts"]>["events"]>[number];
 
 const EVENT_TITLE_RU: Record<string, string> = {
@@ -228,12 +276,14 @@ export function buildReplayAnalysis(
   if (!facts) return null;
 
   const tactical = facts.tactical_analysis ?? null;
-  const coachSummary = (facts.coach_reply || tactical?.summary || "").trim();
-  const improvements = [
+  const coachSummary = humanizeCoachSummary(facts.coach_reply || tactical?.summary || "");
+  const improvements = humanizeImprovementLines([
     ...parseStringList(tactical?.recommendations, 6),
     ...parseStringList(tactical?.possible_mistakes, 4),
-  ].slice(0, 6);
-  const positives = parseStringList(tactical?.positive_actions, 6);
+  ]);
+  const positives = parseStringList(tactical?.positive_actions, 6).filter(
+    (x) => !isTechnicalCoachLine(x),
+  );
   const confirmedCards = Array.isArray(facts.confirmed_cards) ? facts.confirmed_cards : [];
   const confirmedCardNames = confirmedCards
     .map((c) => (typeof c.card_name === "string" ? c.card_name.trim() : ""))
@@ -277,7 +327,7 @@ export function buildReplayAnalysis(
       coachSummary ||
       (moments.length > 0
         ? "Собрал ключевые моменты по видео. Ниже — что видно уверенно."
-        : "Пока мало подтверждённых сигналов для полного разбора."),
+        : INSUFFICIENT_COACH_SUMMARY),
     improvements,
     positives,
     moments: moments.slice(0, 14),
@@ -310,10 +360,11 @@ function parseAnalysis(raw: unknown): ReplayAnalysisView | null {
     return null;
   }
   return {
-    coachSummary:
+    coachSummary: humanizeCoachSummary(
       coachSummary || "Собрал ключевые моменты по видео. Ниже — что видно уверенно.",
-    improvements,
-    positives,
+    ),
+    improvements: humanizeImprovementLines(improvements),
+    positives: positives.filter((x) => !isTechnicalCoachLine(x)),
     moments,
     confirmedCardNames,
   };

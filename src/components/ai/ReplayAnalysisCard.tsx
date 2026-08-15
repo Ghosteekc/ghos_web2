@@ -4,6 +4,7 @@ import { CardTile } from "@/components/cards";
 import {
   formatReplayConfidencePercent,
   formatReplayDuration,
+  formatReplayFramesLabel,
   formatReplayMomentTime,
   type AiReplayCardData,
 } from "@/components/ai/replay";
@@ -21,10 +22,7 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
   if (!analysis) return null;
 
   const confidenceLabel = formatReplayConfidencePercent(card.confidence);
-  const frames =
-    typeof card.framesAnalyzed === "number" && card.framesAnalyzed > 0
-      ? card.framesAnalyzed
-      : null;
+  const framesLabel = formatReplayFramesLabel(card.framesAnalyzed);
 
   const previewMoments = analysis.moments.slice(0, expanded ? analysis.moments.length : 6);
   const previewImprovements = analysis.improvements.slice(
@@ -45,9 +43,7 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
           <p className="ai-replay-filename truncate">Clash Royale replay</p>
           <div className="ai-deck-card-tags">
             <span className="ai-deck-card-tag">{formatReplayDuration(card.durationSeconds)}</span>
-            {frames != null ? (
-              <span className="ai-deck-card-tag">{frames} кадров</span>
-            ) : null}
+            {framesLabel ? <span className="ai-deck-card-tag">{framesLabel}</span> : null}
             {confidenceLabel ? (
               <span className="ai-deck-card-tag">Уверенность {confidenceLabel}</span>
             ) : null}
