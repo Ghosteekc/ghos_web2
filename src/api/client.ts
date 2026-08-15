@@ -497,9 +497,34 @@ export type ReplayAnalyzeSuccess = {
         what_we_know: string[];
         what_we_dont_know: string[];
       };
+      conclusions?: {
+        kind: string;
+        text: string;
+        confidence: number;
+        evidence: string[];
+        related_events: number[];
+      }[];
     } | null;
     coach_reply?: string | null;
     coach_source?: string | null;
+    game_state_observations?: Record<string, unknown>[];
+    elixir_observations?: {
+      kind: string;
+      timestamp: number;
+      confidence: number;
+      value: number | null;
+      source?: string;
+      evidence?: Record<string, unknown>;
+    }[];
+    cycle?: {
+      player_cycle: string[];
+      opponent_cycle: string[];
+      confidence: number;
+      limitations: string[];
+    } | null;
+    what_is_confirmed?: string[];
+    what_is_uncertain?: string[];
+    what_is_unavailable?: string[];
   } | null;
 };
 

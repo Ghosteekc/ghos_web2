@@ -220,6 +220,7 @@ const EVENT_TITLE_RU: Record<string, string> = {
   result_visible: "Экран результата",
   card_visible: "Карта на экране",
   card_play_candidate: "Возможный розыгрыш",
+  card_play: "Розыгрыш",
 };
 
 function isRecord(raw: unknown): raw is Record<string, unknown> {
@@ -249,13 +250,13 @@ function momentFromEvent(
   if (!type || type === "unknown") return null;
 
   const cardName = cardNameById(ev.card_id, cards);
-  if (type === "card_visible" || type === "card_play_candidate") {
+  if (type === "card_visible" || type === "card_play_candidate" || type === "card_play") {
     if (!cardName) return null;
     return {
       timestampSeconds: Number(ev.timestamp_seconds) || 0,
       title: cardName,
       cardName,
-      kind,
+      kind: type === "card_play_candidate" ? "candidate" : "confirmed",
     };
   }
 
