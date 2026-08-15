@@ -11,6 +11,7 @@ import {
 } from "@/components/ai/chatTypes";
 import { compressReplayVideo, ReplayClientError } from "@/components/ai/compressReplay";
 import {
+  buildReplayAnalysis,
   isAllowedReplayVideo,
   isReplayBusyStatus,
   REPLAY_CLIENT_COMPRESS_OVER_BYTES,
@@ -352,12 +353,14 @@ export function useGhosteekChat() {
             confidence: data.replay_detection?.confidence ?? null,
           });
         }
+        const analysis =
+          data.status === "cr_replay" ? buildReplayAnalysis(data.replay_facts) : null;
         setMessages((prev) => [
           ...prev,
           {
             id: newMessageId(),
             role: "assistant",
-            content: replayDetectionMessage(data.status),
+            content: replayDetectionMessage(data.status, Boolean(analysis)),
             replayCard: {
               filename: data.filename,
               durationSeconds: data.duration_seconds,
@@ -370,7 +373,14 @@ export function useGhosteekChat() {
                 detectionStatus === "uncertain"
                   ? detectionStatus
                   : null,
-              confidence: data.replay_detection?.confidence ?? null,
+              confidence:
+                data.replay_facts?.confidence ?? data.replay_detection?.confidence ?? null,
+              framesAnalyzed:
+                data.replay_facts?.frames_analyzed ??
+                data.replay_detection?.frames_analyzed ??
+                null,
+              hasLimitations: Boolean(data.replay_facts?.limitations?.length),
+              analysis,
             },
             createdAt: Date.now(),
           },

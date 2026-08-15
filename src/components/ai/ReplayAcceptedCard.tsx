@@ -1,5 +1,5 @@
 import type { AiReplayCardData } from "@/components/ai/replay";
-import { formatReplayDuration } from "@/components/ai/replay";
+import { formatReplayDuration, REPLAY_MSG } from "@/components/ai/replay";
 
 type Props = {
   card: AiReplayCardData;
@@ -20,6 +20,15 @@ export function ReplayAcceptedCard({ card }: Props) {
             ? "✓ Видео принято"
             : null;
 
+  const confidenceLabel =
+    typeof card.confidence === "number" && card.confidence > 0
+      ? `${Math.round(card.confidence * 100)}%`
+      : null;
+  const framesLabel =
+    typeof card.framesAnalyzed === "number" && card.framesAnalyzed > 0
+      ? `${card.framesAnalyzed} кадров`
+      : null;
+
   return (
     <div className="ai-deck-card ai-replay-card">
       <div className="ai-deck-card-head">
@@ -29,6 +38,8 @@ export function ReplayAcceptedCard({ card }: Props) {
           <div className="ai-deck-card-tags">
             <span className="ai-deck-card-tag">{formatReplayDuration(card.durationSeconds)}</span>
             {sizeLabel ? <span className="ai-deck-card-tag">{sizeLabel}</span> : null}
+            {confidenceLabel ? <span className="ai-deck-card-tag">{confidenceLabel}</span> : null}
+            {framesLabel ? <span className="ai-deck-card-tag">{framesLabel}</span> : null}
           </div>
         </div>
       </div>
@@ -36,6 +47,9 @@ export function ReplayAcceptedCard({ card }: Props) {
         <p className={status === "not_cr_replay" || status === "uncertain" ? "ai-replay-note" : "ai-replay-ok"}>
           {footer}
         </p>
+      ) : null}
+      {status === "cr_replay" && card.hasLimitations ? (
+        <p className="ai-replay-note">{REPLAY_MSG.factsLimited}</p>
       ) : null}
     </div>
   );

@@ -4187,6 +4187,143 @@ button.ai-md-link {
   color: rgb(var(--cr-muted));
 }
 
+.ai-replay-analysis {
+  padding-top: 0.7rem;
+}
+
+.ai-replay-analysis-enter {
+  animation: ai-msg-enter var(--ui-duration) var(--ui-ease) both;
+}
+
+.ai-replay-analysis-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.ai-replay-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex-shrink: 0;
+  border-radius: 0.65rem;
+  border: 1px solid rgb(var(--cr-border) / 0.55);
+  background: rgb(var(--cr-blue) / 0.1);
+  color: rgb(var(--cr-blue));
+}
+
+.ai-replay-section {
+  margin-top: 0.7rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgb(var(--cr-border) / 0.45);
+}
+
+.ai-replay-section-title {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgb(var(--cr-muted));
+}
+
+.ai-replay-section-body {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgb(var(--cr-text));
+}
+
+.ai-replay-list {
+  margin: 0;
+  padding-left: 1.05rem;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: rgb(var(--cr-text));
+}
+
+.ai-replay-timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.ai-replay-tl-item {
+  display: grid;
+  grid-template-columns: 3.4rem minmax(0, 1fr);
+  gap: 0.45rem;
+  align-items: baseline;
+  padding: 0.28rem 0.4rem 0.28rem 0.5rem;
+  border-radius: 0.45rem;
+  border-left: 2px solid transparent;
+  background: rgb(var(--ui-panel) / 0.35);
+}
+
+.ai-replay-tl-item--confirmed {
+  border-left-color: rgb(var(--cr-blue));
+}
+
+.ai-replay-tl-item--candidate {
+  border-left-style: dashed;
+  border-left-color: rgb(var(--cr-muted) / 0.75);
+  opacity: 0.78;
+}
+
+.ai-replay-tl-time {
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: rgb(var(--cr-blue));
+}
+
+.ai-replay-tl-item--candidate .ai-replay-tl-time {
+  color: rgb(var(--cr-muted));
+}
+
+.ai-replay-tl-title {
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: rgb(var(--cr-text));
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-replay-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem 0.35rem;
+}
+
+.ai-replay-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.ai-replay-action-btn {
+  width: 100%;
+  min-height: 2.35rem !important;
+  font-size: 0.8125rem !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-replay-analysis-enter {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .ai-typing {
   display: inline-flex;
   align-items: center;

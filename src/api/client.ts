@@ -390,6 +390,117 @@ export type ReplayAnalyzeSuccess = {
     frames_analyzed: number;
     observations: string[];
   } | null;
+  replay_facts?: {
+    source: string;
+    replay_status: string;
+    confidence: number;
+    duration_seconds: number;
+    frames_analyzed: number;
+    timeline: {
+      timestamp_seconds: number;
+      frame_index: number;
+      observation_type: string;
+      confidence: number;
+      source: string;
+    }[];
+    facts: string[];
+    limitations: string[];
+    confirmed_cards?: {
+      card_id: string;
+      card_name: string;
+      confidence: number;
+      first_seen: number;
+      last_seen: number;
+    }[];
+    ambiguous_cards?: {
+      candidates: { card_id: string; card_name: string; confidence: number }[];
+      frame_index: number;
+      timestamp_seconds: number;
+      location: string;
+      source: string;
+    }[];
+    events?: {
+      timestamp_seconds: number;
+      event_type: string;
+      player: string;
+      card_id: string | null;
+      confidence: number;
+      source: string;
+      evidence: {
+        frame_indices: number[];
+        observation_ids: string[];
+        timestamps: number[];
+      };
+    }[];
+    confirmed_events?: {
+      timestamp_seconds: number;
+      event_type: string;
+      player: string;
+      card_id: string | null;
+      confidence: number;
+      source: string;
+      evidence: {
+        frame_indices: number[];
+        observation_ids: string[];
+        timestamps: number[];
+      };
+    }[];
+    battle_timeline?: {
+      duration_seconds: number;
+      events: {
+        timestamp_seconds: number;
+        event_type: string;
+        player: string;
+        card_id: string | null;
+        confidence: number;
+        source: string;
+        evidence: {
+          frame_indices: number[];
+          observation_ids: string[];
+          timestamps: number[];
+        };
+      }[];
+      confirmed_events: {
+        timestamp_seconds: number;
+        event_type: string;
+        player: string;
+        card_id: string | null;
+        confidence: number;
+        source: string;
+        evidence: {
+          frame_indices: number[];
+          observation_ids: string[];
+          timestamps: number[];
+        };
+      }[];
+      unknown_intervals: { from: number; to: number; status: string }[];
+      confidence: number;
+      phases?: { phase: string; timestamp_seconds: number; confidence: number }[];
+      summary?: {
+        confirmed_event_count: number;
+        confirmed_card_count: number;
+        first_event: number | null;
+        last_event: number | null;
+        known_duration: number;
+        unknown_intervals_count: number;
+      };
+    } | null;
+    tactical_analysis?: {
+      summary: string;
+      positive_actions: string[];
+      possible_mistakes: string[];
+      matchup_observations: string[];
+      deck_observations: string[];
+      recommendations: string[];
+      confidence: number;
+      limitations: {
+        what_we_know: string[];
+        what_we_dont_know: string[];
+      };
+    } | null;
+    coach_reply?: string | null;
+    coach_source?: string | null;
+  } | null;
 };
 
 async function uploadReplayVideo(file: File): Promise<ReplayAnalyzeSuccess> {

@@ -181,12 +181,22 @@ export function AiCoachPage() {
         ) : (
           <div className="ai-thread">
             {messages.map((m) => (
-              <ChatBubble key={m.id} message={m} />
+              <ChatBubble
+                key={m.id}
+                message={m}
+                onAnalyzeAnotherReplay={busy ? undefined : onReplayButtonClick}
+              />
             ))}
             {loading && <ChatTypingRow />}
             {replayBusy && (
               <ChatTypingRow
-                detail={replayStatus === "compressing" ? REPLAY_MSG.compressing : REPLAY_MSG.checking}
+                detail={
+                  replayStatus === "compressing"
+                    ? REPLAY_MSG.compressing
+                    : replayStatus === "validating"
+                      ? REPLAY_MSG.analyzing
+                      : REPLAY_MSG.checking
+                }
               />
             )}
             <div ref={endRef} className="h-px shrink-0" />

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { DeckCard } from "@/components/ai/DeckCard";
 import { MessageMarkdown } from "@/components/ai/MessageMarkdown";
 import { ReplayAcceptedCard } from "@/components/ai/ReplayAcceptedCard";
+import { ReplayAnalysisCard } from "@/components/ai/ReplayAnalysisCard";
 import { TypingIndicator } from "@/components/ai/TypingIndicator";
 import { actionLabel, type ChatMessage } from "@/components/ai/chatTypes";
 import { Button } from "@/components/ui";
@@ -11,6 +12,7 @@ import { cn } from "@/utils";
 
 type Props = {
   message: ChatMessage;
+  onAnalyzeAnotherReplay?: () => void;
 };
 
 function AiIdentity({ detail }: { detail?: string }) {
@@ -25,10 +27,12 @@ function AiIdentity({ detail }: { detail?: string }) {
   );
 }
 
-export const ChatBubble = memo(function ChatBubble({ message }: Props) {
+export const ChatBubble = memo(function ChatBubble({ message, onAnalyzeAnotherReplay }: Props) {
   const navigate = useNavigate();
   const isUser = message.role === "user";
   const isError = Boolean(message.error);
+  const replayCard = message.replayCard;
+  const hasAnalysis = Boolean(replayCard?.analysis);
 
   return (
     <div
@@ -38,7 +42,7 @@ export const ChatBubble = memo(function ChatBubble({ message }: Props) {
         "ai-msg-enter",
       )}
     >
-      {!isUser ? <AiIdentity /> : null}
+      {!isUser ? <AiIdentity detail={hasAnalysis ? "· Replay analysis" : undefined} /> : null}
       <div
         className={cn(
           "ai-bubble",
@@ -55,7 +59,11 @@ export const ChatBubble = memo(function ChatBubble({ message }: Props) {
           />
         )}
         {!isUser && message.deckCard ? <DeckCard deck={message.deckCard} /> : null}
-        {!isUser && message.replayCard ? <ReplayAcceptedCard card={message.replayCard} /> : null}
+        {!isUser && replayCard?.analysis ? (
+          <ReplayAnalysisCard card={replayCard} onAnalyzeAnother={onAnalyzeAnotherReplay} />
+        ) : !isUser && replayCard ? (
+          <ReplayAcceptedCard card={replayCard} />
+        ) : null}
         {!isUser && message.actions && message.actions.length > 0 ? (
           <div className="ai-actions">
             {message.actions.map((a) => (
