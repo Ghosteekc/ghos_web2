@@ -116,6 +116,7 @@ export function replayErrorMessage(code: string): string {
     case "REPLAY_NOT_CR":
       return REPLAY_MSG.notCr;
     case "REPLAY_FRAME_EXTRACTION_FAILED":
+      return "Не удалось выделить достаточно кадров из видео. Попробуй запись повыше качеством, с видимой ареной.";
     case "REPLAY_FRAME_ANALYSIS_FAILED":
     case "REPLAY_ANALYSIS_TIMEOUT":
     case "REPLAY_COMPRESS_FAILED":
