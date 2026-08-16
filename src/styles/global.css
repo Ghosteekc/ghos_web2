@@ -631,27 +631,40 @@
     display: flex;
     justify-content: center;
     padding: 0.2rem 0.1rem 0.15rem;
+    will-change: transform, opacity;
   }
 
-  .ctor-slot-card--enter {
-    animation: ctor-card-enter 0.22s ease-out;
+  .ctor-fly-ghost {
+    position: fixed;
+    z-index: 80;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    pointer-events: none;
+    opacity: 0.92;
+    transform: translate(0, 0) scale(1);
+    transform-origin: center center;
+    transition:
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.28s ease-out;
+    will-change: transform, opacity;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.28));
   }
 
-  @keyframes ctor-card-enter {
-    from {
-      opacity: 0.35;
-      transform: scale(0.92);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+  .ctor-fly-ghost .card-tile-label,
+  .ctor-fly-ghost [class*="label"] {
+    display: none !important;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ctor-slot-card--enter {
-      animation: none;
+    .ctor-fly-ghost {
+      display: none !important;
     }
+  }
+
+  html[data-perf="low"] .ctor-fly-ghost {
+    display: none !important;
   }
 
   .ctor-slot-clear {
@@ -4553,6 +4566,7 @@ html[data-perf="low"] .chart-tooltip-glass {
   .ctor-slot,
   .ctor-grid-item,
   .ctor-slot-card--enter,
+  .ctor-fly-ghost,
   .ui-enter {
     transition: none !important;
     animation: none !important;

@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { HelpCircle, Search, Sparkles, X } from "lucide-react";
 
 import { api } from "@/api/client";
@@ -39,6 +39,57 @@ const BROWSER_TABS: { id: BrowserTab; label: string }[] = [
 type SlotPick = { name: string; slot: number } | null;
 
 const CTOR_SESSION_KEY = "ghosteek:ctor-core-v1";
+
+const SLOT_MOTION = {
+  initial: { opacity: 0, scale: 0.78, y: 12 },
+  animate: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.82, y: -8 },
+  transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const },
+};
+
+function ctorMotionOk(): boolean {
+  if (typeof window === "undefined") return false;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+  if (document.documentElement.dataset.perf === "low") return false;
+  return true;
+}
+
+/** Один лёгкий «призрак» — без layout-анимаций сетки. */
+function flyCardToSlot(fromEl: HTMLElement, toEl: HTMLElement) {
+  if (!ctorMotionOk()) return;
+
+  const from = fromEl.getBoundingClientRect();
+  const to = toEl.getBoundingClientRect();
+  if (from.width < 8 || to.width < 8) return;
+
+  const ghost = fromEl.cloneNode(true) as HTMLElement;
+  ghost.classList.add("ctor-fly-ghost");
+  ghost.setAttribute("aria-hidden", "true");
+  ghost.style.left = `${from.left}px`;
+  ghost.style.top = `${from.top}px`;
+  ghost.style.width = `${from.width}px`;
+  ghost.style.height = `${from.height}px`;
+  document.body.appendChild(ghost);
+
+  const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+  const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+  const scale = Math.min(to.width / from.width, to.height / from.height) * 0.92;
+
+  // Два кадра: сначала зафиксировать старт, потом целевой transform.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      ghost.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+      ghost.style.opacity = "0";
+    });
+  });
+
+  const cleanup = () => {
+    ghost.removeEventListener("transitionend", cleanup);
+    ghost.remove();
+  };
+  ghost.addEventListener("transitionend", cleanup);
+  window.setTimeout(cleanup, 380);
+}
 
 function readCtorSession(): { slots: SlotPick[]; activeSlot: number } | null {
   try {
@@ -333,6 +384,8 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   }, [catalog, deferredSearch, usedNames, browserTab, activeSlot, slotFilterOnly]);
 
   const buildRequestRef = useRef(0);
+  const slotWellRefs = useRef<(HTMLDivElement | null)[]>([null, null, null, null]);
+  const reduceMotion = useReducedMotion();
   const buildDecks = useCallback(async (current: (SlotPick)[]) => {
     const picks = current.filter((s): s is NonNullable<SlotPick> => Boolean(s));
     if (picks.length !== 4) {
@@ -385,12 +438,17 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     return () => clearTimeout(timer);
   }, [slots, filledCount, buildDecks]);
 
-  const placeCard = (card: CatalogCard) => {
+  const placeCard = (card: CatalogCard, sourceEl?: HTMLElement | null) => {
     haptic.light();
+    const targetSlot = activeSlot;
+    const well = slotWellRefs.current[targetSlot];
+    if (sourceEl && well) {
+      flyCardToSlot(sourceEl, well);
+    }
     setSlots((prev) => {
       const next = [...prev];
-      next[activeSlot] = { name: card.name, slot: activeSlot };
-      const nextEmpty = next.findIndex((s, i) => !s && i !== activeSlot);
+      next[targetSlot] = { name: card.name, slot: targetSlot };
+      const nextEmpty = next.findIndex((s, i) => !s && i !== targetSlot);
       if (nextEmpty >= 0) setActiveSlot(nextEmpty);
       return next;
     });
@@ -482,32 +540,54 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                       : SLOT_HINTS[index]}
                   </span>
 
-                  <div className="ctor-slot-well">
-                    {card ? (
-                      <div key={card.name} className="ctor-slot-card ctor-slot-card--enter">
-                        <CardTile
-                          name={card.name}
-                          size="deck"
-                          showLabel
-                          {...slotCardProps(index, card as CatalogCard)}
-                        />
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            clearSlot(index);
-                          }}
-                          className="ctor-slot-clear"
-                          aria-label="Убрать карту"
+                  <div
+                    className="ctor-slot-well"
+                    ref={(el) => {
+                      slotWellRefs.current[index] = el;
+                    }}
+                  >
+                    <AnimatePresence initial={false} mode="popLayout">
+                      {card ? (
+                        <motion.div
+                          key={card.name}
+                          className="ctor-slot-card"
+                          initial={reduceMotion ? false : SLOT_MOTION.initial}
+                          animate={SLOT_MOTION.animate}
+                          exit={reduceMotion ? undefined : SLOT_MOTION.exit}
+                          transition={
+                            reduceMotion ? { duration: 0 } : SLOT_MOTION.transition
+                          }
                         >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="ctor-slot-placeholder">
-                        <span className="ctor-slot-plus">+</span>
-                      </div>
-                    )}
+                          <CardTile
+                            name={card.name}
+                            size="deck"
+                            {...slotCardProps(index, card as CatalogCard)}
+                          />
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              clearSlot(index);
+                            }}
+                            className="ctor-slot-clear"
+                            aria-label="Убрать карту"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="placeholder"
+                          className="ctor-slot-placeholder"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.12 }}
+                        >
+                          <span className="ctor-slot-plus">+</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </button>
               );
@@ -581,7 +661,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                 <button
                   key={card.name}
                   type="button"
-                  onClick={() => placeCard(card)}
+                  onClick={(e) => placeCard(card, e.currentTarget)}
                   className={cn(
                     "ctor-grid-item",
                     browserTab === "evo" && "ctor-grid-item--evo",
@@ -623,7 +703,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         {loading ? <Loader /> : null}
         {error ? <ErrorState title={error} /> : null}
 
-        {!loading && filledCount === 4 && decks.length > 0 ? (
+        {!loading && filledCount === 4 && decks.length > 0 && !alternativeDeck ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-cr-gold" />

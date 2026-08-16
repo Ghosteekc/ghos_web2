@@ -90,21 +90,39 @@ function CoachingBlock({
           <p className="text-2xs uppercase tracking-wide text-cr-muted">Почему выбраны карты</p>
           <div className="mt-1 space-y-1.5">
             {coaching.card_choices.map((choice) => {
-              const synergy = localizeCardPhrase(choice.synergy, nameRu);
-              const synergyIsBareCombo = /^\S.+\s\+\s.+\S$/.test(synergy.trim());
+              const roles = [...new Set(choice.roles.map((r) => r.trim()).filter(Boolean))];
+              const rolesJoined = roles.join(" · ");
+              const rolesNorm = new Set(roles.map((r) => r.toLowerCase()));
+              const reasonRaw = (choice.reason || "").trim();
+              const reason =
+                reasonRaw &&
+                !rolesNorm.has(reasonRaw.toLowerCase()) &&
+                !rolesJoined.toLowerCase().includes(reasonRaw.toLowerCase())
+                  ? reasonRaw
+                  : "";
+              const synergyRaw = localizeCardPhrase(choice.synergy || "", nameRu).trim();
+              const synergyIsBareCombo = /^\S.+\s\+\s.+\S$/.test(synergyRaw);
+              const synergyIsGeneric =
+                /работает в связке с ключевыми картами/i.test(synergyRaw) ||
+                /поддерживает общий план колоды/i.test(synergyRaw);
+              const synergy =
+                synergyRaw &&
+                !synergyIsBareCombo &&
+                !synergyIsGeneric &&
+                synergyRaw.toLowerCase() !== reason.toLowerCase() &&
+                !rolesNorm.has(synergyRaw.toLowerCase())
+                  ? synergyRaw
+                  : "";
               return (
                 <div key={choice.card} className="rounded-lg bg-cr-bg/40 px-2.5 py-2">
                   <p className="text-sm font-medium text-cr-text">
                     {localizeCardPhrase(choice.card, nameRu)}
                   </p>
-                  {choice.roles.length > 0 ? (
-                    <p className="text-2xs text-cr-gold">{choice.roles.join(" · ")}</p>
+                  {roles.length > 0 ? (
+                    <p className="text-2xs text-cr-gold">{rolesJoined}</p>
                   ) : null}
-                  <p className="text-2xs text-cr-muted mt-0.5">{choice.reason}</p>
-                  {/* Голые «карта + карта» уже есть в блоке Синергия */}
-                  {!synergyIsBareCombo && synergy ? (
-                    <p className="text-2xs text-cr-muted">{synergy}</p>
-                  ) : null}
+                  {reason ? <p className="text-2xs text-cr-muted mt-0.5">{reason}</p> : null}
+                  {synergy ? <p className="text-2xs text-cr-muted">{synergy}</p> : null}
                 </div>
               );
             })}

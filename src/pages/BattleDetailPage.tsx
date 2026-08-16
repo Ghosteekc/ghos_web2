@@ -15,9 +15,7 @@ import {
   Map,
   Bot,
   Sparkles,
-  Flame,
   GitBranch,
-  CircleAlert,
 } from "lucide-react";
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader, ElixirIcon } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
@@ -108,18 +106,18 @@ function CoachInsightCard({
 }
 
 function BattleCoachBlock({ data }: { data: BattleCoach }) {
-  const usableMistakes = data.main_mistakes.filter((m) => m.confidence !== "insufficient");
-  const hasBody =
-    usableMistakes.length > 0 ||
-    (data.best_moment && data.best_moment.confidence !== "insufficient") ||
-    (data.turning_point && data.turning_point.confidence !== "insufficient") ||
-    (data.outcome_decider && data.outcome_decider.confidence !== "insufficient") ||
-    (data.danger_moment && data.danger_moment.confidence !== "insufficient") ||
-    (data.counterfactual && data.counterfactual.confidence !== "insufficient") ||
-    data.main_mistakes.some((m) => m.confidence === "insufficient") ||
-    data.data_notes.length > 0;
+  // Только уникальный слой: перелом по длительности/счёту и «если бы» по дыре в контрах.
+  // Ошибки / исход / опасность / лучший момент живут в тактике, плане и summary.
+  const turning =
+    data.turning_point && data.turning_point.confidence !== "insufficient"
+      ? data.turning_point
+      : null;
+  const alt =
+    data.counterfactual && data.counterfactual.confidence !== "insufficient"
+      ? data.counterfactual
+      : null;
 
-  if (!hasBody) return null;
+  if (!turning && !alt) return null;
 
   return (
     <Card className="tint-glass-card">
@@ -128,65 +126,18 @@ function BattleCoachBlock({ data }: { data: BattleCoach }) {
         <h3 className="font-semibold text-cr-text">Battle Coach</h3>
       </div>
       <p className="text-xs text-cr-muted mb-4">
-        Коучинг по составам, счёту и длительности. Реплей и таймлайн ходов API не отдаёт —
-        моменты не выдумываются.
+        То, чего нет в тактике и плане: перелом по длительности/счёту и гипотеза замены карты.
+        Реплей API не отдаёт.
       </p>
 
-      {data.data_notes.length > 0 ? (
-        <div className="mb-4 rounded-lg border border-cr-border/40 bg-cr-surface/30 px-3 py-2 space-y-1">
-          {data.data_notes.map((note, i) => (
-            <p key={i} className="text-xs text-cr-muted leading-relaxed">
-              {note}
-            </p>
-          ))}
-        </div>
-      ) : null}
-
       <div className="space-y-3">
-        <div>
-          <h4 className="text-sm font-semibold text-cr-text mb-2 flex items-center gap-1.5">
-            <CircleAlert className="w-4 h-4 text-cr-loss" />
-            Три главные ошибки
-          </h4>
-          {usableMistakes.length > 0 ? (
-            <div className="space-y-2">
-              {usableMistakes.slice(0, 3).map((m, i) => (
-                <CoachInsightCard
-                  key={`${m.title}-${i}`}
-                  insight={m}
-                  accent="loss"
-                  icon={<span className="text-xs font-bold text-cr-loss w-4 text-center">{i + 1}</span>}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-cr-muted italic">
-              По доступным данным устойчивых ошибок состава не найдено.
-            </p>
-          )}
-        </div>
-
         <CoachInsightCard
-          insight={data.best_moment}
-          accent="win"
-          icon={<Trophy className="w-4 h-4 text-cr-win" />}
-        />
-        <CoachInsightCard
-          insight={data.turning_point}
+          insight={turning}
           accent="warn"
           icon={<GitBranch className="w-4 h-4 text-cr-gold" />}
         />
         <CoachInsightCard
-          insight={data.outcome_decider}
-          icon={<Target className="w-4 h-4 text-cr-accent" />}
-        />
-        <CoachInsightCard
-          insight={data.danger_moment}
-          accent="loss"
-          icon={<Flame className="w-4 h-4 text-cr-loss" />}
-        />
-        <CoachInsightCard
-          insight={data.counterfactual}
+          insight={alt}
           accent="warn"
           icon={<GitCompareArrows className="w-4 h-4 text-cr-gold" />}
         />
@@ -447,10 +398,22 @@ function MatchDifficultyBlock({ data }: { data: MatchDifficulty }) {
   );
 }
 
-function MatchPlanBlock({ data }: { data: MatchPlan }) {
+function MatchPlanBlock({
+  data,
+  hidePhases,
+  hideAvoid,
+}: {
+  data: MatchPlan;
+  /** Фазы уже в тактическом разборе (early/mid/late). */
+  hidePhases?: boolean;
+  /** Avoid уже в «Грубые ошибки» тактики. */
+  hideAvoid?: boolean;
+}) {
   const gp = data.game_plan;
-  const hasPhases = gp.phase_1.length + gp.phase_2.length + gp.phase_3.length > 0;
-  if (!hasPhases && !data.avoid.length && !data.save_cards.length && !data.win_condition_window) {
+  const showPhases =
+    !hidePhases && gp.phase_1.length + gp.phase_2.length + gp.phase_3.length > 0;
+  const avoid = hideAvoid ? [] : data.avoid;
+  if (!showPhases && !avoid.length && !data.save_cards.length && !data.win_condition_window) {
     return null;
   }
 
@@ -461,10 +424,12 @@ function MatchPlanBlock({ data }: { data: MatchPlan }) {
         <h3 className="font-semibold text-cr-text">План на матчап</h3>
       </div>
       <p className="text-xs text-cr-muted mb-4">
-        Уникальный план из состава колод, GamePlan и тактических взаимодействий.
+        {hidePhases || hideAvoid
+          ? "Окно атаки и карты, которые лучше беречь — без повтора фаз и запретов из тактики."
+          : "План из состава колод, GamePlan и тактических взаимодействий."}
       </p>
       <div className="space-y-4">
-        {hasPhases ? (
+        {showPhases ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <TipList title="Phase 1 — начало" items={gp.phase_1} />
             <TipList title="Phase 2 — преимущество" items={gp.phase_2} />
@@ -477,7 +442,7 @@ function MatchPlanBlock({ data }: { data: MatchPlan }) {
             <p className="text-sm text-cr-muted leading-snug">{data.win_condition_window}</p>
           </div>
         ) : null}
-        <TipList title="Категорически нельзя" items={data.avoid} />
+        <TipList title="Категорически нельзя" items={avoid} />
         {data.save_cards.length > 0 ? (
           <div>
             <h4 className="text-sm font-semibold text-cr-text mb-2">Не трать зря</h4>
@@ -593,7 +558,51 @@ export function BattleDetailPage() {
     );
   }
 
-  const detailReasons = battle.reasons.length > 1 ? battle.reasons.slice(1) : [];
+  const hasTacticalPhases = Boolean(
+    battle.tactical_matchup &&
+      battle.tactical_matchup.early_game.length +
+        battle.tactical_matchup.mid_game.length +
+        battle.tactical_matchup.late_game.length >
+        0,
+  );
+  const hasTacticalMistakes = Boolean(
+    battle.tactical_matchup && battle.tactical_matchup.worst_mistakes.length > 0,
+  );
+  const hasDangerCards = Boolean(
+    battle.tactical_matchup && battle.tactical_matchup.danger_cards.length > 0,
+  );
+  const hasElixirProfiles = Boolean(battle.user_elixir || battle.opponent_elixir);
+  const showMatchupChip = !battle.match_difficulty;
+
+  // reasons[0] = outcome_summary; дальше — только контры (compact API) или старый полный список.
+  // Не показываем строки, которые уже в summary / сложности матчапа.
+  const knownReasonDupes = new Set<string>(
+    [
+      battle.outcome_summary || "",
+      ...(battle.match_difficulty?.reasons ?? []),
+    ]
+      .map((s) => s.trim())
+      .filter(Boolean),
+  );
+  const hasCounterfactual = Boolean(
+    battle.battle_coach?.counterfactual &&
+      battle.battle_coach.counterfactual.confidence !== "insufficient",
+  );
+  const detailReasons = (battle.reasons.length > 1 ? battle.reasons.slice(1) : []).filter(
+    (line) => {
+      const t = line.trim();
+      if (!t || knownReasonDupes.has(t)) return false;
+      if (/^Матчап:\s*\d+/i.test(t)) return false;
+      if (/^Счёт по коронам:/i.test(t)) return false;
+      if (/^Длительность:/i.test(t)) return false;
+      if (/ключевая карта/i.test(t)) return false;
+      if (/^Мало влияли на исход/i.test(t)) return false;
+      if (/средний эликсир выше/i.test(t)) return false;
+      // «Если бы» в Coach уже даёт конкретную замену при отсутствии контры.
+      if (hasCounterfactual && /^Нет счётчика на/i.test(t)) return false;
+      return true;
+    },
+  );
 
   return (
     <div className="space-y-6">
@@ -684,9 +693,11 @@ export function BattleDetailPage() {
           {battle.crown_score ? (
             <div className="text-base text-cr-text font-semibold">Короны: {battle.crown_score}</div>
           ) : null}
-          <div className="text-base text-cr-text/80 font-semibold">
-            Матчап: {battle.matchup_score.toFixed(0)}/100
-          </div>
+          {showMatchupChip ? (
+            <div className="text-base text-cr-text/80 font-semibold">
+              Матчап: {battle.matchup_score.toFixed(0)}/100
+            </div>
+          ) : null}
           <div className="text-cr-text/80 text-base flex items-center gap-1">
             <Clock className="w-4 h-4" />
             {battle.played_at ? battle.played_at : null}
@@ -706,15 +717,21 @@ export function BattleDetailPage() {
         </Card>
       ) : null}
 
-      {battle.battle_coach ? <BattleCoachBlock data={battle.battle_coach} /> : null}
+      {battle.match_difficulty ? <MatchDifficultyBlock data={battle.match_difficulty} /> : null}
 
       {battle.tactical_matchup ? <TacticalMatchupBlock data={battle.tactical_matchup} /> : null}
 
-      {battle.match_difficulty ? <MatchDifficultyBlock data={battle.match_difficulty} /> : null}
+      {battle.match_plan ? (
+        <MatchPlanBlock
+          data={battle.match_plan}
+          hidePhases={hasTacticalPhases}
+          hideAvoid={hasTacticalMistakes}
+        />
+      ) : null}
 
-      {battle.match_plan ? <MatchPlanBlock data={battle.match_plan} /> : null}
+      {battle.battle_coach ? <BattleCoachBlock data={battle.battle_coach} /> : null}
 
-      {(battle.user_elixir || battle.opponent_elixir) && (
+      {hasElixirProfiles ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {battle.user_elixir ? (
             <ElixirEfficiencyCard title="Ваш эликсир-профиль" data={battle.user_elixir} />
@@ -723,13 +740,13 @@ export function BattleDetailPage() {
             <ElixirEfficiencyCard title="Эликсир соперника" data={battle.opponent_elixir} />
           ) : null}
         </div>
-      )}
+      ) : null}
 
       {detailReasons.length > 0 && (
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-5 h-5 text-cr-gold" />
-            <h3 className="font-semibold text-cr-text">Подробный разбор</h3>
+            <h3 className="font-semibold text-cr-text">Контры на угрозы</h3>
           </div>
           <ul className="space-y-2">
             {detailReasons.map((reason, i) => (
@@ -777,7 +794,8 @@ export function BattleDetailPage() {
         </Card>
       )}
 
-      {battle.opponent_threats.length > 0 && (
+      {/* Угрозы WC — только если нет danger_cards (там та же информация богаче). */}
+      {!hasDangerCards && battle.opponent_threats.length > 0 && (
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <Shield className="w-5 h-5 text-cr-loss" />
@@ -803,15 +821,17 @@ export function BattleDetailPage() {
             cards={battle.user_deck_cards?.length ? battle.user_deck_cards : battle.user_deck}
             size="lg"
             showLabels
-            className="mb-4"
+            className={hasElixirProfiles ? undefined : "mb-4"}
           />
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-base">
-              <span className="text-cr-muted">Ср. эликсир</span>
-              <span className="font-semibold text-cr-text">{battle.user_stats.avg_elixir.toFixed(1)}</span>
+          {!hasElixirProfiles ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-base">
+                <span className="text-cr-muted">Ср. эликсир</span>
+                <span className="font-semibold text-cr-text">{battle.user_stats.avg_elixir.toFixed(1)}</span>
+              </div>
+              <LinearProgress value={battle.user_stats.avg_elixir} max={5} color="#60a5fa" showLabel={false} />
             </div>
-            <LinearProgress value={battle.user_stats.avg_elixir} max={5} color="#60a5fa" showLabel={false} />
-          </div>
+          ) : null}
         </Card>
 
         <Card>
@@ -820,15 +840,24 @@ export function BattleDetailPage() {
             cards={battle.opponent_deck_cards?.length ? battle.opponent_deck_cards : battle.opponent_deck}
             size="lg"
             showLabels
-            className="mb-4"
+            className={hasElixirProfiles ? undefined : "mb-4"}
           />
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-base">
-              <span className="text-cr-muted">Ср. эликсир</span>
-              <span className="font-semibold text-cr-text">{battle.opponent_stats.avg_elixir.toFixed(1)}</span>
+          {!hasElixirProfiles ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-base">
+                <span className="text-cr-muted">Ср. эликсир</span>
+                <span className="font-semibold text-cr-text">
+                  {battle.opponent_stats.avg_elixir.toFixed(1)}
+                </span>
+              </div>
+              <LinearProgress
+                value={battle.opponent_stats.avg_elixir}
+                max={5}
+                color="#ef4444"
+                showLabel={false}
+              />
             </div>
-            <LinearProgress value={battle.opponent_stats.avg_elixir} max={5} color="#ef4444" showLabel={false} />
-          </div>
+          ) : null}
         </Card>
       </div>
     </div>
