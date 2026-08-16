@@ -41,108 +41,127 @@ type SlotPick = { name: string; slot: number } | null;
 const CTOR_SESSION_KEY = "ghosteek:ctor-core-v1";
 
 const SLOT_MOTION = {
-  initial: { opacity: 0, scale: 0.86, y: 8 },
+  initial: { opacity: 0, scale: 0.9, y: 6 },
   animate: { opacity: 1, scale: 1, y: 0 },
-  exit: { opacity: 0, scale: 0.88, y: -6 },
-  transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const },
+  exit: { opacity: 0, scale: 0.92, y: -4 },
+  transition: { duration: 0.16, ease: [0.22, 1, 0.36, 1] as const },
 };
 
-function ctorMotionOk(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  } catch {
-    return true;
-  }
-}
-
-function rectCenter(r: DOMRectReadOnly): { x: number; y: number } {
-  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-}
+type FlyMode = "in" | "out";
 
 /**
- * Лёгкий перелёт иконки карты (WAAPI).
- * Не завязан на data-perf — micro-interaction должен жить и на low/mobile.
+ * Перелёт карты внутри окна билдера.
+ * Координаты относительно `.ctor-fly-layer`, финиш — точный центр выбранного слота.
+ * Не гасим по prefers-reduced-motion / data-perf (на телефонах иначе анимации нет).
  */
-function flyCardIcon(opts: {
+function flyCardInBuilder(opts: {
+  layer: HTMLElement;
   iconUrl: string;
   fromEl?: HTMLElement | null;
   fromRect?: DOMRectReadOnly | null;
   toEl?: HTMLElement | null;
   toRect?: DOMRectReadOnly | null;
-  /** in: в слот (дуга вверх), out: из слота вниз/к браузеру */
-  mode: "in" | "out";
+  mode: FlyMode;
 }): Promise<void> {
-  if (!ctorMotionOk() || !opts.iconUrl) return Promise.resolve();
+  const { layer, iconUrl, mode } = opts;
+  if (!iconUrl || !layer.isConnected) {
+    return Promise.resolve();
+  }
 
+  const layerRect = layer.getBoundingClientRect();
   const from =
     opts.fromRect ??
-    (opts.fromEl ? opts.fromEl.getBoundingClientRect() : null);
+    (opts.fromEl?.isConnected ? opts.fromEl.getBoundingClientRect() : null);
   const to =
     opts.toRect ??
-    (opts.toEl ? opts.toEl.getBoundingClientRect() : null);
-  if (!from || !to || from.width < 4 || to.width < 4) return Promise.resolve();
+    (opts.toEl?.isConnected ? opts.toEl.getBoundingClientRect() : null);
+  if (!from || !to || from.width < 2 || to.width < 2) return Promise.resolve();
 
-  const size = Math.max(36, Math.min(from.width, from.height, 88));
+  const size = Math.max(40, Math.min(from.width, from.height, to.width * 0.92, 84));
   const ghost = document.createElement("div");
   ghost.className = "ctor-fly-ghost";
   ghost.setAttribute("aria-hidden", "true");
+
   const img = document.createElement("img");
-  img.src = opts.iconUrl;
+  const sourceImg = opts.fromEl?.querySelector?.("img") as HTMLImageElement | null;
+  img.src = sourceImg?.currentSrc || sourceImg?.src || iconUrl;
   img.alt = "";
   img.draggable = false;
-  img.decoding = "async";
+  img.decoding = "sync";
   ghost.appendChild(img);
 
-  const startX = from.left + from.width / 2 - size / 2;
-  const startY = from.top + from.height / 2 - size / 2;
+  const startLeft = from.left + from.width / 2 - size / 2 - layerRect.left;
+  const startTop = from.top + from.height / 2 - size / 2 - layerRect.top;
+  const endLeft = to.left + to.width / 2 - size / 2 - layerRect.left;
+  const endTop = to.top + to.height / 2 - size / 2 - layerRect.top;
+  const dx = endLeft - startLeft;
+  const dy = endTop - startTop;
+  const hop = mode === "in" ? -Math.min(18, Math.abs(dy) * 0.18 + 8) : Math.min(14, 10);
+  const endScale = mode === "in" ? Math.min(to.width / size, to.height / size) * 0.9 : 0.62;
+  const duration = mode === "in" ? 320 : 260;
+
   ghost.style.width = `${size}px`;
   ghost.style.height = `${size}px`;
-  ghost.style.left = `${startX}px`;
-  ghost.style.top = `${startY}px`;
-  document.body.appendChild(ghost);
+  ghost.style.left = `${startLeft}px`;
+  ghost.style.top = `${startTop}px`;
+  ghost.style.transform = "translate(0px, 0px) scale(1)";
+  ghost.style.opacity = "1";
+  layer.appendChild(ghost);
 
-  const fromC = rectCenter(from);
-  const toC = rectCenter(to);
-  const dx = toC.x - fromC.x;
-  const dy = toC.y - fromC.y;
-  const endScale = Math.min(to.width / size, to.height / size) * (opts.mode === "in" ? 0.88 : 0.55);
-  const lift = opts.mode === "in" ? -Math.min(42, Math.abs(dy) * 0.35 + 18) : Math.min(36, 24);
-  const duration = opts.mode === "in" ? 340 : 280;
+  const finish = () => {
+    if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+  };
 
-  const anim = ghost.animate(
-    [
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      finish();
+      resolve();
+    };
+
+    const keyframes: Keyframe[] = [
+      { transform: "translate(0px, 0px) scale(1)", opacity: 1, offset: 0 },
       {
-        transform: "translate(0px, 0px) scale(1)",
-        opacity: 0.96,
-        offset: 0,
-      },
-      {
-        transform: `translate(${dx * 0.48}px, ${dy * 0.42 + lift}px) scale(${opts.mode === "in" ? 1.06 : 0.92})`,
+        transform: `translate(${dx * 0.5}px, ${dy * 0.45 + hop}px) scale(${mode === "in" ? 1.05 : 0.9})`,
         opacity: 1,
-        offset: 0.48,
+        offset: 0.45,
       },
       {
         transform: `translate(${dx}px, ${dy}px) scale(${endScale})`,
-        opacity: opts.mode === "in" ? 0.15 : 0,
+        opacity: mode === "in" ? 0.2 : 0,
         offset: 1,
       },
-    ],
-    {
-      duration,
-      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-      fill: "forwards",
-    },
-  );
+    ];
 
-  return new Promise((resolve) => {
-    const done = () => {
-      ghost.remove();
-      resolve();
-    };
-    anim.addEventListener("finish", done, { once: true });
-    anim.addEventListener("cancel", done, { once: true });
-    window.setTimeout(done, duration + 80);
+    try {
+      if (typeof ghost.animate === "function") {
+        const anim = ghost.animate(keyframes, {
+          duration,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          fill: "forwards",
+        });
+        anim.addEventListener("finish", done, { once: true });
+        anim.addEventListener("cancel", done, { once: true });
+        window.setTimeout(done, duration + 120);
+        return;
+      }
+    } catch {
+      /* fallback below */
+    }
+
+    ghost.style.transition =
+      `transform ${duration}ms cubic-bezier(0.22, 1, 0.36, 1), ` +
+      `opacity ${duration}ms ease-out`;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        ghost.style.transform = `translate(${dx}px, ${dy}px) scale(${endScale})`;
+        ghost.style.opacity = mode === "in" ? "0.2" : "0";
+      });
+    });
+    ghost.addEventListener("transitionend", done, { once: true });
+    window.setTimeout(done, duration + 120);
   });
 }
 
@@ -445,6 +464,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const buildRequestRef = useRef(0);
   const slotWellRefs = useRef<(HTMLDivElement | null)[]>([null, null, null, null]);
   const browserRef = useRef<HTMLElement | null>(null);
+  const flyLayerRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
   const [landingSlots, setLandingSlots] = useState<Record<number, boolean>>({});
   const buildDecks = useCallback(async (current: (SlotPick)[]) => {
@@ -503,11 +523,13 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     haptic.light();
     const targetSlot = activeSlot;
     const well = slotWellRefs.current[targetSlot];
+    const layer = flyLayerRef.current;
     const iconUrl = slotIconUrl(targetSlot, card);
 
-    if (sourceEl && well && iconUrl && ctorMotionOk()) {
+    if (sourceEl && well && layer && iconUrl) {
       setLandingSlots((prev) => ({ ...prev, [targetSlot]: true }));
-      void flyCardIcon({
+      void flyCardInBuilder({
+        layer,
         iconUrl,
         fromEl: sourceEl,
         toEl: well,
@@ -535,29 +557,40 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     haptic.light();
     const pick = slots[index];
     const well = slotWellRefs.current[index];
+    const layer = flyLayerRef.current;
     const cardEl = well?.querySelector(".ctor-slot-card") as HTMLElement | null;
     const meta = pick
       ? (catalog.find((c) => c.name === pick.name) ?? getCard(pick.name))
       : null;
     const iconUrl = meta ? slotIconUrl(index, meta as CatalogCard) : "";
 
-    if (cardEl && iconUrl && ctorMotionOk()) {
+    if (cardEl && layer && iconUrl) {
       const from = cardEl.getBoundingClientRect();
-      const browser = browserRef.current?.getBoundingClientRect();
-      const to = browser
-        ? new DOMRect(
-            browser.left + browser.width / 2 - from.width * 0.35,
-            browser.top + 12,
-            from.width * 0.7,
-            from.height * 0.7,
-          )
-        : new DOMRect(from.left, from.top + from.height + 72, from.width * 0.65, from.height * 0.65);
-      void flyCardIcon({
-        iconUrl,
-        fromRect: from,
-        toRect: to,
-        mode: "out",
-      });
+      const browser = browserRef.current;
+      if (browser) {
+        void flyCardInBuilder({
+          layer,
+          iconUrl,
+          fromEl: cardEl,
+          toEl: browser,
+          mode: "out",
+        });
+      } else {
+        // Браузер скрыт (4/4) — улетаем вниз внутри окна билдера.
+        const to = new DOMRect(
+          from.left + from.width * 0.15,
+          Math.min(from.bottom + 64, layer.getBoundingClientRect().bottom - from.height),
+          from.width * 0.7,
+          from.height * 0.7,
+        );
+        void flyCardInBuilder({
+          layer,
+          iconUrl,
+          fromRect: from,
+          toRect: to,
+          mode: "out",
+        });
+      }
     }
 
     setLandingSlots((prev) => {
@@ -595,6 +628,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
   return (
       <div className="ctor">
+        <div className="ctor-fly-layer" ref={flyLayerRef} aria-hidden />
         {/* 1. Header */}
         <header className="ctor-header">
           <div className="ctor-header-copy">

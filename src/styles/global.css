@@ -434,10 +434,19 @@
 
   /* ===== Constructor UX (Supercell-like) ===== */
   .ctor {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
     padding-bottom: 0.5rem;
+  }
+
+  .ctor-fly-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    overflow: visible;
   }
 
   .ctor-header {
@@ -640,15 +649,15 @@
   }
 
   .ctor-fly-ghost {
-    position: fixed;
-    z-index: 9999;
+    position: absolute;
+    z-index: 1;
     margin: 0;
     padding: 0;
     border: none;
     background: transparent;
     pointer-events: none;
     transform-origin: center center;
-    /* Не скрываем на data-perf=low — иначе на мобиле нет перелёта */
+    will-change: transform, opacity;
     filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.32));
   }
 
@@ -661,12 +670,6 @@
     pointer-events: none;
     -webkit-user-drag: none;
     user-select: none;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ctor-fly-ghost {
-      display: none !important;
-    }
   }
 
   .ctor-slot-clear {
@@ -4582,7 +4585,6 @@ html[data-perf="low"] .chart-tooltip-glass {
   .ctor-slot,
   .ctor-grid-item,
   .ctor-slot-card--enter,
-  .ctor-fly-ghost,
   .ui-enter {
     transition: none !important;
     animation: none !important;
