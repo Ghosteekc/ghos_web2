@@ -41,54 +41,109 @@ type SlotPick = { name: string; slot: number } | null;
 const CTOR_SESSION_KEY = "ghosteek:ctor-core-v1";
 
 const SLOT_MOTION = {
-  initial: { opacity: 0, scale: 0.78, y: 12 },
+  initial: { opacity: 0, scale: 0.86, y: 8 },
   animate: { opacity: 1, scale: 1, y: 0 },
-  exit: { opacity: 0, scale: 0.82, y: -8 },
-  transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] as const },
+  exit: { opacity: 0, scale: 0.88, y: -6 },
+  transition: { duration: 0.18, ease: [0.22, 1, 0.36, 1] as const },
 };
 
 function ctorMotionOk(): boolean {
   if (typeof window === "undefined") return false;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-  if (document.documentElement.dataset.perf === "low") return false;
-  return true;
+  try {
+    return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch {
+    return true;
+  }
 }
 
-/** Один лёгкий «призрак» — без layout-анимаций сетки. */
-function flyCardToSlot(fromEl: HTMLElement, toEl: HTMLElement) {
-  if (!ctorMotionOk()) return;
+function rectCenter(r: DOMRectReadOnly): { x: number; y: number } {
+  return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}
 
-  const from = fromEl.getBoundingClientRect();
-  const to = toEl.getBoundingClientRect();
-  if (from.width < 8 || to.width < 8) return;
+/**
+ * Лёгкий перелёт иконки карты (WAAPI).
+ * Не завязан на data-perf — micro-interaction должен жить и на low/mobile.
+ */
+function flyCardIcon(opts: {
+  iconUrl: string;
+  fromEl?: HTMLElement | null;
+  fromRect?: DOMRectReadOnly | null;
+  toEl?: HTMLElement | null;
+  toRect?: DOMRectReadOnly | null;
+  /** in: в слот (дуга вверх), out: из слота вниз/к браузеру */
+  mode: "in" | "out";
+}): Promise<void> {
+  if (!ctorMotionOk() || !opts.iconUrl) return Promise.resolve();
 
-  const ghost = fromEl.cloneNode(true) as HTMLElement;
-  ghost.classList.add("ctor-fly-ghost");
+  const from =
+    opts.fromRect ??
+    (opts.fromEl ? opts.fromEl.getBoundingClientRect() : null);
+  const to =
+    opts.toRect ??
+    (opts.toEl ? opts.toEl.getBoundingClientRect() : null);
+  if (!from || !to || from.width < 4 || to.width < 4) return Promise.resolve();
+
+  const size = Math.max(36, Math.min(from.width, from.height, 88));
+  const ghost = document.createElement("div");
+  ghost.className = "ctor-fly-ghost";
   ghost.setAttribute("aria-hidden", "true");
-  ghost.style.left = `${from.left}px`;
-  ghost.style.top = `${from.top}px`;
-  ghost.style.width = `${from.width}px`;
-  ghost.style.height = `${from.height}px`;
+  const img = document.createElement("img");
+  img.src = opts.iconUrl;
+  img.alt = "";
+  img.draggable = false;
+  img.decoding = "async";
+  ghost.appendChild(img);
+
+  const startX = from.left + from.width / 2 - size / 2;
+  const startY = from.top + from.height / 2 - size / 2;
+  ghost.style.width = `${size}px`;
+  ghost.style.height = `${size}px`;
+  ghost.style.left = `${startX}px`;
+  ghost.style.top = `${startY}px`;
   document.body.appendChild(ghost);
 
-  const dx = to.left + to.width / 2 - (from.left + from.width / 2);
-  const dy = to.top + to.height / 2 - (from.top + from.height / 2);
-  const scale = Math.min(to.width / from.width, to.height / from.height) * 0.92;
+  const fromC = rectCenter(from);
+  const toC = rectCenter(to);
+  const dx = toC.x - fromC.x;
+  const dy = toC.y - fromC.y;
+  const endScale = Math.min(to.width / size, to.height / size) * (opts.mode === "in" ? 0.88 : 0.55);
+  const lift = opts.mode === "in" ? -Math.min(42, Math.abs(dy) * 0.35 + 18) : Math.min(36, 24);
+  const duration = opts.mode === "in" ? 340 : 280;
 
-  // Два кадра: сначала зафиксировать старт, потом целевой transform.
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      ghost.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
-      ghost.style.opacity = "0";
-    });
+  const anim = ghost.animate(
+    [
+      {
+        transform: "translate(0px, 0px) scale(1)",
+        opacity: 0.96,
+        offset: 0,
+      },
+      {
+        transform: `translate(${dx * 0.48}px, ${dy * 0.42 + lift}px) scale(${opts.mode === "in" ? 1.06 : 0.92})`,
+        opacity: 1,
+        offset: 0.48,
+      },
+      {
+        transform: `translate(${dx}px, ${dy}px) scale(${endScale})`,
+        opacity: opts.mode === "in" ? 0.15 : 0,
+        offset: 1,
+      },
+    ],
+    {
+      duration,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      fill: "forwards",
+    },
+  );
+
+  return new Promise((resolve) => {
+    const done = () => {
+      ghost.remove();
+      resolve();
+    };
+    anim.addEventListener("finish", done, { once: true });
+    anim.addEventListener("cancel", done, { once: true });
+    window.setTimeout(done, duration + 80);
   });
-
-  const cleanup = () => {
-    ghost.removeEventListener("transitionend", cleanup);
-    ghost.remove();
-  };
-  ghost.addEventListener("transitionend", cleanup);
-  window.setTimeout(cleanup, 380);
 }
 
 function readCtorSession(): { slots: SlotPick[]; activeSlot: number } | null {
@@ -201,6 +256,10 @@ function slotCardProps(slotIndex: number, card: CatalogCard) {
     evolution_level: mode === "evo" ? 1 : 0,
     is_hero: mode === "hero",
   };
+}
+
+function slotIconUrl(slotIndex: number, card: CatalogCard): string {
+  return String(slotCardProps(slotIndex, card).icon || card.icon || "");
 }
 
 /** Только карты с реальной эволюцией — без героев и чемпионов. */
@@ -385,7 +444,9 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
   const buildRequestRef = useRef(0);
   const slotWellRefs = useRef<(HTMLDivElement | null)[]>([null, null, null, null]);
+  const browserRef = useRef<HTMLElement | null>(null);
   const reduceMotion = useReducedMotion();
+  const [landingSlots, setLandingSlots] = useState<Record<number, boolean>>({});
   const buildDecks = useCallback(async (current: (SlotPick)[]) => {
     const picks = current.filter((s): s is NonNullable<SlotPick> => Boolean(s));
     if (picks.length !== 4) {
@@ -442,9 +503,25 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     haptic.light();
     const targetSlot = activeSlot;
     const well = slotWellRefs.current[targetSlot];
-    if (sourceEl && well) {
-      flyCardToSlot(sourceEl, well);
+    const iconUrl = slotIconUrl(targetSlot, card);
+
+    if (sourceEl && well && iconUrl && ctorMotionOk()) {
+      setLandingSlots((prev) => ({ ...prev, [targetSlot]: true }));
+      void flyCardIcon({
+        iconUrl,
+        fromEl: sourceEl,
+        toEl: well,
+        mode: "in",
+      }).finally(() => {
+        setLandingSlots((prev) => {
+          if (!prev[targetSlot]) return prev;
+          const next = { ...prev };
+          delete next[targetSlot];
+          return next;
+        });
+      });
     }
+
     setSlots((prev) => {
       const next = [...prev];
       next[targetSlot] = { name: card.name, slot: targetSlot };
@@ -456,6 +533,39 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
   const clearSlot = (index: number) => {
     haptic.light();
+    const pick = slots[index];
+    const well = slotWellRefs.current[index];
+    const cardEl = well?.querySelector(".ctor-slot-card") as HTMLElement | null;
+    const meta = pick
+      ? (catalog.find((c) => c.name === pick.name) ?? getCard(pick.name))
+      : null;
+    const iconUrl = meta ? slotIconUrl(index, meta as CatalogCard) : "";
+
+    if (cardEl && iconUrl && ctorMotionOk()) {
+      const from = cardEl.getBoundingClientRect();
+      const browser = browserRef.current?.getBoundingClientRect();
+      const to = browser
+        ? new DOMRect(
+            browser.left + browser.width / 2 - from.width * 0.35,
+            browser.top + 12,
+            from.width * 0.7,
+            from.height * 0.7,
+          )
+        : new DOMRect(from.left, from.top + from.height + 72, from.width * 0.65, from.height * 0.65);
+      void flyCardIcon({
+        iconUrl,
+        fromRect: from,
+        toRect: to,
+        mode: "out",
+      });
+    }
+
+    setLandingSlots((prev) => {
+      if (!prev[index]) return prev;
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
     setSlots((prev) => {
       const next = [...prev];
       next[index] = null;
@@ -467,6 +577,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const resetAll = () => {
     setSlots([null, null, null, null]);
     setActiveSlot(0);
+    setLandingSlots({});
     setDecks([]);
     setAlternativeDeck(null);
     setCoreConflict(null);
@@ -552,10 +663,22 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                           key={card.name}
                           className="ctor-slot-card"
                           initial={reduceMotion ? false : SLOT_MOTION.initial}
-                          animate={SLOT_MOTION.animate}
-                          exit={reduceMotion ? undefined : SLOT_MOTION.exit}
+                          animate={
+                            landingSlots[index]
+                              ? { opacity: 0, scale: 0.9, y: 6 }
+                              : SLOT_MOTION.animate
+                          }
+                          exit={
+                            reduceMotion
+                              ? undefined
+                              : { opacity: 0, scale: 0.94, transition: { duration: 0.06 } }
+                          }
                           transition={
-                            reduceMotion ? { duration: 0 } : SLOT_MOTION.transition
+                            reduceMotion
+                              ? { duration: 0 }
+                              : landingSlots[index]
+                                ? { duration: 0 }
+                                : SLOT_MOTION.transition
                           }
                         >
                           <CardTile
@@ -614,7 +737,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
         {/* 3. Card Browser */}
         {filledCount < 4 ? (
-          <section className="ctor-browser">
+          <section className="ctor-browser" ref={browserRef}>
             <div className="ctor-search">
               <Search className="ctor-search-icon" aria-hidden />
               <input

@@ -101,7 +101,8 @@
   --palette-accent: 93 125 232;
 
   --palette-ink: 24 35 59;
-  --palette-ink-muted: 102 112 133;
+  /* Было 102 112 133 — на светлом wallpaper почти не читалось без фона */
+  --palette-ink-muted: 45 55 78;
   --palette-line: 232 236 243;
   --palette-line-alpha: 0.18;
 

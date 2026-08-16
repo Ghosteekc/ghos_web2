@@ -184,6 +184,11 @@
     text-shadow: var(--cr-stroke-body);
   }
 
+  /* Светлая тема: серый текст без подложки должен оставаться контрастным */
+  [data-theme="light"] .text-cr-muted {
+    color: rgb(var(--cr-muted)) !important;
+  }
+
   .text-cr-accent {
     color: rgb(var(--cr-accent)) !important;
     text-shadow: var(--cr-stroke-body);
@@ -620,7 +625,7 @@
     font-size: 1.25rem;
     font-weight: 700;
     line-height: 1;
-    color: rgb(var(--cr-muted) / 0.85);
+    color: rgb(var(--cr-muted));
     border: 1.5px dashed rgb(var(--cr-border) / 0.55);
     background: rgb(var(--cr-bg) / 0.35);
   }
@@ -636,35 +641,32 @@
 
   .ctor-fly-ghost {
     position: fixed;
-    z-index: 80;
+    z-index: 9999;
     margin: 0;
     padding: 0;
     border: none;
     background: transparent;
     pointer-events: none;
-    opacity: 0.92;
-    transform: translate(0, 0) scale(1);
     transform-origin: center center;
-    transition:
-      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 0.28s ease-out;
-    will-change: transform, opacity;
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.28));
+    /* Не скрываем на data-perf=low — иначе на мобиле нет перелёта */
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.32));
   }
 
-  .ctor-fly-ghost .card-tile-label,
-  .ctor-fly-ghost [class*="label"] {
-    display: none !important;
+  .ctor-fly-ghost img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 0.55rem;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .ctor-fly-ghost {
       display: none !important;
     }
-  }
-
-  html[data-perf="low"] .ctor-fly-ghost {
-    display: none !important;
   }
 
   .ctor-slot-clear {
@@ -948,9 +950,23 @@
     color: #0a0a0a;
   }
 
+  [data-theme="light"] .ctor-subtitle,
+  [data-theme="light"] .ctor-progress,
+  [data-theme="light"] .ctor-loading-hint,
+  [data-theme="light"] .ctor-reset,
+  [data-theme="light"] .ctor-search-icon,
+  [data-theme="light"] .ctor-search-input::placeholder,
+  [data-theme="light"] .ctor-tab,
+  [data-theme="light"] .ctor-slot-label,
+  [data-theme="light"] .ctor-slot-plus,
+  [data-theme="light"] .ctor-slot-filter {
+    color: rgb(var(--cr-muted));
+    opacity: 1;
+  }
+
   [data-theme="light"] .ctor-help-btn {
     background: rgb(var(--palette-white) / 0.85);
-    color: #334155;
+    color: rgb(var(--cr-muted));
   }
 
   [data-theme="light"] .ctor-slot-well {
