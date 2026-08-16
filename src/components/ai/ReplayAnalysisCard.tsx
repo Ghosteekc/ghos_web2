@@ -75,8 +75,18 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
                     : "ai-replay-tl-item--confirmed",
                 )}
               >
-                <span className="ai-replay-tl-time">{formatReplayMomentTime(m.timestampSeconds)}</span>
-                <span className="ai-replay-tl-title">{m.title}</span>
+                <div className="ai-replay-tl-row">
+                  <span className="ai-replay-tl-time">{formatReplayMomentTime(m.timestampSeconds)}</span>
+                  <span className="ai-replay-tl-title">{m.title}</span>
+                </div>
+                {m.imageBase64 ? (
+                  <img
+                    className="ai-replay-tl-shot"
+                    src={`data:image/jpeg;base64,${m.imageBase64}`}
+                    alt={m.title}
+                    loading="lazy"
+                  />
+                ) : null}
               </li>
             ))}
           </ol>

@@ -35,6 +35,7 @@ export type ReplayTimelineMoment = {
   title: string;
   cardName?: string | null;
   kind: ReplayTimelineKind;
+  imageBase64?: string | null;
 };
 
 export type ReplayAnalysisView = {
@@ -374,6 +375,30 @@ export function buildReplayAnalysis(
 
   moments.sort((a, b) => a.timestampSeconds - b.timestampSeconds || a.kind.localeCompare(b.kind));
 
+  const shots = Array.isArray(facts.moment_shots) ? facts.moment_shots : [];
+  for (const shot of shots) {
+    if (!shot || typeof shot.image_base64 !== "string" || !shot.image_base64.trim()) continue;
+    const ts = Number(shot.timestamp_seconds) || 0;
+    const kind: ReplayTimelineKind = shot.kind === "candidate" ? "candidate" : "confirmed";
+    const label =
+      typeof shot.label === "string" && shot.label.trim() ? shot.label.trim() : "Момент";
+    const existing = moments.find(
+      (m) => Math.abs(m.timestampSeconds - ts) < 0.15 && m.kind === kind,
+    );
+    if (existing) {
+      existing.imageBase64 = shot.image_base64.trim();
+      continue;
+    }
+    moments.push({
+      timestampSeconds: ts,
+      title: label,
+      cardName: null,
+      kind,
+      imageBase64: shot.image_base64.trim(),
+    });
+  }
+  moments.sort((a, b) => a.timestampSeconds - b.timestampSeconds || a.kind.localeCompare(b.kind));
+
   const hasEvidence = moments.length > 0 || confirmedCardNames.length > 0;
   const coachSummary = humanizeCoachSummary(facts.coach_reply || tactical?.summary || "", {
     hasMoments: hasEvidence,
@@ -410,6 +435,7 @@ function parseMoment(raw: unknown): ReplayTimelineMoment | null {
     title: raw.title.trim(),
     cardName: typeof raw.cardName === "string" ? raw.cardName : null,
     kind,
+    imageBase64: typeof raw.imageBase64 === "string" ? raw.imageBase64 : null,
   };
 }
 

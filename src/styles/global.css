@@ -4269,14 +4269,20 @@ button.ai-md-link {
 }
 
 .ai-replay-tl-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.45rem;
+  border-left: 2px solid transparent;
+  background: rgb(var(--ui-panel) / 0.35);
+}
+
+.ai-replay-tl-row {
   display: grid;
   grid-template-columns: 3.4rem minmax(0, 1fr);
   gap: 0.45rem;
   align-items: baseline;
-  padding: 0.28rem 0.4rem 0.28rem 0.5rem;
-  border-radius: 0.45rem;
-  border-left: 2px solid transparent;
-  background: rgb(var(--ui-panel) / 0.35);
 }
 
 .ai-replay-tl-item--confirmed {
@@ -4286,7 +4292,7 @@ button.ai-md-link {
 .ai-replay-tl-item--candidate {
   border-left-style: dashed;
   border-left-color: rgb(var(--cr-muted) / 0.75);
-  opacity: 0.78;
+  opacity: 0.92;
 }
 
 .ai-replay-tl-time {
@@ -4308,6 +4314,16 @@ button.ai-md-link {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.ai-replay-tl-shot {
+  display: block;
+  width: 100%;
+  max-height: 12rem;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 0.4rem;
+  background: rgb(0 0 0 / 0.25);
 }
 
 .ai-replay-cards {

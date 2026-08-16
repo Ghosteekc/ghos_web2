@@ -460,6 +460,12 @@ export type ReplayAnalyzeSuccess = {
       evidence_frame_indexes?: number[];
       details?: Record<string, unknown>;
     }[];
+    moment_shots?: {
+      timestamp_seconds: number;
+      label: string;
+      kind: string;
+      image_base64: string;
+    }[];
     battle_timeline?: {
       duration_seconds: number;
       events: {
