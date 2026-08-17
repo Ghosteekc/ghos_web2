@@ -444,14 +444,6 @@
     padding-bottom: 0.5rem;
   }
 
-  .ctor-fly-layer {
-    position: absolute;
-    inset: 0;
-    z-index: 60;
-    pointer-events: none;
-    overflow: visible;
-  }
-
   .ctor-header {
     display: flex;
     align-items: flex-start;
@@ -655,35 +647,31 @@
     display: flex;
     justify-content: center;
     padding: 0.2rem 0.1rem 0.15rem;
-    will-change: transform, opacity;
   }
 
-  .ctor-fly-ghost {
-    position: absolute;
-    z-index: 1;
-    margin: 0;
-    padding: 0;
-    border: none;
-    background: transparent;
-    pointer-events: none;
+  @keyframes ctor-slot-enter {
+    0% {
+      opacity: 0;
+      transform: translate3d(0, 10px, 0) scale(0.97);
+    }
+    72% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    86% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(0.98);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+  }
+
+  .ctor-slot-card--enter {
     transform-origin: center bottom;
     will-change: transform, opacity;
-    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.32));
-  }
-
-  .ctor-fly-ghost--in {
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.38));
-  }
-
-  .ctor-fly-ghost img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 0.55rem;
-    pointer-events: none;
-    -webkit-user-drag: none;
-    user-select: none;
+    animation: ctor-slot-enter var(--ui-duration) var(--ui-ease-standard) both;
   }
 
   .ctor-slot-clear {

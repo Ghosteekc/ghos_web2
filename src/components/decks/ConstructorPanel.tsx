@@ -40,232 +40,6 @@ type SlotPick = { name: string; slot: number } | null;
 
 const CTOR_SESSION_KEY = "ghosteek:ctor-core-v1";
 
-const SLOT_MOTION = {
-  initial: { opacity: 0, scale: 0.985, y: 6 },
-  animate: { opacity: 1, scale: 1, y: 0 },
-  exit: { opacity: 0, scale: 0.985, y: -4 },
-  transition: { duration: 0.18, ease: [0.2, 0.8, 0.2, 1] as const },
-};
-
-const SLOT_BOUNCE = {
-  animate: {
-    opacity: 1,
-    scale: [1.04, 0.94, 1.03, 1],
-    y: [6, -11, 3, 0],
-  },
-  transition: { duration: 0.32, ease: [0.34, 1.55, 0.48, 1] as const },
-};
-
-type FlyMode = "in" | "out";
-type FlyCardSize = { width: number; height: number };
-
-/** Размер CardTile `deck` в слоте билдера (как в `.ctor-slot-card`). */
-function measureBuilderSlotCardSize(
-  wells: ReadonlyArray<HTMLElement | null>,
-  targetWell?: HTMLElement | null,
-): FlyCardSize {
-  for (const well of wells) {
-    const wrap = well?.querySelector(".card-tile-wrap") as HTMLElement | null;
-    if (!wrap?.isConnected) continue;
-    const rect = wrap.getBoundingClientRect();
-    if (rect.width >= 20 && rect.height >= 20) {
-      return { width: rect.width, height: rect.height };
-    }
-  }
-  const wellRect = (targetWell ?? wells.find(Boolean))?.getBoundingClientRect();
-  const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-  const width = Math.min(wellRect?.width ? wellRect.width * 0.82 : rootPx * 3.45, rootPx * 3.45);
-  return { width, height: width * 1.25 };
-}
-
-function cardSizeFromElement(el: HTMLElement | null | undefined): FlyCardSize | null {
-  const wrap = el?.querySelector?.(".card-tile-wrap") as HTMLElement | null;
-  const target = wrap?.isConnected ? wrap : el;
-  if (!target?.isConnected) return null;
-  const rect = target.getBoundingClientRect();
-  if (rect.width < 20 || rect.height < 20) return null;
-  return { width: rect.width, height: rect.height };
-}
-
-/**
- * Перелёт карты внутри окна билдера.
- * Координаты относительно `.ctor-fly-layer`, финиш — центр слота.
- * В слот карта летит уже в размере `deck` (как в билдере), с дугой и подпрыгиванием.
- */
-function flyCardInBuilder(opts: {
-  layer: HTMLElement;
-  iconUrl: string;
-  fromEl?: HTMLElement | null;
-  fromRect?: DOMRectReadOnly | null;
-  toEl?: HTMLElement | null;
-  toRect?: DOMRectReadOnly | null;
-  mode: FlyMode;
-  slotCardSize?: FlyCardSize;
-  /** Карта в слоте появляется в момент удара; призрак снимается сразу. */
-  onHandoff?: () => void;
-}): Promise<void> {
-  const { layer, iconUrl, mode } = opts;
-  if (!iconUrl || !layer.isConnected) {
-    return Promise.resolve();
-  }
-
-  const layerRect = layer.getBoundingClientRect();
-  const from =
-    opts.fromRect ??
-    (opts.fromEl?.isConnected ? opts.fromEl.getBoundingClientRect() : null);
-  const to =
-    opts.toRect ??
-    (opts.toEl?.isConnected ? opts.toEl.getBoundingClientRect() : null);
-  if (!from || !to || from.width < 2 || to.width < 2) return Promise.resolve();
-
-  const slotSize =
-    mode === "in"
-      ? opts.slotCardSize ?? cardSizeFromElement(opts.toEl) ?? { width: 55, height: 69 }
-      : cardSizeFromElement(opts.fromEl) ??
-        opts.slotCardSize ?? { width: from.width, height: from.height };
-
-  const cardW = slotSize.width;
-  const cardH = slotSize.height;
-
-  const ghost = document.createElement("div");
-  ghost.className = cn("ctor-fly-ghost", mode === "in" && "ctor-fly-ghost--in");
-  ghost.setAttribute("aria-hidden", "true");
-
-  const img = document.createElement("img");
-  const sourceImg = opts.fromEl?.querySelector?.("img") as HTMLImageElement | null;
-  img.src = sourceImg?.currentSrc || sourceImg?.src || iconUrl;
-  img.alt = "";
-  img.draggable = false;
-  img.decoding = "sync";
-  ghost.appendChild(img);
-
-  const startLeft = from.left + from.width / 2 - cardW / 2 - layerRect.left;
-  const startTop = from.top + from.height / 2 - cardH / 2 - layerRect.top;
-  const endLeft = to.left + to.width / 2 - cardW / 2 - layerRect.left;
-  const endTop = to.top + to.height / 2 - cardH / 2 - layerRect.top;
-  const dx = endLeft - startLeft;
-  const dy = endTop - startTop;
-
-  const duration = mode === "in" ? 400 : 260;
-
-  ghost.style.width = `${cardW}px`;
-  ghost.style.height = `${cardH}px`;
-  ghost.style.left = `${startLeft}px`;
-  ghost.style.top = `${startTop}px`;
-  ghost.style.transform = "translate(0px, 0px) scale(1)";
-  ghost.style.opacity = "1";
-  layer.appendChild(ghost);
-
-  const finish = () => {
-    if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
-  };
-
-  const buildInKeyframes = (): Keyframe[] => {
-    const dist = Math.hypot(dx, dy) || 1;
-    const windX = -(dx / dist) * Math.min(14, dist * 0.08);
-    const windY = Math.min(10, cardH * 0.12);
-    const arcLift = -Math.min(42, Math.max(18, Math.abs(dy) * 0.34 + 16));
-    const diveY = dy - Math.min(22, cardH * 0.22);
-    const squash = Math.max(5, cardH * 0.08);
-    return [
-      { transform: "translate(0px, 0px) scale(1) rotate(0deg)", opacity: 1, offset: 0 },
-      {
-        transform: `translate(${windX}px, ${windY}px) scale(0.94) rotate(-4deg)`,
-        opacity: 1,
-        offset: 0.1,
-      },
-      {
-        transform: `translate(${dx * 0.38}px, ${dy * 0.22 + arcLift}px) scale(1.1) rotate(-2deg)`,
-        opacity: 1,
-        offset: 0.34,
-      },
-      {
-        transform: `translate(${dx * 0.78}px, ${diveY}px) scale(1.06) rotate(1deg)`,
-        opacity: 1,
-        offset: 0.58,
-      },
-      {
-        transform: `translate(${dx}px, ${dy + squash}px) scale(1.04, 0.86) rotate(0deg)`,
-        opacity: 1,
-        offset: 1,
-      },
-    ];
-  };
-
-  const buildOutKeyframes = (): Keyframe[] => {
-    const hop = Math.min(14, 10);
-    return [
-      { transform: "translate(0px, 0px) scale(1)", opacity: 1, offset: 0 },
-      {
-        transform: `translate(${dx * 0.5}px, ${dy * 0.45 + hop}px) scale(0.94)`,
-        opacity: 1,
-        offset: 0.45,
-      },
-      { transform: `translate(${dx}px, ${dy}px) scale(0.62)`, opacity: 0, offset: 1 },
-    ];
-  };
-
-  const keyframes = mode === "in" ? buildInKeyframes() : buildOutKeyframes();
-  const easing =
-    mode === "in" ? "cubic-bezier(0.15, 0.85, 0.22, 1)" : "cubic-bezier(0.22, 1, 0.36, 1)";
-
-  return new Promise((resolve) => {
-    let settled = false;
-    let fallbackTimer = 0;
-    let anim: Animation | null = null;
-
-    const done = () => {
-      if (settled) return;
-      settled = true;
-      window.clearTimeout(fallbackTimer);
-      if (mode === "in") {
-        opts.onHandoff?.();
-        requestAnimationFrame(() => {
-          finish();
-          resolve();
-        });
-        return;
-      }
-      finish();
-      resolve();
-    };
-
-    try {
-      if (typeof ghost.animate === "function") {
-        anim = ghost.animate(keyframes, {
-          duration,
-          easing,
-          fill: "forwards",
-        });
-        anim.addEventListener("finish", done, { once: true });
-        anim.addEventListener("cancel", () => {
-          if (!settled) finish();
-        }, { once: true });
-        fallbackTimer = window.setTimeout(done, duration + 80);
-        return;
-      }
-    } catch {
-      /* fallback below */
-    }
-
-    const last = keyframes[keyframes.length - 1]?.transform as string | undefined;
-    ghost.style.transition =
-      `transform ${duration}ms ${easing}, opacity ${duration}ms ease-out`;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        ghost.style.transform = last ?? `translate(${dx}px, ${dy}px) scale(1)`;
-        ghost.style.opacity = "0";
-      });
-    });
-    ghost.addEventListener(
-      "transitionend",
-      done,
-      { once: true },
-    );
-    fallbackTimer = window.setTimeout(done, duration + 80);
-  });
-}
-
 function readCtorSession(): { slots: SlotPick[]; activeSlot: number } | null {
   try {
     const raw = sessionStorage.getItem(CTOR_SESSION_KEY);
@@ -561,12 +335,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   }, [catalog, deferredSearch, browserTab]);
 
   const buildRequestRef = useRef(0);
-  const slotWellRefs = useRef<(HTMLDivElement | null)[]>([null, null, null, null]);
-  const browserRef = useRef<HTMLElement | null>(null);
-  const flyLayerRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
-  const [landingSlots, setLandingSlots] = useState<Record<number, boolean>>({});
-  const [bounceSlots, setBounceSlots] = useState<Record<number, boolean>>({});
   const buildDecks = useCallback(async (current: (SlotPick)[]) => {
     const picks = current.filter((s): s is NonNullable<SlotPick> => Boolean(s));
     if (picks.length !== 4) {
@@ -619,43 +388,9 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     return () => clearTimeout(timer);
   }, [slots, filledCount, buildDecks]);
 
-  const placeCard = (card: CatalogCard, sourceEl?: HTMLElement | null) => {
+  const placeCard = (card: CatalogCard) => {
     haptic.light();
     const targetSlot = activeSlot;
-    const well = slotWellRefs.current[targetSlot];
-    const layer = flyLayerRef.current;
-    const iconUrl = slotIconUrl(targetSlot, card);
-
-    if (sourceEl && well && layer && iconUrl) {
-      const slotCardSize = measureBuilderSlotCardSize(slotWellRefs.current, well);
-      setLandingSlots((prev) => ({ ...prev, [targetSlot]: true }));
-      void flyCardInBuilder({
-        layer,
-        iconUrl,
-        fromEl: sourceEl,
-        toEl: well,
-        mode: "in",
-        slotCardSize,
-        onHandoff: () => {
-          setLandingSlots((prev) => {
-            if (!prev[targetSlot]) return prev;
-            const next = { ...prev };
-            delete next[targetSlot];
-            return next;
-          });
-          setBounceSlots((prev) => ({ ...prev, [targetSlot]: true }));
-          window.setTimeout(() => {
-            setBounceSlots((prev) => {
-              if (!prev[targetSlot]) return prev;
-              const next = { ...prev };
-              delete next[targetSlot];
-              return next;
-            });
-          }, 340);
-        },
-      });
-    }
-
     setSlots((prev) => {
       const next = [...prev];
       next[targetSlot] = { name: card.name, slot: targetSlot };
@@ -667,50 +402,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
   const clearSlot = (index: number) => {
     haptic.light();
-    const pick = slots[index];
-    const well = slotWellRefs.current[index];
-    const layer = flyLayerRef.current;
-    const cardEl = well?.querySelector(".ctor-slot-card") as HTMLElement | null;
-    const meta = pick
-      ? (catalog.find((c) => c.name === pick.name) ?? getCard(pick.name))
-      : null;
-    const iconUrl = meta ? slotIconUrl(index, meta as CatalogCard) : "";
-
-    if (cardEl && layer && iconUrl) {
-      const from = cardEl.getBoundingClientRect();
-      const browser = browserRef.current;
-      if (browser) {
-        void flyCardInBuilder({
-          layer,
-          iconUrl,
-          fromEl: cardEl,
-          toEl: browser,
-          mode: "out",
-        });
-      } else {
-        // Браузер скрыт (4/4) — улетаем вниз внутри окна билдера.
-        const to = new DOMRect(
-          from.left + from.width * 0.15,
-          Math.min(from.bottom + 64, layer.getBoundingClientRect().bottom - from.height),
-          from.width * 0.7,
-          from.height * 0.7,
-        );
-        void flyCardInBuilder({
-          layer,
-          iconUrl,
-          fromRect: from,
-          toRect: to,
-          mode: "out",
-        });
-      }
-    }
-
-    setLandingSlots((prev) => {
-      if (!prev[index]) return prev;
-      const next = { ...prev };
-      delete next[index];
-      return next;
-    });
     setSlots((prev) => {
       const next = [...prev];
       next[index] = null;
@@ -722,8 +413,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const resetAll = () => {
     setSlots([null, null, null, null]);
     setActiveSlot(0);
-    setLandingSlots({});
-    setBounceSlots({});
     setDecks([]);
     setAlternativeDeck(null);
     setCoreConflict(null);
@@ -741,7 +430,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
   return (
       <div className="ctor">
-        <div className="ctor-fly-layer" ref={flyLayerRef} aria-hidden />
         {/* 1. Header */}
         <header className="ctor-header">
           <div className="ctor-header-copy">
@@ -798,76 +486,34 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                       : SLOT_HINTS[index]}
                   </span>
 
-                  <div
-                    className="ctor-slot-well"
-                    ref={(el) => {
-                      slotWellRefs.current[index] = el;
-                    }}
-                  >
-                    <AnimatePresence initial={false}>
-                      {card ? (
-                        <motion.div
-                          key={card.name}
-                          className="ctor-slot-card"
-                          initial={
-                            reduceMotion
-                              ? false
-                              : landingSlots[index]
-                                ? { opacity: 0, scale: 1, y: 0 }
-                                : SLOT_MOTION.initial
-                          }
-                          animate={
-                            landingSlots[index]
-                              ? { opacity: 0, scale: 1, y: 0 }
-                              : bounceSlots[index]
-                                ? SLOT_BOUNCE.animate
-                                : SLOT_MOTION.animate
-                          }
-                          exit={
-                            reduceMotion
-                              ? undefined
-                              : { opacity: 0, scale: 0.985, transition: { duration: 0.12 } }
-                          }
-                          transition={
-                            reduceMotion
-                              ? { duration: 0 }
-                              : landingSlots[index]
-                                ? { duration: 0 }
-                                : bounceSlots[index]
-                                  ? SLOT_BOUNCE.transition
-                                  : SLOT_MOTION.transition
-                          }
+                  <div className="ctor-slot-well">
+                    {card ? (
+                      <div
+                        key={card.name}
+                        className={cn("ctor-slot-card", !reduceMotion && "ctor-slot-card--enter")}
+                      >
+                        <CardTile
+                          name={card.name}
+                          size="deck"
+                          {...slotCardProps(index, card as CatalogCard)}
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            clearSlot(index);
+                          }}
+                          className="ctor-slot-clear"
+                          aria-label="Убрать карту"
                         >
-                          <CardTile
-                            name={card.name}
-                            size="deck"
-                            {...slotCardProps(index, card as CatalogCard)}
-                          />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              clearSlot(index);
-                            }}
-                            className="ctor-slot-clear"
-                            aria-label="Убрать карту"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="placeholder"
-                          className="ctor-slot-placeholder"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.12 }}
-                        >
-                          <span className="ctor-slot-plus">+</span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="ctor-slot-placeholder">
+                        <span className="ctor-slot-plus">+</span>
+                      </div>
+                    )}
                   </div>
                 </button>
               );
@@ -898,7 +544,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
         {/* 3. Card Browser */}
         {filledCount < 4 ? (
-          <section className="ctor-browser" ref={browserRef}>
+          <section className="ctor-browser">
             <div className="ctor-search">
               <Search className="ctor-search-icon" aria-hidden />
               <input
@@ -947,12 +593,12 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                 const blocked = used || unfit;
                 return (
                 <button
-                  key={card.name}
+                  key={card.id != null ? String(card.id) : card.name}
                   type="button"
                   disabled={blocked}
-                  onClick={(e) => {
+                  onClick={() => {
                     if (blocked) return;
-                    placeCard(card, e.currentTarget);
+                    placeCard(card);
                   }}
                   className={cn(
                     "ctor-grid-item",
@@ -1069,8 +715,8 @@ export function ConstructorDeckGrid({ cards }: { cards: DeckCard[] }) {
 
   return (
     <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-3 mb-4">
-      {sorted.map((card, i) => (
-        <div key={`${card.id}-${i}`} className="min-w-0 overflow-visible">
+      {sorted.map((card) => (
+        <div key={card.id || card.name} className="min-w-0 overflow-visible">
           <CardTile
             name={card.name}
             icon={card.icon}
