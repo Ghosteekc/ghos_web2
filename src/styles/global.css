@@ -810,9 +810,14 @@
     font-weight: 700;
     letter-spacing: 0.01em;
     transition:
+      transform var(--ui-duration-fast) var(--ui-ease-standard),
       background var(--ui-duration-fast) var(--ui-ease-standard),
       color var(--ui-duration-fast) var(--ui-ease-standard),
       border-color var(--ui-duration-fast) var(--ui-ease-standard);
+  }
+
+  .ctor-tab:active:not(:disabled) {
+    transform: scale(0.98);
   }
 
   .ctor-tab--active {
@@ -1056,9 +1061,10 @@
     filter: var(--pb-filter-raised);
     transition:
       transform var(--ui-duration-fast) var(--ui-ease-out),
-      box-shadow var(--ui-duration-fast) var(--ui-ease-out),
-      filter var(--ui-duration-fast) var(--ui-ease-out),
-      background var(--ui-duration-fast) var(--ui-ease-out);
+      opacity var(--ui-duration-fast) var(--ui-ease-out),
+      background var(--ui-duration-fast) var(--ui-ease-out),
+      color var(--ui-duration-fast) var(--ui-ease-out),
+      box-shadow var(--ui-duration-fast) var(--ui-ease-out);
   }
 
   .pixel-bevel--compact {
@@ -1072,15 +1078,17 @@
     -webkit-tap-highlight-color: transparent;
     color: rgb(var(--cr-text));
     text-shadow: var(--cr-stroke-body);
+    transform: translate(0, 0) scale(1);
     transition:
       transform var(--ui-duration-fast) var(--ui-ease-out),
-      box-shadow var(--ui-duration-fast) var(--ui-ease-out),
-      filter var(--ui-duration-fast) var(--ui-ease-out),
-      background var(--ui-duration-fast) var(--ui-ease-out);
+      opacity var(--ui-duration-fast) var(--ui-ease-out),
+      background var(--ui-duration-fast) var(--ui-ease-out),
+      color var(--ui-duration-fast) var(--ui-ease-out),
+      box-shadow var(--ui-duration-fast) var(--ui-ease-out);
   }
 
   .pixel-btn:not(.pixel-btn--ghost).pixel-btn--active {
-    transform: translate(1px, 1px);
+    transform: translate(1px, 1px) scale(1);
     background: var(--pb-bg-pressed);
     box-shadow: var(--pb-shadow-pressed), var(--pb-glow-active);
     filter: var(--pb-filter-pressed);
@@ -1100,25 +1108,14 @@
     text-shadow: var(--cr-stroke-body);
   }
 
+  /* Press feedback only — must not copy selected/ON chrome, or one click
+     flashes ON → OFF → ON between pointerdown and React class update. */
   .pixel-btn:not(.pixel-btn--ghost):active:not(:disabled) {
-    transform: translate(1px, 2px);
-    background: var(--pb-bg-pressed);
-    box-shadow: var(--pb-shadow-pressed), var(--pb-glow-active);
-    filter: var(--pb-filter-pressed);
+    transform: translate(0, 0) scale(0.98);
   }
 
-  .pixel-btn:not(.pixel-btn--ghost):active:not(:disabled)::after {
-    opacity: 0;
-  }
-
-  .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary):active:not(:disabled) {
-    color: rgb(var(--cr-gold-text));
-    text-shadow: var(--cr-stroke-title);
-  }
-
-  .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary):active:not(:disabled) .pixel-btn-hint {
-    color: rgba(251, 191, 36, 0.78);
-    text-shadow: var(--cr-stroke-body);
+  .pixel-btn:not(.pixel-btn--ghost).pixel-btn--active:active:not(:disabled) {
+    transform: translate(1px, 1px) scale(0.98);
   }
 
   .pixel-bevel::after {
@@ -1201,7 +1198,6 @@
     @apply text-cr-gold opacity-100;
   }
 
-  .pixel-btn:not(.pixel-btn--ghost):active:not(:disabled) .pixel-btn-tile-chevron,
   .pixel-btn:not(.pixel-btn--ghost).pixel-btn--active .pixel-btn-tile-chevron {
     transform: translateY(calc(-50% + 1px));
   }
@@ -1217,12 +1213,10 @@
     @apply text-cr-gold opacity-100;
   }
 
-  .pixel-btn:not(.pixel-btn--ghost):active:not(:disabled) .pixel-btn-icon-slot,
   .pixel-btn:not(.pixel-btn--ghost).pixel-btn--active .pixel-btn-icon-slot {
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
   }
 
-  .pixel-btn:not(.pixel-btn--ghost):active:not(:disabled) .pixel-btn-chevron,
   .pixel-btn:not(.pixel-btn--ghost).pixel-btn--active .pixel-btn-chevron {
     transform: translateY(calc(-50% + 1px));
   }
@@ -1277,7 +1271,6 @@
     font-weight: 800;
   }
 
-  .pixel-btn--primary:active:not(:disabled),
   .pixel-btn--primary.pixel-btn--active {
     background: linear-gradient(
       180deg,
@@ -1301,8 +1294,8 @@
   }
 
   .pixel-btn--ghost:active:not(:disabled) {
-    @apply bg-white/10;
-    transform: none;
+    transform: scale(0.98);
+    opacity: 0.88;
   }
 
   .pixel-btn--chip {
@@ -1323,15 +1316,20 @@
     @apply pixel-btn pixel-btn--chip flex-1 justify-center whitespace-nowrap text-base font-semibold text-cr-text;
   }
 
-  /* Match decks FeatureNav active: gold label + pressed volume (keep both classes) */
+  /* Match decks FeatureNav selected: gold label + pressed volume (keep both classes) */
   .filter-tab.filter-tab--active,
   .filter-tab.pixel-btn--active {
-    transform: translate(1px, 1px);
+    transform: translate(1px, 1px) scale(1);
     background: var(--pb-bg-pressed);
     box-shadow: var(--pb-shadow-pressed), var(--pb-glow-active);
     filter: var(--pb-filter-pressed);
     color: rgb(var(--cr-gold-text));
     text-shadow: var(--cr-stroke-title);
+  }
+
+  .filter-tab.filter-tab--active:active:not(:disabled),
+  .filter-tab.pixel-btn--active:active:not(:disabled) {
+    transform: translate(1px, 1px) scale(0.98);
   }
 
   .filter-tab.filter-tab--active::after,
@@ -1396,8 +1394,7 @@
       0 0 0 1px rgb(150 175 215 / 0.28);
   }
 
-  [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost).pixel-btn--active,
-  [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):active:not(:disabled) {
+  [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost).pixel-btn--active {
     --pb-glow-active:
       0 0 0 1px rgb(var(--palette-blue) / 0.22),
       0 0 8px rgb(var(--palette-blue) / 0.1);
@@ -1410,14 +1407,12 @@
       drop-shadow(0 0 0 1px rgb(var(--palette-blue) / 0.18));
   }
 
-  [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary).pixel-btn--active,
-  [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary):active:not(:disabled) {
+  [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary).pixel-btn--active {
     color: rgb(var(--cr-gold-text));
     text-shadow: none;
   }
 
-  [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary).pixel-btn--active .pixel-btn-hint,
-  [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary):active:not(:disabled) .pixel-btn-hint {
+  [data-theme="light"] .pixel-btn:not(.pixel-btn--ghost):not(.pixel-btn--primary).pixel-btn--active .pixel-btn-hint {
     color: rgb(var(--cr-gold-text) / 0.78);
     text-shadow: none;
   }
@@ -1432,7 +1427,6 @@
     color: #fff;
   }
 
-  [data-theme="light"] .pixel-btn--primary:active:not(:disabled),
   [data-theme="light"] .pixel-btn--primary.pixel-btn--active {
     background: linear-gradient(
       180deg,
@@ -1482,9 +1476,7 @@
   }
 
   .scroll-to-top-btn--visible:active {
-    transform: translate(1px, 2px);
-    box-shadow: var(--pb-shadow-pressed);
-    filter: var(--pb-filter-pressed);
+    transform: translateY(0) scale(0.98);
   }
 
   .chart-tooltip-glass {
@@ -1723,25 +1715,20 @@
   }
 
   .segment-tab.segment-tab--active {
-    transform: none;
+    transform: translate(0, 0) scale(1);
     background: var(--pb-bg-pressed);
     box-shadow: var(--pb-shadow-pressed), var(--pb-glow-active);
     filter: var(--pb-filter-pressed);
     color: rgb(var(--cr-gold));
     text-shadow: var(--cr-stroke-title);
-  }
-
-  .segment-tab.segment-tab--active:active:not(:disabled) {
-    transform: translate(0, 1px);
   }
 
   .segment-tab:active:not(:disabled) {
-    transform: translate(0, 1px);
-    background: var(--pb-bg-pressed);
-    box-shadow: var(--pb-shadow-pressed), var(--pb-glow-active);
-    filter: var(--pb-filter-pressed);
-    color: rgb(var(--cr-gold));
-    text-shadow: var(--cr-stroke-title);
+    transform: translate(0, 0) scale(0.98);
+  }
+
+  .segment-tab.segment-tab--active:active:not(:disabled) {
+    transform: translate(0, 0) scale(0.98);
   }
 
   .theme-segment-track {
@@ -1929,7 +1916,7 @@
   }
 
   .sidebar-item.active {
-    transform: translate(1px, 1px);
+    transform: translate(1px, 1px) scale(1);
     background: var(--pb-bg-pressed);
     box-shadow: var(--pb-shadow-pressed), var(--pb-glow-active);
     filter: var(--pb-filter-pressed);
@@ -1938,7 +1925,7 @@
   }
 
   .sidebar-item.active:active:not(:disabled) {
-    transform: translate(1px, 2px);
+    transform: translate(1px, 1px) scale(0.98);
   }
 
   .sidebar-item:not(.active) {
@@ -2525,7 +2512,6 @@
   [data-theme="light"] .text-cr-muted,
   [data-theme="light"] .filter-tab,
   [data-theme="light"] .filter-tab.filter-tab--active,
-  [data-theme="light"] .filter-tab:active:not(:disabled),
   [data-theme="light"] .collection-filter-tab,
   [data-theme="light"] .collection-filter-tab.collection-filter-tab--active,
   [data-theme="light"] .card-name-glow,
@@ -2547,7 +2533,6 @@
   }
 
   [data-theme="light"] .filter-tab.filter-tab--active,
-  [data-theme="light"] .filter-tab:active:not(:disabled),
   [data-theme="light"] .collection-filter-tab.collection-filter-tab--active {
     color: rgb(var(--cr-gold-text));
   }
@@ -3462,9 +3447,9 @@
   font-weight: 600;
   transition:
     transform var(--ui-duration-fast) var(--ui-ease-out),
-    box-shadow var(--ui-duration-fast) var(--ui-ease-out),
-    filter var(--ui-duration-fast) var(--ui-ease-out),
-    background var(--ui-duration-fast) var(--ui-ease-out);
+    background var(--ui-duration-fast) var(--ui-ease-out),
+    color var(--ui-duration-fast) var(--ui-ease-out),
+    box-shadow var(--ui-duration-fast) var(--ui-ease-out);
   --pb-filter-raised:
     drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.35))
     drop-shadow(0 0 0 1px rgba(0, 0, 0, 0.88));
@@ -3487,19 +3472,17 @@
 }
 
 .collection-filter-tab:active:not(:disabled) {
-  transform: translate(1px, 2px);
-  box-shadow: var(--pb-shadow-pressed);
-  filter: var(--pb-filter-pressed);
+  transform: translate(0, 0) scale(0.98);
 }
 
 .collection-filter-tab--active {
-  transform: translate(1px, 1px);
+  transform: translate(1px, 1px) scale(1);
   box-shadow: var(--pb-shadow-pressed);
   filter: var(--pb-filter-pressed);
 }
 
 .collection-filter-tab--active:active:not(:disabled) {
-  transform: translate(1px, 2px);
+  transform: translate(1px, 1px) scale(0.98);
 }
 
 .collection-filter-tab--evo {
@@ -3604,12 +3587,12 @@
 }
 
 .collection-filter-tab.collection-filter-tab--active {
-  transform: translate(1px, 1px);
+  transform: translate(1px, 1px) scale(1);
   filter: var(--pb-filter-pressed);
 }
 
 .collection-filter-tab.collection-filter-tab--active:active:not(:disabled) {
-  transform: translate(1px, 2px);
+  transform: translate(1px, 1px) scale(0.98);
 }
 
 .collection-stat-evo {

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { animate, motion, useMotionValue } from "framer-motion";
 import type { HapticIntensity } from "@/utils/hapticManager";
 import { cn } from "@/utils";
-import { haptic } from "@/utils/hapticManager";
 
 const INTENSITY_OPTIONS: { id: HapticIntensity; label: string }[] = [
   { id: "weak", label: "Слабая" },
@@ -141,7 +140,6 @@ export function HapticSegment({ value, onChange, disabled = false }: HapticSegme
             onClick={() => {
               if (disabled || option.id === value) return;
               onChange(option.id);
-              haptic.selection();
             }}
           >
             {option.label}

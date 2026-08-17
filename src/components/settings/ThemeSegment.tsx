@@ -3,7 +3,6 @@ import { animate, motion, useMotionValue } from "framer-motion";
 import { Moon, Smartphone, Sun, type LucideIcon } from "lucide-react";
 import type { AppTheme } from "@/hooks/useTheme";
 import { cn } from "@/utils";
-import { haptic } from "@/utils/hapticManager";
 
 const THEME_OPTIONS: { id: AppTheme; label: string; Icon: LucideIcon }[] = [
   { id: "dark", label: "Тёмная", Icon: Moon },
@@ -129,7 +128,6 @@ export function ThemeSegment({ value, onChange }: ThemeSegmentProps) {
             className={cn("theme-segment-tab segment-tab", active && "is-active")}
             onClick={() => {
               if (option.id === value) return;
-              haptic.selection();
               onChange(option.id);
             }}
           >

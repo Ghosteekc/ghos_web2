@@ -211,6 +211,7 @@ export function ProfileCardsPage() {
                 key={opt.id}
                 type="button"
                 onClick={() => handleSortMode(opt.id)}
+                aria-pressed={active}
                 className={
                   "pixel-btn pixel-btn--chip-sm " +
                   (active ? "pixel-btn--active text-cr-gold" : "text-cr-muted")

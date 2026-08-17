@@ -460,10 +460,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                 <button
                   key={index}
                   type="button"
-                  onClick={() => {
-                    haptic.selection();
-                    setActiveSlot(index);
-                  }}
+                  onClick={() => setActiveSlot(index)}
                   className={cn(
                     "ctor-slot constructor-slot",
                     isActive && "ctor-slot--active constructor-slot--active",
@@ -576,10 +573,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                   role="tab"
                   aria-selected={browserTab === tab.id}
                   className={cn("ctor-tab", browserTab === tab.id && "ctor-tab--active")}
-                  onClick={() => {
-                    haptic.selection();
-                    setBrowserTab(tab.id);
-                  }}
+                  onClick={() => setBrowserTab(tab.id)}
                 >
                   {tab.label}
                 </button>
