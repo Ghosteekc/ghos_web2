@@ -875,26 +875,26 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           </div>
         </section>
 
+        <div className="ctor-below">
         <p className="ctor-tip">
           <Sparkles className="ctor-tip-icon" aria-hidden />
           <span>{tip}</span>
         </p>
 
-        <button
+        <Button
           type="button"
-          className={cn("ctor-reset", filledCount === 0 && "ctor-reset--idle")}
+          variant="secondary"
+          className="ctor-reset w-full"
           onClick={resetAll}
           disabled={filledCount === 0}
-          aria-hidden={filledCount === 0}
-          tabIndex={filledCount === 0 ? -1 : undefined}
         >
-          Сбросить
-        </button>
+          Сбросить выбор карт
+        </Button>
 
         <div className="ctor-stage">
-        <p className={cn("ctor-loading-hint", !loading && "ctor-tip--empty")} aria-hidden={!loading}>
-          Собираем колоды…
-        </p>
+        {loading ? (
+          <p className="ctor-loading-hint">Собираем колоды…</p>
+        ) : null}
 
         {/* 3. Card Browser */}
         {filledCount < 4 ? (
@@ -1054,6 +1054,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         !coreConflict ? (
           <EmptyState title="Не удалось подобрать колоды для этой комбинации" className="py-6" />
         ) : null}
+        </div>
         </div>
 
         <AnimatePresence>

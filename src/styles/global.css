@@ -702,11 +702,17 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   }
 
+  .ctor-below {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
   .ctor-tip {
     display: flex;
     align-items: flex-start;
     gap: 0.45rem;
-    margin: 0.15rem 0 0;
+    margin: 0;
     padding: 0.65rem 0.75rem;
     border-radius: 0.85rem;
     background: rgb(var(--cr-gold) / 0.1);
@@ -731,27 +737,13 @@
   }
 
   .ctor-reset {
-    display: block;
     width: 100%;
-    margin-top: 0.2rem;
-    padding: 0.45rem;
-    min-height: 2.1rem;
-    border: none;
-    background: transparent;
-    color: rgb(var(--cr-muted));
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-align: center;
-  }
-
-  .ctor-reset--idle {
-    visibility: hidden;
-    pointer-events: none;
+    margin: 0;
+    min-height: 2.5rem;
   }
 
   .ctor-loading-hint {
     margin: 0;
-    min-height: 1.25rem;
     text-align: center;
     font-size: 0.82rem;
     color: rgb(var(--cr-muted));
@@ -995,7 +987,6 @@
   [data-theme="light"] .ctor-subtitle,
   [data-theme="light"] .ctor-progress,
   [data-theme="light"] .ctor-loading-hint,
-  [data-theme="light"] .ctor-reset,
   [data-theme="light"] .ctor-search-icon,
   [data-theme="light"] .ctor-search-input::placeholder,
   [data-theme="light"] .ctor-tab,
