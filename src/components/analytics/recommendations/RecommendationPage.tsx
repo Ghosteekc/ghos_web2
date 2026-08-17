@@ -41,8 +41,8 @@ function ArenaProgressHeader({ summary }: { summary: ArenaProgressSummary }) {
       </div>
       <div className="mt-3 h-2 rounded-full bg-cr-border overflow-hidden">
         <div
-          className="h-full rounded-full bg-cr-gold transition-[width] duration-[220ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]"
-          style={{ width: `${summary.progressPercent}%` }}
+          className="h-full rounded-full bg-cr-gold origin-left"
+          style={{ transform: `scaleX(${Math.max(0, Math.min(1, summary.progressPercent / 100))})` }}
         />
       </div>
     </Card>

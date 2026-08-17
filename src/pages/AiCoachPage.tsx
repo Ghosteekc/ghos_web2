@@ -58,13 +58,16 @@ export function AiCoachPage() {
   } = useGhosteekChat();
 
   const endRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const replayInputRef = useRef<HTMLInputElement>(null);
   const replayBusy = isReplayBusyStatus(replayStatus);
   const busy = loading || replayBusy;
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+    const scroller = scrollRef.current;
+    if (!scroller) return;
+    scroller.scrollTop = scroller.scrollHeight;
   }, [messages, loading, booting, replayStatus]);
 
   useEffect(() => {
@@ -136,6 +139,7 @@ export function AiCoachPage() {
         />
 
         {pageContext ? (
+          <div className="ai-context-slot">
           <div className="ai-context-chip" role="status">
             <span className="ai-context-chip-text truncate">{pageContext.label}</span>
             <button
@@ -148,11 +152,14 @@ export function AiCoachPage() {
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
-        ) : null}
+          </div>
+        ) : (
+          <div className="ai-context-slot" aria-hidden />
+        )}
       </div>
 
       <div className="ai-chat-body">
-        <div className="ai-chat-scroll">
+        <div className="ai-chat-scroll" ref={scrollRef}>
         {booting ? (
           <div className="flex justify-center py-10">
             <Loader />

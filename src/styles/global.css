@@ -39,11 +39,14 @@
     --scroll-top-bottom: calc(var(--bottom-nav-shell-height) + var(--bottom-nav-dock-inset) + 0.75rem);
     --mobile-top-inset: calc(var(--app-content-top) + 0.75rem);
     --mobile-header-offset: var(--mobile-top-inset);
-    /* UI motion ? Telegram / iOS-like (DockBar keeps its own timings) */
+    /* UI motion — Telegram / iOS-like (DockBar keeps its own timings) */
     --ui-duration: 220ms;
     --ui-duration-fast: 180ms;
+    --ui-duration-emphasized: 300ms;
     --ui-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
     --ui-ease-out: cubic-bezier(0.22, 0.08, 0.24, 1);
+    --ui-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --ui-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @supports (view-transition-name: root) {
@@ -525,7 +528,9 @@
     border-radius: 1rem;
     border: 2px solid transparent;
     background: transparent;
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition:
+      opacity var(--ui-duration-fast) var(--ui-ease-standard),
+      transform var(--ui-duration-fast) var(--ui-ease-standard);
   }
 
   .ctor-slot--dim {
@@ -595,6 +600,11 @@
       0 6px 14px rgba(0, 0, 0, 0.22);
     border: 1.5px solid rgb(var(--cr-border) / 0.45);
     overflow: visible;
+  }
+
+  /* Exit/enter of + vs card share one cell — no height jump in the well. */
+  .ctor-slot-well > * {
+    grid-area: 1 / 1;
   }
 
   /* Glow только у активного пустого слота — без бесконечной анимации на всех. */
@@ -704,6 +714,12 @@
     color: rgb(var(--cr-text));
     font-size: 0.84rem;
     line-height: 1.35;
+    min-height: 3.1rem;
+  }
+
+  .ctor-tip--empty {
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .ctor-tip-icon {
@@ -719,6 +735,7 @@
     width: 100%;
     margin-top: 0.7rem;
     padding: 0.45rem;
+    min-height: 2.1rem;
     border: none;
     background: transparent;
     color: rgb(var(--cr-muted));
@@ -727,11 +744,21 @@
     text-align: center;
   }
 
+  .ctor-reset--idle {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   .ctor-loading-hint {
-    margin: -0.35rem 0 0;
+    margin: 0;
+    min-height: 1.25rem;
     text-align: center;
     font-size: 0.82rem;
     color: rgb(var(--cr-muted));
+  }
+
+  .ctor-stage {
+    min-height: min(56vh, 32rem);
   }
 
   .ctor-browser {
@@ -802,7 +829,10 @@
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.01em;
-    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    transition:
+      background var(--ui-duration-fast) var(--ui-ease-standard),
+      color var(--ui-duration-fast) var(--ui-ease-standard),
+      border-color var(--ui-duration-fast) var(--ui-ease-standard);
   }
 
   .ctor-tab--active {
@@ -866,9 +896,14 @@
     background: transparent;
     border: none;
     overflow: visible;
-    content-visibility: auto;
-    contain-intrinsic-size: auto 7.5rem;
-    transition: transform 0.12s ease;
+    transition: transform var(--ui-duration-fast) var(--ui-ease-standard),
+      opacity var(--ui-duration-fast) var(--ui-ease-standard);
+  }
+
+  .ctor-grid-item--used,
+  .ctor-grid-item--unfit {
+    opacity: 0.38;
+    pointer-events: none;
   }
 
   .ctor-grid-item:active {
@@ -1449,9 +1484,9 @@
     bottom: var(--scroll-top-bottom);
     transform: translateY(0.5rem);
     transition:
-      opacity var(--ui-duration) var(--ui-ease),
-      transform var(--ui-duration) var(--ui-ease),
-      visibility var(--ui-duration) var(--ui-ease);
+      opacity var(--ui-duration) var(--ui-ease-standard),
+      transform var(--ui-duration) var(--ui-ease-standard),
+      visibility var(--ui-duration) var(--ui-ease-standard);
     visibility: hidden;
   }
 
@@ -2763,7 +2798,7 @@
   }
 
   .ui-enter {
-    animation: ui-enter var(--ui-duration) var(--ui-ease) both;
+    animation: ui-enter var(--ui-duration) var(--ui-ease-standard) both;
   }
 
   @keyframes ui-fade {
@@ -3643,7 +3678,7 @@
 
 /* ===== Ghosteek AI chat (layout-only; surfaces via glass-card / pixel-btn) ===== */
 .ai-chat {
-  --ai-chrome-top: 3.15rem;
+  --ai-chrome-top: 5.1rem;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -3653,10 +3688,6 @@
   margin: -0.25rem 0 0;
   overflow: hidden;
   overscroll-behavior-y: none;
-}
-
-.ai-chat:has(.ai-context-chip) {
-  --ai-chrome-top: 5.1rem;
 }
 
 @media (min-width: 1024px) {
@@ -3782,7 +3813,7 @@
 }
 
 .ai-msg-enter {
-  animation: ai-msg-enter var(--ui-duration) var(--ui-ease) both;
+  animation: ai-msg-enter var(--ui-duration) var(--ui-ease-standard) both;
 }
 
 @keyframes ai-msg-enter {
@@ -3881,6 +3912,7 @@
 
 .ai-bubble--typing {
   min-width: 3rem;
+  min-height: 2.45rem;
   padding: 0.5rem 0.7rem;
 }
 
@@ -4241,7 +4273,7 @@ button.ai-md-link {
 }
 
 .ai-replay-analysis-enter {
-  animation: ai-msg-enter var(--ui-duration) var(--ui-ease) both;
+  animation: ai-msg-enter var(--ui-duration) var(--ui-ease-standard) both;
 }
 
 .ai-replay-analysis-head {
@@ -4382,7 +4414,8 @@ button.ai-md-link {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ai-replay-analysis-enter {
+  .ai-replay-analysis-enter,
+  .ai-deck-card {
     animation: none !important;
     opacity: 1;
     transform: none;
@@ -4456,6 +4489,10 @@ button.ai-md-link {
   50% {
     opacity: 1;
   }
+}
+
+.ai-context-slot {
+  min-height: 2rem;
 }
 
 .ai-context-chip {

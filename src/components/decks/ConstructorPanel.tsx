@@ -41,10 +41,10 @@ type SlotPick = { name: string; slot: number } | null;
 const CTOR_SESSION_KEY = "ghosteek:ctor-core-v1";
 
 const SLOT_MOTION = {
-  initial: { opacity: 0, scale: 0.9, y: 6 },
+  initial: { opacity: 0, scale: 0.985, y: 6 },
   animate: { opacity: 1, scale: 1, y: 0 },
-  exit: { opacity: 0, scale: 0.92, y: -4 },
-  transition: { duration: 0.16, ease: [0.22, 1, 0.36, 1] as const },
+  exit: { opacity: 0, scale: 0.985, y: -4 },
+  transition: { duration: 0.18, ease: [0.2, 0.8, 0.2, 1] as const },
 };
 
 const SLOT_BOUNCE = {
@@ -549,8 +549,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     const q = deferredSearch.trim().toLowerCase();
     return catalog
       .filter((c) => {
-        if (usedNames.has(c.name)) return false;
-        if (slotFilterOnly && !cardFitsSlot(activeSlot, c)) return false;
         if (!matchesBrowserTab(c, browserTab)) return false;
         if (!q) return true;
         return (
@@ -560,7 +558,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         );
       })
       .sort((a, b) => (a.elixir ?? 99) - (b.elixir ?? 99) || a.name.localeCompare(b.name));
-  }, [catalog, deferredSearch, usedNames, browserTab, activeSlot, slotFilterOnly]);
+  }, [catalog, deferredSearch, browserTab]);
 
   const buildRequestRef = useRef(0);
   const slotWellRefs = useRef<(HTMLDivElement | null)[]>([null, null, null, null]);
@@ -806,7 +804,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                       slotWellRefs.current[index] = el;
                     }}
                   >
-                    <AnimatePresence initial={false} mode="popLayout">
+                    <AnimatePresence initial={false}>
                       {card ? (
                         <motion.div
                           key={card.name}
@@ -828,7 +826,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                           exit={
                             reduceMotion
                               ? undefined
-                              : { opacity: 0, scale: 0.94, transition: { duration: 0.06 } }
+                              : { opacity: 0, scale: 0.985, transition: { duration: 0.12 } }
                           }
                           transition={
                             reduceMotion
@@ -876,23 +874,27 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
             })}
           </div>
 
-          {tip ? (
-            <p className="ctor-tip">
-              <Sparkles className="ctor-tip-icon" aria-hidden />
-              <span>{tip}</span>
-            </p>
-          ) : null}
+          <p className={cn("ctor-tip", !tip && "ctor-tip--empty")}>
+            <Sparkles className="ctor-tip-icon" aria-hidden />
+            <span>{tip ?? "Выберите карты основы."}</span>
+          </p>
 
-          {filledCount > 0 ? (
-            <button type="button" className="ctor-reset" onClick={resetAll}>
-              Сбросить
-            </button>
-          ) : null}
+          <button
+            type="button"
+            className={cn("ctor-reset", filledCount === 0 && "ctor-reset--idle")}
+            onClick={resetAll}
+            disabled={filledCount === 0}
+            aria-hidden={filledCount === 0}
+            tabIndex={filledCount === 0 ? -1 : undefined}
+          >
+            Сбросить
+          </button>
         </section>
 
-        {loading ? (
-          <p className="ctor-loading-hint">Собираем колоды…</p>
-        ) : null}
+        <div className="ctor-stage">
+        <p className={cn("ctor-loading-hint", !loading && "ctor-tip--empty")} aria-hidden={!loading}>
+          Собираем колоды…
+        </p>
 
         {/* 3. Card Browser */}
         {filledCount < 4 ? (
@@ -939,16 +941,27 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
             </div>
 
             <div className={cn("ctor-grid", browserTab === "evo" && "ctor-grid--evo")}>
-              {filteredCards.map((card) => (
+              {filteredCards.map((card) => {
+                const used = usedNames.has(card.name);
+                const unfit = slotFilterOnly && !cardFitsSlot(activeSlot, card);
+                const blocked = used || unfit;
+                return (
                 <button
                   key={card.name}
                   type="button"
-                  onClick={(e) => placeCard(card, e.currentTarget)}
+                  disabled={blocked}
+                  onClick={(e) => {
+                    if (blocked) return;
+                    placeCard(card, e.currentTarget);
+                  }}
                   className={cn(
                     "ctor-grid-item",
                     browserTab === "evo" && "ctor-grid-item--evo",
+                    used && "ctor-grid-item--used",
+                    unfit && !used && "ctor-grid-item--unfit",
                   )}
                   title={nameRu(card.name)}
+                  aria-disabled={blocked}
                 >
                   {browserTab === "evo" ? (
                     <CardTile
@@ -971,7 +984,8 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                     />
                   )}
                 </button>
-              ))}
+                );
+              })}
             </div>
 
             {filteredCards.length === 0 ? <EmptyState title="Карты не найдены" /> : null}
@@ -1040,6 +1054,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         !coreConflict ? (
           <EmptyState title="Не удалось подобрать колоды для этой комбинации" className="py-6" />
         ) : null}
+        </div>
 
         <AnimatePresence>
           {helpOpen ? <ConstructorHelpSheet onClose={() => setHelpOpen(false)} /> : null}
