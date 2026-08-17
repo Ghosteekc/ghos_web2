@@ -500,7 +500,7 @@
   }
 
   .ctor-core {
-    padding: 1.1rem 0.95rem 1rem !important;
+    padding: 0.85rem 0.7rem 0.75rem !important;
     border-radius: 1.35rem !important;
     overflow: visible !important;
   }
@@ -706,7 +706,7 @@
     display: flex;
     align-items: flex-start;
     gap: 0.45rem;
-    margin: 0.9rem 0 0;
+    margin: 0.15rem 0 0;
     padding: 0.65rem 0.75rem;
     border-radius: 0.85rem;
     background: rgb(var(--cr-gold) / 0.1);
@@ -733,7 +733,7 @@
   .ctor-reset {
     display: block;
     width: 100%;
-    margin-top: 0.7rem;
+    margin-top: 0.2rem;
     padding: 0.45rem;
     min-height: 2.1rem;
     border: none;

@@ -399,8 +399,8 @@ function matchesBrowserTab(card: CatalogCard, tab: BrowserTab): boolean {
 }
 
 /** Короткая подсказка Ghosteek — только UX, не влияет на сборку. */
-function ghosteekRecommendation(names: string[]): string | null {
-  if (names.length === 0) return null;
+function ghosteekRecommendation(names: string[]): string {
+  if (names.length === 0) return "Ниже выбери любимую карту";
 
   const hasWin = names.some(
     (n) => WIN_CONDITIONS.has(n) || cardHasRole(n, "win_condition"),
@@ -873,23 +873,23 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
               );
             })}
           </div>
-
-          <p className={cn("ctor-tip", !tip && "ctor-tip--empty")}>
-            <Sparkles className="ctor-tip-icon" aria-hidden />
-            <span>{tip ?? "Выберите карты основы."}</span>
-          </p>
-
-          <button
-            type="button"
-            className={cn("ctor-reset", filledCount === 0 && "ctor-reset--idle")}
-            onClick={resetAll}
-            disabled={filledCount === 0}
-            aria-hidden={filledCount === 0}
-            tabIndex={filledCount === 0 ? -1 : undefined}
-          >
-            Сбросить
-          </button>
         </section>
+
+        <p className="ctor-tip">
+          <Sparkles className="ctor-tip-icon" aria-hidden />
+          <span>{tip}</span>
+        </p>
+
+        <button
+          type="button"
+          className={cn("ctor-reset", filledCount === 0 && "ctor-reset--idle")}
+          onClick={resetAll}
+          disabled={filledCount === 0}
+          aria-hidden={filledCount === 0}
+          tabIndex={filledCount === 0 ? -1 : undefined}
+        >
+          Сбросить
+        </button>
 
         <div className="ctor-stage">
         <p className={cn("ctor-loading-hint", !loading && "ctor-tip--empty")} aria-hidden={!loading}>
