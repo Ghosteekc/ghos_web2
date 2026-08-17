@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader, ElixirIcon } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
+import { BattleLeagueBadgeLabel, BattleLeaguePair } from "@/components/battles/BattleLeagueMark";
 import { api, ApiError } from "@/api/client";
 import { cacheGet, cacheHas } from "@/api/cache";
 import {
@@ -479,9 +480,9 @@ export function BattleDetailPage() {
       : null;
 
   const cacheKey = battleTime
-    ? `battle-time-v2:${decodeURIComponent(battleTime)}`
+    ? `battle-time-v3:${decodeURIComponent(battleTime)}`
     : index !== undefined && index !== ""
-      ? `battle-v2:${Number(index)}`
+      ? `battle-v3:${Number(index)}`
       : null;
 
   const [battle, setBattle] = useState<BattleDetail | null>(() =>
@@ -686,6 +687,7 @@ export function BattleDetailPage() {
             <Trophy className="w-5 h-5" />
             <span className="font-bold">{battle.won ? "Победа" : "Поражение"}</span>
           </div>
+          {battle.is_ranked ? <BattleLeagueBadgeLabel className="text-xs" /> : null}
           <div className={cn("text-base font-bold", getTrophyChangeColor(battle.trophy_change))}>
             {battle.trophy_change >= 0 ? "+" : ""}
             {battle.trophy_change} 🏆
@@ -706,6 +708,13 @@ export function BattleDetailPage() {
             {!battle.played_at && !(battle.duration ?? 0) ? "—" : null}
           </div>
         </div>
+        {battle.is_ranked ? (
+          <BattleLeaguePair
+            user={battle.user_league}
+            opponent={battle.opponent_league}
+            className="mt-3 pt-3 border-t border-cr-border/60"
+          />
+        ) : null}
       </Card>
 
       {battle.outcome_summary ? (

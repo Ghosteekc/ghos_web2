@@ -592,7 +592,7 @@ async function uploadReplayVideo(file: File): Promise<ReplayAnalyzeSuccess> {
 
 export const api = {
 
-  getHome: () => cachedGet<HomeData>("home-v2", "/api/home", TTL.home),
+  getHome: () => cachedGet<HomeData>("home-v3", "/api/home", TTL.home),
 
 
 
@@ -605,17 +605,17 @@ export const api = {
 
   getBattles: () =>
     cachedGet<{ battles: BattleSummary[]; cached_total: number | null; cached_winrate: number | null }>(
-      "battles-v4",
+      "battles-v5",
       "/api/battles",
       TTL.battles,
     ),
 
   getBattle: (index: number) =>
-    cachedGet<BattleDetail>(`battle-v2:${index}`, `/api/battles/${index}`, TTL.battles),
+    cachedGet<BattleDetail>(`battle-v3:${index}`, `/api/battles/${index}`, TTL.battles),
 
   getBattleByTime: (timestamp: string) =>
     cachedGet<BattleDetail>(
-      `battle-time-v2:${timestamp}`,
+      `battle-time-v3:${timestamp}`,
       `/api/battles/by-time/${encodeURIComponent(timestamp)}`,
       TTL.battles,
     ),

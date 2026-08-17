@@ -94,6 +94,13 @@ export interface Profile {
   league?: LeagueInfo | null;
 }
 
+export interface BattleLeagueBadge {
+  league_number: number;
+  league_name: string;
+  league_icon: string | null;
+  starting_trophies?: number | null;
+}
+
 export interface BattleSummary {
   index: number;
   opponent_name: string;
@@ -111,6 +118,9 @@ export interface BattleSummary {
   top_reason: string | null;
   timestamp: string;
   played_at?: string;
+  is_ranked?: boolean;
+  user_league?: BattleLeagueBadge | null;
+  opponent_league?: BattleLeagueBadge | null;
 }
 
 export interface KeyCardEntry {
@@ -220,6 +230,9 @@ export interface BattleDetail {
   match_difficulty?: MatchDifficulty | null;
   match_plan?: MatchPlan | null;
   battle_coach?: BattleCoach | null;
+  is_ranked?: boolean;
+  user_league?: BattleLeagueBadge | null;
+  opponent_league?: BattleLeagueBadge | null;
 }
 
 export interface DeckCard {

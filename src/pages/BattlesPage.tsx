@@ -18,7 +18,7 @@ type BattlesPayload = {
   cached_winrate: number | null;
 };
 
-const BATTLES_CACHE_KEY = "battles-v4";
+const BATTLES_CACHE_KEY = "battles-v5";
 
 export function BattlesPage() {
   const navigate = useNavigate();
@@ -28,7 +28,7 @@ export function BattlesPage() {
   });
   const [loading, setLoading] = useState(() => !cacheHas(BATTLES_CACHE_KEY));
   const [refreshing, setRefreshing] = useState(false);
-  const [filter, setFilter] = useState<"all" | "wins" | "losses">("all");
+  const [filter, setFilter] = useState<"all" | "wins" | "losses" | "league">("all");
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -72,6 +72,7 @@ export function BattlesPage() {
       battles.filter((b) => {
         if (filter === "wins") return b.won;
         if (filter === "losses") return !b.won;
+        if (filter === "league") return Boolean(b.is_ranked);
         return true;
       }),
     [battles, filter],
@@ -100,7 +101,7 @@ export function BattlesPage() {
       />
 
       <div className="filter-tab-row">
-        {(["all", "wins", "losses"] as const).map((f) => (
+        {(["all", "wins", "losses", "league"] as const).map((f) => (
           <button
             key={f}
             type="button"
@@ -108,7 +109,7 @@ export function BattlesPage() {
             className={cn("filter-tab", filter === f && "filter-tab--active pixel-btn--active")}
             aria-pressed={filter === f}
           >
-            {f === "all" ? "Все" : f === "wins" ? "Победы" : "Поражения"}
+            {f === "all" ? "Все" : f === "wins" ? "Победы" : f === "losses" ? "Поражения" : "Лига"}
           </button>
         ))}
       </div>
@@ -129,7 +130,7 @@ export function BattlesPage() {
           {filtered.length === 0 && (
             <EmptyState
               icon={<Trophy className="h-12 w-12 opacity-50" />}
-              title="Бои не найдены"
+              title={filter === "league" ? "Боёв в лиге нет" : "Бои не найдены"}
             />
           )}
         </div>

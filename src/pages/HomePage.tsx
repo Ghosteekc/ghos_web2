@@ -14,7 +14,7 @@ export function HomePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [lastBattle, setLastBattle] = useState<BattleSummary | null>(null);
   const [todayStats, setTodayStats] = useState<StatsOverview | null>(null);
-  const [loading, setLoading] = useState(() => !cacheHas("home-v2"));
+  const [loading, setLoading] = useState(() => !cacheHas("home-v3"));
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
