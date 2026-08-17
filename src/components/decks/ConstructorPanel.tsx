@@ -47,12 +47,52 @@ const SLOT_MOTION = {
   transition: { duration: 0.16, ease: [0.22, 1, 0.36, 1] as const },
 };
 
+const SLOT_LAND_MOTION = {
+  initial: { opacity: 0, scale: 0.92, y: 8 },
+  animate: {
+    opacity: 1,
+    scale: [0.92, 1.1, 1],
+    y: [8, -5, 0],
+  },
+  transition: { duration: 0.34, ease: [0.34, 1.45, 0.64, 1] as const },
+};
+
 type FlyMode = "in" | "out";
+
+type FlyCardSize = { width: number; height: number };
+
+/** Размер CardTile `deck` в слоте билдера (как в `.ctor-slot-card`). */
+function measureBuilderSlotCardSize(
+  wells: ReadonlyArray<HTMLElement | null>,
+  targetWell?: HTMLElement | null,
+): FlyCardSize {
+  for (const well of wells) {
+    const wrap = well?.querySelector(".card-tile-wrap") as HTMLElement | null;
+    if (!wrap?.isConnected) continue;
+    const rect = wrap.getBoundingClientRect();
+    if (rect.width >= 20 && rect.height >= 20) {
+      return { width: rect.width, height: rect.height };
+    }
+  }
+  const wellRect = (targetWell ?? wells.find(Boolean))?.getBoundingClientRect();
+  const rootPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const width = Math.min(wellRect?.width ? wellRect.width * 0.82 : rootPx * 3.45, rootPx * 3.45);
+  return { width, height: width * 1.25 };
+}
+
+function cardSizeFromElement(el: HTMLElement | null | undefined): FlyCardSize | null {
+  const wrap = el?.querySelector?.(".card-tile-wrap") as HTMLElement | null;
+  const target = wrap?.isConnected ? wrap : el;
+  if (!target?.isConnected) return null;
+  const rect = target.getBoundingClientRect();
+  if (rect.width < 20 || rect.height < 20) return null;
+  return { width: rect.width, height: rect.height };
+}
 
 /**
  * Перелёт карты внутри окна билдера.
- * Координаты относительно `.ctor-fly-layer`, финиш — точный центр выбранного слота.
- * Не гасим по prefers-reduced-motion / data-perf (на телефонах иначе анимации нет).
+ * Координаты относительно `.ctor-fly-layer`, финиш — центр слота.
+ * В слот карта летит уже в размере `deck` (как в билдере), с дугой и подпрыгиванием.
  */
 function flyCardInBuilder(opts: {
   layer: HTMLElement;
@@ -62,6 +102,7 @@ function flyCardInBuilder(opts: {
   toEl?: HTMLElement | null;
   toRect?: DOMRectReadOnly | null;
   mode: FlyMode;
+  slotCardSize?: FlyCardSize;
 }): Promise<void> {
   const { layer, iconUrl, mode } = opts;
   if (!iconUrl || !layer.isConnected) {
@@ -77,9 +118,17 @@ function flyCardInBuilder(opts: {
     (opts.toEl?.isConnected ? opts.toEl.getBoundingClientRect() : null);
   if (!from || !to || from.width < 2 || to.width < 2) return Promise.resolve();
 
-  const size = Math.max(40, Math.min(from.width, from.height, to.width * 0.92, 84));
+  const slotSize =
+    mode === "in"
+      ? opts.slotCardSize ?? cardSizeFromElement(opts.toEl) ?? { width: 55, height: 69 }
+      : cardSizeFromElement(opts.fromEl) ??
+        opts.slotCardSize ?? { width: from.width, height: from.height };
+
+  const cardW = slotSize.width;
+  const cardH = slotSize.height;
+
   const ghost = document.createElement("div");
-  ghost.className = "ctor-fly-ghost";
+  ghost.className = cn("ctor-fly-ghost", mode === "in" && "ctor-fly-ghost--in");
   ghost.setAttribute("aria-hidden", "true");
 
   const img = document.createElement("img");
@@ -90,18 +139,17 @@ function flyCardInBuilder(opts: {
   img.decoding = "sync";
   ghost.appendChild(img);
 
-  const startLeft = from.left + from.width / 2 - size / 2 - layerRect.left;
-  const startTop = from.top + from.height / 2 - size / 2 - layerRect.top;
-  const endLeft = to.left + to.width / 2 - size / 2 - layerRect.left;
-  const endTop = to.top + to.height / 2 - size / 2 - layerRect.top;
+  const startLeft = from.left + from.width / 2 - cardW / 2 - layerRect.left;
+  const startTop = from.top + from.height / 2 - cardH / 2 - layerRect.top;
+  const endLeft = to.left + to.width / 2 - cardW / 2 - layerRect.left;
+  const endTop = to.top + to.height / 2 - cardH / 2 - layerRect.top;
   const dx = endLeft - startLeft;
   const dy = endTop - startTop;
-  const hop = mode === "in" ? -Math.min(18, Math.abs(dy) * 0.18 + 8) : Math.min(14, 10);
-  const endScale = mode === "in" ? Math.min(to.width / size, to.height / size) * 0.9 : 0.62;
-  const duration = mode === "in" ? 320 : 260;
 
-  ghost.style.width = `${size}px`;
-  ghost.style.height = `${size}px`;
+  const duration = mode === "in" ? 440 : 260;
+
+  ghost.style.width = `${cardW}px`;
+  ghost.style.height = `${cardH}px`;
   ghost.style.left = `${startLeft}px`;
   ghost.style.top = `${startTop}px`;
   ghost.style.transform = "translate(0px, 0px) scale(1)";
@@ -112,6 +160,46 @@ function flyCardInBuilder(opts: {
     if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
   };
 
+  const buildInKeyframes = (): Keyframe[] => {
+    const arcLift = -Math.min(34, Math.max(14, Math.abs(dy) * 0.28 + 12));
+    const midX = dx * 0.52;
+    const midY = dy * 0.42 + arcLift;
+    const landSquash = Math.max(4, cardH * 0.06);
+    const bounceUp = -Math.min(16, Math.max(8, cardH * 0.14));
+    return [
+      { transform: "translate(0px, 0px) scale(1)", opacity: 1, offset: 0 },
+      { transform: `translate(${midX}px, ${midY}px) scale(1.04)`, opacity: 1, offset: 0.42 },
+      {
+        transform: `translate(${dx}px, ${dy + landSquash}px) scale(1.02, 0.9)`,
+        opacity: 1,
+        offset: 0.74,
+      },
+      {
+        transform: `translate(${dx}px, ${dy + bounceUp}px) scale(0.98, 1.05)`,
+        opacity: 1,
+        offset: 0.88,
+      },
+      { transform: `translate(${dx}px, ${dy}px) scale(1)`, opacity: 0, offset: 1 },
+    ];
+  };
+
+  const buildOutKeyframes = (): Keyframe[] => {
+    const hop = Math.min(14, 10);
+    return [
+      { transform: "translate(0px, 0px) scale(1)", opacity: 1, offset: 0 },
+      {
+        transform: `translate(${dx * 0.5}px, ${dy * 0.45 + hop}px) scale(0.94)`,
+        opacity: 1,
+        offset: 0.45,
+      },
+      { transform: `translate(${dx}px, ${dy}px) scale(0.62)`, opacity: 0, offset: 1 },
+    ];
+  };
+
+  const keyframes = mode === "in" ? buildInKeyframes() : buildOutKeyframes();
+  const easing =
+    mode === "in" ? "cubic-bezier(0.34, 1.35, 0.64, 1)" : "cubic-bezier(0.22, 1, 0.36, 1)";
+
   return new Promise((resolve) => {
     let settled = false;
     const done = () => {
@@ -121,25 +209,11 @@ function flyCardInBuilder(opts: {
       resolve();
     };
 
-    const keyframes: Keyframe[] = [
-      { transform: "translate(0px, 0px) scale(1)", opacity: 1, offset: 0 },
-      {
-        transform: `translate(${dx * 0.5}px, ${dy * 0.45 + hop}px) scale(${mode === "in" ? 1.05 : 0.9})`,
-        opacity: 1,
-        offset: 0.45,
-      },
-      {
-        transform: `translate(${dx}px, ${dy}px) scale(${endScale})`,
-        opacity: mode === "in" ? 0.2 : 0,
-        offset: 1,
-      },
-    ];
-
     try {
       if (typeof ghost.animate === "function") {
         const anim = ghost.animate(keyframes, {
           duration,
-          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          easing,
           fill: "forwards",
         });
         anim.addEventListener("finish", done, { once: true });
@@ -151,13 +225,13 @@ function flyCardInBuilder(opts: {
       /* fallback below */
     }
 
+    const last = keyframes[keyframes.length - 1]?.transform as string | undefined;
     ghost.style.transition =
-      `transform ${duration}ms cubic-bezier(0.22, 1, 0.36, 1), ` +
-      `opacity ${duration}ms ease-out`;
+      `transform ${duration}ms ${easing}, opacity ${duration}ms ease-out`;
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        ghost.style.transform = `translate(${dx}px, ${dy}px) scale(${endScale})`;
-        ghost.style.opacity = mode === "in" ? "0.2" : "0";
+        ghost.style.transform = last ?? `translate(${dx}px, ${dy}px) scale(1)`;
+        ghost.style.opacity = mode === "in" ? "0" : "0";
       });
     });
     ghost.addEventListener("transitionend", done, { once: true });
@@ -467,6 +541,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const flyLayerRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
   const [landingSlots, setLandingSlots] = useState<Record<number, boolean>>({});
+  const [landedSlots, setLandedSlots] = useState<Record<number, boolean>>({});
   const buildDecks = useCallback(async (current: (SlotPick)[]) => {
     const picks = current.filter((s): s is NonNullable<SlotPick> => Boolean(s));
     if (picks.length !== 4) {
@@ -527,13 +602,21 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     const iconUrl = slotIconUrl(targetSlot, card);
 
     if (sourceEl && well && layer && iconUrl) {
+      const slotCardSize = measureBuilderSlotCardSize(slotWellRefs.current, well);
       setLandingSlots((prev) => ({ ...prev, [targetSlot]: true }));
+      setLandedSlots((prev) => {
+        if (!prev[targetSlot]) return prev;
+        const next = { ...prev };
+        delete next[targetSlot];
+        return next;
+      });
       void flyCardInBuilder({
         layer,
         iconUrl,
         fromEl: sourceEl,
         toEl: well,
         mode: "in",
+        slotCardSize,
       }).finally(() => {
         setLandingSlots((prev) => {
           if (!prev[targetSlot]) return prev;
@@ -541,6 +624,15 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           delete next[targetSlot];
           return next;
         });
+        setLandedSlots((prev) => ({ ...prev, [targetSlot]: true }));
+        window.setTimeout(() => {
+          setLandedSlots((prev) => {
+            if (!prev[targetSlot]) return prev;
+            const next = { ...prev };
+            delete next[targetSlot];
+            return next;
+          });
+        }, 380);
       });
     }
 
@@ -696,11 +788,19 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                         <motion.div
                           key={card.name}
                           className="ctor-slot-card"
-                          initial={reduceMotion ? false : SLOT_MOTION.initial}
+                          initial={
+                            reduceMotion
+                              ? false
+                              : landedSlots[index]
+                                ? SLOT_LAND_MOTION.initial
+                                : SLOT_MOTION.initial
+                          }
                           animate={
                             landingSlots[index]
-                              ? { opacity: 0, scale: 0.9, y: 6 }
-                              : SLOT_MOTION.animate
+                              ? { opacity: 0, scale: 1, y: 0 }
+                              : landedSlots[index]
+                                ? SLOT_LAND_MOTION.animate
+                                : SLOT_MOTION.animate
                           }
                           exit={
                             reduceMotion
@@ -712,7 +812,9 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                               ? { duration: 0 }
                               : landingSlots[index]
                                 ? { duration: 0 }
-                                : SLOT_MOTION.transition
+                                : landedSlots[index]
+                                  ? SLOT_LAND_MOTION.transition
+                                  : SLOT_MOTION.transition
                           }
                         >
                           <CardTile

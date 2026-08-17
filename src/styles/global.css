@@ -656,9 +656,13 @@
     border: none;
     background: transparent;
     pointer-events: none;
-    transform-origin: center center;
+    transform-origin: center bottom;
     will-change: transform, opacity;
     filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.32));
+  }
+
+  .ctor-fly-ghost--in {
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.38));
   }
 
   .ctor-fly-ghost img {
