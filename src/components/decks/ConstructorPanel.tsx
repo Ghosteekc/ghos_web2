@@ -876,11 +876,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         </section>
 
         <div className="ctor-below">
-        <p className="ctor-tip">
-          <Sparkles className="ctor-tip-icon" aria-hidden />
-          <span>{tip}</span>
-        </p>
-
         <Button
           type="button"
           variant="secondary"
@@ -890,6 +885,11 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         >
           Сбросить выбор карт
         </Button>
+
+        <p className="ctor-tip">
+          <Sparkles className="ctor-tip-icon" aria-hidden />
+          <span>{tip}</span>
+        </p>
 
         <div className="ctor-stage">
         {loading ? (
