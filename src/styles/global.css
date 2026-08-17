@@ -702,13 +702,13 @@
     gap: 0.45rem;
     margin: 0;
     padding: 0.65rem 0.75rem;
-    border-radius: 0.85rem;
-    background: rgb(var(--cr-gold) / 0.1);
-    border: 1px solid rgb(var(--cr-gold) / 0.22);
     color: rgb(var(--cr-text));
     font-size: 0.84rem;
     line-height: 1.35;
     min-height: 3.1rem;
+    isolation: isolate;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
 
   .ctor-tip--empty {
@@ -1027,11 +1027,6 @@
   [data-theme="light"] .ctor-tab--active {
     border-color: rgb(var(--palette-blue) / 0.45);
     background: rgb(var(--palette-blue) / 0.12);
-  }
-
-  [data-theme="light"] .ctor-tip {
-    background: rgb(var(--palette-blue) / 0.08);
-    border-color: rgb(var(--palette-blue) / 0.2);
   }
 
   [data-theme="light"] .ctor-tip-icon {

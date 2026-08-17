@@ -529,7 +529,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           Сбросить выбор карт
         </Button>
 
-        <p className="ctor-tip">
+        <p className="ctor-tip glass-card">
           <Sparkles className="ctor-tip-icon" aria-hidden />
           <span>{tip}</span>
         </p>
