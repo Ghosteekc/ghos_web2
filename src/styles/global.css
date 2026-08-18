@@ -4589,3 +4589,152 @@ html[data-perf="low"] .chart-tooltip-glass {
   }
 }
 
+/* Meta deck card widget — layout only, does not restyle CardTile. */
+.meta-deck-card.glass-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 0.85rem 0.9rem;
+  overflow: visible;
+  transition:
+    border-color var(--ui-duration-fast) var(--ui-ease-standard),
+    box-shadow var(--ui-duration-fast) var(--ui-ease-standard);
+}
+
+.meta-deck-card.glass-card:active {
+  border-color: rgb(var(--ui-border) / calc(var(--ui-border-alpha) + 0.08));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .meta-deck-card.glass-card:hover {
+    border-color: rgb(var(--ui-border) / calc(var(--ui-border-alpha) + 0.1));
+  }
+}
+
+.meta-deck-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 1.15rem;
+}
+
+.meta-deck-rank {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: rgb(var(--cr-muted));
+  font-variant-numeric: tabular-nums;
+}
+
+.meta-deck-rank--1 {
+  color: rgb(var(--cr-gold-text));
+}
+
+.meta-deck-rank--2,
+.meta-deck-rank--3 {
+  color: rgb(var(--cr-gold-text) / 0.72);
+}
+
+.meta-deck-trend {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: opacity var(--ui-duration-fast) var(--ui-ease-standard);
+}
+
+.meta-deck-trend--up {
+  color: rgb(var(--cr-win));
+}
+
+.meta-deck-trend--down {
+  color: rgb(var(--cr-loss));
+}
+
+.meta-deck-trend--stable,
+.meta-deck-trend--muted {
+  color: rgb(var(--cr-muted));
+  font-weight: 500;
+}
+
+.meta-deck-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.meta-deck-metrics {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 0.75rem;
+}
+
+.meta-deck-games {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgb(var(--cr-text));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-deck-games-hint {
+  margin: 0.1rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.2;
+  color: rgb(var(--cr-muted));
+}
+
+.meta-deck-wr {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.meta-deck-spark {
+  min-width: 0;
+}
+
+.meta-deck-sparkline {
+  display: block;
+  width: 100%;
+  height: 20px;
+  opacity: 0.85;
+}
+
+.meta-deck-spark-caption,
+.meta-deck-spark-empty,
+.meta-deck-updated,
+.meta-deck-war-note {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.25;
+  color: rgb(var(--cr-muted));
+}
+
+.meta-deck-spark-empty {
+  padding-top: 0.1rem;
+}
+
+.meta-deck-war-name {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgb(var(--cr-text));
+}
+
+.meta-deck-war-note {
+  line-height: 1.35;
+}
+

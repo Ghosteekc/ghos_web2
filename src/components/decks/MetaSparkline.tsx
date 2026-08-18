@@ -12,9 +12,9 @@ export function MetaSparkline({ values, className }: MetaSparklineProps) {
     );
   }
 
-  const width = 96;
-  const height = 28;
-  const pad = 2;
+  const width = 160;
+  const height = 20;
+  const pad = 1.5;
   const max = Math.max(...values, 1);
   const step = (width - pad * 2) / (values.length - 1);
   const points = values
@@ -27,16 +27,17 @@ export function MetaSparkline({ values, className }: MetaSparklineProps) {
 
   return (
     <svg
-      className={cn("meta-sparkline", className)}
-      width={width}
+      className={cn("meta-deck-sparkline", className)}
+      width="100%"
       height={height}
       viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="none"
       aria-hidden
     >
       <polyline
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.75"
+        strokeWidth="1.5"
         strokeLinejoin="round"
         strokeLinecap="round"
         points={points}

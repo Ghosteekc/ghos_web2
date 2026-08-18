@@ -18,12 +18,20 @@ const TABS: { id: MetaTab; label: string }[] = [
 function formatUpdatedAt(iso: string | null | undefined) {
   if (!iso) return null;
   try {
-    return new Date(iso).toLocaleString("ru-RU", {
-      day: "2-digit",
-      month: "2-digit",
+    const date = new Date(iso);
+    const time = date.toLocaleTimeString("ru-RU", {
       hour: "2-digit",
       minute: "2-digit",
     });
+    const today = new Date();
+    if (date.toDateString() === today.toDateString()) {
+      return `сегодня, ${time}`;
+    }
+    const day = date.toLocaleDateString("ru-RU", {
+      day: "2-digit",
+      month: "2-digit",
+    });
+    return `${day}, ${time}`;
   } catch {
     return null;
   }
@@ -33,77 +41,118 @@ function formatGames(n: number) {
   return n.toLocaleString("ru-RU");
 }
 
+function gamesWord(n: number) {
+  const abs = Math.abs(n) % 100;
+  const last = abs % 10;
+  if (abs > 10 && abs < 20) return "боёв";
+  if (last === 1) return "бой";
+  if (last >= 2 && last <= 4) return "боя";
+  return "боёв";
+}
+
+function RankBadge({ rank }: { rank: number }) {
+  return (
+    <span
+      className={cn(
+        "meta-deck-rank",
+        rank === 1 && "meta-deck-rank--1",
+        rank === 2 && "meta-deck-rank--2",
+        rank === 3 && "meta-deck-rank--3",
+      )}
+    >
+      #{rank}
+    </span>
+  );
+}
+
 function TrendMark({ trend, percent }: { trend: string; percent: number | null }) {
   if (trend === "up") {
     return (
-      <span className="text-sm font-semibold text-cr-win">
+      <span className="meta-deck-trend meta-deck-trend--up">
         ↑{percent != null ? ` ${percent.toFixed(1)}%` : ""}
       </span>
     );
   }
   if (trend === "down") {
     return (
-      <span className="text-sm font-semibold text-cr-loss">
+      <span className="meta-deck-trend meta-deck-trend--down">
         ↓{percent != null ? ` ${Math.abs(percent).toFixed(1)}%` : ""}
       </span>
     );
   }
-  return <span className="text-sm text-cr-muted">→ стабильно</span>;
+  return <span className="meta-deck-trend meta-deck-trend--stable">→ стабильно</span>;
 }
 
-function LadderCard({ deck }: { deck: MetaLadderDeck }) {
+function LadderCard({ deck, index }: { deck: MetaLadderDeck; index: number }) {
   const wrClass = deck.win_rate >= 50 ? "text-cr-win" : "text-cr-loss";
+  const updated = formatUpdatedAt(deck.last_seen);
+  const historyDays = deck.history.length;
+
   return (
-    <Card noMotion>
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <span className="text-sm font-bold text-cr-gold bg-cr-gold/10 px-2 py-0.5 rounded-full border border-cr-gold/20">
-          #{deck.rank}
-        </span>
+    <Card className="meta-deck-card" delay={Math.min(index, 8) * 0.04}>
+      <div className="meta-deck-head">
+        <RankBadge rank={deck.rank} />
         {deck.history_available ? (
           <TrendMark trend={deck.trend} percent={deck.trend_percent} />
         ) : (
-          <span className="text-xs text-cr-muted">мало истории</span>
+          <span className="meta-deck-trend meta-deck-trend--muted">мало истории</span>
         )}
       </div>
-      <PlayerDeckGrid cards={deck.cards} size="lg" showLabels className="mb-4" />
-      <div className="flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-sm text-cr-text font-semibold tabular-nums">
-            {formatGames(deck.games_count)} боёв
-          </p>
-          <p className={cn("text-sm font-bold tabular-nums", wrClass)}>
-            {deck.win_rate.toFixed(1)}% WR
-          </p>
+
+      <PlayerDeckGrid
+        cards={deck.cards}
+        size="lg"
+        showLabels
+        gapClassName="gap-x-1.5 gap-y-2"
+      />
+
+      <div className="meta-deck-foot">
+        <div className="meta-deck-metrics">
+          <div className="min-w-0">
+            <p className="meta-deck-games">
+              {formatGames(deck.games_count)} {gamesWord(deck.games_count)}
+            </p>
+            <p className="meta-deck-games-hint">за выборку</p>
+          </div>
+          <p className={cn("meta-deck-wr", wrClass)}>{deck.win_rate.toFixed(1)}% WR</p>
         </div>
+
         {deck.history_available ? (
-          <MetaSparkline
-            className="text-cr-gold shrink-0"
-            values={deck.history.map((point) => point.games)}
-          />
+          <div className="meta-deck-spark">
+            <MetaSparkline
+              className="text-cr-gold/70"
+              values={deck.history.map((point) => point.games)}
+            />
+            <p className="meta-deck-spark-caption">
+              популярность{historyDays ? ` · ${historyDays} дн.` : ""}
+            </p>
+          </div>
         ) : (
-          <p className="text-xs text-cr-muted shrink-0">Недостаточно истории</p>
+          <p className="meta-deck-spark-empty">Недостаточно истории</p>
         )}
+
+        {updated ? <p className="meta-deck-updated">Обновлено {updated}</p> : null}
       </div>
-      {formatUpdatedAt(deck.last_seen) ? (
-        <p className="text-xs text-cr-muted mt-2">Последнее обновление {formatUpdatedAt(deck.last_seen)}</p>
-      ) : null}
     </Card>
   );
 }
 
-function WarCard({ deck }: { deck: MetaWarDeck }) {
+function WarCard({ deck, index }: { deck: MetaWarDeck; index: number }) {
   return (
-    <Card noMotion>
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <span className="text-sm font-bold text-cr-gold bg-cr-gold/10 px-2 py-0.5 rounded-full border border-cr-gold/20">
-          #{deck.rank}
-        </span>
-        {deck.role ? <span className="text-xs text-cr-muted">{deck.role}</span> : null}
+    <Card className="meta-deck-card" delay={Math.min(index, 8) * 0.04}>
+      <div className="meta-deck-head">
+        <RankBadge rank={deck.rank} />
+        {deck.role ? <span className="meta-deck-trend meta-deck-trend--muted">{deck.role}</span> : null}
       </div>
-      {deck.name ? <h3 className="text-sm font-semibold text-cr-text mb-2">{deck.name}</h3> : null}
-      <PlayerDeckGrid cards={deck.cards} size="lg" showLabels className="mb-4" />
+      {deck.name ? <h3 className="meta-deck-war-name">{deck.name}</h3> : null}
+      <PlayerDeckGrid
+        cards={deck.cards}
+        size="lg"
+        showLabels
+        gapClassName="gap-x-1.5 gap-y-2"
+      />
       {deck.recommendation ? (
-        <p className="text-xs text-cr-muted leading-snug">{deck.recommendation}</p>
+        <p className="meta-deck-war-note">{deck.recommendation}</p>
       ) : null}
     </Card>
   );
@@ -176,8 +225,8 @@ export function MetaPanel() {
       {!loading && !error && tab !== "clan-wars" && ladder ? (
         ladder.decks.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {ladder.decks.map((deck) => (
-              <LadderCard key={deck.deck_hash} deck={deck} />
+            {ladder.decks.map((deck, index) => (
+              <LadderCard key={deck.deck_hash} deck={deck} index={index} />
             ))}
           </div>
         ) : (
@@ -192,8 +241,8 @@ export function MetaPanel() {
               <p className="text-xs text-cr-muted">Источник: {wars.source}</p>
             ) : null}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {wars.decks.map((deck) => (
-                <WarCard key={`${deck.rank}-${deck.name}`} deck={deck} />
+              {wars.decks.map((deck, index) => (
+                <WarCard key={`${deck.rank}-${deck.name}`} deck={deck} index={index} />
               ))}
             </div>
           </div>
