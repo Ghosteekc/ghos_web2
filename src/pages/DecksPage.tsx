@@ -39,6 +39,9 @@ const ConstructorPanel = lazy(() =>
 const ConstructorDeckGrid = lazy(() =>
   import("@/components/decks/ConstructorPanel").then((m) => ({ default: m.ConstructorDeckGrid })),
 );
+const MetaPanel = lazy(() =>
+  import("@/components/decks/MetaPanel").then((m) => ({ default: m.MetaPanel })),
+);
 
 function TabSuspense({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<Loader />}>{children}</Suspense>;
@@ -108,7 +111,8 @@ export function DecksPage() {
       filter === "top" ||
       filter === "arena" ||
       filter === "constructor" ||
-      filter === "favorites"
+      filter === "favorites" ||
+      filter === "meta"
     ) {
       setLoading(false);
       setDecks([]);
@@ -165,7 +169,7 @@ export function DecksPage() {
             {filter === DECK_HOME ? (
               "До 10 последних сыгранных колод: винрейт и бои считаются постоянно. Новая колода заменяет ту, у которой меньше всего боёв."
             ) : filter === "meta" ? (
-              <>Классические мета-колоды — проверенные архетипы Clash Royale.</>
+              <>Актуальные колоды сильнейших игроков</>
             ) : filter === "top" ? (
               "Топ-10 игроков из глобального списка лидеров (Легендарный путь): колода, винрейт на ней и кубки."
             ) : filter === "arena" ? (
@@ -194,7 +198,9 @@ export function DecksPage() {
                 : filter === "arena"
                   ? "Арена"
                   : filter === "favorites"
-                    ? "Избранное"
+                  ? "Избранное"
+                  : filter === "meta"
+                    ? "Мета"
                   : `${decks.length} колод`}
           </span>
         }
@@ -206,7 +212,7 @@ export function DecksPage() {
         <Card className="text-center text-cr-win text-base">{copyHint}</Card>
       )}
 
-      {error && <ErrorState title={error} />}
+      {error && filter !== "meta" && <ErrorState title={error} />}
 
       {loading &&
       filter !== DECK_HOME &&
@@ -214,7 +220,8 @@ export function DecksPage() {
       filter !== "top" &&
       filter !== "arena" &&
       filter !== "constructor" &&
-      filter !== "favorites" ? (
+      filter !== "favorites" &&
+      filter !== "meta" ? (
         <Loader />
       ) : null}
 
@@ -310,7 +317,13 @@ export function DecksPage() {
         </TabSuspense>
       ) : null}
 
-      {(filter === "meta" || filter === "mine") && (
+      {filter === "meta" ? (
+        <TabSuspense>
+          <MetaPanel />
+        </TabSuspense>
+      ) : null}
+
+      {filter === "mine" && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
           {decks.map((deck, i) => {
             const canCompare = deck.type !== "mine" && (deck.cards?.length ?? 0) === 8;
@@ -349,7 +362,7 @@ export function DecksPage() {
             <EmptyState
               icon={<SlidersHorizontal className="h-12 w-12 opacity-50" />}
               title="Колоды не найдены"
-              description="Выберите «Мета» или сыграйте бои для раздела «Мои»"
+              description="Сыграйте бои для раздела «Мои»"
               className="col-span-full"
             />
           ) : null}

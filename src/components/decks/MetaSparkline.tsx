@@ -1,0 +1,46 @@
+import { cn } from "@/utils";
+
+type MetaSparklineProps = {
+  values: number[];
+  className?: string;
+};
+
+export function MetaSparkline({ values, className }: MetaSparklineProps) {
+  if (values.length < 2 || values.every((v) => v <= 0)) {
+    return (
+      <p className={cn("text-xs text-cr-muted", className)}>Недостаточно истории</p>
+    );
+  }
+
+  const width = 96;
+  const height = 28;
+  const pad = 2;
+  const max = Math.max(...values, 1);
+  const step = (width - pad * 2) / (values.length - 1);
+  const points = values
+    .map((value, index) => {
+      const x = pad + index * step;
+      const y = height - pad - (value / max) * (height - pad * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  return (
+    <svg
+      className={cn("meta-sparkline", className)}
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      aria-hidden
+    >
+      <polyline
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        points={points}
+      />
+    </svg>
+  );
+}

@@ -345,6 +345,59 @@ export interface ArenaDecksData {
   updated_at: string | null;
 }
 
+export interface MetaHistoryPoint {
+  day: string;
+  games: number;
+}
+
+export interface MetaLadderDeck {
+  rank: number;
+  deck_hash: string;
+  cards: DeckCard[];
+  games_count: number;
+  wins: number;
+  losses: number;
+  win_rate: number;
+  unique_players: number;
+  trend: "up" | "down" | "stable" | string;
+  trend_percent: number | null;
+  history: MetaHistoryPoint[];
+  history_available: boolean;
+  last_seen: string | null;
+  deck_link?: string | null;
+  low_sample: boolean;
+}
+
+export interface MetaLadderData {
+  mode: string;
+  status: string;
+  message: string | null;
+  sample_note: string;
+  updated_at: string | null;
+  min_games: number;
+  decks: MetaLadderDeck[];
+}
+
+export interface MetaWarDeck {
+  rank: number;
+  cards: DeckCard[];
+  name: string;
+  role: string;
+  recommendation: string;
+  deck_link?: string | null;
+}
+
+export interface MetaWarData {
+  mode: string;
+  status: string;
+  message: string | null;
+  source: string;
+  source_url: string;
+  updated_at: string | null;
+  sample_note: string;
+  decks: MetaWarDeck[];
+}
+
 export interface DeckCompareCardNote {
   card: string;
   card_ru: string;

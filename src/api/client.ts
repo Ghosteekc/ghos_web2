@@ -27,6 +27,8 @@ import {
   DecksListData,
 
   ArenaDecksData,
+  MetaLadderData,
+  MetaWarData,
 
   DeckCompareResult,
   MineDeckStats,
@@ -662,6 +664,15 @@ export const api = {
 
   getArenaDecks: () =>
     cachedGet<ArenaDecksData>("arena-decks-v10", "/api/decks/arena", TTL.arenaDecks),
+
+  getMetaLeague: () =>
+    cachedGet<MetaLadderData>("meta-league-v1", "/api/meta/league", TTL.meta),
+
+  getMetaTrophies: () =>
+    cachedGet<MetaLadderData>("meta-trophies-v1", "/api/meta/trophies", TTL.meta),
+
+  getMetaClanWars: () =>
+    cachedGet<MetaWarData>("meta-clan-wars-v1", "/api/meta/clan-wars", TTL.meta),
 
 
 

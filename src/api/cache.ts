@@ -85,6 +85,7 @@ export const TTL = {
   catalog: 24 * 60 * 60_000,
   topPlayers: 10 * 60_000,
   arenaDecks: 15 * 60_000,
+  meta: 5 * 60_000,
 } as const;
 
 function sleep(ms: number) {
