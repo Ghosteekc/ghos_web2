@@ -54,7 +54,7 @@ function TrendMark({ trend, percent }: { trend: string; percent: number | null }
 function LadderCard({ deck }: { deck: MetaLadderDeck }) {
   const wrClass = deck.win_rate >= 50 ? "text-cr-win" : "text-cr-loss";
   return (
-    <Card noMotion className="p-3">
+    <Card noMotion>
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className="text-sm font-bold text-cr-gold bg-cr-gold/10 px-2 py-0.5 rounded-full border border-cr-gold/20">
           #{deck.rank}
@@ -65,7 +65,7 @@ function LadderCard({ deck }: { deck: MetaLadderDeck }) {
           <span className="text-xs text-cr-muted">мало истории</span>
         )}
       </div>
-      <PlayerDeckGrid cards={deck.cards} size="sm" className="mb-3" />
+      <PlayerDeckGrid cards={deck.cards} size="lg" showLabels className="mb-4" />
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm text-cr-text font-semibold tabular-nums">
@@ -93,7 +93,7 @@ function LadderCard({ deck }: { deck: MetaLadderDeck }) {
 
 function WarCard({ deck }: { deck: MetaWarDeck }) {
   return (
-    <Card noMotion className="p-3">
+    <Card noMotion>
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className="text-sm font-bold text-cr-gold bg-cr-gold/10 px-2 py-0.5 rounded-full border border-cr-gold/20">
           #{deck.rank}
@@ -101,7 +101,7 @@ function WarCard({ deck }: { deck: MetaWarDeck }) {
         {deck.role ? <span className="text-xs text-cr-muted">{deck.role}</span> : null}
       </div>
       {deck.name ? <h3 className="text-sm font-semibold text-cr-text mb-2">{deck.name}</h3> : null}
-      <PlayerDeckGrid cards={deck.cards} size="sm" className="mb-2" />
+      <PlayerDeckGrid cards={deck.cards} size="lg" showLabels className="mb-4" />
       {deck.recommendation ? (
         <p className="text-xs text-cr-muted leading-snug">{deck.recommendation}</p>
       ) : null}

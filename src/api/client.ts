@@ -666,10 +666,10 @@ export const api = {
     cachedGet<ArenaDecksData>("arena-decks-v10", "/api/decks/arena", TTL.arenaDecks),
 
   getMetaLeague: () =>
-    cachedGet<MetaLadderData>("meta-league-v1", "/api/meta/league", TTL.meta),
+    cachedGet<MetaLadderData>("meta-league-v2", "/api/meta/league", TTL.meta),
 
   getMetaTrophies: () =>
-    cachedGet<MetaLadderData>("meta-trophies-v1", "/api/meta/trophies", TTL.meta),
+    cachedGet<MetaLadderData>("meta-trophies-v2", "/api/meta/trophies", TTL.meta),
 
   getMetaClanWars: () =>
     cachedGet<MetaWarData>("meta-clan-wars-v1", "/api/meta/clan-wars", TTL.meta),

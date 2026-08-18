@@ -51,10 +51,10 @@ const DECK_HOME = "stats";
 
 const DECK_NAV = [
   { id: "top", label: DECK_FILTER_LABELS.top, emoji: "👑" },
-  { id: "meta", label: DECK_FILTER_LABELS.meta, emoji: "🔥" },
+  { id: "constructor", label: DECK_FILTER_LABELS["constructor"], emoji: "🛠️" },
   { id: "arena", label: DECK_FILTER_LABELS.arena, emoji: "🏟️" },
   { id: "favorites", label: DECK_FILTER_LABELS.favorites, emoji: "⭐" },
-  { id: "constructor", label: DECK_FILTER_LABELS["constructor"], emoji: "🛠️" },
+  { id: "meta", label: DECK_FILTER_LABELS.meta, emoji: "🔥" },
   { id: "random", label: DECK_FILTER_LABELS.random, emoji: "🎲" },
 ] as const;
 
