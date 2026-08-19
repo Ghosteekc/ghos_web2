@@ -3,7 +3,7 @@ import { Card, Loader, ErrorState, EmptyState } from "@/components/ui";
 import { PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
 import { cn } from "@/utils";
-import { derivePopularityTrend } from "@/utils/metaTrend";
+import { derivePopularityTrend, type PopularityTrend } from "@/utils/metaTrend";
 import { usePageRefresh } from "@/hooks";
 import type { MetaLadderData, MetaLadderDeck, MetaWarData, MetaWarDeck } from "@/types";
 import { MetaSparkline } from "./MetaSparkline";
@@ -66,22 +66,26 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
-function TrendMark({ trend, percent }: { trend: string; percent: number | null }) {
+function TrendMark({ trend }: { trend: PopularityTrend }) {
   if (trend === "up") {
     return (
-      <span className="meta-deck-trend meta-deck-trend--up">
-        ↑{percent != null ? ` ${percent.toFixed(1)}%` : ""}
+      <span className="meta-deck-trend meta-deck-trend--up" title="Популярность растёт">
+        ↑
       </span>
     );
   }
   if (trend === "down") {
     return (
-      <span className="meta-deck-trend meta-deck-trend--down">
-        ↓{percent != null ? ` ${Math.abs(percent).toFixed(1)}%` : ""}
+      <span className="meta-deck-trend meta-deck-trend--down" title="Популярность падает">
+        ↓
       </span>
     );
   }
-  return <span className="meta-deck-trend meta-deck-trend--stable">→ стабильно</span>;
+  return (
+    <span className="meta-deck-trend meta-deck-trend--stable" title="Популярность стабильна">
+      →
+    </span>
+  );
 }
 
 function LadderCard({ deck, index }: { deck: MetaLadderDeck; index: number }) {
@@ -96,7 +100,7 @@ function LadderCard({ deck, index }: { deck: MetaLadderDeck; index: number }) {
       <div className="meta-deck-head">
         <RankBadge rank={deck.rank} />
         {deck.history_available ? (
-          <TrendMark trend={popularityTrend.trend} percent={popularityTrend.percent} />
+          <TrendMark trend={popularityTrend} />
         ) : (
           <span className="meta-deck-trend meta-deck-trend--muted">мало истории</span>
         )}

@@ -1,52 +1,55 @@
-const TREND_UP_PCT = 12;
-const TREND_DOWN_PCT = -12;
+export type PopularityTrend = "up" | "down" | "stable";
 
-function trendFromCounts(
-  recent: number,
-  previous: number,
-): { trend: "up" | "down" | "stable"; percent: number | null } {
-  if (previous <= 0 && recent <= 0) {
-    return { trend: "stable", percent: null };
-  }
-  if (previous <= 0) {
-    return { trend: "stable", percent: null };
-  }
-
-  const percent = Math.round(((recent - previous) / previous) * 1000) / 10;
-  if (percent >= TREND_UP_PCT) {
-    return { trend: "up", percent };
-  }
-  if (percent <= TREND_DOWN_PCT) {
-    return { trend: "down", percent };
-  }
-  return { trend: "stable", percent };
+function mean(values: number[]) {
+  if (values.length === 0) return 0;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-export function derivePopularityTrend(values: number[]) {
-  if (values.length < 4) {
-    return { trend: "stable" as const, percent: null };
+function linearSlope(values: number[]) {
+  const n = values.length;
+  if (n < 2) return 0;
+
+  let sumX = 0;
+  let sumY = 0;
+  let sumXY = 0;
+  let sumXX = 0;
+  for (let index = 0; index < n; index += 1) {
+    sumX += index;
+    sumY += values[index];
+    sumXY += index * values[index];
+    sumXX += index * index;
   }
 
-  const window = Math.min(7, Math.max(3, Math.floor(values.length / 4)));
-  if (values.length >= window * 2) {
-    const recent = values.slice(-window).reduce((sum, value) => sum + value, 0);
-    const previous = values.slice(-window * 2, -window).reduce((sum, value) => sum + value, 0);
+  const denom = n * sumXX - sumX * sumX;
+  if (denom === 0) return 0;
+  return (n * sumXY - sumX * sumY) / denom;
+}
 
-    if (values.length >= 3) {
-      const tail = values.slice(-3);
-      if (tail[0] > tail[1] && tail[1] > tail[2] && tail[0] >= 2) {
-        const tailPercent = Math.round(((tail[2] - tail[0]) / tail[0]) * 1000) / 10;
-        if (tailPercent <= -15) {
-          return { trend: "down" as const, percent: tailPercent };
-        }
-      }
-    }
+/**
+ * Trend matches the right edge of the popularity sparkline:
+ * first compare the last day vs the previous day, then the 7-day slope.
+ */
+export function derivePopularityTrend(values: number[]): PopularityTrend {
+  if (values.length < 2) return "stable";
 
-    return trendFromCounts(recent, previous);
+  const tailLen = Math.min(7, values.length);
+  const tail = values.slice(-tailLen);
+  const tailSum = tail.reduce((sum, value) => sum + value, 0);
+  if (tailSum <= 0) return "stable";
+
+  const last = tail[tail.length - 1];
+  const prev = tail[tail.length - 2];
+  const segmentThreshold = Math.max(1, prev * 0.15);
+
+  if (prev > 0) {
+    const segmentChange = last - prev;
+    if (segmentChange <= -segmentThreshold) return "down";
+    if (segmentChange >= segmentThreshold) return "up";
   }
 
-  const half = Math.max(1, Math.floor(values.length / 2));
-  const recent = values.slice(-half).reduce((sum, value) => sum + value, 0);
-  const previous = values.slice(0, half).reduce((sum, value) => sum + value, 0);
-  return trendFromCounts(recent, previous);
+  const slope = linearSlope(tail);
+  const slopeThreshold = Math.max(0.35, mean(tail) * 0.12);
+  if (slope >= slopeThreshold) return "up";
+  if (slope <= -slopeThreshold) return "down";
+  return "stable";
 }
