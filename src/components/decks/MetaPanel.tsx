@@ -3,6 +3,7 @@ import { Card, Loader, ErrorState, EmptyState } from "@/components/ui";
 import { PlayerDeckGrid } from "@/components/cards";
 import { api, ApiError } from "@/api/client";
 import { cn } from "@/utils";
+import { derivePopularityTrend } from "@/utils/metaTrend";
 import { usePageRefresh } from "@/hooks";
 import type { MetaLadderData, MetaLadderDeck, MetaWarData, MetaWarDeck } from "@/types";
 import { MetaSparkline } from "./MetaSparkline";
@@ -87,13 +88,15 @@ function LadderCard({ deck, index }: { deck: MetaLadderDeck; index: number }) {
   const wrClass = deck.win_rate >= 50 ? "text-cr-win" : "text-cr-loss";
   const updated = formatUpdatedAt(deck.last_seen);
   const historyDays = deck.history.length;
+  const historyValues = deck.history.map((point) => point.games);
+  const popularityTrend = derivePopularityTrend(historyValues);
 
   return (
     <Card className="meta-deck-card" delay={Math.min(index, 8) * 0.04}>
       <div className="meta-deck-head">
         <RankBadge rank={deck.rank} />
         {deck.history_available ? (
-          <TrendMark trend={deck.trend} percent={deck.trend_percent} />
+          <TrendMark trend={popularityTrend.trend} percent={popularityTrend.percent} />
         ) : (
           <span className="meta-deck-trend meta-deck-trend--muted">мало истории</span>
         )}
@@ -112,7 +115,6 @@ function LadderCard({ deck, index }: { deck: MetaLadderDeck; index: number }) {
             <p className="meta-deck-games">
               {formatGames(deck.games_count)} {gamesWord(deck.games_count)}
             </p>
-            <p className="meta-deck-games-hint">за выборку</p>
           </div>
           <p className={cn("meta-deck-wr", wrClass)}>{deck.win_rate.toFixed(1)}% WR</p>
         </div>
@@ -121,7 +123,7 @@ function LadderCard({ deck, index }: { deck: MetaLadderDeck; index: number }) {
           <div className="meta-deck-spark">
             <MetaSparkline
               className="text-cr-gold/70"
-              values={deck.history.map((point) => point.games)}
+              values={historyValues}
             />
             <p className="meta-deck-spark-caption">
               популярность{historyDays ? ` · ${historyDays} дн.` : ""}

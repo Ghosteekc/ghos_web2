@@ -25,7 +25,7 @@ export const DECK_FILTER_LABELS: Record<string, string> = {
 
 export const UI = {
   winrate: "Винрейт",
-  winrateShort: "ВР",
+  winrateShort: "WR",
   games: "Игр",
   battles: "боёв",
   avgElixir: "Ср. эликсир",

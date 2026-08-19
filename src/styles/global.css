@@ -4639,19 +4639,22 @@ html[data-perf="low"] .chart-tooltip-glass {
 
 .meta-deck-trend {
   flex-shrink: 0;
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.88rem;
+  font-weight: 700;
   line-height: 1;
+  letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
   transition: opacity var(--ui-duration-fast) var(--ui-ease-standard);
 }
 
 .meta-deck-trend--up {
   color: rgb(var(--cr-win));
+  font-size: 1rem;
 }
 
 .meta-deck-trend--down {
   color: rgb(var(--cr-loss));
+  font-size: 1rem;
 }
 
 .meta-deck-trend--stable,
