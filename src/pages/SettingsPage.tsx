@@ -303,14 +303,22 @@ export function SettingsPage() {
           <Card className="space-y-3">
             <div className="flex items-center gap-4">
               <div className="flex-1 min-w-0">
-                <p className="text-base font-semibold text-cr-muted">Username</p>
-                <p className="text-cr-text font-semibold">@{tg?.initDataUnsafe?.user?.username ?? "—"}</p>
                 {profile?.player_tag ? (
-                  <p className="text-sm text-cr-muted mt-1 font-mono">
-                    CR: {formatPlayerTag(profile.player_tag)}
-                  </p>
+                  <>
+                    <p className="text-base font-semibold text-cr-muted">Игрок</p>
+                    <p className="text-cr-text font-semibold truncate">
+                      {profile.player_name?.trim() || "Без имени"}
+                    </p>
+                    <p className="text-sm text-cr-accent mt-1 font-mono">
+                      {formatPlayerTag(profile.player_tag)}
+                    </p>
+                  </>
                 ) : (
-                  <p className="text-sm text-cr-muted mt-1">Clash Royale не привязан</p>
+                  <>
+                    <p className="text-base font-semibold text-cr-muted">Аккаунт CR</p>
+                    <p className="text-cr-text font-semibold">Не привязан</p>
+                    <p className="text-sm text-cr-muted mt-1">Привяжите тег в боте: /link #ТЕГ</p>
+                  </>
                 )}
               </div>
               <button

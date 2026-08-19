@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { User } from "lucide-react";
 import { Card, Button, Loader, ErrorState, PageHeader } from "@/components/ui";
 import { ProfileCollectionNav } from "@/components/profile/ProfileCollectionNav";
 import { CardLevelScale } from "@/components/profile/CardLevelScale";
 import { ProfileStatGrid } from "@/components/profile/ProfileStatGrid";
 import { LeagueBanner, resolveLeagueInfo } from "@/components/profile/LeagueBanner";
 import { SupercellDisclaimer } from "@/components/home/SupercellDisclaimer";
-import { useTelegram, usePageRefresh } from "@/hooks";
+import { usePageRefresh } from "@/hooks";
 import { api } from "@/api/client";
 import { Profile } from "@/types";
 import { formatPlayerTag } from "@/utils";
@@ -14,7 +13,6 @@ import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 import { cacheHas } from "@/api/cache";
 
 export function ProfilePage() {
-  const { user } = useTelegram();
   const { nameRu } = useCardCatalog();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(() => !cacheHas("profile-v8"));
@@ -100,22 +98,6 @@ export function ProfilePage() {
           </div>
         </Card>
       )}
-
-      <Card className="!p-3">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 shrink-0 rounded-full bg-cr-surface border border-cr-border flex items-center justify-center">
-            <User className="w-5 h-5 text-cr-muted" />
-          </div>
-          <div className="min-w-0">
-          <p className="text-label mb-1">Telegram</p>
-          <h2 className="text-[16px] font-bold text-cr-text truncate">
-            {user?.first_name ?? user?.username ?? "—"}
-          </h2>
-          <p className="text-cr-accent text-base font-semibold mt-0.5 truncate">@{user?.username ?? "—"}</p>
-          <p className="text-sm text-cr-accent font-medium mt-1">ID: {user?.id ?? "—"}</p>
-          </div>
-        </div>
-      </Card>
 
       {league ? (
         <Card className="!py-3 !px-4">

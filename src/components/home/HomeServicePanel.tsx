@@ -53,8 +53,13 @@ export function HomeServicePanel({ profile, onNavigate }: HomeServicePanelProps)
           <p className="text-sm text-cr-muted uppercase tracking-wide">Аккаунт CR</p>
         </div>
         <p className="text-lg font-bold text-cr-text truncate">
-          {tagLinked ? formatPlayerTag(profile.player_tag!) : "Не привязан"}
+          {tagLinked ? profile.player_name?.trim() || "Игрок" : "Не привязан"}
         </p>
+        {tagLinked ? (
+          <p className="text-sm text-cr-accent font-mono mt-1 truncate">
+            {formatPlayerTag(profile.player_tag!)}
+          </p>
+        ) : null}
         <p className="text-sm text-cr-muted mt-1 truncate">
           {tagLinked
             ? profile.clan_name
