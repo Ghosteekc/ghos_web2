@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { Card, Loader, ErrorState, EmptyState } from "@/components/ui";
+import { ExternalLink } from "lucide-react";
+import { Card, Loader, ErrorState, EmptyState, Button } from "@/components/ui";
 import { PlayerDeckGrid } from "@/components/cards";
+import { FavoriteDeckButton } from "@/components/decks/FavoriteDeckButton";
 import { api, ApiError } from "@/api/client";
 import { cn } from "@/utils";
 import { derivePopularityTrend, type PopularityTrend } from "@/utils/metaTrend";
-import { usePageRefresh } from "@/hooks";
-import type { MetaLadderData, MetaLadderDeck, MetaWarData, MetaWarDeck } from "@/types";
+import { usePageRefresh, useTelegram } from "@/hooks";
+import type { DeckCard, MetaLadderData, MetaLadderDeck, MetaWarData, MetaWarDeck } from "@/types";
 import { MetaSparkline } from "./MetaSparkline";
 
 type MetaTab = "league" | "trophies" | "clan-wars";
@@ -88,7 +90,69 @@ function TrendMark({ trend }: { trend: PopularityTrend }) {
   );
 }
 
-function LadderCard({ deck, index }: { deck: MetaLadderDeck; index: number }) {
+function MetaDeckActions({
+  cards,
+  deckLink,
+  onMessage,
+}: {
+  cards: DeckCard[];
+  deckLink?: string | null;
+  onMessage: (msg: string) => void;
+}) {
+  const { openLink } = useTelegram();
+  const cardNames = cards.map((card) => card.name).filter(Boolean);
+  const canFavorite = cardNames.length === 8;
+  const canImport = Boolean(deckLink);
+
+  if (!canImport && !canFavorite) return null;
+
+  const importDeck = async () => {
+    if (!deckLink) return;
+    if (openLink) {
+      openLink(deckLink);
+      onMessage("Открываем Clash Royale для импорта колоды…");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(deckLink);
+      onMessage("Ссылка на колоду скопирована");
+    } catch {
+      onMessage("Откройте приложение из Telegram для импорта колоды");
+    }
+  };
+
+  return (
+    <div className="meta-deck-actions">
+      {canImport ? (
+        <Button
+          variant="secondary"
+          className="flex-1 !py-2 text-sm flex items-center justify-center gap-1.5"
+          onClick={() => void importDeck()}
+        >
+          <ExternalLink className="w-4 h-4 shrink-0" />
+          В игру
+        </Button>
+      ) : (
+        <p className="flex-1 text-xs text-cr-muted text-center self-center leading-snug px-1">
+          Импорт недоступен
+        </p>
+      )}
+      {canFavorite ? (
+        <FavoriteDeckButton cards={cardNames} onMessage={onMessage} />
+      ) : null}
+    </div>
+  );
+}
+
+function LadderCard({
+  deck,
+  index,
+  onMessage,
+}: {
+  deck: MetaLadderDeck;
+  index: number;
+  onMessage: (msg: string) => void;
+}) {
   const wrClass = deck.win_rate >= 50 ? "text-cr-win" : "text-cr-loss";
   const updated = formatUpdatedAt(deck.last_seen);
   const historyDays = deck.history.length;
@@ -138,12 +202,22 @@ function LadderCard({ deck, index }: { deck: MetaLadderDeck; index: number }) {
         )}
 
         {updated ? <p className="meta-deck-updated">Обновлено {updated}</p> : null}
+
+        <MetaDeckActions cards={deck.cards} deckLink={deck.deck_link} onMessage={onMessage} />
       </div>
     </Card>
   );
 }
 
-function WarCard({ deck, index }: { deck: MetaWarDeck; index: number }) {
+function WarCard({
+  deck,
+  index,
+  onMessage,
+}: {
+  deck: MetaWarDeck;
+  index: number;
+  onMessage: (msg: string) => void;
+}) {
   return (
     <Card className="meta-deck-card" delay={Math.min(index, 8) * 0.04}>
       <div className="meta-deck-head">
@@ -160,6 +234,7 @@ function WarCard({ deck, index }: { deck: MetaWarDeck; index: number }) {
       {deck.recommendation ? (
         <p className="meta-deck-war-note">{deck.recommendation}</p>
       ) : null}
+      <MetaDeckActions cards={deck.cards} deckLink={deck.deck_link} onMessage={onMessage} />
     </Card>
   );
 }
@@ -170,6 +245,12 @@ export function MetaPanel() {
   const [wars, setWars] = useState<MetaWarData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionHint, setActionHint] = useState<string | null>(null);
+
+  const showActionHint = useCallback((msg: string) => {
+    setActionHint(msg);
+    window.setTimeout(() => setActionHint(null), 3000);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -221,6 +302,9 @@ export function MetaPanel() {
 
       {sampleNote ? <p className="text-xs text-cr-muted leading-snug">{sampleNote}</p> : null}
       {updatedLabel ? <p className="text-xs text-cr-muted">Обновлено: {updatedLabel}</p> : null}
+      {actionHint ? (
+        <Card className="text-center text-cr-win text-sm py-2">{actionHint}</Card>
+      ) : null}
       {!loading && !error && statusMessage && tab !== "clan-wars" && ladder && ladder.decks.length ? (
         <p className="text-xs text-cr-muted">{statusMessage}</p>
       ) : null}
@@ -232,7 +316,7 @@ export function MetaPanel() {
         ladder.decks.length ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {ladder.decks.map((deck, index) => (
-              <LadderCard key={deck.deck_hash} deck={deck} index={index} />
+              <LadderCard key={deck.deck_hash} deck={deck} index={index} onMessage={showActionHint} />
             ))}
           </div>
         ) : (
@@ -248,7 +332,7 @@ export function MetaPanel() {
             ) : null}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {wars.decks.map((deck, index) => (
-                <WarCard key={`${deck.rank}-${deck.name}`} deck={deck} index={index} />
+                <WarCard key={`${deck.rank}-${deck.name}`} deck={deck} index={index} onMessage={showActionHint} />
               ))}
             </div>
           </div>

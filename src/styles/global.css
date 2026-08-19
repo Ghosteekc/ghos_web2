@@ -4741,3 +4741,13 @@ html[data-perf="low"] .chart-tooltip-glass {
   line-height: 1.35;
 }
 
+.meta-deck-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.meta-deck-actions .btn {
+  min-height: 2.25rem;
+}
