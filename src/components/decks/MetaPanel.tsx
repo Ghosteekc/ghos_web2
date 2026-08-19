@@ -320,7 +320,7 @@ export function MetaPanel() {
             ))}
           </div>
         ) : (
-          <EmptyState title={statusMessage || "Недостаточно данных для формирования актуальной меты."} />
+          <EmptyState title={statusMessage || ladder?.message || "Недостаточно данных для формирования актуальной меты."} />
         )
       ) : null}
 
