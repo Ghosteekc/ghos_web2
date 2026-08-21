@@ -82,8 +82,8 @@ export function ProfilePage() {
               <p className="text-cr-accent text-base font-bold font-mono mt-1">
                 {formatPlayerTag(profile.player_tag)}
               </p>
-              <p className="text-sm text-emerald-400/90 font-semibold mt-2 truncate">
-                <span className="text-emerald-400/60 font-medium">Клан · </span>
+              <p className="text-sm text-cr-win font-semibold mt-2 truncate">
+                <span className="text-cr-win/70 font-medium">Клан · </span>
                 {profile.clan_name?.trim() || "Без клана"}
               </p>
               <p className="text-sm text-cr-accent font-semibold mt-1 truncate">
