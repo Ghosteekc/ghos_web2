@@ -190,7 +190,7 @@ export function AnalyticsPage() {
           <Button
             variant="secondary"
             onClick={() => navigate("/ai")}
-            className="text-sm shrink-0 !px-3 !py-2 !min-h-[2.5rem] gap-1.5"
+            className="text-sm shrink-0 !px-3 !py-1.5 !min-h-0 !h-10 gap-1.5"
           >
             <Bot className="w-4 h-4 shrink-0" aria-hidden />
             Ghosteek AI

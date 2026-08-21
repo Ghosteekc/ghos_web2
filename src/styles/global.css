@@ -2892,6 +2892,8 @@
     gap: 0.75rem;
     width: 100%;
     min-width: 0;
+    /* Keep title chrome height identical with/without trailing actions */
+    min-height: 2.5rem;
   }
 
   .page-header-bar--leading .page-header-title-row {
@@ -2927,13 +2929,17 @@
     white-space: nowrap;
     min-width: 0;
     flex: 1 1 auto;
+    height: 2rem;
+    line-height: 2rem;
+    display: flex;
+    align-items: center;
   }
 
   .page-title {
     @apply text-2xl font-cr tracking-tight;
     color: rgb(var(--cr-gold-text));
     text-shadow: var(--cr-stroke-title);
-    line-height: 1.15;
+    line-height: 2rem;
     letter-spacing: -0.01em;
   }
 
