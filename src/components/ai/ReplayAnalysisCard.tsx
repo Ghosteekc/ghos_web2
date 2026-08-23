@@ -99,6 +99,13 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
         </section>
       ) : null}
 
+      {analysis.groundedLimitations ? (
+        <section className="ai-replay-section">
+          <h3 className="ai-replay-section-title">Ограничения анализа</h3>
+          <p className="ai-replay-section-body whitespace-pre-wrap">{analysis.groundedLimitations}</p>
+        </section>
+      ) : null}
+
       {visualMoments.length > 0 ? (
         <section className="ai-replay-section">
           <h3 className="ai-replay-section-title">Ключевые моменты</h3>
@@ -125,9 +132,9 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
                       {formatReplayMomentTime(m.timestampSeconds)}
                     </span>
                     <span className="ai-replay-tl-title">{m.title}</span>
-                    <span className="ai-replay-visual-sub">
-                      Vision · {Math.round(Math.max(0, Math.min(1, m.confidence)) * 100)}%
-                    </span>
+                    {m.shortDescription ? (
+                      <span className="ai-replay-visual-sub">{m.shortDescription}</span>
+                    ) : null}
                   </span>
                 </button>
               </li>
@@ -252,8 +259,8 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
               />
             ) : null}
             <p className="ai-replay-lightbox-caption">
-              {formatReplayMomentTime(lightbox.timestampSeconds)} · {lightbox.title} · Vision ·{" "}
-              {Math.round(Math.max(0, Math.min(1, lightbox.confidence)) * 100)}%
+              {formatReplayMomentTime(lightbox.timestampSeconds)} · {lightbox.title}
+              {lightbox.shortDescription ? ` — ${lightbox.shortDescription}` : null}
             </p>
           </div>
         </div>

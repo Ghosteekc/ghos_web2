@@ -42,6 +42,7 @@ export type ReplayVisualMomentView = {
   timestampSeconds: number;
   eventType: string;
   title: string;
+  shortDescription: string | null;
   cardName: string | null;
   confidence: number;
   previewBase64: string | null;
@@ -52,6 +53,7 @@ export type ReplayVisualMomentView = {
 
 export type ReplayAnalysisView = {
   coachSummary: string;
+  groundedLimitations: string | null;
   improvements: string[];
   positives: string[];
   moments: ReplayTimelineMoment[];
@@ -420,11 +422,17 @@ export function buildReplayAnalysis(
     if (eventType === "unknown") continue;
     const cardName =
       typeof vm.card_name === "string" && vm.card_name.trim() ? vm.card_name.trim() : null;
-    const title = cardName || eventType.replace(/_/g, " ");
+    const apiTitle = typeof vm.title === "string" && vm.title.trim() ? vm.title.trim() : "";
+    const title = apiTitle || cardName || "Момент на поле";
+    const shortDescription =
+      typeof vm.short_description === "string" && vm.short_description.trim()
+        ? vm.short_description.trim()
+        : null;
     visualMoments.push({
       timestampSeconds: Number(vm.timestamp_seconds) || 0,
       eventType,
       title,
+      shortDescription,
       cardName,
       confidence: Number(vm.confidence) || 0,
       previewBase64:
@@ -439,9 +447,18 @@ export function buildReplayAnalysis(
 
   const hasEvidence =
     moments.length > 0 || confirmedCardNames.length > 0 || visualMoments.length > 0;
-  const coachSummary = humanizeCoachSummary(facts.coach_reply || tactical?.summary || "", {
-    hasMoments: hasEvidence,
-  });
+  const groundedSummary =
+    typeof facts.grounded_summary === "string" ? facts.grounded_summary.trim() : "";
+  const groundedLimitations =
+    typeof facts.grounded_limitations === "string" && facts.grounded_limitations.trim()
+      ? facts.grounded_limitations.trim()
+      : null;
+  const coachSummary = humanizeCoachSummary(
+    groundedSummary || facts.coach_reply || tactical?.summary || "",
+    {
+      hasMoments: hasEvidence,
+    },
+  );
   const improvements = humanizeImprovementLines(
     [...parseStringList(tactical?.recommendations, 6), ...parseStringList(tactical?.possible_mistakes, 4)],
     { hasEvidence },
@@ -464,6 +481,7 @@ export function buildReplayAnalysis(
   return {
     coachSummary:
       coachSummary || (hasEvidence ? WITH_MOMENTS_LEAD : INSUFFICIENT_COACH_SUMMARY),
+    groundedLimitations,
     improvements: hasEvidence ? improvements : improvements.slice(0, 1),
     positives: hasEvidence ? positives : [],
     moments: moments.slice(0, 14),
@@ -488,6 +506,10 @@ function parseMoment(raw: unknown): ReplayTimelineMoment | null {
 function parseAnalysis(raw: unknown): ReplayAnalysisView | null {
   if (!isRecord(raw)) return null;
   const coachSummary = typeof raw.coachSummary === "string" ? raw.coachSummary.trim() : "";
+  const groundedLimitations =
+    typeof raw.groundedLimitations === "string" && raw.groundedLimitations.trim()
+      ? raw.groundedLimitations.trim()
+      : null;
   const improvements = parseStringList(raw.improvements, 8);
   const positives = parseStringList(raw.positives, 8);
   const moments = Array.isArray(raw.moments)
@@ -515,6 +537,7 @@ function parseAnalysis(raw: unknown): ReplayAnalysisView | null {
       coachSummary || (hasEvidence ? WITH_MOMENTS_LEAD : INSUFFICIENT_COACH_SUMMARY),
       { hasMoments: hasEvidence },
     ),
+    groundedLimitations,
     improvements: humanizeImprovementLines(improvements, { hasEvidence }),
     positives: positives
       .map(stripTechnicalFragments)
@@ -535,6 +558,10 @@ function parseVisualMoment(raw: unknown): ReplayVisualMomentView | null {
     timestampSeconds: Number(raw.timestampSeconds) || 0,
     eventType: eventType || "unknown",
     title: title || eventType || "Момент",
+    shortDescription:
+      typeof raw.shortDescription === "string" && raw.shortDescription.trim()
+        ? raw.shortDescription.trim()
+        : null,
     cardName: typeof raw.cardName === "string" ? raw.cardName : null,
     confidence: Number(raw.confidence) || 0,
     previewBase64: typeof raw.previewBase64 === "string" ? raw.previewBase64 : null,

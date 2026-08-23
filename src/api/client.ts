@@ -484,6 +484,10 @@ export type ReplayAnalyzeSuccess = {
       clip_available?: boolean;
       preview_base64?: string | null;
       source?: string;
+      title?: string | null;
+      short_description?: string | null;
+      explanation_kind?: string | null;
+      explanation_source?: string | null;
     }[];
     battle_timeline?: {
       duration_seconds: number;
@@ -547,6 +551,9 @@ export type ReplayAnalyzeSuccess = {
     } | null;
     coach_reply?: string | null;
     coach_source?: string | null;
+    grounded_summary?: string | null;
+    grounded_limitations?: string | null;
+    grounded_summary_source?: string | null;
     game_state_observations?: Record<string, unknown>[];
     elixir_observations?: {
       kind: string;
