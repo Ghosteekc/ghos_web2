@@ -4357,6 +4357,106 @@ button.ai-md-link {
   background: rgb(0 0 0 / 0.25);
 }
 
+.ai-replay-visual-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.ai-replay-visual-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.35rem 0.4rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 0.5rem;
+  background: rgb(0 0 0 / 0.18);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ai-replay-visual-btn:hover {
+  background: rgb(255 255 255 / 0.06);
+}
+
+.ai-replay-visual-thumb {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 0.35rem;
+  object-fit: cover;
+  object-position: center top;
+  flex-shrink: 0;
+  background: rgb(0 0 0 / 0.3);
+}
+
+.ai-replay-visual-thumb--empty {
+  display: inline-block;
+}
+
+.ai-replay-visual-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.ai-replay-visual-sub {
+  font-size: 0.72rem;
+  opacity: 0.72;
+}
+
+.ai-replay-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: rgb(0 0 0 / 0.72);
+}
+
+.ai-replay-lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: none;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+  cursor: pointer;
+}
+
+.ai-replay-lightbox-body {
+  max-width: min(92vw, 36rem);
+  text-align: center;
+}
+
+.ai-replay-lightbox-body img {
+  display: block;
+  width: 100%;
+  max-height: min(70vh, 28rem);
+  object-fit: contain;
+  border-radius: 0.5rem;
+  background: #000;
+}
+
+.ai-replay-lightbox-caption {
+  margin: 0.65rem 0 0;
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
 .ai-replay-cards {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

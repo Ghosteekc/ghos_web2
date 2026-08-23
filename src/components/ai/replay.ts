@@ -38,11 +38,24 @@ export type ReplayTimelineMoment = {
   imageBase64?: string | null;
 };
 
+export type ReplayVisualMomentView = {
+  timestampSeconds: number;
+  eventType: string;
+  title: string;
+  cardName: string | null;
+  confidence: number;
+  previewBase64: string | null;
+  evidenceId: string | null;
+  clipId: string | null;
+  clipAvailable: boolean;
+};
+
 export type ReplayAnalysisView = {
   coachSummary: string;
   improvements: string[];
   positives: string[];
   moments: ReplayTimelineMoment[];
+  visualMoments: ReplayVisualMomentView[];
   confirmedCardNames: string[];
 };
 
@@ -399,7 +412,33 @@ export function buildReplayAnalysis(
   }
   moments.sort((a, b) => a.timestampSeconds - b.timestampSeconds || a.kind.localeCompare(b.kind));
 
-  const hasEvidence = moments.length > 0 || confirmedCardNames.length > 0;
+  const visualMoments: ReplayVisualMomentView[] = [];
+  const rawVisual = Array.isArray(facts.visual_moments) ? facts.visual_moments : [];
+  for (const vm of rawVisual.slice(0, 6)) {
+    if (!vm || typeof vm !== "object") continue;
+    const eventType = typeof vm.event_type === "string" ? vm.event_type : "unknown";
+    if (eventType === "unknown") continue;
+    const cardName =
+      typeof vm.card_name === "string" && vm.card_name.trim() ? vm.card_name.trim() : null;
+    const title = cardName || eventType.replace(/_/g, " ");
+    visualMoments.push({
+      timestampSeconds: Number(vm.timestamp_seconds) || 0,
+      eventType,
+      title,
+      cardName,
+      confidence: Number(vm.confidence) || 0,
+      previewBase64:
+        typeof vm.preview_base64 === "string" && vm.preview_base64.trim()
+          ? vm.preview_base64.trim()
+          : null,
+      evidenceId: typeof vm.evidence_id === "string" ? vm.evidence_id : null,
+      clipId: typeof vm.clip_id === "string" ? vm.clip_id : null,
+      clipAvailable: Boolean(vm.clip_available),
+    });
+  }
+
+  const hasEvidence =
+    moments.length > 0 || confirmedCardNames.length > 0 || visualMoments.length > 0;
   const coachSummary = humanizeCoachSummary(facts.coach_reply || tactical?.summary || "", {
     hasMoments: hasEvidence,
   });
@@ -412,7 +451,13 @@ export function buildReplayAnalysis(
     .filter(Boolean)
     .filter((x) => !isTechnicalCoachLine(x));
 
-  if (!coachSummary && improvements.length === 0 && moments.length === 0 && positives.length === 0) {
+  if (
+    !coachSummary &&
+    improvements.length === 0 &&
+    moments.length === 0 &&
+    positives.length === 0 &&
+    visualMoments.length === 0
+  ) {
     return null;
   }
 
@@ -422,6 +467,7 @@ export function buildReplayAnalysis(
     improvements: hasEvidence ? improvements : improvements.slice(0, 1),
     positives: hasEvidence ? positives : [],
     moments: moments.slice(0, 14),
+    visualMoments,
     confirmedCardNames,
   };
 }
@@ -447,11 +493,23 @@ function parseAnalysis(raw: unknown): ReplayAnalysisView | null {
   const moments = Array.isArray(raw.moments)
     ? raw.moments.map(parseMoment).filter((m): m is ReplayTimelineMoment => Boolean(m))
     : [];
+  const visualMoments = Array.isArray(raw.visualMoments)
+    ? raw.visualMoments
+        .map(parseVisualMoment)
+        .filter((m): m is ReplayVisualMomentView => Boolean(m))
+    : [];
   const confirmedCardNames = parseStringList(raw.confirmedCardNames, 8);
-  if (!coachSummary && improvements.length === 0 && moments.length === 0 && positives.length === 0) {
+  if (
+    !coachSummary &&
+    improvements.length === 0 &&
+    moments.length === 0 &&
+    positives.length === 0 &&
+    visualMoments.length === 0
+  ) {
     return null;
   }
-  const hasEvidence = moments.length > 0 || confirmedCardNames.length > 0;
+  const hasEvidence =
+    moments.length > 0 || confirmedCardNames.length > 0 || visualMoments.length > 0;
   return {
     coachSummary: humanizeCoachSummary(
       coachSummary || (hasEvidence ? WITH_MOMENTS_LEAD : INSUFFICIENT_COACH_SUMMARY),
@@ -463,7 +521,26 @@ function parseAnalysis(raw: unknown): ReplayAnalysisView | null {
       .filter(Boolean)
       .filter((x) => !isTechnicalCoachLine(x)),
     moments,
+    visualMoments,
     confirmedCardNames,
+  };
+}
+
+function parseVisualMoment(raw: unknown): ReplayVisualMomentView | null {
+  if (!isRecord(raw)) return null;
+  const eventType = typeof raw.eventType === "string" ? raw.eventType.trim() : "";
+  const title = typeof raw.title === "string" ? raw.title.trim() : eventType;
+  if (!eventType && !title) return null;
+  return {
+    timestampSeconds: Number(raw.timestampSeconds) || 0,
+    eventType: eventType || "unknown",
+    title: title || eventType || "Момент",
+    cardName: typeof raw.cardName === "string" ? raw.cardName : null,
+    confidence: Number(raw.confidence) || 0,
+    previewBase64: typeof raw.previewBase64 === "string" ? raw.previewBase64 : null,
+    evidenceId: typeof raw.evidenceId === "string" ? raw.evidenceId : null,
+    clipId: typeof raw.clipId === "string" ? raw.clipId : null,
+    clipAvailable: Boolean(raw.clipAvailable),
   };
 }
 

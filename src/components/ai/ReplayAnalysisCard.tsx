@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Clapperboard } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Clapperboard, X } from "lucide-react";
+import { api } from "@/api/client";
 import { CardTile } from "@/components/cards";
 import {
   formatReplayConfidenceLabel,
@@ -7,6 +8,7 @@ import {
   formatReplayFramesLabel,
   formatReplayMomentTime,
   type AiReplayCardData,
+  type ReplayVisualMomentView,
 } from "@/components/ai/replay";
 import { Button } from "@/components/ui";
 import { cn } from "@/utils";
@@ -16,13 +18,49 @@ type Props = {
   onAnalyzeAnother?: () => void;
 };
 
+function ReplayEvidenceClip({
+  clipId,
+  fallbackBase64,
+}: {
+  clipId: string;
+  fallbackBase64: string | null;
+}) {
+  const [src, setSrc] = useState<string | null>(
+    fallbackBase64 ? `data:image/jpeg;base64,${fallbackBase64}` : null,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    void (async () => {
+      try {
+        const blob = await api.fetchReplayEvidence(clipId);
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setSrc(objectUrl);
+      } catch {
+        /* keep frame fallback */
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [clipId]);
+
+  if (!src) return null;
+  return <img src={src} alt="" />;
+}
+
 export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [lightbox, setLightbox] = useState<ReplayVisualMomentView | null>(null);
   const analysis = card.analysis;
   if (!analysis) return null;
 
   const confidenceLabel = formatReplayConfidenceLabel(card.confidence);
   const framesLabel = formatReplayFramesLabel(card.framesAnalyzed);
+  const visualMoments = analysis.visualMoments ?? [];
 
   const previewMoments = analysis.moments.slice(0, expanded ? analysis.moments.length : 6);
   const previewImprovements = analysis.improvements.slice(
@@ -61,7 +99,42 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
         </section>
       ) : null}
 
-      {previewMoments.length > 0 ? (
+      {visualMoments.length > 0 ? (
+        <section className="ai-replay-section">
+          <h3 className="ai-replay-section-title">Ключевые моменты</h3>
+          <ul className="ai-replay-visual-list">
+            {visualMoments.map((m, i) => (
+              <li key={`${m.eventType}-${m.timestampSeconds}-${i}`}>
+                <button
+                  type="button"
+                  className="ai-replay-visual-btn"
+                  onClick={() => setLightbox(m)}
+                >
+                  {m.previewBase64 ? (
+                    <img
+                      className="ai-replay-visual-thumb"
+                      src={`data:image/jpeg;base64,${m.previewBase64}`}
+                      alt={m.title}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="ai-replay-visual-thumb ai-replay-visual-thumb--empty" />
+                  )}
+                  <span className="ai-replay-visual-meta">
+                    <span className="ai-replay-tl-time">
+                      {formatReplayMomentTime(m.timestampSeconds)}
+                    </span>
+                    <span className="ai-replay-tl-title">{m.title}</span>
+                    <span className="ai-replay-visual-sub">
+                      Vision · {Math.round(Math.max(0, Math.min(1, m.confidence)) * 100)}%
+                    </span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : previewMoments.length > 0 ? (
         <section className="ai-replay-section">
           <h3 className="ai-replay-section-title">Ключевые моменты</h3>
           <ol className="ai-replay-timeline">
@@ -153,6 +226,38 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
           </Button>
         ) : null}
       </div>
+
+      {lightbox ? (
+        <div
+          className="ai-replay-lightbox"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            type="button"
+            className="ai-replay-lightbox-close"
+            aria-label="Закрыть"
+            onClick={() => setLightbox(null)}
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div className="ai-replay-lightbox-body" onClick={(e) => e.stopPropagation()}>
+            {lightbox.clipAvailable && lightbox.clipId ? (
+              <ReplayEvidenceClip clipId={lightbox.clipId} fallbackBase64={lightbox.previewBase64} />
+            ) : lightbox.previewBase64 ? (
+              <img
+                src={`data:image/jpeg;base64,${lightbox.previewBase64}`}
+                alt={lightbox.title}
+              />
+            ) : null}
+            <p className="ai-replay-lightbox-caption">
+              {formatReplayMomentTime(lightbox.timestampSeconds)} · {lightbox.title} · Vision ·{" "}
+              {Math.round(Math.max(0, Math.min(1, lightbox.confidence)) * 100)}%
+            </p>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

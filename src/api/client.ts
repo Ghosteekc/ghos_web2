@@ -468,6 +468,23 @@ export type ReplayAnalyzeSuccess = {
       kind: string;
       image_base64: string;
     }[];
+    visual_moments?: {
+      event_type: string;
+      timestamp_seconds: number;
+      card_name?: string | null;
+      confidence: number;
+      evidence_frame: {
+        timestamp_seconds: number;
+        frame_index: number;
+        width?: number | null;
+        height?: number | null;
+      };
+      evidence_id?: string | null;
+      clip_id?: string | null;
+      clip_available?: boolean;
+      preview_base64?: string | null;
+      source?: string;
+    }[];
     battle_timeline?: {
       duration_seconds: number;
       events: {
@@ -928,6 +945,29 @@ export const api = {
     }),
 
   analyzeReplay: (file: File) => uploadReplayVideo(file),
+
+  /** Opaque evidence bytes (JPEG/WebP). Never accepts filesystem paths. */
+  fetchReplayEvidence: async (evidenceId: string): Promise<Blob> => {
+    const safeId = evidenceId.trim();
+    if (!safeId || /[/\\]/.test(safeId) || safeId.includes("..") || safeId.length > 64) {
+      throw new ApiError(formatApiError("Evidence not found", "E404"), 404, "E404");
+    }
+    await waitForInitData();
+    const headers: Record<string, string> = {
+      "X-Telegram-Init-Data": getInitData(),
+    };
+    if (usesDirectTunnel()) {
+      headers["Bypass-Tunnel-Reminder"] = "true";
+    }
+    const res = await fetch(apiUrl(`/api/ai/replay/evidence/${encodeURIComponent(safeId)}`), {
+      method: "GET",
+      headers,
+    });
+    if (!res.ok) {
+      throw new ApiError(formatApiError("Evidence not found", "E404"), res.status, "E404");
+    }
+    return res.blob();
+  },
 };
 
 
