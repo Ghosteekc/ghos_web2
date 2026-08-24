@@ -11,6 +11,8 @@ export { useGlobalButtonHaptics } from "./useGlobalButtonHaptics";
 export { useDisableSystemGestures } from "./useDisableSystemGestures";
 export { useHapticSettingsBootstrap } from "./useHapticSettingsBootstrap";
 export { useSettings } from "./useSettings";
+export { useGhosteekPro } from "./useGhosteekPro";
+export type { GhosteekPro } from "./useGhosteekPro";
 export { applyTheme, loadStoredTheme, resolveTheme, initTheme } from "./useTheme";
 export type { AppTheme } from "./useTheme";
 export function useTelegram() {

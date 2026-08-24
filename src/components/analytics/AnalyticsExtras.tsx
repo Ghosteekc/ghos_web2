@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, Swords, Wand2, ChevronDown, ChevronUp, RefreshCw, ExternalLink, Brain, ChevronRight, ScanSearch, BarChart3 } from "lucide-react";
-import { api, ApiError } from "@/api/client";
+import { api, ApiError, isProRequiredError } from "@/api/client";
 import { cacheGet, cacheHas, cacheInvalidate } from "@/api/cache";
 import { Card, Button, Loader, ErrorState, EmptyState } from "@/components/ui";
 import { CardDeckGrid, CardTile, PlayerDeckGrid } from "@/components/cards";
-import { useCardCatalog, usePageRefresh, useTelegram } from "@/hooks";
+import { ProGate } from "@/components/pro";
+import { useCardCatalog, useGhosteekPro, usePageRefresh, useTelegram } from "@/hooks";
 import { battleDetailPath, cn } from "@/utils";
 import type { CounterDeckData, CustomizeData, Deck, InsightsData, OpponentEntry, WinrateEntry } from "@/types";
 
@@ -317,30 +318,48 @@ export function DeckToolsPanel() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [proLocked, setProLocked] = useState(false);
   const [showIssues, setShowIssues] = useState(false);
   const { nameRu } = useCardCatalog();
+  const { isPro, loading: proLoading } = useGhosteekPro();
 
   const load = useCallback(async (force = false) => {
+    if (!isPro) {
+      setCustomize(null);
+      setProLocked(true);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     try {
       setError(null);
+      setProLocked(false);
       if (force) {
         cacheInvalidate("customize-v7");
       }
-      const custom = await api.getCustomizeDeck().catch(() => null);
+      const custom = await api.getCustomizeDeck();
       setCustomize(custom);
       if (!custom) {
         setError("Недостаточно боёв для рекомендаций");
       }
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Ошибка загрузки");
+      setCustomize(null);
+      if (isProRequiredError(e)) {
+        setProLocked(true);
+        setError(null);
+      } else {
+        setProLocked(false);
+        setError(e instanceof ApiError ? e.message : "Ошибка загрузки");
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isPro]);
 
   useEffect(() => {
+    if (proLoading) return;
     void load();
-  }, [load]);
+  }, [load, proLoading]);
 
   const synergyNeeded = Boolean(
     customize &&
@@ -353,7 +372,16 @@ export function DeckToolsPanel() {
       (customize && !synergyNeeded && !levelAltNeeded && upgrades.length === 0),
   );
 
-  if (loading) return <Loader />;
+  if (proLoading || loading) return <Loader />;
+  if (proLocked) {
+    return (
+      <ProGate
+        feature="deck_improve"
+        title="Улучшение колоды"
+        description="Подбор замен и улучшений для твоей колоды доступен в Ghosteek Pro."
+      />
+    );
+  }
   if (error && !customize) return <ErrorState title={error} />;
 
   return (

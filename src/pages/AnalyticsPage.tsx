@@ -15,8 +15,7 @@ import {
 import { TrendingUp, TrendingDown, Swords, Bot } from "lucide-react";
 import { StatsOverview } from "@/types";
 import { Card, FeatureNavGrid, Loader, ScrollToTopButton, Button, ErrorState, PageHeader } from "@/components/ui";
-import { api, isProRequiredError } from "@/api/client";
-import { ProGate } from "@/components/pro";
+import { api } from "@/api/client";
 import { cacheGet, lsGet, TTL } from "@/api/cache";
 import { getWinColor } from "@/utils";
 
@@ -80,7 +79,6 @@ export function AnalyticsPage() {
   const [stats, setStats] = useState<StatsOverview | null>(() => bootstrapStats());
   const [loading, setLoading] = useState(() => !bootstrapStats());
   const [error, setError] = useState<string | null>(null);
-  const [proLocked, setProLocked] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
@@ -92,16 +90,12 @@ export function AnalyticsPage() {
     }
     try {
       setError(null);
-      setProLocked(false);
       const data = await api.getStats();
       setStats(data);
     } catch (e) {
       const fallback = bootstrapStats();
       if (fallback) {
         setStats(fallback);
-        setError(null);
-      } else if (isProRequiredError(e)) {
-        setProLocked(true);
         setError(null);
       } else {
         setError(e instanceof Error ? e.message : "Ошибка загрузки");
@@ -175,19 +169,6 @@ export function AnalyticsPage() {
 
   if (loading && section === null) {
     return <Loader />;
-  }
-
-  if (proLocked && section === null) {
-    return (
-      <div className="space-y-4">
-        <PageHeader title="Аналитика" />
-        <ProGate
-          feature="battle_detail"
-          title="Аналитика в Ghosteek Pro"
-          description="Расширенная статистика, тренды винрейта, соперники и улучшение колод доступны с Ghosteek Pro."
-        />
-      </div>
-    );
   }
 
   if ((error || !stats) && section === null) {

@@ -5,7 +5,7 @@ import { CardLevelScale } from "@/components/profile/CardLevelScale";
 import { ProfileStatGrid } from "@/components/profile/ProfileStatGrid";
 import { LeagueBanner, resolveLeagueInfo } from "@/components/profile/LeagueBanner";
 import { SupercellDisclaimer } from "@/components/home/SupercellDisclaimer";
-import { ProStatusBanner } from "@/components/pro";
+import { ProHeaderChip } from "@/components/pro";
 import { usePageRefresh } from "@/hooks";
 import { api } from "@/api/client";
 import { Profile } from "@/types";
@@ -48,7 +48,10 @@ export function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Профиль" />
+      <PageHeader
+        title="Профиль"
+        action={<ProHeaderChip subscription={profile?.subscription} />}
+      />
 
       {error && (
         <ErrorState title={error} button="Повторить" onAction={() => void load()} />
@@ -99,8 +102,6 @@ export function ProfilePage() {
           </div>
         </Card>
       )}
-
-      {profile ? <ProStatusBanner subscription={profile.subscription} /> : null}
 
       {league ? (
         <Card className="!py-3 !px-4">
