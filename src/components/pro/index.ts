@@ -2,6 +2,10 @@ export { ProBadge, ProGate, ProLockCard } from "./ProLock";
 export type { ProLockCardProps } from "./ProLock";
 export { ProStatusBanner } from "./ProStatusBanner";
 export { ProHeaderChip } from "./ProHeaderChip";
+export { ProHero } from "./ProHero";
+export { ProFeatureShowcase } from "./ProFeatureShowcase";
+export { ProPlanPicker } from "./ProPlanPicker";
+export { ProStarPrice } from "./ProStarPrice";
 export {
   PRO_FEATURES,
   PRO_TAGLINE,
