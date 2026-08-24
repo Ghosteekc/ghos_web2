@@ -34,6 +34,7 @@ import {
   MineDeckStats,
   ProInvoice,
   ProStatus,
+  ProTrialResponse,
   RecommendDeckResponse,
   InsightsData,
   WinrateEntry,
@@ -672,6 +673,12 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ plan_id: planId }),
     }),
+
+  startProTrial: () => {
+    cacheInvalidate(PRO_STATUS_KEY);
+    cacheInvalidate("profile-v8");
+    return request<ProTrialResponse>("/api/pro/trial", { method: "POST" });
+  },
 
 
 

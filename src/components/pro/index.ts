@@ -6,6 +6,7 @@ export { ProHero } from "./ProHero";
 export { ProFeatureShowcase } from "./ProFeatureShowcase";
 export { ProPlanPicker } from "./ProPlanPicker";
 export { ProStarPrice } from "./ProStarPrice";
+export { ProTrialOffer } from "./ProTrialOffer";
 export {
   PRO_FEATURES,
   PRO_TAGLINE,

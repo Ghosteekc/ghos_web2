@@ -5,13 +5,21 @@ import { PRO_TITLE, daysLeftWord, formatProExpiry } from "./proFeatures";
 
 interface ProHeroProps {
   isPro: boolean;
+  isTrial?: boolean;
   expired: boolean;
   expiresAt: string | null;
   daysLeft: number | null;
   onGetPro?: () => void;
 }
 
-export function ProHero({ isPro, expired, expiresAt, daysLeft, onGetPro }: ProHeroProps) {
+export function ProHero({
+  isPro,
+  isTrial = false,
+  expired,
+  expiresAt,
+  daysLeft,
+  onGetPro,
+}: ProHeroProps) {
   const until = formatProExpiry(expiresAt);
 
   return (
@@ -26,12 +34,20 @@ export function ProHero({ isPro, expired, expiresAt, daysLeft, onGetPro }: ProHe
             </p>
             {isPro ? (
               <>
-                <h2 className="pro-hero__title">Подписка активна</h2>
+                <h2 className="pro-hero__title">
+                  {isTrial ? "Пробный период активен" : "Подписка активна"}
+                </h2>
                 <p className="pro-hero__subtitle text-cr-gold">
-                  {until ? `До ${until}` : "Без ограничения по сроку"}
-                  {daysLeft != null && daysLeft > 0
-                    ? ` · ${daysLeft} ${daysLeftWord(daysLeft)}`
-                    : null}
+                  {daysLeft != null && daysLeft > 0 ? (
+                    <>
+                      Осталось {daysLeft} {daysLeftWord(daysLeft)}
+                      {until ? ` · до ${until}` : ""}
+                    </>
+                  ) : until ? (
+                    `Действует до ${until}`
+                  ) : (
+                    "Без ограничения по сроку"
+                  )}
                 </p>
               </>
             ) : (
@@ -62,7 +78,12 @@ export function ProHero({ isPro, expired, expiresAt, daysLeft, onGetPro }: ProHe
         <div className="flex flex-wrap items-center gap-2 pt-0.5">
           <span className="pro-hero__pill">5 Pro-функций</span>
           {isPro ? (
-            <span className="pro-hero__pill pro-hero__pill--active">Pro активен</span>
+            <>
+              {isTrial ? (
+                <span className="pro-hero__pill pro-hero__pill--trial">Пробный Pro</span>
+              ) : null}
+              <span className="pro-hero__pill pro-hero__pill--active">Pro активен</span>
+            </>
           ) : null}
         </div>
 
@@ -72,7 +93,9 @@ export function ProHero({ isPro, expired, expiresAt, daysLeft, onGetPro }: ProHe
           </Button>
         ) : isPro ? (
           <p className="text-xs text-cr-muted leading-snug">
-            Любая покупка ниже продлевает подписку с текущей даты окончания.
+            {isTrial
+              ? "После пробного периода оформите подписку ниже, чтобы сохранить доступ."
+              : "Любая покупка ниже продлевает подписку с текущей даты окончания."}
           </p>
         ) : null}
       </div>

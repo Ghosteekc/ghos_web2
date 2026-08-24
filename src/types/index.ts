@@ -97,8 +97,23 @@ export interface ProStatus {
   days_left: number | null;
   plan_id: string | null;
   trial_used: boolean;
+  trial_available: boolean;
+  trial_days: number;
+  is_trial: boolean;
   expired: boolean;
   plans: ProPlan[];
+}
+
+export interface ProTrialResponse {
+  ok: boolean;
+  activated: boolean;
+  message: string;
+  is_pro: boolean;
+  expires_at: string | null;
+  days_left: number | null;
+  plan_id: string | null;
+  trial_used: boolean;
+  is_trial: boolean;
 }
 
 export interface ProInvoice {

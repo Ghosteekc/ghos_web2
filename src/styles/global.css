@@ -5059,6 +5059,16 @@ html[data-perf="low"] .chart-tooltip-glass {
   color: rgb(var(--cr-win));
 }
 
+.pro-hero__pill--trial {
+  background: rgb(var(--cr-blue) / 0.14);
+  border-color: rgb(var(--cr-blue) / 0.32);
+  color: rgb(var(--cr-blue));
+}
+
+.pro-trial-offer {
+  border-color: rgb(var(--cr-blue) / 0.28);
+}
+
 .pro-feature-primary {
   padding: 1rem 1.125rem;
   border-color: rgb(var(--cr-gold) / 0.32);

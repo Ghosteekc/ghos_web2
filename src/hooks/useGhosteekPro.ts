@@ -10,6 +10,9 @@ export interface GhosteekPro {
   planId: string | null;
   expired: boolean;
   trialUsed: boolean;
+  trialAvailable: boolean;
+  trialDays: number;
+  isTrial: boolean;
   plans: ProPlan[];
   status: ProStatus | null;
   loading: boolean;
@@ -52,6 +55,9 @@ export function useGhosteekPro(): GhosteekPro {
     planId: status?.plan_id ?? null,
     expired: status?.expired ?? false,
     trialUsed: status?.trial_used ?? false,
+    trialAvailable: status?.trial_available ?? false,
+    trialDays: status?.trial_days ?? 7,
+    isTrial: status?.is_trial ?? false,
     plans: status?.plans ?? [],
     status,
     loading,

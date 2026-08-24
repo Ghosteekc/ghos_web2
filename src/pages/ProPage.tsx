@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button, Card, ErrorState, Loader, PageHeader } from "@/components/ui";
-import { PRO_TITLE, ProFeatureShowcase, ProHero, ProPlanPicker } from "@/components/pro";
+import { PRO_TITLE, ProFeatureShowcase, ProHero, ProPlanPicker, ProTrialOffer } from "@/components/pro";
 import { useGhosteekPro } from "@/hooks/useGhosteekPro";
 import { usePageRefresh } from "@/hooks";
 import { api, ApiError } from "@/api/client";
@@ -17,9 +17,22 @@ function defaultPlanId(plans: ProPlan[]): string | null {
 export function ProPage() {
   const navigate = useNavigate();
   const plansRef = useRef<HTMLDivElement>(null);
-  const { isPro, expired, expiresAt, daysLeft, plans, loading, error, refresh } = useGhosteekPro();
+  const {
+    isPro,
+    isTrial,
+    expired,
+    expiresAt,
+    daysLeft,
+    trialAvailable,
+    trialDays,
+    plans,
+    loading,
+    error,
+    refresh,
+  } = useGhosteekPro();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [paying, setPaying] = useState<string | null>(null);
+  const [trialLoading, setTrialLoading] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [payError, setPayError] = useState<string | null>(null);
 
@@ -33,6 +46,27 @@ export function ProPage() {
   const scrollToPlans = useCallback(() => {
     plansRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
+
+  const startTrial = useCallback(async () => {
+    if (trialLoading || paying) return;
+    setTrialLoading(true);
+    setPayError(null);
+    setNotice(null);
+    try {
+      const res = await api.startProTrial();
+      if (res.activated) {
+        haptic.heavy();
+        setNotice(res.message);
+        await refresh();
+      } else {
+        setPayError(res.message);
+      }
+    } catch (e) {
+      setPayError(e instanceof ApiError ? e.message : "Не удалось активировать пробный период.");
+    } finally {
+      setTrialLoading(false);
+    }
+  }, [trialLoading, paying, refresh]);
 
   const buy = useCallback(
     async (plan: ProPlan) => {
@@ -93,11 +127,16 @@ export function ProPage() {
 
       <ProHero
         isPro={isPro}
+        isTrial={isTrial}
         expired={expired}
         expiresAt={expiresAt}
         daysLeft={daysLeft}
         onGetPro={scrollToPlans}
       />
+
+      {trialAvailable ? (
+        <ProTrialOffer trialDays={trialDays} loading={trialLoading} onStart={() => void startTrial()} />
+      ) : null}
 
       {notice ? (
         <Card className="!py-2 text-center text-sm text-cr-win ui-enter">{notice}</Card>
