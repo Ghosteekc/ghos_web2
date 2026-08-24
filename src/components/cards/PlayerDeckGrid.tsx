@@ -1,9 +1,12 @@
 import { cn } from "@/utils";
 import { CardTile } from "./CardTile";
+import { resolveCardDisplayMode } from "./cardDisplayMode";
 import type { CardDisplayMode, DeckCard } from "@/types";
+import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 
 type DeckGridSize = "xs" | "sm" | "md" | "lg" | "deck";
 
+/** @deprecated use resolveCardDisplayMode */
 export function cardDisplayMode(
   card: Pick<DeckCard, "is_hero" | "evolution_level">,
 ): CardDisplayMode {
@@ -57,6 +60,7 @@ export function PlayerDeckGrid({
   gapClassName,
   levelBadgeAnchor,
 }: PlayerDeckGridProps) {
+  const { getCard } = useCardCatalog();
   const items = toDeckCards(cards)
     .slice(0, 8)
     .sort((a, b) => (a.slot ?? 0) - (b.slot ?? 0));
@@ -68,7 +72,7 @@ export function PlayerDeckGrid({
   return (
     <div className={cn("grid grid-cols-4 grid-rows-2 w-full", gaps, className)}>
       {items.map((card, index) => {
-        const mode = cardDisplayMode(card);
+        const mode = resolveCardDisplayMode(card, getCard(card.name));
         return (
           <div key={`${card.id}-${index}`} className="min-w-0 overflow-visible">
             <CardTile
@@ -77,8 +81,8 @@ export function PlayerDeckGrid({
               size={size}
               showLabel={showLabels}
               displayMode={mode}
-              iconEvo={card.icon}
-              iconHero={card.icon}
+              iconEvo={getCard(card.name)?.icon_evo || card.icon}
+              iconHero={getCard(card.name)?.icon_hero || card.icon}
               elixirCost={card.cost > 0 ? card.cost : undefined}
               rarity={card.rarity}
               levelBadge={card.level != null && card.level > 0 ? card.level : undefined}

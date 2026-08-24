@@ -119,8 +119,15 @@ export function ProPlanPicker({
             ) : (
               <>
                 {isPro ? "Продлить Ghosteek Pro" : "Получить Ghosteek Pro"}
-                <span className="opacity-90">·</span>
-                <ProStarPrice stars={selected.stars} size="md" className="!text-base" />
+                <span className="opacity-80" aria-hidden>
+                  ·
+                </span>
+                <ProStarPrice
+                  stars={selected.stars}
+                  size="md"
+                  tone="inherit"
+                  className="!text-base opacity-95"
+                />
               </>
             )}
           </Button>

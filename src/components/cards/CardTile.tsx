@@ -3,6 +3,7 @@ import { cn } from "@/utils";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 import { ElixirIcon } from "@/components/ui/ElixirIcon";
 import type { CardDisplayMode } from "@/types";
+import { cardUpgradeRimClass, cardUpgradeWrapClass } from "./cardDisplayMode";
 
 type CardTileSize = "xs" | "sm" | "md" | "grid" | "lg" | "deck" | "collection";
 
@@ -275,6 +276,11 @@ const CardTileImpl = memo(function CardTileImpl({
     labelOverride ??
     ((compactLabel || size === "deck" || size === "lg") && showLabel ? nameShort(name) : nameRu(name));
   const belowCaption = showLabel && (size === "deck" || size === "lg");
+  const upgradeWrap = cardUpgradeWrapClass(displayMode, rarity);
+  const upgradeRim = cardUpgradeRimClass(displayMode, rarity);
+  const innerFrameClass = isCollection
+    ? collectionFrameClass(displayMode, rarity)
+    : cardFrameClass(displayMode, rarity);
 
   return (
     <div
@@ -286,6 +292,7 @@ const CardTileImpl = memo(function CardTileImpl({
       <div
         className={cn(
           "relative shrink-0 card-tile-wrap",
+          upgradeWrap,
           isCollection
             ? "overflow-visible collection-card-wrap"
             : showElixir || levelBadge != null
@@ -295,15 +302,10 @@ const CardTileImpl = memo(function CardTileImpl({
         )}
         title={nameRu(name)}
       >
-        {!isCollection && <span className="card-tile-rim" aria-hidden />}
-        <div
-          className={cn(
-            "relative z-10 h-full w-full",
-            isCollection
-              ? collectionFrameClass(displayMode, rarity)
-              : (size === "lg" || size === "deck") && cardFrameClass(displayMode, rarity),
-          )}
-        >
+        {!isCollection && (
+          <span className={cn("card-tile-rim", upgradeRim)} aria-hidden />
+        )}
+        <div className={cn("relative z-10 h-full w-full", innerFrameClass)}>
           {src ? (
             <CardArt
               name={nameRu(name)}
