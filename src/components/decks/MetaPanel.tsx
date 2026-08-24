@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ExternalLink, Lock } from "lucide-react";
 import { Card, Loader, ErrorState, EmptyState, Button } from "@/components/ui";
+import { ProBadge, decksWord } from "@/components/pro";
 import { PlayerDeckGrid } from "@/components/cards";
 import { FavoriteDeckButton } from "@/components/decks/FavoriteDeckButton";
 import { api, ApiError } from "@/api/client";
@@ -239,6 +241,32 @@ function WarCard({
   );
 }
 
+function MetaProCta({ lockedCount }: { lockedCount: number }) {
+  const navigate = useNavigate();
+  if (lockedCount <= 0) return null;
+
+  return (
+    <Card className="border-cr-gold/25 !p-3" onClick={() => navigate("/pro")}>
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 shrink-0 rounded-xl bg-cr-gold/15 border border-cr-gold/30 flex items-center justify-center">
+          <Lock className="w-4 h-4 text-cr-gold" aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-base font-semibold text-cr-text">
+              Ещё {lockedCount} {lockedCount === 1 ? "метовая колода" : `метовых ${decksWord(lockedCount)}`}
+            </p>
+            <ProBadge />
+          </div>
+          <p className="text-sm text-cr-muted leading-snug mt-0.5">
+            Без Pro показываем топ-5. Откройте полный список с историей популярности.
+          </p>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export function MetaPanel() {
   const [tab, setTab] = useState<MetaTab>("league");
   const [ladder, setLadder] = useState<MetaLadderData | null>(null);
@@ -314,10 +342,13 @@ export function MetaPanel() {
 
       {!loading && !error && tab !== "clan-wars" && ladder ? (
         ladder.decks.length ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {ladder.decks.map((deck, index) => (
-              <LadderCard key={deck.deck_hash} deck={deck} index={index} onMessage={showActionHint} />
-            ))}
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {ladder.decks.map((deck, index) => (
+                <LadderCard key={deck.deck_hash} deck={deck} index={index} onMessage={showActionHint} />
+              ))}
+            </div>
+            <MetaProCta lockedCount={ladder.pro_locked_count ?? 0} />
           </div>
         ) : (
           <EmptyState title={statusMessage || ladder?.message || "Недостаточно данных для формирования актуальной меты."} />
@@ -335,6 +366,7 @@ export function MetaPanel() {
                 <WarCard key={`${deck.rank}-${deck.name}`} deck={deck} index={index} onMessage={showActionHint} />
               ))}
             </div>
+            <MetaProCta lockedCount={wars.pro_locked_count ?? 0} />
           </div>
         ) : (
           <EmptyState title={statusMessage || "Готовые колоды КВ пока не загружены."} />

@@ -32,6 +32,8 @@ import {
 
   DeckCompareResult,
   MineDeckStats,
+  ProInvoice,
+  ProStatus,
   RecommendDeckResponse,
   InsightsData,
   WinrateEntry,
@@ -51,6 +53,7 @@ const API_BASE = (import.meta.env.VITE_API_URL ?? "").trim();
 const DEFAULT_UNAVAILABLE =
   "Нет соединения с ботом, попробуйте позже";
 
+const PRO_STATUS_KEY = "pro-status-v1";
 const STATS_MEM_KEY = "stats-v8";
 const STATS_LS_KEY = "stats-overview-v4";
 const STATS_STALE_GRACE_MS = 7 * 24 * 60 * 60_000;
@@ -81,7 +84,10 @@ function formatApiError(message: string, code?: string): string {
   return `${friendly.message}\n\nКод ошибки: ${friendly.code}`;
 }
 
-function parseErrorBody(body: unknown, status: number): { message: string; code: string } {
+function parseErrorBody(
+  body: unknown,
+  status: number,
+): { message: string; code: string; feature?: string } {
   if (body && typeof body === "object") {
     const record = body as Record<string, unknown>;
     const message =
@@ -91,20 +97,40 @@ function parseErrorBody(body: unknown, status: number): { message: string; code:
           ? record.detail
           : DEFAULT_UNAVAILABLE;
     const code = typeof record.code === "string" ? record.code : `E1${Math.min(status, 999)}`;
-    return { message, code };
+    const feature = typeof record.feature === "string" ? record.feature : undefined;
+    return { message, code, feature };
   }
   return { message: DEFAULT_UNAVAILABLE, code: `E1${Math.min(status, 999)}` };
+}
+
+function proErrorFromBody(body: unknown, status: number): ApiError | null {
+  if (!body || typeof body !== "object") return null;
+  const record = body as Record<string, unknown>;
+  const code = record.error_code ?? record.code;
+  if (code !== PRO_REQUIRED) return null;
+  const parsed = parseErrorBody(body, status);
+  return new ApiError(parsed.message, status, PRO_REQUIRED, parsed.feature);
 }
 
 export class ApiError extends Error {
   status: number;
   code: string;
+  /** Ghosteek Pro contract: which paid feature was requested. */
+  feature?: string;
 
-  constructor(message: string, status: number, code?: string) {
+  constructor(message: string, status: number, code?: string, feature?: string) {
     super(message);
     this.status = status;
     this.code = code ?? (status > 0 ? `E1${Math.min(status, 999)}` : "E100");
+    this.feature = feature;
   }
+}
+
+export const PRO_REQUIRED = "PRO_REQUIRED";
+
+/** True when the backend refused the call because Ghosteek Pro is not active. */
+export function isProRequiredError(err: unknown): err is ApiError {
+  return err instanceof ApiError && err.code === PRO_REQUIRED;
 }
 
 
@@ -236,6 +262,15 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
 
 
   if (!res.ok) {
+
+    // Ghosteek Pro gates answer 403, which the tunnel heuristic would otherwise swallow.
+    if (res.status === 403 && contentType.includes("application/json")) {
+      const body = await res.json().catch(() => ({}));
+      const proError = proErrorFromBody(body, res.status);
+      if (proError) throw proError;
+      const parsed = parseErrorBody(body, res.status);
+      throw new ApiError(formatApiError(parsed.message, parsed.code), res.status, parsed.code);
+    }
 
     if (isTunnelBlockedResponse(res, contentType)) {
       throw new ApiError(
@@ -626,6 +661,17 @@ export const api = {
 
   getPlayerCollection: () =>
     cachedGet<PlayerCollectionData>("player-collection-v13", "/api/profile/collection", TTL.profile),
+
+  getProStatus: (opts?: { fresh?: boolean }) => {
+    if (opts?.fresh) cacheInvalidate(PRO_STATUS_KEY);
+    return cachedGet<ProStatus>(PRO_STATUS_KEY, "/api/pro/status", TTL.profile);
+  },
+
+  createProInvoice: (planId: string) =>
+    request<ProInvoice>("/api/pro/invoice", {
+      method: "POST",
+      body: JSON.stringify({ plan_id: planId }),
+    }),
 
 
 

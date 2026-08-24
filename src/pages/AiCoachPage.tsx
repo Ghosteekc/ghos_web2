@@ -6,6 +6,8 @@ import { ChatBubble, ChatTypingRow } from "@/components/ai/ChatBubble";
 import { CHAT_PRESETS } from "@/components/ai/chatTypes";
 import { isReplayBusyStatus, REPLAY_MSG } from "@/components/ai/replay";
 import { useGhosteekChat } from "@/hooks/useGhosteekChat";
+import { useGhosteekPro } from "@/hooks/useGhosteekPro";
+import { ProGate } from "@/components/pro";
 import { cn } from "@/utils";
 import { internalPressableProps } from "@/utils/nativeCallout";
 
@@ -38,7 +40,44 @@ function PresetChips({
   );
 }
 
+/** FREE users must not reach the chat hook — every AI endpoint is Pro-gated. */
 export function AiCoachPage() {
+  const navigate = useNavigate();
+  const { isPro, loading } = useGhosteekPro();
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (!isPro) {
+    return (
+      <div className="space-y-4">
+        <PageHeader
+          title="Ghosteek AI"
+          action={
+            <Button
+              variant="ghost"
+              onClick={() => navigate("/")}
+              className="!p-2 shrink-0"
+              aria-label="Назад"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+          }
+        />
+        <ProGate feature="ai_coach" />
+      </div>
+    );
+  }
+
+  return <AiCoachChat />;
+}
+
+function AiCoachChat() {
   const navigate = useNavigate();
   const {
     messages,

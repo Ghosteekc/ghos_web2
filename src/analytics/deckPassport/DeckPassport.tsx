@@ -5,7 +5,9 @@ import { Card, Button } from "@/components/ui";
 import { PlayerDeckGrid } from "@/components/cards";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 import { cn } from "@/utils";
-import { api } from "@/api/client";
+import { api, isProRequiredError } from "@/api/client";
+import { useGhosteekPro } from "@/hooks/useGhosteekPro";
+import { ProLockCard } from "@/components/pro";
 import { analyzeDeckPassport, getMetricDisplayList } from "./DeckAnalyzer";
 import { collectCardNames } from "./DeckStatistics";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
@@ -38,20 +40,33 @@ function MetricBar({ label, value }: { label: string; value: number }) {
 export function DeckPassport({ deck, onClose }: DeckPassportProps) {
   const { nameRu } = useCardCatalog();
   const open = deck != null && (deck.cards?.length ?? 0) === 8;
+  const { isPro, loading: proLoading } = useGhosteekPro();
   const [recommendation, setRecommendation] = useState<RecommendationResult | null>(null);
   const [recError, setRecError] = useState<string | null>(null);
+  const [recLocked, setRecLocked] = useState(false);
   const [loadingRec, setLoadingRec] = useState(false);
 
   useEffect(() => {
     if (!open || !deck) {
       setRecommendation(null);
       setRecError(null);
+      setRecLocked(false);
       return;
     }
     // Колода из конструктора уже прошла Engine с origin=builder — не переоцениваем как player.
     if (deck.type === "constructor" && deck.recommendation) {
       setRecommendation(deck.recommendation);
       setRecError(null);
+      setRecLocked(false);
+      setLoadingRec(false);
+      return;
+    }
+    if (proLoading) return;
+    // Улучшение колоды — платная функция: без Pro не тратим запрос, показываем замок.
+    if (!isPro) {
+      setRecommendation(null);
+      setRecError(null);
+      setRecLocked(true);
       setLoadingRec(false);
       return;
     }
@@ -59,6 +74,7 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
     let cancelled = false;
     setLoadingRec(true);
     setRecError(null);
+    setRecLocked(false);
     const isBuilder = deck.type === "constructor";
     api
       .recommendDeck(names, false, {
@@ -69,10 +85,14 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
         if (!cancelled) setRecommendation(data.recommendation);
       })
       .catch((err: unknown) => {
-        if (!cancelled) {
-          setRecommendation(null);
-          setRecError(err instanceof Error ? err.message : "Не удалось загрузить рекомендации");
+        if (cancelled) return;
+        setRecommendation(null);
+        if (isProRequiredError(err)) {
+          setRecLocked(true);
+          setRecError(null);
+          return;
         }
+        setRecError(err instanceof Error ? err.message : "Не удалось загрузить рекомендации");
       })
       .finally(() => {
         if (!cancelled) setLoadingRec(false);
@@ -80,7 +100,7 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
     return () => {
       cancelled = true;
     };
-  }, [open, deck]);
+  }, [open, deck, isPro, proLoading]);
 
   const analysis = useMemo(
     () => (deck ? analyzeDeckPassport(deck, recommendation) : null),
@@ -140,6 +160,7 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
               <p className="text-sm text-cr-loss">{recError}</p>
             </Card>
           )}
+          {recLocked && <ProLockCard feature="deck_improve" compact cta="Открыть улучшение колод" />}
 
           {analysis && (
             <>

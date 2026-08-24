@@ -22,6 +22,7 @@ const BattleDetailPage = lazy(() => import("@/pages/BattleDetailPage"));
 const SearchPage = lazy(() => import("@/pages/SearchPage"));
 const PlayerPreviewPage = lazy(() => import("@/pages/PlayerPreviewPage"));
 const AiCoachPage = lazy(() => import("@/pages/AiCoachPage"));
+const ProPage = lazy(() => import("@/pages/ProPage"));
 
 function PageLoader() {
   return (
@@ -56,6 +57,14 @@ export default function App() {
             element={
               <LazyPage>
                 <ProfileMasteryPage />
+              </LazyPage>
+            }
+          />
+          <Route
+            path="pro"
+            element={
+              <LazyPage>
+                <ProPage />
               </LazyPage>
             }
           />

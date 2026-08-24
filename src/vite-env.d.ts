@@ -34,6 +34,11 @@ export interface TelegramWebApp {
   disableVerticalSwipes?: () => void;
   openTelegramLink: (url: string) => void;
   openLink: (url: string) => void;
+  /** Bot API 6.1+ — Telegram Stars / payments invoice. */
+  openInvoice?: (
+    url: string,
+    callback?: (status: "paid" | "cancelled" | "failed" | "pending") => void,
+  ) => void;
   themeParams: Record<string, string>;
   colorScheme: "light" | "dark";
   platform?: "ios" | "android" | "macos" | "tdesktop" | "weba" | "webk" | "unigram" | "unknown";

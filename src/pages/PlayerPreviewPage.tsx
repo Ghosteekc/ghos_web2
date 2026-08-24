@@ -12,7 +12,8 @@ import {
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { api, ApiError } from "@/api/client";
+import { api, ApiError, isProRequiredError } from "@/api/client";
+import { ProGate } from "@/components/pro";
 import { SearchResult } from "@/types";
 import { Button, Card, ElixirIcon, Loader, ErrorState, EmptyState, PageHeader } from "@/components/ui";
 import { PlayerDeckGrid } from "@/components/cards";
@@ -39,16 +40,23 @@ export function PlayerPreviewPage() {
   const [player, setPlayer] = useState<SearchResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [proLocked, setProLocked] = useState(false);
   const [hint, setHint] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!tag) return;
     try {
       setError(null);
+      setProLocked(false);
       setPlayer(await api.getPlayerPreview(tag));
     } catch (e) {
       setPlayer(null);
-      setError(e instanceof ApiError ? e.message : "Игрок не найден");
+      if (isProRequiredError(e)) {
+        setProLocked(true);
+        setError(null);
+      } else {
+        setError(e instanceof ApiError ? e.message : "Игрок не найден");
+      }
     } finally {
       setLoading(false);
     }
@@ -148,6 +156,8 @@ export function PlayerPreviewPage() {
 
       {loading ? (
         <Loader />
+      ) : proLocked ? (
+        <ProGate feature="player_search" />
       ) : error || !player ? (
         <ErrorState title={error ?? "Не найден"} />
       ) : (

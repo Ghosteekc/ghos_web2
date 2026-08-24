@@ -35,6 +35,7 @@ import { formatTime, getTrophyChangeColor, formatPlayerTag, cn } from "@/utils";
 import { buildDeckComparePath } from "@/utils/deckActions";
 import { contextFromBattle, openGhosteekAi } from "@/utils/aiPageContext";
 import { usePageRefresh } from "@/hooks";
+import { ProLockCard } from "@/components/pro";
 
 function confidenceLabel(confidence: string): string {
   switch (confidence) {
@@ -572,6 +573,7 @@ export function BattleDetailPage() {
   const hasDangerCards = Boolean(
     battle.tactical_matchup && battle.tactical_matchup.danger_cards.length > 0,
   );
+  const detailedLocked = battle.detailed_unlocked === false || battle.pro_required === true;
   const hasElixirProfiles = Boolean(battle.user_elixir || battle.opponent_elixir);
   const showMatchupChip = !battle.match_difficulty;
 
@@ -724,6 +726,14 @@ export function BattleDetailPage() {
             <p className="text-base text-cr-text leading-relaxed font-medium">{battle.outcome_summary}</p>
           </div>
         </Card>
+      ) : null}
+
+      {detailedLocked ? (
+        <ProLockCard
+          feature="battle_detail"
+          cta="Разблокировать разбор"
+          description="Тактика по фазам, план на матч, сложность матчапа, эликсир-профили и тренер боя доступны в Ghosteek Pro. Итог боя и колоды остаются бесплатными."
+        />
       ) : null}
 
       {battle.match_difficulty ? <MatchDifficultyBlock data={battle.match_difficulty} /> : null}

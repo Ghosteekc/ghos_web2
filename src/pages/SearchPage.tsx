@@ -8,18 +8,22 @@ import {
   ChevronRight,
   ArrowLeft,
 } from "lucide-react";
-import { Card, Button, ErrorState, EmptyState, PageHeader } from "@/components/ui";
-import { api, ApiError } from "@/api/client";
+import { Card, Button, ErrorState, EmptyState, Loader, PageHeader } from "@/components/ui";
+import { api, ApiError, isProRequiredError } from "@/api/client";
 import { SearchResult } from "@/types";
 import { usePageRefresh } from "@/hooks";
+import { useGhosteekPro } from "@/hooks/useGhosteekPro";
+import { ProGate } from "@/components/pro";
 
 export function SearchPage() {
   const navigate = useNavigate();
+  const { isPro, loading: proLoading } = useGhosteekPro();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<string[]>([]);
+  const [locked, setLocked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const search = useCallback(async (q: string) => {
@@ -33,7 +37,10 @@ export function SearchPage() {
       setHistory((prev) => [trimmed, ...prev.filter((h) => h !== trimmed)].slice(0, 8));
     } catch (e) {
       setResults([]);
-      if (e instanceof ApiError) {
+      if (isProRequiredError(e)) {
+        setLocked(true);
+        setError(null);
+      } else if (e instanceof ApiError) {
         setError(e.message);
       } else {
         setError("Не удалось найти игрока");
@@ -67,21 +74,37 @@ export function SearchPage() {
     setHistory((prev) => prev.filter((h) => h !== item));
   };
 
+  const backButton = (
+    <Button
+      variant="ghost"
+      onClick={() => navigate("/")}
+      className="!p-2 shrink-0"
+      aria-label="Назад к профилю"
+    >
+      <ArrowLeft className="w-5 h-5" />
+    </Button>
+  );
+
+  if (proLoading) {
+    return (
+      <div className="flex justify-center py-16">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (!isPro || locked) {
+    return (
+      <div className="space-y-4">
+        <PageHeader title="Поиск игроков" action={backButton} />
+        <ProGate feature="player_search" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Поиск игроков"
-        action={
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className="!p-2 shrink-0"
-            aria-label="Назад к профилю"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-        }
-      />
+      <PageHeader title="Поиск игроков" action={backButton} />
 
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cr-muted" />

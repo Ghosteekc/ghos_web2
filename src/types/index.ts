@@ -70,6 +70,44 @@ export interface LeagueInfo {
   absolute_trophies: number | null;
 }
 
+export interface SubscriptionInfo {
+  active: boolean;
+  is_pro?: boolean;
+  expires_at: string | null;
+  started_at?: string | null;
+  days_left?: number | null;
+  trial_used: boolean;
+  plan_id?: string | null;
+  expired?: boolean;
+}
+
+export interface ProPlan {
+  id: string;
+  title: string;
+  description: string;
+  stars: number;
+  months: number;
+  badge?: string | null;
+}
+
+export interface ProStatus {
+  is_pro: boolean;
+  started_at: string | null;
+  expires_at: string | null;
+  days_left: number | null;
+  plan_id: string | null;
+  trial_used: boolean;
+  expired: boolean;
+  plans: ProPlan[];
+}
+
+export interface ProInvoice {
+  ok: boolean;
+  plan_id: string;
+  stars: number;
+  invoice_link: string;
+}
+
 export interface Profile {
   player_tag: string | null;
   player_name: string | null;
@@ -80,7 +118,7 @@ export interface Profile {
   avatar_url: string | null;
   favorite_card: string | null;
   favorite_card_icon: string | null;
-  subscription: { active: boolean; expires_at: string | null; trial_used: boolean };
+  subscription: SubscriptionInfo;
   skill_rating: number | null;
   winrate: number | null;
   last_rating_change: number | null;
@@ -233,6 +271,9 @@ export interface BattleDetail {
   is_ranked?: boolean;
   user_league?: BattleLeagueBadge | null;
   opponent_league?: BattleLeagueBadge | null;
+  /** false when Ghosteek Pro is required for the deep analysis blocks. */
+  detailed_unlocked?: boolean;
+  pro_required?: boolean;
 }
 
 export interface DeckCard {
@@ -376,6 +417,9 @@ export interface MetaLadderData {
   updated_at: string | null;
   min_games: number;
   decks: MetaLadderDeck[];
+  is_pro?: boolean;
+  total_decks?: number;
+  pro_locked_count?: number;
 }
 
 export interface MetaWarDeck {
@@ -396,6 +440,9 @@ export interface MetaWarData {
   updated_at: string | null;
   sample_note: string;
   decks: MetaWarDeck[];
+  is_pro?: boolean;
+  total_decks?: number;
+  pro_locked_count?: number;
 }
 
 export interface DeckCompareCardNote {
