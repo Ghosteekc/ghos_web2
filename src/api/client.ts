@@ -46,7 +46,7 @@ import {
   ConstructorData,
 } from "@/types";
 
-import { cacheGet, cacheSet, cacheInvalidate, cacheHas, inflight, TTL, sleep, lsGet, lsSet, lsClearAll } from "./cache";
+import { cacheGet, cacheSet, cacheInvalidate, cacheHas, inflight, TTL, sleep, lsGet, lsSet, lsClearAll, applyLinkedPlayerTag } from "./cache";
 import { setLastSyncAt } from "@/utils/lastSync";
 import { toUserFacingError } from "@/utils/userError";
 
@@ -659,7 +659,12 @@ export const api = {
 
 
 
-  getProfile: () => cachedGet<Profile>("profile-v8", "/api/me", TTL.profile),
+  getProfile: async (opts?: { fresh?: boolean }) => {
+    if (opts?.fresh) cacheInvalidate("profile-v8");
+    const profile = await cachedGet<Profile>("profile-v8", "/api/me", TTL.profile);
+    applyLinkedPlayerTag(profile.player_tag);
+    return profile;
+  },
 
   getPlayerCollection: () =>
     cachedGet<PlayerCollectionData>("player-collection-v13", "/api/profile/collection", TTL.profile),
@@ -897,6 +902,7 @@ export const api = {
     const result = await request<{ ok: boolean; unlinked_tag: string | null }>("/api/account/unlink", {
       method: "POST",
     });
+    applyLinkedPlayerTag(null);
     cacheInvalidate();
     lsClearAll();
     return result;

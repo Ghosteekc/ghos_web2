@@ -88,6 +88,54 @@ export const TTL = {
   meta: 5 * 60_000,
 } as const;
 
+/** Persists outside ghosteek-cache:* so lsClearAll does not wipe it. */
+const LINKED_TAG_STORAGE_KEY = "ghosteek-linked-player-tag";
+
+function normalizeLinkedTag(tag: string | null | undefined): string {
+  if (!tag) return "";
+  return tag.trim().toUpperCase().replace(/^#/, "");
+}
+
+export function readStoredLinkedTag(): string {
+  try {
+    return localStorage.getItem(LINKED_TAG_STORAGE_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeStoredLinkedTag(tag: string): void {
+  try {
+    if (!tag) localStorage.removeItem(LINKED_TAG_STORAGE_KEY);
+    else localStorage.setItem(LINKED_TAG_STORAGE_KEY, tag);
+  } catch {
+    /* private mode */
+  }
+}
+
+/**
+ * Remember the linked CR tag. When it changes (bot /link or Settings unlink),
+ * clear all Mini App caches so battles/stats/decks reload for the new account.
+ * Returns true if caches were cleared.
+ */
+export function applyLinkedPlayerTag(tag: string | null | undefined): boolean {
+  const next = normalizeLinkedTag(tag);
+  const prev = readStoredLinkedTag();
+  if (prev === next) return false;
+
+  writeStoredLinkedTag(next);
+  // First observation in this browser — just remember, don't wipe.
+  if (!prev) return false;
+
+  cacheInvalidate();
+  lsClearAll();
+  writeStoredLinkedTag(next);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("app:sync"));
+  }
+  return true;
+}
+
 function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
