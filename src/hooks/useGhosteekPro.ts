@@ -16,6 +16,8 @@ export interface GhosteekPro {
   plans: ProPlan[];
   referralDiscountActive: boolean;
   referralDiscountExpiresAt: string | null;
+  creditsBalance: number;
+  creditsMaxSharePercent: number;
   status: ProStatus | null;
   loading: boolean;
   error: string | null;
@@ -63,6 +65,8 @@ export function useGhosteekPro(): GhosteekPro {
     plans: status?.plans ?? [],
     referralDiscountActive: status?.referral_discount_active ?? false,
     referralDiscountExpiresAt: status?.referral_discount_expires_at ?? null,
+    creditsBalance: status?.credits_balance ?? 0,
+    creditsMaxSharePercent: status?.credits_max_share_percent ?? 50,
     status,
     loading,
     error,

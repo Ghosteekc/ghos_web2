@@ -88,8 +88,13 @@ export interface ProPlan {
   stars: number;
   months: number;
   badge?: string | null;
-  /** Catalog price when ``stars`` is a referral discount. */
+  /** Catalog price when checkout price differs. */
   original_stars?: number | null;
+  discount_percent?: number;
+  final_price?: number | null;
+  max_credits?: number;
+  credits_to_use?: number;
+  stars_to_pay?: number | null;
 }
 
 export interface ProStatus {
@@ -106,6 +111,9 @@ export interface ProStatus {
   plans: ProPlan[];
   referral_discount_active?: boolean;
   referral_discount_expires_at?: string | null;
+  referral_discount_percent?: number;
+  credits_balance?: number;
+  credits_max_share_percent?: number;
 }
 
 export interface ProTrialResponse {
@@ -122,15 +130,20 @@ export interface ProTrialResponse {
 
 export interface ReferralStatus {
   referral_link: string;
-  successful_referrals: number;
-  current_progress: number;
-  required_referrals: number;
-  rewards_earned: number;
-  reward_days: number;
-  next_reward_in: number;
-  days_earned_total: number;
+  friends_purchased: number;
+  credits_earned_from_referrals: number;
+  credits_balance: number;
+  credits_reward_amount: number;
   is_pro: boolean;
   pro_expires_at: string | null;
+  /** @deprecated Credits v2 — kept for older clients */
+  successful_referrals?: number;
+  current_progress?: number;
+  required_referrals?: number;
+  rewards_earned?: number;
+  reward_days?: number;
+  next_reward_in?: number;
+  days_earned_total?: number;
 }
 
 export interface ProInvoice {
@@ -138,6 +151,14 @@ export interface ProInvoice {
   plan_id: string;
   stars: number;
   invoice_link: string;
+  base_price?: number;
+  discount_percent?: number;
+  discount_stars?: number;
+  final_price?: number;
+  available_credits?: number;
+  max_credits?: number;
+  credits_to_use?: number;
+  stars_to_pay?: number;
 }
 
 export interface Profile {

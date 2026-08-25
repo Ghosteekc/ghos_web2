@@ -12,8 +12,9 @@ function monthsWord(n: number): string {
 }
 
 function pricePerMonth(plan: ProPlan): number {
-  if (plan.months <= 0) return plan.stars;
-  return Math.round(plan.stars / plan.months);
+  const pay = plan.stars_to_pay ?? plan.stars;
+  if (plan.months <= 0) return pay;
+  return Math.round(pay / plan.months);
 }
 
 function formatDiscountUntil(iso: string | null | undefined): string | null {
@@ -69,9 +70,10 @@ export function ProPlanPicker({
       <div className="grid grid-cols-1 gap-2.5">
         {plans.map((plan, i) => {
           const isSelected = plan.id === selectedId;
+          const pay = plan.stars_to_pay ?? plan.stars;
           const perMonth = pricePerMonth(plan);
           const original = plan.original_stars ?? null;
-          const hasDiscount = original != null && original > plan.stars;
+          const hasDiscount = original != null && original > pay;
 
           return (
             <button
@@ -97,7 +99,7 @@ export function ProPlanPicker({
               </div>
 
               <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <ProStarPrice stars={plan.stars} size="xl" />
+                <ProStarPrice stars={pay} size="xl" />
                 {hasDiscount ? (
                   <span className="text-sm text-cr-muted line-through tabular-nums opacity-80">
                     {original} ★
@@ -108,9 +110,7 @@ export function ProPlanPicker({
               <p className="text-xs text-cr-muted mt-1.5 tabular-nums">
                 {plan.months === 1 ? (
                   <>
-                    {plan.stars}{" "}
-                    <StarInline />
-                    {" / месяц"}
+                    {pay} <StarInline /> / месяц
                   </>
                 ) : (
                   <>
@@ -133,7 +133,8 @@ export function ProPlanPicker({
       </div>
 
       {selected ? (
-        <Card className="!p-3 ui-enter" delay={0.12}>
+        <Card className="!p-3 ui-enter space-y-3" delay={0.12}>
+          <CheckoutBreakdown plan={selected} />
           <Button
             variant="primary"
             className="pro-plan-cta w-full !py-3 text-base flex items-center justify-center gap-2"
@@ -152,7 +153,7 @@ export function ProPlanPicker({
                   ·
                 </span>
                 <ProStarPrice
-                  stars={selected.stars}
+                  stars={selected.stars_to_pay ?? selected.stars}
                   size="md"
                   tone="inherit"
                   className="!text-base opacity-95"
@@ -165,9 +166,46 @@ export function ProPlanPicker({
 
       <p className="text-xs text-cr-muted leading-snug">
         Оплата проходит внутри Telegram через Stars (XTR). Подписка продлевается вручную —
-        автосписаний нет.
+        автосписаний нет. Credits покрывают не больше половины стоимости.
       </p>
     </section>
+  );
+}
+
+function CheckoutBreakdown({ plan }: { plan: ProPlan }) {
+  const base = plan.original_stars ?? plan.final_price ?? plan.stars;
+  const discountPct = plan.discount_percent ?? 0;
+  const finalPrice = plan.final_price ?? plan.stars;
+  const credits = plan.credits_to_use ?? 0;
+  const pay = plan.stars_to_pay ?? plan.stars;
+  const showDiscount = discountPct > 0 && (plan.original_stars ?? 0) > finalPrice;
+  const showCredits = credits > 0;
+
+  if (!showDiscount && !showCredits) return null;
+
+  return (
+    <div className="space-y-1.5 text-sm tabular-nums">
+      <div className="flex justify-between gap-2 text-cr-muted">
+        <span>Ghosteek Pro · {plan.title}</span>
+        <span>{base} ★</span>
+      </div>
+      {showDiscount ? (
+        <div className="flex justify-between gap-2 text-cr-gold">
+          <span>− {discountPct}% скидка</span>
+          <span>{finalPrice} ★</span>
+        </div>
+      ) : null}
+      {showCredits ? (
+        <div className="flex justify-between gap-2 text-cr-gold">
+          <span>Credits</span>
+          <span>− {credits}</span>
+        </div>
+      ) : null}
+      <div className="flex justify-between gap-2 font-bold text-cr-text pt-1 border-t border-cr-border/40">
+        <span>К оплате</span>
+        <span>{pay} ★</span>
+      </div>
+    </div>
   );
 }
 

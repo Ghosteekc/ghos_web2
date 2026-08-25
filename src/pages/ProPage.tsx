@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button, Card, ErrorState, Loader, PageHeader } from "@/components/ui";
-import { PRO_TITLE, ProFeatureShowcase, ProHero, ProPlanPicker, ProReferralCard, ProTrialOffer } from "@/components/pro";
+import { PRO_TITLE, ProCreditsCard, ProFeatureShowcase, ProHero, ProPlanPicker, ProReferralCard, ProTrialOffer } from "@/components/pro";
 import { useGhosteekPro } from "@/hooks/useGhosteekPro";
 import { usePageRefresh } from "@/hooks";
 import { api, ApiError } from "@/api/client";
@@ -28,6 +28,8 @@ export function ProPage() {
     plans,
     referralDiscountActive,
     referralDiscountExpiresAt,
+    creditsBalance,
+    creditsMaxSharePercent,
     loading,
     error,
     refresh,
@@ -148,6 +150,8 @@ export function ProPage() {
       ) : null}
 
       <ProFeatureShowcase />
+
+      <ProCreditsCard balance={creditsBalance} maxSharePercent={creditsMaxSharePercent} />
 
       <ProReferralCard />
 

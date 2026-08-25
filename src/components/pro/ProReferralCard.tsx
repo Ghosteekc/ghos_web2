@@ -5,7 +5,6 @@ import { api, ApiError } from "@/api/client";
 import { usePageRefresh, useTelegram } from "@/hooks";
 import { haptic } from "@/utils/hapticManager";
 import type { ReferralStatus } from "@/types";
-import { cn } from "@/utils";
 
 function friendsWord(n: number): string {
   const abs = Math.abs(n) % 100;
@@ -26,7 +25,7 @@ export function ProReferralCard() {
   const load = useCallback(async () => {
     try {
       setError(null);
-      setData(await api.getReferralStatus());
+      setData(await api.getReferralStatus({ fresh: true }));
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Не удалось загрузить рефералку");
     } finally {
@@ -55,8 +54,9 @@ export function ProReferralCard() {
   const inviteFriends = useCallback(() => {
     if (!data?.referral_link) return;
     haptic.medium();
+    const reward = data.credits_reward_amount || 10;
     const text = encodeURIComponent(
-      "Присоединяйся к Ghosteek — ассистенту для Clash Royale. По моей ссылке скидка на Pro:",
+      `Присоединяйся к Ghosteek — ассистенту для Clash Royale. По моей ссылке скидка на Pro, и мы оба получим +${reward} Credits:`,
     );
     const url = encodeURIComponent(data.referral_link);
     const sharePath = `share/url?url=${url}&text=${text}`;
@@ -65,7 +65,7 @@ export function ProReferralCard() {
       return;
     }
     window.open(`https://t.me/${sharePath}`, "_blank");
-  }, [data?.referral_link, openTelegramLink, tg]);
+  }, [data?.referral_link, data?.credits_reward_amount, openTelegramLink, tg]);
 
   if (loading && !data) {
     return (
@@ -88,30 +88,14 @@ export function ProReferralCard() {
 
   if (!data) return null;
 
-  const { current_progress, required_referrals, next_reward_in, reward_days } = data;
-  const justRewarded =
-    data.successful_referrals > 0 &&
-    current_progress === 0 &&
-    data.rewards_earned > 0 &&
-    data.successful_referrals % required_referrals === 0;
-
-  let progressHint: string;
-  if (justRewarded) {
-    progressHint = `🎉 Ты пригласил ${required_referrals} друзей — тебе начислено +${reward_days} дней Ghosteek Pro!`;
-  } else if (data.successful_referrals >= required_referrals) {
-    progressHint = `Приглашено: ${data.successful_referrals} · Следующая награда: через ${next_reward_in} ${friendsWord(next_reward_in)}`;
-  } else if (current_progress === 0) {
-    progressHint = `${required_referrals} приглашённых друзей → +${reward_days} дней Pro`;
-  } else {
-    progressHint = `Ещё ${next_reward_in} ${friendsWord(next_reward_in)} → +${reward_days} дней Ghosteek Pro`;
-  }
-
-  const pct = Math.min(100, Math.round((current_progress / required_referrals) * 100));
+  const friends = data.friends_purchased ?? data.successful_referrals ?? 0;
+  const reward = data.credits_reward_amount || 10;
+  const earned = data.credits_earned_from_referrals ?? friends * reward;
 
   return (
     <section className="space-y-3" aria-labelledby="pro-referral-heading">
       <h2 id="pro-referral-heading" className="text-base font-semibold text-cr-text">
-        Или бесплатно
+        Приглашения
       </h2>
       <Card className="pro-referral-card glass-card ui-enter !p-4">
         <div className="flex items-start gap-3">
@@ -120,48 +104,29 @@ export function ProReferralCard() {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-base font-extrabold text-cr-text leading-tight">
-              Приглашай друзей — получай Pro бесплатно
+              Приглашай друзей — получай Credits
             </h3>
             <p className="text-sm text-cr-muted leading-snug mt-1">
-              {required_referrals} новых друзей → +{reward_days} дней Ghosteek Pro. Им — скидка на
-              подписку в первый месяц.
+              За каждого друга, который впервые покупает Pro, вы оба получаете +{reward} Credits.
             </p>
           </div>
         </div>
 
-        <div className="mt-4 space-y-2">
-          <div className="flex items-end justify-between gap-2">
-            <p className="text-2xl font-extrabold text-cr-text tabular-nums">
-              {current_progress}{" "}
-              <span className="text-base font-bold text-cr-muted">/ {required_referrals} друзей</span>
-            </p>
-            <p className="text-xs text-cr-muted text-right">
-              Всего: {data.successful_referrals} · Наград: {data.rewards_earned} (+
-              {data.days_earned_total} дн.)
-            </p>
-          </div>
-          <div className="h-2 rounded-full bg-cr-border/40 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-cr-blue to-cr-gold transition-[width] duration-200"
-              style={{ width: `${pct}%` }}
-            />
-          </div>
-          <p
-            className={cn(
-              "text-sm leading-snug",
-              justRewarded ? "text-cr-win font-semibold" : "text-cr-muted",
-            )}
-          >
-            {progressHint}
+        <div className="mt-4 space-y-1">
+          <p className="text-2xl font-extrabold text-cr-text tabular-nums">
+            {friends}{" "}
+            <span className="text-base font-bold text-cr-muted">
+              {friendsWord(friends)} купили Pro
+            </span>
+          </p>
+          <p className="text-sm text-cr-muted">
+            Ты получил:{" "}
+            <span className="font-bold text-cr-gold tabular-nums">+{earned} Credits</span>
           </p>
         </div>
 
         <div className="mt-3 flex gap-2">
-          <Button
-            variant="primary"
-            className="flex-1 !py-2.5 text-base"
-            onClick={inviteFriends}
-          >
+          <Button variant="primary" className="flex-1 !py-2.5 text-base" onClick={inviteFriends}>
             Пригласить друзей
           </Button>
           <Button

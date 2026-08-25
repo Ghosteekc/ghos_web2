@@ -678,6 +678,10 @@ export const api = {
     request<ProInvoice>("/api/pro/invoice", {
       method: "POST",
       body: JSON.stringify({ plan_id: planId }),
+    }).then((invoice) => {
+      cacheInvalidate(PRO_STATUS_KEY);
+      cacheInvalidate("referral-v2");
+      return invoice;
     }),
 
   startProTrial: () => {
@@ -687,8 +691,8 @@ export const api = {
   },
 
   getReferralStatus: (opts?: { fresh?: boolean }) => {
-    if (opts?.fresh) cacheInvalidate("referral-v1");
-    return cachedGet<ReferralStatus>("referral-v1", "/api/referral", TTL.profile);
+    if (opts?.fresh) cacheInvalidate("referral-v2");
+    return cachedGet<ReferralStatus>("referral-v2", "/api/referral", TTL.profile);
   },
 
 
