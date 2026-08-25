@@ -26,6 +26,10 @@ export function SearchPage() {
   const [locked, setLocked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    if (isPro) setLocked(false);
+  }, [isPro]);
+
   const search = useCallback(async (q: string) => {
     const trimmed = q.trim();
     if (!trimmed) return;

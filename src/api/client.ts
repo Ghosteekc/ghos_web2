@@ -56,6 +56,13 @@ const DEFAULT_UNAVAILABLE =
   "Нет соединения с ботом, попробуйте позже";
 
 const PRO_STATUS_KEY = "pro-status-v1";
+const META_CACHE_KEYS = ["meta-league-v2", "meta-trophies-v2", "meta-clan-wars-v1"] as const;
+
+function invalidateMetaCache(): void {
+  for (const key of META_CACHE_KEYS) {
+    cacheInvalidate(key);
+  }
+}
 const STATS_MEM_KEY = "stats-v8";
 const STATS_LS_KEY = "stats-overview-v4";
 const STATS_STALE_GRACE_MS = 7 * 24 * 60 * 60_000;
@@ -681,12 +688,14 @@ export const api = {
     }).then((invoice) => {
       cacheInvalidate(PRO_STATUS_KEY);
       cacheInvalidate("referral-v2");
+      invalidateMetaCache();
       return invoice;
     }),
 
   startProTrial: () => {
     cacheInvalidate(PRO_STATUS_KEY);
     cacheInvalidate("profile-v8");
+    invalidateMetaCache();
     return request<ProTrialResponse>("/api/pro/trial", { method: "POST" });
   },
 
