@@ -5069,6 +5069,10 @@ html[data-perf="low"] .chart-tooltip-glass {
   border-color: rgb(var(--cr-blue) / 0.28);
 }
 
+.pro-referral-card {
+  border-color: rgb(var(--cr-blue) / 0.22);
+}
+
 .pro-feature-primary {
   padding: 1rem 1.125rem;
   border-color: rgb(var(--cr-gold) / 0.32);

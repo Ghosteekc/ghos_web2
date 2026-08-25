@@ -35,6 +35,7 @@ import {
   ProInvoice,
   ProStatus,
   ProTrialResponse,
+  ReferralStatus,
   RecommendDeckResponse,
   InsightsData,
   WinrateEntry,
@@ -678,6 +679,11 @@ export const api = {
     cacheInvalidate(PRO_STATUS_KEY);
     cacheInvalidate("profile-v8");
     return request<ProTrialResponse>("/api/pro/trial", { method: "POST" });
+  },
+
+  getReferralStatus: (opts?: { fresh?: boolean }) => {
+    if (opts?.fresh) cacheInvalidate("referral-v1");
+    return cachedGet<ReferralStatus>("referral-v1", "/api/referral", TTL.profile);
   },
 
 

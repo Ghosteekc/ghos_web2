@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button, Card, ErrorState, Loader, PageHeader } from "@/components/ui";
-import { PRO_TITLE, ProFeatureShowcase, ProHero, ProPlanPicker, ProTrialOffer } from "@/components/pro";
+import { PRO_TITLE, ProFeatureShowcase, ProHero, ProPlanPicker, ProReferralCard, ProTrialOffer } from "@/components/pro";
 import { useGhosteekPro } from "@/hooks/useGhosteekPro";
 import { usePageRefresh } from "@/hooks";
 import { api, ApiError } from "@/api/client";
@@ -146,6 +146,8 @@ export function ProPage() {
       ) : null}
 
       <ProFeatureShowcase />
+
+      <ProReferralCard />
 
       <div ref={plansRef}>
         <ProPlanPicker

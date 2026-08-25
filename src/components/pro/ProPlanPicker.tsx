@@ -43,7 +43,7 @@ export function ProPlanPicker({
   return (
     <section className="space-y-3" aria-labelledby="pro-plans-heading">
       <h2 id="pro-plans-heading" className="text-base font-semibold text-cr-text">
-        {isPro ? "Продлить подписку" : "Выберите срок"}
+        {isPro ? "Продлить подписку" : "Оплата"}
       </h2>
 
       <div className="grid grid-cols-1 gap-2.5">

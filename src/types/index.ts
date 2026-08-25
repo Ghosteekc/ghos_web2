@@ -116,6 +116,19 @@ export interface ProTrialResponse {
   is_trial: boolean;
 }
 
+export interface ReferralStatus {
+  referral_link: string;
+  successful_referrals: number;
+  current_progress: number;
+  required_referrals: number;
+  rewards_earned: number;
+  reward_days: number;
+  next_reward_in: number;
+  days_earned_total: number;
+  is_pro: boolean;
+  pro_expires_at: string | null;
+}
+
 export interface ProInvoice {
   ok: boolean;
   plan_id: string;
