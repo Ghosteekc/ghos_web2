@@ -14,6 +14,8 @@ export interface GhosteekPro {
   trialDays: number;
   isTrial: boolean;
   plans: ProPlan[];
+  referralDiscountActive: boolean;
+  referralDiscountExpiresAt: string | null;
   status: ProStatus | null;
   loading: boolean;
   error: string | null;
@@ -59,6 +61,8 @@ export function useGhosteekPro(): GhosteekPro {
     trialDays: status?.trial_days ?? 7,
     isTrial: status?.is_trial ?? false,
     plans: status?.plans ?? [],
+    referralDiscountActive: status?.referral_discount_active ?? false,
+    referralDiscountExpiresAt: status?.referral_discount_expires_at ?? null,
     status,
     loading,
     error,

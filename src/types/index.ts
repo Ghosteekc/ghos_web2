@@ -88,6 +88,8 @@ export interface ProPlan {
   stars: number;
   months: number;
   badge?: string | null;
+  /** Catalog price when ``stars`` is a referral discount. */
+  original_stars?: number | null;
 }
 
 export interface ProStatus {
@@ -102,6 +104,8 @@ export interface ProStatus {
   is_trial: boolean;
   expired: boolean;
   plans: ProPlan[];
+  referral_discount_active?: boolean;
+  referral_discount_expires_at?: string | null;
 }
 
 export interface ProTrialResponse {

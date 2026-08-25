@@ -16,6 +16,13 @@ function pricePerMonth(plan: ProPlan): number {
   return Math.round(plan.stars / plan.months);
 }
 
+function formatDiscountUntil(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+}
+
 interface ProPlanPickerProps {
   plans: ProPlan[];
   selectedId: string | null;
@@ -23,6 +30,8 @@ interface ProPlanPickerProps {
   onBuy: (plan: ProPlan) => void;
   paying: string | null;
   isPro: boolean;
+  referralDiscountActive?: boolean;
+  referralDiscountExpiresAt?: string | null;
 }
 
 export function ProPlanPicker({
@@ -32,11 +41,15 @@ export function ProPlanPicker({
   onBuy,
   paying,
   isPro,
+  referralDiscountActive = false,
+  referralDiscountExpiresAt = null,
 }: ProPlanPickerProps) {
   const selected = useMemo(
     () => plans.find((p) => p.id === selectedId) ?? plans[0] ?? null,
     [plans, selectedId],
   );
+
+  const untilLabel = formatDiscountUntil(referralDiscountExpiresAt);
 
   if (!plans.length) return null;
 
@@ -46,10 +59,19 @@ export function ProPlanPicker({
         {isPro ? "Продлить подписку" : "Оплата"}
       </h2>
 
+      {referralDiscountActive ? (
+        <p className="text-sm text-cr-gold leading-snug">
+          Скидка по приглашению
+          {untilLabel ? <> действует до {untilLabel}</> : null}.
+        </p>
+      ) : null}
+
       <div className="grid grid-cols-1 gap-2.5">
         {plans.map((plan, i) => {
           const isSelected = plan.id === selectedId;
           const perMonth = pricePerMonth(plan);
+          const original = plan.original_stars ?? null;
+          const hasDiscount = original != null && original > plan.stars;
 
           return (
             <button
@@ -74,7 +96,14 @@ export function ProPlanPicker({
                 ) : null}
               </div>
 
-              <ProStarPrice stars={plan.stars} size="xl" className="mt-2" />
+              <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                <ProStarPrice stars={plan.stars} size="xl" />
+                {hasDiscount ? (
+                  <span className="text-sm text-cr-muted line-through tabular-nums opacity-80">
+                    {original} ★
+                  </span>
+                ) : null}
+              </div>
 
               <p className="text-xs text-cr-muted mt-1.5 tabular-nums">
                 {plan.months === 1 ? (

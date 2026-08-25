@@ -56,7 +56,7 @@ export function ProReferralCard() {
     if (!data?.referral_link) return;
     haptic.medium();
     const text = encodeURIComponent(
-      "Присоединяйся к Ghosteek — ассистенту для Clash Royale. Разбор боёв, мета и AI-тренер:",
+      "Присоединяйся к Ghosteek — ассистенту для Clash Royale. По моей ссылке скидка на Pro:",
     );
     const url = encodeURIComponent(data.referral_link);
     const sharePath = `share/url?url=${url}&text=${text}`;
@@ -123,7 +123,8 @@ export function ProReferralCard() {
               Приглашай друзей — получай Pro бесплатно
             </h3>
             <p className="text-sm text-cr-muted leading-snug mt-1">
-              {required_referrals} новых друзей → +{reward_days} дней Ghosteek Pro. Без срока действия.
+              {required_referrals} новых друзей → +{reward_days} дней Ghosteek Pro. Им — скидка на
+              подписку в первый месяц.
             </p>
           </div>
         </div>

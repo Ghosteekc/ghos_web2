@@ -26,6 +26,8 @@ export function ProPage() {
     trialAvailable,
     trialDays,
     plans,
+    referralDiscountActive,
+    referralDiscountExpiresAt,
     loading,
     error,
     refresh,
@@ -157,6 +159,8 @@ export function ProPage() {
           onBuy={(plan) => void buy(plan)}
           paying={paying}
           isPro={isPro}
+          referralDiscountActive={referralDiscountActive}
+          referralDiscountExpiresAt={referralDiscountExpiresAt}
         />
       </div>
     </div>
