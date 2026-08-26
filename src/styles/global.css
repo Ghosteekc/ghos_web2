@@ -5106,49 +5106,89 @@ html[data-perf="low"] .chart-tooltip-glass {
   border: 1px solid rgb(var(--cr-gold) / 0.22);
 }
 
-.pro-plan-card {
-  padding: 1rem 1.125rem;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  width: 100%;
-  transition:
-    border-color var(--ui-duration-fast) var(--ui-ease-standard),
-    background var(--ui-duration-fast) var(--ui-ease-standard),
-    box-shadow var(--ui-duration-fast) var(--ui-ease-standard);
+.pro-plan-btn {
+  min-height: 4.25rem;
+  align-items: center;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+  padding-right: 0.75rem;
 }
 
-.pro-plan-card:disabled {
-  opacity: 0.72;
-  cursor: not-allowed;
+.pro-plan-btn__text {
+  gap: 0.2rem;
 }
 
-.pro-plan-card--selected {
-  border-color: rgb(var(--cr-gold) / 0.55);
-  background: rgb(var(--cr-gold) / 0.06);
-  box-shadow: var(--pb-glow-active), var(--ui-shadow);
+.pro-plan-btn__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
 }
 
-.pro-plan-card--highlight:not(.pro-plan-card--selected) {
-  border-color: rgb(var(--cr-gold) / 0.35);
-}
-
-.pro-plan-card__badge {
-  padding: 0.125rem 0.5rem;
+.pro-plan-btn__badge {
+  padding: 0.1rem 0.4rem;
   border-radius: 9999px;
   font-size: 0.625rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   background: rgb(var(--cr-gold) / 0.16);
   border: 1px solid rgb(var(--cr-gold) / 0.42);
   color: rgb(var(--cr-gold));
+  flex-shrink: 0;
 }
 
-.pro-plan-card__cta,
+.pixel-btn--active .pro-plan-btn__badge {
+  background: rgb(var(--cr-gold) / 0.22);
+  border-color: rgb(var(--cr-gold) / 0.55);
+  color: inherit;
+}
+
+.pro-plan-btn__price {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  margin-top: 0.1rem;
+}
+
+.pro-plan-btn__was {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgb(var(--cr-muted));
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+
+.pixel-btn--active .pro-plan-btn__was {
+  color: inherit;
+  opacity: 0.65;
+}
+
+.pro-plan-btn__hint {
+  margin-top: 0;
+}
+
+.pro-plan-btn__state {
+  margin-left: auto;
+  flex-shrink: 0;
+  min-width: 2.75rem;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--cr-muted));
+  opacity: 0.85;
+}
+
+.pro-plan-btn__state.is-on {
+  color: rgb(var(--cr-gold-text));
+  text-shadow: var(--cr-stroke-title);
+  opacity: 1;
+}
+
 .pro-plan-cta {
   box-shadow: var(--pb-glow-active);
 }
@@ -5159,7 +5199,7 @@ html[data-perf="low"] .chart-tooltip-glass {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pro-plan-card {
+  .pro-plan-btn {
     transition: none;
   }
 }

@@ -31,7 +31,8 @@ export function ProCreditsCard({
               <span className="text-base font-bold text-cr-muted">Credits</span>
             </p>
             <p className="text-sm text-cr-muted leading-snug mt-1.5">
-              Credits можно использовать для оплаты до {maxSharePercent}% стоимости Pro.
+              Credits можно использовать для оплаты до {maxSharePercent}% стоимости Pro. Credits
+              хранятся без ограничений по времени.
             </p>
           </div>
         </div>
@@ -46,8 +47,8 @@ export function ProCreditsCard({
 
         {open ? (
           <p className="mt-3 text-sm text-cr-muted leading-snug">
-            Приглашай друзей в Ghosteek. Когда приглашённый пользователь впервые покупает Pro, вы
-            оба получаете +{rewardAmount} Credits.
+            Приглашай друзей в Ghosteek. За каждого приведённого друга вы и ваш друг получаете по +
+            {rewardAmount} Credits.
           </p>
         ) : null}
       </Card>

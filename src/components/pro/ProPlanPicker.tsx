@@ -1,7 +1,8 @@
 import { useMemo } from "react";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, Star } from "lucide-react";
 import { Button, Card } from "@/components/ui";
 import { cn } from "@/utils";
+import { internalPressableProps } from "@/utils/nativeCallout";
 import type { ProPlan } from "@/types";
 import { ProStarPrice } from "./ProStarPrice";
 
@@ -67,7 +68,7 @@ export function ProPlanPicker({
         </p>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-2.5">
+      <div className="grid grid-cols-1 gap-2" role="group" aria-label="Тариф Ghosteek Pro">
         {plans.map((plan, i) => {
           const isSelected = plan.id === selectedId;
           const pay = plan.stars_to_pay ?? plan.stars;
@@ -83,50 +84,54 @@ export function ProPlanPicker({
               aria-pressed={isSelected}
               onClick={() => onSelect(plan.id)}
               className={cn(
-                "pro-plan-card glass-card ui-enter text-left w-full",
-                isSelected && "pro-plan-card--selected",
-                plan.badge && !isSelected && "pro-plan-card--highlight",
+                "pixel-btn pixel-bevel pixel-btn--nav-row pro-plan-btn ui-enter w-full",
+                isSelected && "pixel-btn--active",
               )}
               style={{ animationDelay: `${Math.min(i, 4) * 40}ms` }}
+              {...internalPressableProps}
             >
-              <div className="flex items-start justify-between gap-2">
-                <p className="text-sm font-bold uppercase tracking-wide text-cr-muted">
-                  {plan.title}
-                </p>
-                {plan.badge ? (
-                  <span className="pro-plan-card__badge">{plan.badge}</span>
-                ) : null}
-              </div>
-
-              <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <ProStarPrice stars={pay} size="xl" />
-                {hasDiscount ? (
-                  <span className="text-sm text-cr-muted line-through tabular-nums opacity-80">
-                    {original} ★
-                  </span>
-                ) : null}
-              </div>
-
-              <p className="text-xs text-cr-muted mt-1.5 tabular-nums">
-                {plan.months === 1 ? (
-                  <>
-                    {pay} <StarInline /> / месяц
-                  </>
+              <span className="pixel-btn-icon-slot" aria-hidden>
+                {isSelected ? (
+                  <Check className="pixel-btn-icon" strokeWidth={2.5} />
                 ) : (
-                  <>
-                    ≈ {perMonth} <StarInline /> / месяц · {plan.months} {monthsWord(plan.months)}
-                  </>
+                  <Star className="pixel-btn-icon" strokeWidth={2.25} />
                 )}
-              </p>
+              </span>
 
-              {isSelected ? (
-                <p className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-cr-gold">
-                  <Check className="w-3.5 h-3.5" aria-hidden />
-                  Выбрано
-                </p>
-              ) : (
-                <p className="mt-2.5 text-xs text-cr-muted">Нажмите, чтобы выбрать</p>
-              )}
+              <span className="pixel-btn-text pro-plan-btn__text">
+                <span className="pixel-btn-label pro-plan-btn__title">
+                  <span>{plan.title}</span>
+                  {plan.badge ? <span className="pro-plan-btn__badge">{plan.badge}</span> : null}
+                </span>
+
+                <span className="pro-plan-btn__price">
+                  <ProStarPrice
+                    stars={pay}
+                    size="lg"
+                    tone={isSelected ? "inherit" : "accent"}
+                    className="!text-xl"
+                  />
+                  {hasDiscount ? (
+                    <span className="pro-plan-btn__was tabular-nums">{original} ★</span>
+                  ) : null}
+                </span>
+
+                <span className="pixel-btn-hint pro-plan-btn__hint tabular-nums">
+                  {plan.months === 1 ? (
+                    <>
+                      {pay} ★ / месяц
+                    </>
+                  ) : (
+                    <>
+                      ≈ {perMonth} ★ / месяц · {plan.months} {monthsWord(plan.months)}
+                    </>
+                  )}
+                </span>
+              </span>
+
+              <span className={cn("pro-plan-btn__state", isSelected && "is-on")}>
+                {isSelected ? "Вкл" : "Выкл"}
+              </span>
             </button>
           );
         })}
@@ -206,13 +211,5 @@ function CheckoutBreakdown({ plan }: { plan: ProPlan }) {
         <span>{pay} ★</span>
       </div>
     </div>
-  );
-}
-
-function StarInline() {
-  return (
-    <span className="text-cr-gold font-bold" aria-hidden>
-      ★
-    </span>
   );
 }
