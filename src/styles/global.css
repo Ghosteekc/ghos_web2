@@ -52,16 +52,31 @@
   @supports (view-transition-name: root) {
     ::view-transition-old(root),
     ::view-transition-new(root) {
-      animation-duration: var(--ui-duration);
+      animation-duration: 380ms;
       animation-timing-function: var(--ui-ease);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    ::view-transition-old(root),
-    ::view-transition-new(root) {
+    html:not([data-force-motion="1"]) ::view-transition-old(root),
+    html:not([data-force-motion="1"]) ::view-transition-new(root) {
       animation: none !important;
     }
+  }
+
+  /* Mobile / Telegram theme crossfade (fallback when View Transitions API is missing) */
+  .theme-crossfade-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity 420ms var(--ui-ease);
+    will-change: opacity;
+  }
+
+  .theme-crossfade-veil--out {
+    opacity: 0;
   }
 
   html.dock-gesture-lock,
