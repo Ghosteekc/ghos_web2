@@ -2784,15 +2784,116 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ui-enter,
-    .ui-fade,
-    .loader-item-enter {
+    html:not([data-force-motion="1"]) .ui-enter,
+    html:not([data-force-motion="1"]) .ui-fade,
+    html:not([data-force-motion="1"]) .loader-item-enter {
       animation: none !important;
     }
   }
 
   .loader-item-enter {
     animation: ui-fade var(--ui-duration) var(--ui-ease-out) both;
+  }
+
+  /*
+   * Shared circular spinner — HTML + transform/opacity only.
+   * Avoid SVG stroke-dash / CSS mask (often static or broken in Telegram iOS/Android WebViews).
+   * Loaders keep spinning even under prefers-reduced-motion (status indicator, not chrome).
+   */
+  .cr-spinner {
+    --cr-spinner-size: 3.25rem;
+    --cr-spinner-border: 3px;
+    position: relative;
+    width: var(--cr-spinner-size);
+    height: var(--cr-spinner-size);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .cr-spinner--page {
+    --cr-spinner-size: 10.5rem;
+    --cr-spinner-border: 2.5px;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .cr-spinner__halo {
+    position: absolute;
+    inset: 18%;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle,
+      rgb(var(--cr-gold) / 0.22) 0%,
+      rgb(var(--cr-blue) / 0.1) 50%,
+      transparent 72%
+    );
+    animation: cr-spinner-pulse 1.55s ease-in-out infinite;
+  }
+
+  .cr-spinner__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    border: var(--cr-spinner-border) solid rgb(var(--cr-border) / 0.35);
+    box-sizing: border-box;
+    will-change: transform;
+  }
+
+  .cr-spinner__ring--outer {
+    border-top-color: rgb(var(--cr-gold));
+    border-right-color: rgb(var(--cr-gold) / 0.45);
+    border-bottom-color: rgb(var(--cr-border) / 0.2);
+    border-left-color: rgb(var(--cr-blue) / 0.35);
+    animation: cr-spinner-spin 0.95s linear infinite;
+  }
+
+  .cr-spinner__ring--inner {
+    inset: 18%;
+    border-width: calc(var(--cr-spinner-border) - 0.5px);
+    border-top-color: rgb(var(--cr-blue));
+    border-right-color: rgb(var(--cr-blue) / 0.35);
+    border-bottom-color: transparent;
+    border-left-color: rgb(var(--cr-gold) / 0.4);
+    animation: cr-spinner-spin-rev 1.35s linear infinite;
+  }
+
+  .cr-spinner__orbit {
+    position: absolute;
+    inset: 0;
+    animation: cr-spinner-spin 0.95s linear infinite;
+    will-change: transform;
+  }
+
+  .cr-spinner__spark {
+    position: absolute;
+    top: calc(var(--cr-spinner-border) * -0.35);
+    left: 50%;
+    width: 0.4rem;
+    height: 0.4rem;
+    margin-left: -0.2rem;
+    border-radius: 9999px;
+    background: rgb(var(--cr-gold));
+    box-shadow: 0 0 8px rgb(var(--cr-gold) / 0.75);
+    animation: cr-spinner-spark 0.95s ease-in-out infinite;
+  }
+
+  .cr-spinner__core {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle at 35% 30%,
+      rgb(255 255 255 / 0.95),
+      rgb(var(--cr-gold)) 55%,
+      rgb(var(--cr-blue)) 100%
+    );
+    box-shadow: 0 0 8px rgb(var(--cr-gold) / 0.5);
+    animation: cr-spinner-pulse 1.55s ease-in-out infinite;
   }
 
   .page-loader__hero {
@@ -2808,48 +2909,20 @@
     z-index: 1;
   }
 
-  .page-loader__ring {
-    position: absolute;
-    inset: 0;
-    border-radius: 9999px;
-    background: conic-gradient(
-      from 0deg,
-      transparent 0%,
-      rgb(var(--cr-gold) / 0.15) 8%,
-      rgb(var(--cr-gold)) 22%,
-      rgb(var(--cr-blue) / 0.9) 38%,
-      transparent 58%
-    );
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2.5px));
-    animation: section-loader-spin 2.4s linear infinite;
-    filter: drop-shadow(0 0 10px rgb(var(--cr-gold) / 0.28));
+  .cr-spinner--page .cr-spinner__ring--inner {
+    inset: 7%;
   }
 
-  .page-loader__ring--inner {
-    inset: 0.7rem;
-    background: conic-gradient(
-      from 180deg,
-      transparent 0%,
-      rgb(var(--cr-blue) / 0.2) 10%,
-      rgb(var(--cr-blue)) 28%,
-      rgb(var(--cr-gold) / 0.75) 44%,
-      transparent 62%
-    );
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 1.75px), #000 calc(100% - 1.75px));
-    mask: radial-gradient(farthest-side, transparent calc(100% - 1.75px), #000 calc(100% - 1.75px));
-    animation: section-loader-spin-rev 1.8s linear infinite;
-    filter: drop-shadow(0 0 8px rgb(var(--cr-blue) / 0.32));
+  .cr-spinner--page .cr-spinner__spark {
+    width: 0.48rem;
+    height: 0.48rem;
+    margin-left: -0.24rem;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .page-loader__ring {
-      animation: none !important;
-      opacity: 0.7;
-    }
+  .cr-spinner--page .cr-spinner__halo {
+    inset: 10%;
   }
 
-  /* Section / tab loaders — circular ring (no page GIF) */
   .section-loader {
     display: flex;
     flex-direction: column;
@@ -2866,135 +2939,20 @@
     gap: 0.55rem;
   }
 
-  .section-loader__ring {
-    position: relative;
-    width: 3.25rem;
-    height: 3.25rem;
-    display: grid;
-    place-items: center;
+  .section-loader--compact .cr-spinner {
+    --cr-spinner-size: 2.35rem;
+    --cr-spinner-border: 2.5px;
   }
 
-  .section-loader__glow {
-    position: absolute;
-    inset: 12%;
-    border-radius: 9999px;
-    background: radial-gradient(
-      circle,
-      rgb(var(--cr-gold) / 0.28) 0%,
-      rgb(var(--cr-blue) / 0.12) 48%,
-      transparent 72%
-    );
-    animation: section-loader-pulse 1.6s var(--ui-ease-standard) infinite;
-    filter: blur(1px);
+  .section-loader--compact .cr-spinner__spark {
+    width: 0.3rem;
+    height: 0.3rem;
+    margin-left: -0.15rem;
   }
 
-  .section-loader__svg {
-    width: 100%;
-    height: 100%;
-    transform-origin: center;
-    overflow: visible;
-  }
-
-  .section-loader__track {
-    stroke: rgb(var(--cr-border) / 0.55);
-    stroke-width: 3.2;
-  }
-
-  .section-loader__arc {
-    fill: none;
-    stroke-linecap: round;
-    transform-origin: 32px 32px;
-  }
-
-  .section-loader__arc--outer {
-    stroke: rgb(var(--cr-gold));
-    stroke-width: 3.4;
-    stroke-dasharray: 68 96;
-    transform-box: fill-box;
-    transform-origin: center;
-    animation:
-      section-loader-spin 1.15s linear infinite,
-      section-loader-dash 1.6s var(--ui-ease-emphasized) infinite;
-    filter: drop-shadow(0 0 6px rgb(var(--cr-gold) / 0.55));
-  }
-
-  .section-loader__arc--inner {
-    stroke: rgb(var(--cr-blue));
-    stroke-width: 2.6;
-    stroke-dasharray: 42 72;
-    transform-box: fill-box;
-    transform-origin: center;
-    animation:
-      section-loader-spin-rev 1.55s linear infinite,
-      section-loader-dash-inner 1.35s var(--ui-ease-standard) infinite;
-    filter: drop-shadow(0 0 5px rgb(var(--cr-blue) / 0.5));
-    opacity: 0.92;
-  }
-
-  .section-loader__orbit {
-    position: absolute;
-    inset: 0;
-    animation: section-loader-spin 1.15s linear infinite;
-  }
-
-  .section-loader__spark {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 0.42rem;
-    height: 0.42rem;
-    margin-left: -0.21rem;
-    margin-top: -0.08rem;
-    border-radius: 9999px;
-    background: rgb(var(--cr-gold));
-    box-shadow:
-      0 0 8px rgb(var(--cr-gold) / 0.85),
-      0 0 16px rgb(var(--cr-gold) / 0.35);
-    animation: section-loader-spark 1.15s linear infinite;
-  }
-
-  .section-loader__core {
-    position: absolute;
-    width: 0.55rem;
-    height: 0.55rem;
-    border-radius: 9999px;
-    background: radial-gradient(
-      circle at 35% 30%,
-      rgb(255 255 255 / 0.9),
-      rgb(var(--cr-gold)) 55%,
-      rgb(var(--cr-blue)) 100%
-    );
-    box-shadow: 0 0 10px rgb(var(--cr-gold) / 0.55);
-    animation: section-loader-core 1.6s var(--ui-ease-standard) infinite;
-  }
-
-  .section-loader__label {
-    margin: 0;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    color: rgb(var(--cr-muted));
-    animation: section-loader-label 1.8s var(--ui-ease-standard) infinite;
-  }
-
-  .section-loader--compact .section-loader__ring {
-    width: 2.35rem;
-    height: 2.35rem;
-  }
-
-  .section-loader--compact .section-loader__spark {
-    width: 0.32rem;
-    height: 0.32rem;
-    margin-left: -0.16rem;
-  }
-
-  .section-loader--compact .section-loader__core {
-    width: 0.4rem;
-    height: 0.4rem;
-  }
-
-  .section-loader--compact .section-loader__label {
-    font-size: 0.75rem;
+  .section-loader--compact .cr-spinner__core {
+    width: 0.38rem;
+    height: 0.38rem;
   }
 
   .section-loader--inline {
@@ -3003,76 +2961,56 @@
     gap: 0;
   }
 
-  .section-loader--inline .section-loader__ring {
-    width: 1.35rem;
-    height: 1.35rem;
+  .section-loader--inline .cr-spinner {
+    --cr-spinner-size: 1.35rem;
+    --cr-spinner-border: 2px;
   }
 
-  .section-loader--inline .section-loader__track {
-    stroke-width: 4;
+  .section-loader--inline .cr-spinner__spark {
+    width: 0.24rem;
+    height: 0.24rem;
+    margin-left: -0.12rem;
   }
 
-  .section-loader--inline .section-loader__arc--outer {
-    stroke-width: 4;
+  .section-loader--inline .cr-spinner__core {
+    width: 0.26rem;
+    height: 0.26rem;
   }
 
-  .section-loader--inline .section-loader__arc--inner {
-    stroke-width: 3.2;
+  .section-loader--inline .cr-spinner__halo {
+    inset: 10%;
   }
 
-  .section-loader--inline .section-loader__spark {
-    width: 0.28rem;
-    height: 0.28rem;
-    margin-left: -0.14rem;
-    margin-top: -0.04rem;
+  .section-loader__label {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: rgb(var(--cr-muted));
+    animation: cr-spinner-label 1.8s ease-in-out infinite;
   }
 
-  .section-loader--inline .section-loader__core {
-    width: 0.28rem;
-    height: 0.28rem;
+  .section-loader--compact .section-loader__label {
+    font-size: 0.75rem;
   }
 
-  .section-loader--inline .section-loader__glow {
-    inset: 8%;
+  [data-theme="light"] .section-loader__label {
+    color: rgb(var(--cr-muted));
   }
 
-  @keyframes section-loader-spin {
+  @keyframes cr-spinner-spin {
     to {
       transform: rotate(360deg);
     }
   }
 
-  @keyframes section-loader-spin-rev {
+  @keyframes cr-spinner-spin-rev {
     to {
       transform: rotate(-360deg);
     }
   }
 
-  @keyframes section-loader-dash {
-    0%,
-    100% {
-      stroke-dasharray: 52 112;
-      stroke-dashoffset: 0;
-    }
-    50% {
-      stroke-dasharray: 88 76;
-      stroke-dashoffset: -28;
-    }
-  }
-
-  @keyframes section-loader-dash-inner {
-    0%,
-    100% {
-      stroke-dasharray: 28 86;
-      stroke-dashoffset: 0;
-    }
-    50% {
-      stroke-dasharray: 58 56;
-      stroke-dashoffset: 22;
-    }
-  }
-
-  @keyframes section-loader-pulse {
+  @keyframes cr-spinner-pulse {
     0%,
     100% {
       opacity: 0.55;
@@ -3080,35 +3018,23 @@
     }
     50% {
       opacity: 1;
-      transform: scale(1.08);
+      transform: scale(1.06);
     }
   }
 
-  @keyframes section-loader-core {
+  @keyframes cr-spinner-spark {
     0%,
     100% {
       transform: scale(0.85);
       opacity: 0.75;
     }
     50% {
-      transform: scale(1.15);
+      transform: scale(1.2);
       opacity: 1;
     }
   }
 
-  @keyframes section-loader-spark {
-    0%,
-    100% {
-      transform: scale(0.85);
-      opacity: 0.7;
-    }
-    50% {
-      transform: scale(1.25);
-      opacity: 1;
-    }
-  }
-
-  @keyframes section-loader-label {
+  @keyframes cr-spinner-label {
     0%,
     100% {
       opacity: 0.55;
@@ -3118,42 +3044,22 @@
     }
   }
 
-  [data-theme="light"] .section-loader__label {
-    color: rgb(var(--cr-muted));
-  }
-
-  [data-theme="light"] .section-loader__track {
-    stroke: rgb(var(--cr-border) / 0.75);
-  }
-
+  /* Keep spinner motion on phones even if OS reports reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    .section-loader__glow,
-    .section-loader__arc,
-    .section-loader__orbit,
-    .section-loader__spark,
-    .section-loader__core,
+    .cr-spinner__ring--outer,
+    .cr-spinner__orbit {
+      animation: cr-spinner-spin 1.25s linear infinite !important;
+    }
+
+    .cr-spinner__ring--inner {
+      animation: cr-spinner-spin-rev 1.7s linear infinite !important;
+    }
+
+    .cr-spinner__halo,
+    .cr-spinner__core,
+    .cr-spinner__spark,
     .section-loader__label {
-      animation: none !important;
-    }
-
-    .section-loader__arc--outer {
-      stroke-dasharray: 90 74;
-      transform: rotate(-40deg);
-    }
-
-    .section-loader__arc--inner {
-      stroke-dasharray: 50 64;
-      transform: rotate(50deg);
-    }
-
-    .section-loader__orbit {
-      transform: rotate(-40deg);
-    }
-
-    .section-loader__glow,
-    .section-loader__core,
-    .section-loader__label {
-      opacity: 0.9;
+      animation-duration: 2s !important;
     }
   }
 
@@ -4965,8 +4871,8 @@ button.ai-md-link {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ai-replay-analysis-enter,
-  .ai-deck-card {
+  html:not([data-force-motion="1"]) .ai-replay-analysis-enter,
+  html:not([data-force-motion="1"]) .ai-deck-card {
     animation: none !important;
     opacity: 1;
     transform: none;
@@ -5018,7 +4924,7 @@ button.ai-md-link {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ai-msg-enter {
+  html:not([data-force-motion="1"]) .ai-msg-enter {
     animation: none !important;
     opacity: 1;
     transform: none;
@@ -5174,10 +5080,10 @@ html[data-perf="low"] .chart-tooltip-glass {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ctor-slot,
-  .ctor-grid-item,
-  .ctor-slot-card--enter,
-  .ui-enter {
+  html:not([data-force-motion="1"]) .ctor-slot,
+  html:not([data-force-motion="1"]) .ctor-grid-item,
+  html:not([data-force-motion="1"]) .ctor-slot-card--enter,
+  html:not([data-force-motion="1"]) .ui-enter {
     transition: none !important;
     animation: none !important;
   }

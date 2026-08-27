@@ -37,7 +37,9 @@ function isIPadLike(): boolean {
 export function detectInitialProfile(): RenderProfile {
   if (typeof window === "undefined") return "medium";
 
-  if (prefersReducedMotion()) return "low";
+  const forceMotion =
+    typeof document !== "undefined" && document.documentElement.dataset.forceMotion === "1";
+  if (prefersReducedMotion() && !forceMotion) return "low";
 
   const cores = navigator.hardwareConcurrency || 4;
   const memory = typeof navigator.deviceMemory === "number" ? navigator.deviceMemory : null;

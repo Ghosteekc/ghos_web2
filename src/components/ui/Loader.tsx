@@ -49,17 +49,14 @@ function SectionLoader({
       aria-busy="true"
       aria-label={showLabel ? label : "Загрузка"}
     >
-      <div className="section-loader__ring" aria-hidden>
-        <span className="section-loader__glow" />
-        <svg className="section-loader__svg" viewBox="0 0 64 64" fill="none">
-          <circle className="section-loader__track" cx="32" cy="32" r="26" />
-          <circle className="section-loader__arc section-loader__arc--outer" cx="32" cy="32" r="26" />
-          <circle className="section-loader__arc section-loader__arc--inner" cx="32" cy="32" r="18" />
-        </svg>
-        <span className="section-loader__orbit">
-          <span className="section-loader__spark" />
+      <div className="cr-spinner" aria-hidden>
+        <span className="cr-spinner__halo" />
+        <span className="cr-spinner__ring cr-spinner__ring--outer" />
+        <span className="cr-spinner__ring cr-spinner__ring--inner" />
+        <span className="cr-spinner__orbit">
+          <span className="cr-spinner__spark" />
         </span>
-        <span className="section-loader__core" />
+        <span className="cr-spinner__core" />
       </div>
       {showLabel && !inline ? <p className="section-loader__label">{label}</p> : null}
     </div>
@@ -111,8 +108,14 @@ const Loader = ({
       aria-label={showLabel ? `Загрузка ${current}` : "Загрузка"}
     >
       <div className="page-loader__hero" aria-hidden>
-        <span className="page-loader__ring" />
-        <span className="page-loader__ring page-loader__ring--inner" />
+        <span className="cr-spinner cr-spinner--page">
+          <span className="cr-spinner__halo" />
+          <span className="cr-spinner__ring cr-spinner__ring--outer" />
+          <span className="cr-spinner__ring cr-spinner__ring--inner" />
+          <span className="cr-spinner__orbit">
+            <span className="cr-spinner__spark" />
+          </span>
+        </span>
         <img
           src="/pekka-butterfly.gif"
           alt=""

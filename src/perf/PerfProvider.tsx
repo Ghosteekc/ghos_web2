@@ -11,6 +11,7 @@ import {
 } from "react";
 import { applyRenderProfile, readCurrentProfile } from "./applyProfile";
 import { detectInitialProfile, downgradeProfile, prefersReducedMotion } from "./detectProfile";
+import { isForceMotionEnabled } from "./bootstrap";
 import type { PerfSnapshot, RenderProfile } from "./types";
 import { PROFILE_TOKENS } from "./types";
 
@@ -54,7 +55,7 @@ export function PerfProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (prefersReducedMotion()) {
+    if (prefersReducedMotion() && !isForceMotionEnabled()) {
       setSnapshot(applyRenderProfile("low", null));
       return;
     }
