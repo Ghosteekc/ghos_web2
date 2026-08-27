@@ -67,7 +67,7 @@ export function ArenaDecksPanel({ renderDeck }: ArenaDecksPanelProps) {
     void load();
   }, [load]);
 
-  if (loading) return <Loader />;
+  if (loading) return <Loader variant="section" />;
 
   if (error) {
     return (

@@ -70,7 +70,7 @@ export function ProReferralCard() {
   if (loading && !data) {
     return (
       <Card className="!p-4">
-        <Loader />
+        <Loader variant="section" compact />
       </Card>
     );
   }

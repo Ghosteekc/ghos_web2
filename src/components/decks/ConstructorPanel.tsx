@@ -425,7 +425,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   };
 
   if (!ready && !catalog.length) {
-    return <Loader />;
+    return <Loader variant="section" />;
   }
 
   return (
@@ -636,7 +636,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           </section>
         ) : null}
 
-        {loading ? <Loader /> : null}
+        {loading ? <Loader variant="section" compact label="Собираем колоды…" /> : null}
         {error ? <ErrorState title={error} /> : null}
 
         {!loading && filledCount === 4 && decks.length > 0 && !alternativeDeck ? (

@@ -172,7 +172,7 @@ export function RecommendationsPanel() {
     scrollToArena(playerArena);
   }, [playerArena, scrollToArena]);
 
-  if (loading) return <Loader />;
+  if (loading) return <Loader variant="section" />;
   if (error) return <ErrorState title={error} />;
   if (!profile?.player_tag) {
     return (

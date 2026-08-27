@@ -44,7 +44,7 @@ const MetaPanel = lazy(() =>
 );
 
 function TabSuspense({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<Loader />}>{children}</Suspense>;
+  return <Suspense fallback={<Loader variant="section" />}>{children}</Suspense>;
 }
 
 const DECK_HOME = "stats";
@@ -222,7 +222,7 @@ export function DecksPage() {
       filter !== "constructor" &&
       filter !== "favorites" &&
       filter !== "meta" ? (
-        <Loader />
+        <Loader variant="section" />
       ) : null}
 
       {filter === DECK_HOME ? <DeckWinratesPanel onAnalyze={setPassportDeck} /> : null}
@@ -434,7 +434,7 @@ function TopPlayersPanel({
     }
   };
 
-  if (loading) return <Loader />;
+  if (loading) return <Loader variant="section" />;
 
   if (error) {
     return (
@@ -700,7 +700,7 @@ function RandomDeckPanel({
     return (
       <div className="space-y-3">
         <RoflModeBar rofl={rofl} onRoflChange={setRofl} />
-        <Loader />
+        <Loader variant="section" />
       </div>
     );
   }

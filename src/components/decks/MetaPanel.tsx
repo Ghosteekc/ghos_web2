@@ -337,7 +337,7 @@ export function MetaPanel() {
         <p className="text-xs text-cr-muted">{statusMessage}</p>
       ) : null}
 
-      {loading ? <Loader /> : null}
+      {loading ? <Loader variant="section" /> : null}
       {error ? <ErrorState title={error} /> : null}
 
       {!loading && !error && tab !== "clan-wars" && ladder ? (

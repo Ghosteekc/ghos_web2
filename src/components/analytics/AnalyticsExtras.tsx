@@ -76,7 +76,7 @@ export function DeckWinratesPanel({ onAnalyze }: { onAnalyze?: (deck: Deck) => v
     void load();
   }, [load]);
 
-  if (loading) return <Loader />;
+  if (loading) return <Loader variant="section" />;
   if (error) return <ErrorState title={error} />;
   if (!rows.length) {
     return <EmptyState title="Сыграйте бои — появится статистика по колодам" />;
@@ -230,7 +230,7 @@ export function OpponentsPanel() {
     }
   };
 
-  if (loading) return <Loader />;
+  if (loading) return <Loader variant="section" />;
   if (error) return <ErrorState title={error} />;
   if (!opponents.length) {
     return <EmptyState title="Нет данных о колодах соперников" />;
@@ -372,7 +372,7 @@ export function DeckToolsPanel() {
       (customize && !synergyNeeded && !levelAltNeeded && upgrades.length === 0),
   );
 
-  if (proLoading || loading) return <Loader />;
+  if (proLoading || loading) return <Loader variant="section" />;
   if (proLocked) {
     return (
       <ProGate
@@ -565,7 +565,7 @@ export function LossAnalysisPanel() {
     [insights?.insights],
   );
 
-  if (loading) return <Loader />;
+  if (loading) return <Loader variant="section" />;
   if (error) return <ErrorState title={error} />;
   if (!insights) {
     return <EmptyState title="Сыграйте бои — здесь появится разбор ваших поражений" />;

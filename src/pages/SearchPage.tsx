@@ -130,12 +130,7 @@ export function SearchPage() {
         )}
         {loading && (
           <div className="absolute right-12 top-1/2 -translate-y-1/2 pointer-events-none">
-            <img
-              src="/pekka-butterfly.gif"
-              alt=""
-              aria-hidden
-              className="w-6 h-6 object-contain"
-            />
+            <Loader inline showLabel={false} />
           </div>
         )}
       </div>

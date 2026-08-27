@@ -66,7 +66,7 @@ export function FavoritesPanel({ onAnalyze, onCompare }: FavoritesPanelProps) {
       deckLink: entry.deck_link,
     });
 
-  if (loading) return <Loader />;
+  if (loading) return <Loader variant="section" />;
 
   return (
     <div className="space-y-4">
