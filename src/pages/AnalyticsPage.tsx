@@ -14,8 +14,8 @@ import {
 } from "recharts";
 import { TrendingUp, TrendingDown, Swords, Bot } from "lucide-react";
 import { StatsOverview } from "@/types";
-import { Card, FeatureNavGrid, Loader, ScrollToTopButton, Button, ErrorState, PageHeader } from "@/components/ui";
-import { api } from "@/api/client";
+import { Card, FeatureNavGrid, Loader, ScrollToTopButton, Button, ErrorState, NoBattlesHint, isNoBattlesError, PageHeader } from "@/components/ui";
+import { api, ApiError } from "@/api/client";
 import { cacheGet, lsGet, TTL } from "@/api/cache";
 import { getWinColor } from "@/utils";
 
@@ -79,6 +79,7 @@ export function AnalyticsPage() {
   const [stats, setStats] = useState<StatsOverview | null>(() => bootstrapStats());
   const [loading, setLoading] = useState(() => !bootstrapStats());
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
@@ -90,6 +91,7 @@ export function AnalyticsPage() {
     }
     try {
       setError(null);
+      setErrorCode(null);
       const data = await api.getStats();
       setStats(data);
     } catch (e) {
@@ -97,8 +99,10 @@ export function AnalyticsPage() {
       if (fallback) {
         setStats(fallback);
         setError(null);
+        setErrorCode(null);
       } else {
         setError(e instanceof Error ? e.message : "Ошибка загрузки");
+        setErrorCode(e instanceof ApiError ? e.code : null);
       }
     } finally {
       setLoading(false);
@@ -172,6 +176,9 @@ export function AnalyticsPage() {
   }
 
   if ((error || !stats) && section === null) {
+    if (isNoBattlesError(errorCode ? { code: errorCode, message: error ?? "" } : error)) {
+      return <NoBattlesHint />;
+    }
     return (
       <ErrorState
         title={error ?? "Нет данных"}

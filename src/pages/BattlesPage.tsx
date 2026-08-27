@@ -4,7 +4,7 @@ import {
   Trophy,
   RefreshCw,
 } from "lucide-react";
-import { Button, Loader, ScrollToTopButton, ErrorState, EmptyState, PageHeader } from "@/components/ui";
+import { Button, Loader, ScrollToTopButton, ErrorState, EmptyState, NoBattlesHint, PageHeader } from "@/components/ui";
 import { BattleCardSimple } from "@/components/battles/BattleCard";
 import { api, ApiError } from "@/api/client";
 import { cacheGet, cacheHas } from "@/api/cache";
@@ -138,21 +138,22 @@ export function BattlesPage() {
             />
           ))}
           {filtered.length === 0 && (
-            <EmptyState
-              icon={<Trophy className="h-12 w-12 opacity-50" />}
-              title={
-                refreshing
-                  ? "Загружаем бои из Clash Royale…"
-                  : filter === "league"
-                    ? "Боёв в лиге нет"
-                    : "Бои пока не найдены"
-              }
-              description={
-                refreshing || filter === "league"
-                  ? undefined
-                  : "Нажмите обновление — подтянем последние бои из игры."
-              }
-            />
+            filter === "league" ? (
+              <EmptyState
+                icon={<Trophy className="h-12 w-12 opacity-50" />}
+                title={refreshing ? "Загружаем бои из Clash Royale…" : "Боёв в лиге нет"}
+              />
+            ) : refreshing ? (
+              <EmptyState
+                icon={<Trophy className="h-12 w-12 opacity-50" />}
+                title="Загружаем бои из Clash Royale…"
+              />
+            ) : (
+              <NoBattlesHint
+                title="Бои пока не найдены"
+                description="Если давно не заходили в игру, журнал боёв пуст. Сыграйте пару рейтинговых матчей — список обновится после синхронизации."
+              />
+            )
           )}
         </div>
       )}
