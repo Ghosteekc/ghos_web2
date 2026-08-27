@@ -11,6 +11,7 @@ export { useGlobalButtonHaptics } from "./useGlobalButtonHaptics";
 export { useDisableSystemGestures } from "./useDisableSystemGestures";
 export { useHapticSettingsBootstrap } from "./useHapticSettingsBootstrap";
 export { useLinkedTagSync } from "./useLinkedTagSync";
+export { useUserDataBootstrap } from "./useUserDataBootstrap";
 export { useSettings } from "./useSettings";
 export { useGhosteekPro } from "./useGhosteekPro";
 export type { GhosteekPro } from "./useGhosteekPro";

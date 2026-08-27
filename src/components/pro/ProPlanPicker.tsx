@@ -129,9 +129,6 @@ export function ProPlanPicker({
                 </span>
               </span>
 
-              <span className={cn("pro-plan-btn__state", isSelected && "is-on")}>
-                {isSelected ? "Вкл" : "Выкл"}
-              </span>
             </button>
           );
         })}

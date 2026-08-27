@@ -34,7 +34,17 @@ export function BattlesPage() {
   const load = useCallback(async () => {
     try {
       setError(null);
-      const res = await api.getBattles();
+      let res = await api.getBattles();
+      // New / cold users: auto-pull CR battlelog once before showing empty.
+      if (!(res.battles ?? []).length) {
+        setRefreshing(true);
+        try {
+          await api.syncData();
+          res = await api.getBattles();
+        } catch {
+          // keep first response / error below
+        }
+      }
       setBattles(res.battles ?? []);
     } catch (e) {
       if (!cacheHas(BATTLES_CACHE_KEY)) {
@@ -130,7 +140,18 @@ export function BattlesPage() {
           {filtered.length === 0 && (
             <EmptyState
               icon={<Trophy className="h-12 w-12 opacity-50" />}
-              title={filter === "league" ? "Боёв в лиге нет" : "Бои не найдены"}
+              title={
+                refreshing
+                  ? "Загружаем бои из Clash Royale…"
+                  : filter === "league"
+                    ? "Боёв в лиге нет"
+                    : "Бои пока не найдены"
+              }
+              description={
+                refreshing || filter === "league"
+                  ? undefined
+                  : "Нажмите обновление — подтянем последние бои из игры."
+              }
             />
           )}
         </div>

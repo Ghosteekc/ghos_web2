@@ -10,6 +10,7 @@ import {
   useDisableSystemGestures,
   useHapticSettingsBootstrap,
   useLinkedTagSync,
+  useUserDataBootstrap,
 } from "@/hooks";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { PerfProvider, PerfDevOverlay } from "@/perf";
@@ -23,6 +24,7 @@ export function Layout() {
   useDisableSystemGestures();
   useHapticSettingsBootstrap();
   useLinkedTagSync();
+  useUserDataBootstrap();
 
   useEffect(() => {
     bootstrapTelegramViewport();

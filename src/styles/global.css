@@ -5170,25 +5170,6 @@ html[data-perf="low"] .chart-tooltip-glass {
   margin-top: 0;
 }
 
-.pro-plan-btn__state {
-  margin-left: auto;
-  flex-shrink: 0;
-  min-width: 2.75rem;
-  text-align: center;
-  font-size: 0.6875rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: rgb(var(--cr-muted));
-  opacity: 0.85;
-}
-
-.pro-plan-btn__state.is-on {
-  color: rgb(var(--cr-gold-text));
-  text-shadow: var(--cr-stroke-title);
-  opacity: 1;
-}
-
 .pro-plan-cta {
   box-shadow: var(--pb-glow-active);
 }
