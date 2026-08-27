@@ -49,16 +49,18 @@ function SectionLoader({
       aria-busy="true"
       aria-label={showLabel ? label : "Загрузка"}
     >
-      <div className="section-loader__stage" aria-hidden>
-        <span className="section-loader__orb section-loader__orb--1" />
-        <span className="section-loader__orb section-loader__orb--2" />
-        <span className="section-loader__orb section-loader__orb--3" />
+      <div className="section-loader__ring" aria-hidden>
+        <span className="section-loader__glow" />
+        <svg className="section-loader__svg" viewBox="0 0 64 64" fill="none">
+          <circle className="section-loader__track" cx="32" cy="32" r="26" />
+          <circle className="section-loader__arc section-loader__arc--outer" cx="32" cy="32" r="26" />
+          <circle className="section-loader__arc section-loader__arc--inner" cx="32" cy="32" r="18" />
+        </svg>
+        <span className="section-loader__orbit">
+          <span className="section-loader__spark" />
+        </span>
+        <span className="section-loader__core" />
       </div>
-      {!inline ? (
-        <div className="section-loader__bar" aria-hidden>
-          <span className="section-loader__bar-fill" />
-        </div>
-      ) : null}
       {showLabel && !inline ? <p className="section-loader__label">{label}</p> : null}
     </div>
   );
@@ -108,14 +110,17 @@ const Loader = ({
       aria-busy="true"
       aria-label={showLabel ? `Загрузка ${current}` : "Загрузка"}
     >
-      <img
-        src="/pekka-butterfly.gif"
-        alt=""
-        aria-hidden
-        className="object-contain w-36 h-36"
-      />
+      <div className="page-loader__hero" aria-hidden>
+        <span className="page-loader__ring" />
+        <span className="page-loader__ring page-loader__ring--inner" />
+        <img
+          src="/pekka-butterfly.gif"
+          alt=""
+          className="page-loader__gif object-contain w-36 h-36"
+        />
+      </div>
       {showLabel && (
-        <div className="text-center mt-4">
+        <div className="text-center mt-5">
           <p className="text-cr-muted loader-title text-base">Загрузка</p>
           <div className="relative overflow-hidden mt-1 min-h-[1.35rem]">
             <p
