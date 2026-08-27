@@ -103,10 +103,6 @@ const Loader = ({
       aria-label={showLabel ? `Загрузка ${current}` : "Загрузка"}
     >
       <div className="page-loader__hero" aria-hidden>
-        <span className="cr-spinner cr-spinner--page">
-          <span className="cr-spinner__track" />
-          <span className="cr-spinner__arc" />
-        </span>
         <img
           src="/pekka-butterfly.gif"
           alt=""
