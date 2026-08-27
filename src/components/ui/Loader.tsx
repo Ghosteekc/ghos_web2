@@ -50,13 +50,8 @@ function SectionLoader({
       aria-label={showLabel ? label : "Загрузка"}
     >
       <div className="cr-spinner" aria-hidden>
-        <span className="cr-spinner__halo" />
-        <span className="cr-spinner__ring cr-spinner__ring--outer" />
-        <span className="cr-spinner__ring cr-spinner__ring--inner" />
-        <span className="cr-spinner__orbit">
-          <span className="cr-spinner__spark" />
-        </span>
-        <span className="cr-spinner__core" />
+        <span className="cr-spinner__track" />
+        <span className="cr-spinner__arc" />
       </div>
       {showLabel && !inline ? <p className="section-loader__label">{label}</p> : null}
     </div>
@@ -109,12 +104,8 @@ const Loader = ({
     >
       <div className="page-loader__hero" aria-hidden>
         <span className="cr-spinner cr-spinner--page">
-          <span className="cr-spinner__halo" />
-          <span className="cr-spinner__ring cr-spinner__ring--outer" />
-          <span className="cr-spinner__ring cr-spinner__ring--inner" />
-          <span className="cr-spinner__orbit">
-            <span className="cr-spinner__spark" />
-          </span>
+          <span className="cr-spinner__track" />
+          <span className="cr-spinner__arc" />
         </span>
         <img
           src="/pekka-butterfly.gif"
