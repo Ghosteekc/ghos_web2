@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { BottomNav } from "./BottomNav";
 import {
@@ -43,9 +42,7 @@ export function Layout() {
               <FavoriteDecksProvider>
                 <div className="page-shell">
                   <ErrorBoundary>
-                    <PageEnter>
-                      <Outlet />
-                    </PageEnter>
+                    <PageEnter />
                   </ErrorBoundary>
                 </div>
               </FavoriteDecksProvider>

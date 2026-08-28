@@ -4,3 +4,4 @@ export { applyMotionTokens } from "./bootstrap";
 export { PageEnter } from "./PageEnter";
 export { TabTransition, TabContentEnter } from "./TabTransition";
 export { useEnterMotionConfig } from "./useEnterMotionConfig";
+export { usePageMotionConfig } from "./usePageMotionConfig";

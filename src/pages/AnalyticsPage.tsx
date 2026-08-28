@@ -173,7 +173,12 @@ export function AnalyticsPage() {
   };
 
   if (loading && section === null) {
-    return <Loader />;
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Аналитика" />
+        <Loader variant="section" />
+      </div>
+    );
   }
 
   if ((error || !stats) && section === null) {

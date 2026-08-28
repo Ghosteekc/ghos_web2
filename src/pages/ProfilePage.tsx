@@ -38,7 +38,12 @@ export function ProfilePage() {
   }, [load]);
 
   if (loading) {
-    return <Loader />;
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Профиль" />
+        <Loader variant="section" />
+      </div>
+    );
   }
 
   const league =

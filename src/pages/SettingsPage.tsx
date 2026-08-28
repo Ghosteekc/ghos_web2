@@ -227,7 +227,12 @@ export function SettingsPage() {
   };
 
   if (settingsLoading || profileLoading) {
-    return <Loader />;
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Настройки" />
+        <Loader variant="section" />
+      </div>
+    );
   }
 
   return (

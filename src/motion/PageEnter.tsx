@@ -1,24 +1,40 @@
-import { motion } from "framer-motion";
-import { useLocation } from "react-router-dom";
-import { useEnterMotionConfig } from "./useEnterMotionConfig";
+import { AnimatePresence, motion } from "framer-motion";
+import { useLayoutEffect } from "react";
+import { useLocation, useOutlet } from "react-router-dom";
+import { usePageMotionConfig } from "./usePageMotionConfig";
 
-/** Лёгкий enter при смене route (opacity, без translate на mobile). */
-export function PageEnter({ children }: { children: React.ReactNode }) {
-  const { pathname } = useLocation();
-  const motionConfig = useEnterMotionConfig();
+/** Crossfade при смене route (bottom nav и вложенные страницы). */
+export function PageEnter() {
+  const location = useLocation();
+  const outlet = useOutlet();
+  const motionConfig = usePageMotionConfig();
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+    document.querySelector(".app-main")?.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
-    <motion.div
-      key={pathname}
-      className="page-motion-panel"
-      initial={motionConfig.initial}
-      animate={motionConfig.animate}
-      transition={{
-        ...motionConfig.transition,
-        duration: motionConfig.fadeOnly ? 0.18 : 0.24,
-      }}
-    >
-      {children}
-    </motion.div>
+    <div className="page-motion-stage">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {outlet ? (
+          <motion.div
+            key={location.pathname}
+            className="page-motion-panel"
+            initial={motionConfig.initial}
+            animate={{
+              ...motionConfig.animate,
+              transition: motionConfig.transition,
+            }}
+            exit={{
+              ...motionConfig.exit,
+              transition: motionConfig.exitTransition,
+            }}
+          >
+            {outlet}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
   );
 }

@@ -127,7 +127,7 @@ export function BattlesPage() {
       {error && <ErrorState title={error} />}
 
       {loading ? (
-        <Loader />
+        <Loader variant="section" />
       ) : (
         <div className="space-y-4 battles-list">
           {filtered.map((battle) => (
