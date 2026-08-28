@@ -220,8 +220,7 @@ export function AnalyticsPage() {
       />
 
       {section === null && stats ? (
-        <TabTransition tabKey="overview">
-        <>
+        <TabTransition tabKey="overview" className="space-y-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { label: "Всего боёв", value: stats.total_battles, icon: Swords, color: "text-cr-gold" },
@@ -280,7 +279,6 @@ export function AnalyticsPage() {
               </ChartTooltipAnchor>
             </Card>
           </div>
-        </>
         </TabTransition>
       ) : null}
 
