@@ -62,9 +62,13 @@ export function DeckWinratesPanel({ onAnalyze }: { onAnalyze?: (deck: Deck) => v
     try {
       setError(null);
       const data = await api.getWinrates();
-      const sorted = [...data].sort((a, b) =>
-        (b.last_seen ?? "").localeCompare(a.last_seen ?? ""),
-      );
+      const sorted = [...data]
+        .filter((row) => (row.total ?? 0) > 0)
+        .sort((a, b) => {
+          const bySeen = (b.last_seen ?? "").localeCompare(a.last_seen ?? "");
+          if (bySeen !== 0) return bySeen;
+          return (b.total ?? 0) - (a.total ?? 0);
+        });
       setRows(sorted);
     } catch (e) {
       setRows([]);

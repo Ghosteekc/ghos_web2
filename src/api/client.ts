@@ -723,7 +723,7 @@ export const api = {
       TTL.battles,
     ),
 
-  getWinrates: () => cachedGet<WinrateEntry[]>("winrates-v4", "/api/winrates", TTL.stats),
+  getWinrates: () => cachedGet<WinrateEntry[]>("winrates-v5", "/api/winrates", TTL.stats),
 
   getOpponents: () => cachedGet<OpponentEntry[]>("opponents-v2", "/api/opponents", TTL.battles),
 
