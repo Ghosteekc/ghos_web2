@@ -214,8 +214,8 @@ export function AnalyticsPage() {
         onSelect={handleNavSelect}
       />
 
-      <TabTransition tabKey={section ?? "overview"}>
-      {section === null && stats && (
+      {section === null && stats ? (
+        <TabTransition tabKey="overview">
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
@@ -276,15 +276,31 @@ export function AnalyticsPage() {
             </Card>
           </div>
         </>
-      )}
+        </TabTransition>
+      ) : null}
 
-      {section === "recommendations" && <RecommendationsPanel />}
-      {section === "losses" && <LossAnalysisPanel />}
-      {section === "opponents" && <OpponentsPanel />}
-      {section === "tools" && <DeckToolsPanel />}
+      {section === "recommendations" ? (
+        <TabTransition tabKey="recommendations">
+          <RecommendationsPanel />
+        </TabTransition>
+      ) : null}
+      {section === "losses" ? (
+        <TabTransition tabKey="losses">
+          <LossAnalysisPanel />
+        </TabTransition>
+      ) : null}
+      {section === "opponents" ? (
+        <TabTransition tabKey="opponents">
+          <OpponentsPanel />
+        </TabTransition>
+      ) : null}
+      {section === "tools" ? (
+        <TabTransition tabKey="tools">
+          <DeckToolsPanel />
+        </TabTransition>
+      ) : null}
 
       {section !== null && <ScrollToTopButton />}
-      </TabTransition>
     </div>
   );
 }

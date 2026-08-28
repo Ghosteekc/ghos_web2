@@ -2801,6 +2801,14 @@
     animation: tab-enter var(--ui-duration-fast) var(--ui-ease-out) both;
   }
 
+  /* Framer tab/page panels — не дублировать ui-enter на Card внутри */
+  .tab-motion-panel .ui-enter,
+  .page-motion-panel .ui-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
   @keyframes ui-fade {
     from {
       opacity: 0;

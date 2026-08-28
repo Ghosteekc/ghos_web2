@@ -23,7 +23,7 @@ import type { Deck, DeckCard as DeckCardData, RandomDeck, TopPlayer, TopPlayersD
 import { usePageRefresh, useTelegram } from "@/hooks";
 import { deckFromCardNames, deckToComparePath } from "@/utils/deckActions";
 import { contextFromConstructor, openGhosteekAi } from "@/utils/aiPageContext";
-import { TabTransition } from "@/motion";
+import { TabTransition, TabContentEnter } from "@/motion";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
 
 import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
@@ -226,106 +226,122 @@ export function DecksPage() {
         <Loader variant="section" />
       ) : null}
 
-      <TabTransition tabKey={filter}>
-      {filter === DECK_HOME ? <DeckWinratesPanel onAnalyze={setPassportDeck} /> : null}
+      {filter === DECK_HOME ? (
+        <TabTransition tabKey={DECK_HOME}>
+          <DeckWinratesPanel onAnalyze={setPassportDeck} />
+        </TabTransition>
+      ) : null}
 
       {filter === "favorites" ? (
         <TabSuspense>
-          <FavoritesPanel
-            onAnalyze={setPassportDeck}
-            onCompare={(deck) => {
-              const path = deckToComparePath(deck, "favorites");
-              if (path) navigate(path);
-            }}
-          />
+          <TabContentEnter>
+            <FavoritesPanel
+              onAnalyze={setPassportDeck}
+              onCompare={(deck) => {
+                const path = deckToComparePath(deck, "favorites");
+                if (path) navigate(path);
+              }}
+            />
+          </TabContentEnter>
         </TabSuspense>
       ) : null}
 
       {filter === "random" ? (
-        <RandomDeckPanel
-          onCopied={(msg) => {
-            setCopyHint(msg);
-            setTimeout(() => setCopyHint(null), 3000);
-          }}
-          onAnalyze={setPassportDeck}
-          onCompare={(deck) => {
-            const path = deckToComparePath(deck, "random");
-            if (path) navigate(path);
-          }}
-        />
+        <TabTransition tabKey="random">
+          <RandomDeckPanel
+            onCopied={(msg) => {
+              setCopyHint(msg);
+              setTimeout(() => setCopyHint(null), 3000);
+            }}
+            onAnalyze={setPassportDeck}
+            onCompare={(deck) => {
+              const path = deckToComparePath(deck, "random");
+              if (path) navigate(path);
+            }}
+          />
+        </TabTransition>
       ) : null}
 
       {filter === "top" ? (
-        <TopPlayersPanel
-          onCopied={(msg) => {
-            setCopyHint(msg);
-            setTimeout(() => setCopyHint(null), 3000);
-          }}
-          onAnalyze={setPassportDeck}
-          onCompare={(deck) => {
-            const path = deckToComparePath(deck, "top");
-            if (path) navigate(path);
-          }}
-        />
+        <TabTransition tabKey="top">
+          <TopPlayersPanel
+            onCopied={(msg) => {
+              setCopyHint(msg);
+              setTimeout(() => setCopyHint(null), 3000);
+            }}
+            onAnalyze={setPassportDeck}
+            onCompare={(deck) => {
+              const path = deckToComparePath(deck, "top");
+              if (path) navigate(path);
+            }}
+          />
+        </TabTransition>
       ) : null}
 
       {filter === "constructor" ? (
         <TabSuspense>
-          <ConstructorPanel
-            renderDeckCard={(deck, i) => (
-              <div key={`${deck.id}-${deck.name}`} className="w-full">
-                <DeckCard
-                  deck={deck}
-                  index={i}
-                  showCompare
-                  onCompare={() => {
-                    const path = deckToComparePath(deck, "constructor");
-                    if (path) navigate(path);
-                  }}
-                  onCopied={(msg) => {
-                    setCopyHint(msg);
-                    setTimeout(() => setCopyHint(null), 3000);
-                  }}
-                  onAnalyze={() => setPassportDeck(deck)}
-                  onAskAi={() => {
-                    const names = (deck.cards ?? []).map((c) => c.name).filter(Boolean);
-                    if (names.length < 8) return;
-                    openGhosteekAi(navigate, contextFromConstructor(names));
-                  }}
-                />
-              </div>
-            )}
-          />
+          <TabContentEnter>
+            <ConstructorPanel
+              renderDeckCard={(deck, i) => (
+                <div key={`${deck.id}-${deck.name}`} className="w-full">
+                  <DeckCard
+                    deck={deck}
+                    index={i}
+                    showCompare
+                    onCompare={() => {
+                      const path = deckToComparePath(deck, "constructor");
+                      if (path) navigate(path);
+                    }}
+                    onCopied={(msg) => {
+                      setCopyHint(msg);
+                      setTimeout(() => setCopyHint(null), 3000);
+                    }}
+                    onAnalyze={() => setPassportDeck(deck)}
+                    onAskAi={() => {
+                      const names = (deck.cards ?? []).map((c) => c.name).filter(Boolean);
+                      if (names.length < 8) return;
+                      openGhosteekAi(navigate, contextFromConstructor(names));
+                    }}
+                  />
+                </div>
+              )}
+            />
+          </TabContentEnter>
         </TabSuspense>
       ) : null}
 
       {filter === "arena" ? (
         <TabSuspense>
-          <ArenaDecksPanel
-            renderDeck={(deck, i, onCompare) => (
-              <DeckCard
-                deck={deck}
-                index={i}
-                showCompare
-                onCompare={onCompare}
-                onCopied={(msg) => {
-                  setCopyHint(msg);
-                  setTimeout(() => setCopyHint(null), 3000);
-                }}
-                onAnalyze={() => setPassportDeck(deck)}
-              />
-            )}
-          />
+          <TabContentEnter>
+            <ArenaDecksPanel
+              renderDeck={(deck, i, onCompare) => (
+                <DeckCard
+                  deck={deck}
+                  index={i}
+                  showCompare
+                  onCompare={onCompare}
+                  onCopied={(msg) => {
+                    setCopyHint(msg);
+                    setTimeout(() => setCopyHint(null), 3000);
+                  }}
+                  onAnalyze={() => setPassportDeck(deck)}
+                />
+              )}
+            />
+          </TabContentEnter>
         </TabSuspense>
       ) : null}
 
       {filter === "meta" ? (
         <TabSuspense>
-          <MetaPanel />
+          <TabContentEnter>
+            <MetaPanel />
+          </TabContentEnter>
         </TabSuspense>
       ) : null}
 
-      {filter === "mine" && (
+      {filter === "mine" ? (
+        <TabTransition tabKey="mine">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
           {decks.map((deck, i) => {
             const canCompare = deck.type !== "mine" && (deck.cards?.length ?? 0) === 8;
@@ -369,9 +385,8 @@ export function DecksPage() {
             />
           ) : null}
         </div>
-      )}
-
-      </TabTransition>
+        </TabTransition>
+      ) : null}
 
       <DeckPassport deck={passportDeck} onClose={() => setPassportDeck(null)} />
 
@@ -723,7 +738,7 @@ function RandomDeckPanel({
   }
 
   return (
-    <div className="space-y-3 ui-enter">
+    <div className="space-y-3">
       <RoflModeBar rofl={rofl} onRoflChange={setRofl} />
       <Card className="overflow-hidden">
         <div className="flex items-center justify-between mb-2 gap-2">
