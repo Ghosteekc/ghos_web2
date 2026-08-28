@@ -61,7 +61,11 @@ export function DeckWinratesPanel({ onAnalyze }: { onAnalyze?: (deck: Deck) => v
   const load = useCallback(async () => {
     try {
       setError(null);
-      setRows(await api.getWinrates());
+      const data = await api.getWinrates();
+      const sorted = [...data].sort((a, b) =>
+        (b.last_seen ?? "").localeCompare(a.last_seen ?? ""),
+      );
+      setRows(sorted);
     } catch (e) {
       setRows([]);
       setError(e instanceof ApiError ? e.message : "Не удалось загрузить винрейт");

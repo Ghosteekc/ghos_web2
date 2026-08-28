@@ -723,7 +723,7 @@ export const api = {
       TTL.battles,
     ),
 
-  getWinrates: () => cachedGet<WinrateEntry[]>("winrates-v3", "/api/winrates", TTL.stats),
+  getWinrates: () => cachedGet<WinrateEntry[]>("winrates-v4", "/api/winrates", TTL.stats),
 
   getOpponents: () => cachedGet<OpponentEntry[]>("opponents-v2", "/api/opponents", TTL.battles),
 
@@ -748,7 +748,7 @@ export const api = {
   },
 
   getDecks: (type?: string) => {
-    const key = type === "mine" ? "decks:mine-v4" : `decks:${type ?? "all"}`;
+    const key = type === "mine" ? "decks:mine-v5" : `decks:${type ?? "all"}`;
     return cachedGet<DecksListData>(
       key,
       type ? `/api/decks?type=${type}` : "/api/decks",

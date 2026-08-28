@@ -762,6 +762,8 @@ export interface WinrateEntry {
   losses: number;
   total: number;
   winrate: number;
+  /** ISO battle time of the most recent game with this deck (CR API format). */
+  last_seen?: string | null;
 }
 
 export interface OpponentEntry {

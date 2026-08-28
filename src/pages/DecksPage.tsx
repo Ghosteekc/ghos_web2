@@ -120,7 +120,7 @@ export function DecksPage() {
       setMetaUpdatedAt(null);
       return;
     }
-    const cacheKey = filter === "mine" ? "decks:mine-v4" : `decks:${filter}`;
+    const cacheKey = filter === "mine" ? "decks:mine-v5" : `decks:${filter}`;
     if (!cacheHas(cacheKey)) {
       setLoading(true);
     }
