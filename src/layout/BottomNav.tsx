@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { animate, motion, useMotionValue } from "framer-motion";
+import { navBubbleTween, navPressSpring, MOTION_ENTER } from "@/motion";
 import { haptic } from "@/utils/hapticManager";
 import { MAIN_NAV_ITEMS, getActiveNavId, type MainNavItem } from "./navigation";
 
@@ -8,8 +9,8 @@ const TAB_COUNT = MAIN_NAV_ITEMS.length;
 const BUBBLE_HIT_X = 58;
 const BUBBLE_HIT_Y = 50;
 
-const STRETCH_TWEEN = { type: "tween" as const, duration: 0.18, ease: [0.22, 0.08, 0.24, 1] as const };
-const NEAR_TAB_TWEEN = { type: "tween" as const, duration: 0.28, ease: [0.28, 0.1, 0.22, 1] as const };
+const STRETCH_TWEEN = navBubbleTween.stretch;
+const NEAR_TAB_TWEEN = navBubbleTween.near;
 
 const NEAR_TAB_SPRING = { stiffness: 215, damping: 37, mass: 0.86 };
 const FAR_TAB_SPRING = { stiffness: 270, damping: 23, mass: 0.72 };
@@ -62,9 +63,9 @@ const STRETCH_X_MIN = 0.02;
 const STRETCH_Y_MAX = 0.045;
 const STRETCH_Y_MIN = 0.008;
 
-const PRESS_SCALE = 1.08;
-const PRESS_SPRING = { type: "spring" as const, stiffness: 520, damping: 20, mass: 0.52 };
-const RELEASE_PRESS_SPRING = { type: "spring" as const, stiffness: 420, damping: 28, mass: 0.58 };
+const PRESS_SCALE = MOTION_ENTER.pressScaleDeep;
+const PRESS_SPRING = navPressSpring.press;
+const RELEASE_PRESS_SPRING = navPressSpring.release;
 
 const DRAG_VELOCITY_STRETCH = 0.032;
 const DRAG_VELOCITY_CAP = 2.4;
@@ -598,9 +599,8 @@ export function BottomNav() {
   };
 
   const onNavItemPointerDown = useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) => {
-      if (event.button !== 0 || isDraggingRef.current) return;
-      haptic.selection();
+    (_event: React.PointerEvent<HTMLButtonElement>) => {
+      // Haptic только при navigate — не дублировать с global pointerdown.
     },
     [],
   );
@@ -612,6 +612,7 @@ export function BottomNav() {
   const onNavItemNavigate = useCallback(
     (to: string) => {
       if (isDraggingRef.current) return;
+      haptic.selection();
       navigate(to);
     },
     [navigate],

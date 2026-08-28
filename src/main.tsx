@@ -3,11 +3,13 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { initTheme } from "@/hooks/useTheme";
 import { bootstrapPerfProfile } from "@/perf";
+import { applyMotionTokens } from "@/motion/bootstrap";
 import "@/styles/fonts.css";
 import "@/styles/tokens.css";
 import "@/styles/global.css";
 
 bootstrapPerfProfile();
+applyMotionTokens();
 initTheme();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(

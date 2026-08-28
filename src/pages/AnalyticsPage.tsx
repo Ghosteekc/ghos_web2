@@ -27,6 +27,7 @@ function bootstrapStats(): StatsOverview | null {
   return cacheGet<StatsOverview>(STATS_MEM_KEY) ?? lsGet<StatsOverview>(STATS_LS_KEY, TTL.stats, STATS_STALE_GRACE_MS);
 }
 import { usePageRefresh } from "@/hooks";
+import { TabTransition } from "@/motion";
 import { OpponentsPanel, DeckToolsPanel, LossAnalysisPanel } from "@/components/analytics/AnalyticsExtras";
 import { RecommendationsPanel } from "@/components/analytics/recommendations";
 import { ChartGlassTooltipShell, ChartTooltipAnchor, useChartScrub } from "@/components/charts/ChartGlassTooltip";
@@ -213,6 +214,7 @@ export function AnalyticsPage() {
         onSelect={handleNavSelect}
       />
 
+      <TabTransition tabKey={section ?? "overview"}>
       {section === null && stats && (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -282,6 +284,7 @@ export function AnalyticsPage() {
       {section === "tools" && <DeckToolsPanel />}
 
       {section !== null && <ScrollToTopButton />}
+      </TabTransition>
     </div>
   );
 }

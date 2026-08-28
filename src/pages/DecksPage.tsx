@@ -23,6 +23,7 @@ import type { Deck, DeckCard as DeckCardData, RandomDeck, TopPlayer, TopPlayersD
 import { usePageRefresh, useTelegram } from "@/hooks";
 import { deckFromCardNames, deckToComparePath } from "@/utils/deckActions";
 import { contextFromConstructor, openGhosteekAi } from "@/utils/aiPageContext";
+import { TabTransition } from "@/motion";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
 
 import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
@@ -225,6 +226,7 @@ export function DecksPage() {
         <Loader variant="section" />
       ) : null}
 
+      <TabTransition tabKey={filter}>
       {filter === DECK_HOME ? <DeckWinratesPanel onAnalyze={setPassportDeck} /> : null}
 
       {filter === "favorites" ? (
@@ -368,6 +370,8 @@ export function DecksPage() {
           ) : null}
         </div>
       )}
+
+      </TabTransition>
 
       <DeckPassport deck={passportDeck} onClose={() => setPassportDeck(null)} />
 

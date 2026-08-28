@@ -1,5 +1,6 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { motionTween } from "@/motion";
 import { HelpCircle, Search, Sparkles, X } from "lucide-react";
 
 import { api } from "@/api/client";
@@ -213,6 +214,7 @@ function ghosteekRecommendation(names: string[]): string {
 }
 
 function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       className="ctor-sheet-root"
@@ -222,7 +224,7 @@ function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.18 }}
+      transition={motionTween.fast}
     >
       <button type="button" className="ctor-sheet-backdrop" aria-label="Закрыть" onClick={onClose} />
       <motion.div
@@ -230,7 +232,7 @@ function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
-        transition={{ type: "spring", stiffness: 380, damping: 34 }}
+        transition={reduceMotion ? motionTween.fast : motionTween.slow}
       >
         <div className="ctor-sheet-handle" aria-hidden />
         <h2 id="ctor-help-title" className="ctor-sheet-title">

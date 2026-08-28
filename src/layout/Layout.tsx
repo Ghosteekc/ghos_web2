@@ -14,6 +14,7 @@ import {
 } from "@/hooks";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { PerfProvider, PerfDevOverlay } from "@/perf";
+import { PageEnter } from "@/motion";
 import {
   bindTelegramViewportListeners,
   bootstrapTelegramViewport,
@@ -42,7 +43,9 @@ export function Layout() {
               <FavoriteDecksProvider>
                 <div className="page-shell">
                   <ErrorBoundary>
-                    <Outlet />
+                    <PageEnter>
+                      <Outlet />
+                    </PageEnter>
                   </ErrorBoundary>
                 </div>
               </FavoriteDecksProvider>

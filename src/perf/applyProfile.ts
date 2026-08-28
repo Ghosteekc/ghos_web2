@@ -1,5 +1,6 @@
 import { PROFILE_TOKENS, type PerfSnapshot, type RenderProfile } from "./types";
 import { isCoarsePointer } from "./detectProfile";
+import { applyMotionTokens } from "@/motion/bootstrap";
 
 const ROOT_ATTR = "data-perf";
 
@@ -37,6 +38,13 @@ export function applyRenderProfile(
 
   root.style.setProperty("--ui-duration", `${t.durationMs}ms`);
   root.style.setProperty("--ui-duration-fast", `${t.durationFastMs}ms`);
+
+  applyMotionTokens({
+    fast: t.durationFastMs,
+    normal: t.durationMs,
+    page: Math.round(t.durationMs * 1.15),
+    slow: Math.round(t.durationMs * 1.45),
+  });
 
   // Мягче тени на LOW/MEDIUM — без смены геометрии UI.
   if (profile !== "high") {

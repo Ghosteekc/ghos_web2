@@ -42,6 +42,8 @@
     /* UI motion — Telegram / iOS-like (DockBar keeps its own timings) */
     --ui-duration: 220ms;
     --ui-duration-fast: 180ms;
+    --ui-duration-page: 260ms;
+    --ui-duration-slow: 340ms;
     --ui-duration-emphasized: 300ms;
     --ui-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
     --ui-ease-out: cubic-bezier(0.22, 0.08, 0.24, 1);
@@ -671,19 +673,11 @@
   }
 
   @keyframes ctor-slot-enter {
-    0% {
+    from {
       opacity: 0;
-      transform: translate3d(0, 10px, 0) scale(0.97);
+      transform: translate3d(0, 6px, 0) scale(0.96);
     }
-    72% {
-      opacity: 1;
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    86% {
-      opacity: 1;
-      transform: translate3d(0, 0, 0) scale(0.98);
-    }
-    100% {
+    to {
       opacity: 1;
       transform: translate3d(0, 0, 0) scale(1);
     }
@@ -691,8 +685,7 @@
 
   .ctor-slot-card--enter {
     transform-origin: center bottom;
-    will-change: transform, opacity;
-    animation: ctor-slot-enter var(--ui-duration) var(--ui-ease-standard) both;
+    animation: ctor-slot-enter var(--ui-duration-fast) var(--ui-ease-out) both;
   }
 
   .ctor-slot-clear {
@@ -1077,10 +1070,7 @@
     filter: var(--pb-filter-raised);
     transition:
       transform var(--ui-duration-fast) var(--ui-ease-out),
-      opacity var(--ui-duration-fast) var(--ui-ease-out),
-      background var(--ui-duration-fast) var(--ui-ease-out),
-      color var(--ui-duration-fast) var(--ui-ease-out),
-      box-shadow var(--ui-duration-fast) var(--ui-ease-out);
+      opacity var(--ui-duration-fast) var(--ui-ease-out);
   }
 
   .pixel-bevel--compact {
@@ -1097,10 +1087,7 @@
     transform: translate(0, 0) scale(1);
     transition:
       transform var(--ui-duration-fast) var(--ui-ease-out),
-      opacity var(--ui-duration-fast) var(--ui-ease-out),
-      background var(--ui-duration-fast) var(--ui-ease-out),
-      color var(--ui-duration-fast) var(--ui-ease-out),
-      box-shadow var(--ui-duration-fast) var(--ui-ease-out);
+      opacity var(--ui-duration-fast) var(--ui-ease-out);
   }
 
   .pixel-btn:not(.pixel-btn--ghost).pixel-btn--active {
@@ -2122,7 +2109,7 @@
     cursor: pointer;
     touch-action: none;
     color: rgb(var(--cr-muted) / 0.82);
-    transition: color 0.28s cubic-bezier(0.22, 0.06, 0.24, 1);
+    transition: color var(--ui-duration-fast) var(--ui-ease-out);
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -2144,7 +2131,7 @@
     justify-content: center;
     gap: 0.1rem;
     max-width: 100%;
-    transition: gap 0.52s cubic-bezier(0.22, 0.06, 0.24, 1);
+    transition: gap var(--ui-duration-fast) var(--ui-ease-out);
   }
 
   .bottom-nav-item.is-highlighted .bottom-nav-item-content {
@@ -2160,12 +2147,11 @@
     flex-shrink: 0;
     transform: scale(1);
     transform-origin: center center;
-    transition: transform 0.58s cubic-bezier(0.22, 0.05, 0.24, 1);
+    transition: transform var(--ui-duration-fast) var(--ui-ease-out);
   }
 
   .bottom-nav-item.is-highlighted .bottom-nav-icon-slot {
-    transform: scale(1.24);
-    transition-duration: 0.62s;
+    transform: scale(1.12);
   }
 
   .bottom-nav-item.is-highlighted .bottom-nav-icon {
@@ -2192,8 +2178,8 @@
     flex-shrink: 0;
     filter: none;
     transition:
-      filter 0.52s cubic-bezier(0.22, 0.06, 0.24, 1),
-      color 0.5s cubic-bezier(0.22, 0.06, 0.24, 1);
+      filter var(--ui-duration-fast) var(--ui-ease-out),
+      color var(--ui-duration-fast) var(--ui-ease-out);
   }
 
   .bottom-nav-label {
@@ -2208,7 +2194,7 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     opacity: 0.88;
-    transition: opacity 0.32s ease;
+    transition: opacity var(--ui-duration-fast) var(--ui-ease-out);
   }
 
   .bottom-nav-liquid-bubble {
@@ -2244,8 +2230,8 @@
       rgb(var(--cr-surface) / 0.52) 52%,
       rgb(var(--cr-bg) / 0.62) 100%
     );
-    backdrop-filter: blur(10px) saturate(145%);
-    -webkit-backdrop-filter: blur(10px) saturate(145%);
+    backdrop-filter: blur(var(--perf-blur-px, 10px)) saturate(145%);
+    -webkit-backdrop-filter: blur(var(--perf-blur-px, 10px)) saturate(145%);
     box-shadow:
       inset 0 1px 2px rgba(255, 255, 255, 0.14),
       inset 0 0 20px rgb(120 170 255 / 0.08),
@@ -2785,6 +2771,36 @@
     animation: ui-enter var(--ui-duration) var(--ui-ease-standard) both;
   }
 
+  @keyframes page-enter {
+    from {
+      opacity: 0;
+      transform: translate3d(0, var(--perf-enter-y, 8px), 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .page-enter {
+    animation: page-enter var(--ui-duration-page) var(--ui-ease-out) both;
+  }
+
+  @keyframes tab-enter {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 6px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .tab-enter {
+    animation: tab-enter var(--ui-duration-fast) var(--ui-ease-out) both;
+  }
+
   @keyframes ui-fade {
     from {
       opacity: 0;
@@ -2801,8 +2817,11 @@
   @media (prefers-reduced-motion: reduce) {
     html:not([data-force-motion="1"]) .ui-enter,
     html:not([data-force-motion="1"]) .ui-fade,
-    html:not([data-force-motion="1"]) .loader-item-enter {
-      animation: none !important;
+    html:not([data-force-motion="1"]) .loader-item-enter,
+    html:not([data-force-motion="1"]) .page-enter,
+    html:not([data-force-motion="1"]) .tab-enter {
+      animation: ui-fade var(--ui-duration-fast) var(--ui-ease-out) both !important;
+      transform: none !important;
     }
   }
 
@@ -4944,9 +4963,12 @@ html[data-perf="low"] .chart-tooltip-glass {
   html:not([data-force-motion="1"]) .ctor-slot,
   html:not([data-force-motion="1"]) .ctor-grid-item,
   html:not([data-force-motion="1"]) .ctor-slot-card--enter,
-  html:not([data-force-motion="1"]) .ui-enter {
+  html:not([data-force-motion="1"]) .ui-enter,
+  html:not([data-force-motion="1"]) .page-enter,
+  html:not([data-force-motion="1"]) .tab-enter {
     transition: none !important;
     animation: none !important;
+    transform: none !important;
   }
 }
 
