@@ -1,28 +1,20 @@
-import { useReducedMotion } from "framer-motion";
-import { useMemo } from "react";
-import { MOTION_EASE } from "./tokens";
+import { MOTION_EASE, MOTION_MS } from "./tokens";
 
 const easeOut = [...MOTION_EASE.out] as [number, number, number, number];
 
-/** Crossfade между route — только opacity, без translate (стабильнее на mobile). */
+/** Единый crossfade между route — одинаково на mobile и desktop. */
 export function usePageMotionConfig() {
-  const reduceMotion = useReducedMotion();
-
-  return useMemo(() => {
-    const fast = Boolean(reduceMotion);
-
-    return {
-      initial: { opacity: 0 },
-      animate: { opacity: 1 },
-      exit: { opacity: 0 },
-      transition: {
-        duration: fast ? 0.14 : 0.2,
-        ease: easeOut,
-      },
-      exitTransition: {
-        duration: fast ? 0.1 : 0.14,
-        ease: easeOut,
-      },
-    };
-  }, [reduceMotion]);
+  return {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+    transition: {
+      duration: MOTION_MS.page / 1000,
+      ease: easeOut,
+    },
+    exitTransition: {
+      duration: MOTION_MS.fast / 1000,
+      ease: easeOut,
+    },
+  };
 }

@@ -1,28 +1,15 @@
-import { useReducedMotion } from "framer-motion";
-import { useMemo } from "react";
-import { readCurrentProfile } from "@/perf/applyProfile";
-import { isCoarsePointer } from "@/perf/detectProfile";
-import { MOTION_EASE } from "./tokens";
+import { MOTION_EASE, MOTION_ENTER, MOTION_MS } from "./tokens";
 
 const easeOut = [...MOTION_EASE.out] as [number, number, number, number];
 
-/** Opacity-only enter on touch / low perf — меньше дёрганий на телефоне. */
+/** Единый enter для вкладок — одинаково на mobile и desktop. */
 export function useEnterMotionConfig() {
-  const reduceMotion = useReducedMotion();
-
-  return useMemo(() => {
-    const coarse = typeof window !== "undefined" && isCoarsePointer();
-    const profile = typeof document !== "undefined" ? readCurrentProfile() : "medium";
-    const fadeOnly = Boolean(reduceMotion) || coarse || profile !== "high";
-
-    return {
-      initial: { opacity: 0, y: fadeOnly ? 0 : 4 },
-      animate: { opacity: 1, y: 0 },
-      transition: {
-        duration: fadeOnly ? 0.15 : 0.2,
-        ease: easeOut,
-      },
-      fadeOnly,
-    };
-  }, [reduceMotion]);
+  return {
+    initial: { opacity: 0, y: MOTION_ENTER.tabY },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: MOTION_MS.fast / 1000,
+      ease: easeOut,
+    },
+  };
 }

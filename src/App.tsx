@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { MotionConfig } from "framer-motion";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/layout/Layout";
 import { Loader } from "@/components/ui";
@@ -38,6 +39,7 @@ function LazyPage({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
+    <MotionConfig reducedMotion="never">
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
@@ -154,5 +156,6 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </MotionConfig>
   );
 }

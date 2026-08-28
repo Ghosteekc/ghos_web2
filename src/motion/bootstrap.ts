@@ -1,5 +1,3 @@
-import { isForceMotionEnabled } from "@/perf/bootstrap";
-import { prefersReducedMotion } from "@/perf/detectProfile";
 import { MOTION_MS, motionMsToCss } from "./tokens";
 
 export type MotionMsOverrides = Partial<Record<keyof typeof MOTION_MS, number>>;
@@ -15,10 +13,6 @@ export function applyMotionTokens(overrides?: MotionMsOverrides): void {
   root.style.setProperty("--ui-duration-page", motionMsToCss(ms.page));
   root.style.setProperty("--ui-duration-slow", motionMsToCss(ms.slow));
 
-  const honorReduce = !isForceMotionEnabled() && prefersReducedMotion();
-  if (honorReduce) {
-    root.dataset.motionReduced = "1";
-  } else {
-    delete root.dataset.motionReduced;
-  }
+  // Motion always on — parity mobile/desktop (see forceMotion + MotionConfig).
+  delete root.dataset.motionReduced;
 }

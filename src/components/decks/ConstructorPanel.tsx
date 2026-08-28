@@ -1,5 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { motionTween } from "@/motion";
 import { HelpCircle, Search, Sparkles, X } from "lucide-react";
 
@@ -214,7 +214,6 @@ function ghosteekRecommendation(names: string[]): string {
 }
 
 function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
-  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       className="ctor-sheet-root"
@@ -232,7 +231,7 @@ function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}
-        transition={reduceMotion ? motionTween.fast : motionTween.slow}
+        transition={motionTween.slow}
       >
         <div className="ctor-sheet-handle" aria-hidden />
         <h2 id="ctor-help-title" className="ctor-sheet-title">
@@ -337,7 +336,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   }, [catalog, deferredSearch, browserTab]);
 
   const buildRequestRef = useRef(0);
-  const reduceMotion = useReducedMotion();
   const buildDecks = useCallback(async (current: (SlotPick)[]) => {
     const picks = current.filter((s): s is NonNullable<SlotPick> => Boolean(s));
     if (picks.length !== 4) {
@@ -489,7 +487,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
                     {card ? (
                       <div
                         key={card.name}
-                        className={cn("ctor-slot-card", !reduceMotion && "ctor-slot-card--enter")}
+                        className="ctor-slot-card ctor-slot-card--enter"
                       >
                         <CardTile
                           name={card.name}

@@ -1,6 +1,7 @@
 import { PROFILE_TOKENS, type PerfSnapshot, type RenderProfile } from "./types";
 import { isCoarsePointer } from "./detectProfile";
 import { applyMotionTokens } from "@/motion/bootstrap";
+import { MOTION_ENTER, MOTION_MS } from "@/motion/tokens";
 
 const ROOT_ATTR = "data-perf";
 
@@ -20,7 +21,8 @@ export function applyRenderProfile(
   root.style.setProperty("--perf-seed-blur-px", `${t.seedBlurPx}px`);
   root.style.setProperty("--perf-glow-scale", String(t.glowScale));
   root.style.setProperty("--perf-shadow-scale", String(t.shadowScale));
-  root.style.setProperty("--perf-enter-y", `${t.enterYPx}px`);
+  // Enter offset единый — не укорачивать motion на low/medium.
+  root.style.setProperty("--perf-enter-y", `${MOTION_ENTER.pageY}px`);
 
   root.style.setProperty("--cr-glass-blur", glassBlur);
   root.style.setProperty("--comp-constructor-seed-blur", seedBlur);
@@ -36,15 +38,8 @@ export function applyRenderProfile(
     `0 0 ${Math.round(20 * t.glowScale)}px rgb(var(--palette-glow-blue) / ${0.15 * t.glowScale})`,
   );
 
-  root.style.setProperty("--ui-duration", `${t.durationMs}ms`);
-  root.style.setProperty("--ui-duration-fast", `${t.durationFastMs}ms`);
-
-  applyMotionTokens({
-    fast: t.durationFastMs,
-    normal: t.durationMs,
-    page: Math.round(t.durationMs * 1.15),
-    slow: Math.round(t.durationMs * 1.45),
-  });
+  // Motion durations always from MOTION_MS — same on phone and PC.
+  applyMotionTokens();
 
   // Мягче тени на LOW/MEDIUM — без смены геометрии UI.
   if (profile !== "high") {
@@ -65,9 +60,9 @@ export function applyRenderProfile(
     glassAlpha: t.glassAlpha,
     glowScale: t.glowScale,
     shadowScale: t.shadowScale,
-    durationMs: t.durationMs,
-    durationFastMs: t.durationFastMs,
-    enterYPx: t.enterYPx,
+    durationMs: MOTION_MS.normal,
+    durationFastMs: MOTION_MS.fast,
+    enterYPx: MOTION_ENTER.pageY,
     fps,
     cores,
     memoryGb: memory,

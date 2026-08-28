@@ -22,14 +22,9 @@ export function PageEnter() {
             key={location.pathname}
             className="page-motion-panel"
             initial={motionConfig.initial}
-            animate={{
-              ...motionConfig.animate,
-              transition: motionConfig.transition,
-            }}
-            exit={{
-              ...motionConfig.exit,
-              transition: motionConfig.exitTransition,
-            }}
+            animate={motionConfig.animate}
+            exit={motionConfig.exit}
+            transition={motionConfig.transition}
           >
             {outlet}
           </motion.div>
