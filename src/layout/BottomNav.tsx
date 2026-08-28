@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { animate, motion, useMotionValue } from "framer-motion";
-import { navBubbleTween, navPressSpring, MOTION_ENTER } from "@/motion";
+import { navBubbleTween, navPressSpring } from "@/motion";
 import { haptic } from "@/utils/hapticManager";
 import { MAIN_NAV_ITEMS, getActiveNavId, type MainNavItem } from "./navigation";
 
@@ -63,7 +63,7 @@ const STRETCH_X_MIN = 0.02;
 const STRETCH_Y_MAX = 0.045;
 const STRETCH_Y_MIN = 0.008;
 
-const PRESS_SCALE = MOTION_ENTER.pressScaleDeep;
+const PRESS_SCALE = 1.08;
 const PRESS_SPRING = navPressSpring.press;
 const RELEASE_PRESS_SPRING = navPressSpring.release;
 
