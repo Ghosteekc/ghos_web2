@@ -65,8 +65,8 @@ function LeagueIcon({ src, alt }: { src: string | null; alt: string }) {
   const [failed, setFailed] = useState(false);
   if (!src || failed) {
     return (
-      <div className="w-10 h-10 shrink-0 rounded-lg bg-cr-surface border border-cr-border flex items-center justify-center">
-        <Trophy className="w-5 h-5 text-cr-gold" />
+      <div className="w-9 h-9 shrink-0 rounded-lg bg-cr-surface border border-cr-border flex items-center justify-center">
+        <Trophy className="w-4 h-4 text-cr-gold" />
       </div>
     );
   }
@@ -74,9 +74,17 @@ function LeagueIcon({ src, alt }: { src: string | null; alt: string }) {
     <img
       src={src}
       alt={alt}
-      className="w-10 h-10 shrink-0 object-contain"
+      className="w-9 h-9 shrink-0 object-contain"
       onError={() => setFailed(true)}
     />
+  );
+}
+
+function LeagueName({ name }: { name: string }) {
+  return (
+    <p className="text-sm font-bold leading-snug text-cr-text [overflow-wrap:anywhere]">
+      {name}
+    </p>
   );
 }
 
@@ -94,16 +102,15 @@ function LeagueSide({
   return (
     <div
       className={
-        "flex items-center gap-2.5 min-w-0 flex-1 " +
-        (align === "right" ? "justify-end text-right" : "")
+        "flex items-start gap-2 min-w-0 flex-1 " +
+        (align === "right" ? "justify-end text-right flex-row-reverse" : "")
       }
     >
-      {align === "left" ? <LeagueIcon src={icon} alt={name} /> : null}
-      <div className="min-w-0">
+      <LeagueIcon src={icon} alt={name} />
+      <div className="min-w-0 flex-1 pt-0.5">
         <p className="text-2xs uppercase tracking-wide text-cr-muted font-semibold">{label}</p>
-        <p className="text-base font-bold text-cr-text truncate">{name}</p>
+        <LeagueName name={name} />
       </div>
-      {align === "right" ? <LeagueIcon src={icon} alt={name} /> : null}
     </div>
   );
 }
@@ -129,15 +136,15 @@ export function LeagueBanner({ league }: LeagueBannerProps) {
   if (league.is_absolute_champion) {
     const name = league.current_league_name ?? "Абсолютный чемпион";
     return (
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 min-w-0">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-2 min-w-0 flex-1">
           <LeagueIcon src={league.current_league_icon} alt={name} />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1 pt-0.5">
             <p className="text-2xs uppercase tracking-wide text-cr-muted font-semibold">Текущая лига</p>
-            <p className="text-base font-bold text-cr-text truncate">{name}</p>
+            <LeagueName name={name} />
           </div>
         </div>
-        <div className="shrink-0 text-right">
+        <div className="shrink-0 text-right pt-0.5">
           <p className="text-2xs uppercase tracking-wide text-violet-400 font-semibold">Кубки лиги</p>
           <p className="text-lg font-extrabold tabular-nums text-violet-400 leading-none mt-0.5">
             {formatNumber(league.absolute_trophies ?? 0)}
@@ -152,7 +159,7 @@ export function LeagueBanner({ league }: LeagueBannerProps) {
   const currentName = league.current_league_name ?? "—";
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-stretch gap-2.5">
       <LeagueSide label="Лучшая" name={bestName} icon={bestIcon} />
       <div className="w-px self-stretch bg-cr-border shrink-0" aria-hidden />
       <LeagueSide label="Текущая" name={currentName} icon={league.current_league_icon} align="right" />

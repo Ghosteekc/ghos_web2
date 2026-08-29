@@ -109,7 +109,7 @@ export function ProfilePage() {
       )}
 
       {league ? (
-        <Card className="!py-3 !px-4">
+        <Card className="!py-3.5 !px-4">
           <LeagueBanner league={league} />
         </Card>
       ) : null}
