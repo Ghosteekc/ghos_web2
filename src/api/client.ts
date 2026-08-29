@@ -1008,6 +1008,17 @@ export const api = {
         evaluation?: Record<string, unknown>;
         title?: string | null;
       } | null;
+      deck_cards?: Array<{
+        deck: string[];
+        average_elixir: number;
+        archetype: string;
+        arena?: string | null;
+        import_url?: string;
+        gameplan?: string[];
+        weaknesses?: string[];
+        evaluation?: Record<string, unknown>;
+        title?: string | null;
+      }>;
       battle_card?: Record<string, unknown> | null;
       analysis_card?: Record<string, unknown> | null;
     }>("/api/ai/ask", {

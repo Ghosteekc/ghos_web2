@@ -217,7 +217,12 @@ export function useGhosteekChat() {
         const data = await api.askGhosteekAi(trimmed, askPayload);
         if (tick !== abortRef.current) return;
 
-        const deckCard = parseDeckCardFromApi(data.deck_card);
+        const deckCardsRaw = Array.isArray(data.deck_cards) ? data.deck_cards : [];
+        const deckCards = deckCardsRaw
+          .map((c) => parseDeckCardFromApi(c))
+          .filter((c): c is AiDeckCardData => Boolean(c));
+        const deckCard =
+          parseDeckCardFromApi(data.deck_card) ?? (deckCards.length > 0 ? deckCards[0] : null);
         const fromSources = messagesFromAskSources(
           data.sources as Record<string, unknown> | undefined,
         );
@@ -231,6 +236,7 @@ export function useGhosteekChat() {
                 intent: data.intent ?? merged[i].intent,
                 actions: data.actions ?? merged[i].actions,
                 deckCard: deckCard ?? merged[i].deckCard,
+                deckCards: deckCards.length > 0 ? deckCards : merged[i].deckCards,
               };
               break;
             }
@@ -249,6 +255,7 @@ export function useGhosteekChat() {
           intent: data.intent,
           actions: data.actions,
           deckCard,
+          deckCards: deckCards.length > 0 ? deckCards : undefined,
           createdAt: Date.now(),
         };
         setMessages((prev) => [...prev, assistantMsg]);

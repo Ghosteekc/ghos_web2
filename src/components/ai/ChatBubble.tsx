@@ -58,7 +58,14 @@ export const ChatBubble = memo(function ChatBubble({ message, onAnalyzeAnotherRe
             className={cn("ai-md", isError && "ai-md--error")}
           />
         )}
-        {!isUser && message.deckCard ? <DeckCard deck={message.deckCard} /> : null}
+        {!isUser && (message.deckCards?.length ?? 0) > 0
+          ? message.deckCards!.map((deck, i) => (
+              <DeckCard key={`${message.id}-deck-${i}`} deck={deck} />
+            ))
+          : !isUser && message.deckCard
+            ? <DeckCard deck={message.deckCard} />
+            : null}
+
         {!isUser && replayCard?.analysis ? (
           <ReplayAnalysisCard card={replayCard} onAnalyzeAnother={onAnalyzeAnotherReplay} />
         ) : !isUser && replayCard ? (

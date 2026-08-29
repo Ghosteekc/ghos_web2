@@ -32,6 +32,8 @@ export type ChatMessage = {
   intent?: string | null;
   actions?: ChatAction[];
   deckCard?: AiDeckCardData | null;
+  /** Несколько вариантов сборки в одном ответе */
+  deckCards?: AiDeckCardData[];
   replayCard?: AiReplayCardData | null;
   createdAt: number;
   error?: boolean;
@@ -92,17 +94,25 @@ export function loadChatMessages(): ChatMessage[] {
           typeof row.id === "string"
         );
       })
-      .map((m) => ({
-        id: m.id,
-        role: m.role,
-        content: m.content,
-        intent: m.intent ?? null,
-        actions: Array.isArray(m.actions) ? m.actions : undefined,
-        deckCard: parseDeckCard(m.deckCard),
-        replayCard: parseReplayCard(m.replayCard),
-        createdAt: typeof m.createdAt === "number" ? m.createdAt : Date.now(),
-        error: Boolean(m.error),
-      }));
+      .map((m) => {
+        const row = m as Record<string, unknown>;
+        const rawDeckCards = Array.isArray(row.deckCards) ? row.deckCards : [];
+        const deckCards = rawDeckCards
+          .map((c) => parseDeckCard(c))
+          .filter((c): c is AiDeckCardData => Boolean(c));
+        return {
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          intent: m.intent ?? null,
+          actions: Array.isArray(m.actions) ? m.actions : undefined,
+          deckCard: parseDeckCard(m.deckCard),
+          deckCards: deckCards.length > 0 ? deckCards : undefined,
+          replayCard: parseReplayCard(m.replayCard),
+          createdAt: typeof m.createdAt === "number" ? m.createdAt : Date.now(),
+          error: Boolean(m.error),
+        };
+      });
     return memoryMessages.map((m) => ({ ...m }));
   } catch {
     memoryMessages = [];
