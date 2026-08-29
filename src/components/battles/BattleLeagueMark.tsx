@@ -54,15 +54,24 @@ interface BattleLeaguePairProps {
   className?: string;
 }
 
+/** Лига пути, на которой сыгран бой (без «vs соперник»). */
 export function BattleLeaguePair({ user, opponent, compact = false, className }: BattleLeaguePairProps) {
-  if (!user && !opponent) return null;
+  const league = user ?? opponent;
+  if (!league) return null;
   return (
-    <div className={cn("flex items-center justify-between gap-2", className)}>
-      <BattleLeagueChip league={user} compact={compact} />
-      <span className="shrink-0 text-3xs font-bold uppercase tracking-wide text-cr-muted">vs</span>
-      <BattleLeagueChip league={opponent} align="right" compact={compact} />
+    <div className={cn("flex items-center gap-2", className)}>
+      <BattleLeagueChip league={league} compact={compact} />
     </div>
   );
+}
+
+/** В Path of Legends считаются ступени, не кубки. */
+export function formatLeagueStepChange(won: boolean): string {
+  return won ? "+1 ступень" : "−1 ступень";
+}
+
+export function leagueStepDelta(won: boolean): number {
+  return won ? 1 : -1;
 }
 
 export function BattleLeagueBadgeLabel({ className }: { className?: string }) {

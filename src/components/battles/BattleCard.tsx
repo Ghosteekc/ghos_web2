@@ -9,7 +9,7 @@ import type { BattleSummary, DeckCard } from "@/types";
 import { Card, ElixirIcon } from "@/components/ui";
 import { toDeckCards } from "@/components/cards/PlayerDeckGrid";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
-import { BattleLeagueBadgeLabel, BattleLeaguePair } from "@/components/battles/BattleLeagueMark";
+import { BattleLeagueBadgeLabel, BattleLeaguePair, formatLeagueStepChange, leagueStepDelta } from "@/components/battles/BattleLeagueMark";
 
 interface BattleCardSimpleProps {
   summary: BattleSummary;
@@ -149,8 +149,17 @@ function BattleCardSimpleInner({ summary, onOpen }: BattleCardSimpleProps) {
             </span>
             {summary.is_ranked ? <BattleLeagueBadgeLabel /> : null}
           </div>
-          <span className={cn("text-base font-bold", getTrophyChangeColor(summary.trophy_change))}>
-            {summary.trophy_change >= 0 ? "+" : ""}{summary.trophy_change} 🏆
+          <span
+            className={cn(
+              "text-base font-bold",
+              getTrophyChangeColor(
+                summary.is_ranked ? leagueStepDelta(summary.won) : summary.trophy_change,
+              ),
+            )}
+          >
+            {summary.is_ranked
+              ? formatLeagueStepChange(summary.won)
+              : `${summary.trophy_change >= 0 ? "+" : ""}${summary.trophy_change} 🏆`}
           </span>
         </div>
 

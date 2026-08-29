@@ -1,2 +1,2 @@
 export { BattleCardSimple } from "./BattleCard";
-export { BattleLeagueBadgeLabel, BattleLeaguePair } from "./BattleLeagueMark";
+export { BattleLeagueBadgeLabel, BattleLeaguePair, formatLeagueStepChange, leagueStepDelta } from "./BattleLeagueMark";

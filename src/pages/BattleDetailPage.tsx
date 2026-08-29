@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader, ElixirIcon } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
-import { BattleLeagueBadgeLabel, BattleLeaguePair } from "@/components/battles/BattleLeagueMark";
+import { BattleLeagueBadgeLabel, BattleLeaguePair, formatLeagueStepChange, leagueStepDelta } from "@/components/battles/BattleLeagueMark";
 import { api, ApiError } from "@/api/client";
 import { cacheGet, cacheHas } from "@/api/cache";
 import {
@@ -690,9 +690,17 @@ export function BattleDetailPage() {
             <span className="font-bold">{battle.won ? "Победа" : "Поражение"}</span>
           </div>
           {battle.is_ranked ? <BattleLeagueBadgeLabel className="text-xs" /> : null}
-          <div className={cn("text-base font-bold", getTrophyChangeColor(battle.trophy_change))}>
-            {battle.trophy_change >= 0 ? "+" : ""}
-            {battle.trophy_change} 🏆
+          <div
+            className={cn(
+              "text-base font-bold",
+              getTrophyChangeColor(
+                battle.is_ranked ? leagueStepDelta(battle.won) : battle.trophy_change,
+              ),
+            )}
+          >
+            {battle.is_ranked
+              ? formatLeagueStepChange(battle.won)
+              : `${battle.trophy_change >= 0 ? "+" : ""}${battle.trophy_change} 🏆`}
           </div>
           {battle.crown_score ? (
             <div className="text-base text-cr-text font-semibold">Короны: {battle.crown_score}</div>
