@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { api, ApiError } from "@/api/client";
+import { api, ApiError, isProRequiredError } from "@/api/client";
 import {
   type AiDeckCardData,
   type ChatMessage,
@@ -261,7 +261,11 @@ export function useGhosteekChat() {
         setMessages((prev) => [...prev, assistantMsg]);
       } catch (e) {
         if (tick !== abortRef.current) return;
-        const msg = e instanceof ApiError ? e.message : "Не удалось получить ответ";
+        const msg = isProRequiredError(e)
+          ? "Ghosteek AI доступен в Ghosteek Pro. Открой раздел Pro в приложении."
+          : e instanceof ApiError
+            ? e.message
+            : "Не удалось получить ответ";
         setError(msg);
         setMessages((prev) => [
           ...prev,
