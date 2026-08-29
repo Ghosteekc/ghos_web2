@@ -2761,8 +2761,11 @@
     min-height: 12rem;
   }
 
-  .page-motion-panel {
+  .page-motion-panel,
+  .tab-motion-panel {
     @apply w-full min-w-0;
+    /* Promote compositor layer only during short enter */
+    transform: translateZ(0);
   }
 
   @keyframes ui-enter {

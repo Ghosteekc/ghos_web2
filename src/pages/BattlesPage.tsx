@@ -11,6 +11,7 @@ import { cacheGet, cacheHas } from "@/api/cache";
 import { BattleSummary } from "@/types";
 import { battleDetailPath, cn } from "@/utils";
 import { usePageRefresh } from "@/hooks";
+import { TabTransition } from "@/motion";
 
 type BattlesPayload = {
   battles: BattleSummary[];
@@ -129,7 +130,7 @@ export function BattlesPage() {
       {loading ? (
         <Loader variant="section" />
       ) : (
-        <div className="space-y-4 battles-list">
+        <TabTransition tabKey={filter} className="space-y-4 battles-list">
           {filtered.map((battle) => (
             <BattleCardSimple
               key={`${battle.timestamp}-${battle.index}`}
@@ -155,7 +156,7 @@ export function BattlesPage() {
               />
             )
           )}
-        </div>
+        </TabTransition>
       )}
 
       {!loading && filtered.length > 0 && <ScrollToTopButton />}
