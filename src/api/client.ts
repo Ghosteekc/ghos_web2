@@ -778,7 +778,7 @@ export const api = {
 
 
   getTopPlayers: () =>
-    cachedGet<TopPlayersData>("top-players-v3", "/api/decks/top-players?limit=10", TTL.topPlayers),
+    cachedGet<TopPlayersData>("top-players-v4", "/api/decks/top-players?limit=100", TTL.topPlayers),
 
 
 

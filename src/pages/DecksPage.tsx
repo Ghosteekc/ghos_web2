@@ -172,7 +172,7 @@ export function DecksPage() {
             ) : filter === "meta" ? (
               <>Актуальные колоды сильнейших игроков</>
             ) : filter === "top" ? (
-              "Топ-10 игроков из глобального списка лидеров (Легендарный путь): колода, винрейт на ней и кубки."
+              "Топ-100 игроков из глобального списка лидеров (Легендарный путь): колода, винрейт на ней и кубки."
             ) : filter === "arena" ? (
               "Колоды соперников с твоей арены: винрейт и число боёв, когда данные доступны."
             ) : filter === "constructor" ? (
@@ -408,17 +408,17 @@ function TopPlayersPanel({
 }) {
   const { openLink } = useTelegram();
   const [players, setPlayers] = useState<TopPlayer[]>(() => {
-    const hit = cacheGet<TopPlayersData>("top-players-v3");
+    const hit = cacheGet<TopPlayersData>("top-players-v4");
     return hit?.players ?? [];
   });
   const [updatedAt, setUpdatedAt] = useState<string | null>(
-    () => cacheGet<TopPlayersData>("top-players-v3")?.updated_at ?? null,
+    () => cacheGet<TopPlayersData>("top-players-v4")?.updated_at ?? null,
   );
-  const [loading, setLoading] = useState(() => !cacheHas("top-players-v3"));
+  const [loading, setLoading] = useState(() => !cacheHas("top-players-v4"));
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!cacheHas("top-players-v3")) {
+    if (!cacheHas("top-players-v4")) {
       setLoading(true);
     }
     setError(null);
