@@ -1,4 +1,9 @@
-import type { ConstructorData, ConstructorDeckEntry, Deck } from "@/types";
+import type {
+  ConstructorData,
+  ConstructorDeckEntry,
+  ConstructorTopMatchDeck,
+  Deck,
+} from "@/types";
 import { api, ApiError } from "@/api/client";
 
 export function constructorEntryToDeck(entry: ConstructorDeckEntry): Deck {
@@ -41,6 +46,29 @@ export type ConstructorBuildResult = {
   alternativeDeck: Deck | null;
   coreConflict: ConstructorData["core_conflict"];
 };
+
+export function topMatchEntryToDeck(entry: ConstructorTopMatchDeck): Deck {
+  return {
+    id: entry.id,
+    name: entry.name,
+    cards: entry.cards,
+    winrate: entry.winrate,
+    total_games: entry.total_games,
+    avg_elixir: entry.avg_elixir,
+    type: "legend_path",
+    category: "top",
+    deck_link: entry.deck_link,
+    description: entry.description,
+    best_matchups: [],
+    worst_matchups: [],
+  };
+}
+
+/** Поиск готовых колод топ-игроков по выбранным картам. */
+export async function fetchConstructorTopMatches(cards: string[]): Promise<Deck[]> {
+  const data = await api.matchConstructorTopDecks(cards);
+  return data.decks.map(topMatchEntryToDeck);
+}
 
 /** Генерация колод через backend (единственный источник истины для конструктора). */
 export async function fetchConstructorDecks(

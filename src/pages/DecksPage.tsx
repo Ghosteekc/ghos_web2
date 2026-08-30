@@ -956,6 +956,21 @@ export function DeckCard({
           </>
         )}
 
+        {deck.type === "legend_path" && (
+          <>
+            <div className="flex items-center justify-between text-base">
+              <span className="text-cr-muted">{UI.winrate}</span>
+              <span className={"font-bold " + (winrate >= 50 ? "text-cr-win" : "text-cr-loss")}>
+                {winrate.toFixed(1)}%
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-base mt-1 mb-3">
+              <span className="text-cr-muted">{UI.games}</span>
+              <span className="font-semibold text-cr-text">{deck.total_games ?? 0}</span>
+            </div>
+          </>
+        )}
+
         {deck.type === "constructor" && (
           <>
             <div className="flex items-center justify-between text-base mb-2">

@@ -44,6 +44,7 @@ import {
   CustomizeData,
   SynergyData,
   ConstructorData,
+  ConstructorTopMatchData,
 } from "@/types";
 
 import { cacheGet, cacheSet, cacheInvalidate, cacheHas, inflight, TTL, sleep, lsGet, lsSet, lsClearAll, applyLinkedPlayerTag } from "./cache";
@@ -88,7 +89,9 @@ function requestTimeoutMs(path: string): number {
     path.startsWith("/api/stats") ||
     path.startsWith("/api/home") ||
     path.startsWith("/api/sync") ||
-    path.startsWith("/api/battles");
+    path.startsWith("/api/battles") ||
+    path.startsWith("/api/decks/constructor/top-match") ||
+    path.startsWith("/api/decks/top-players");
   if (usesDirectTunnel()) return slow ? 55_000 : 35_000;
   return slow ? 45_000 : 25_000;
 }
@@ -867,6 +870,18 @@ export const api = {
       method: "POST",
 
       body: JSON.stringify({ slots }),
+
+    }),
+
+
+
+  matchConstructorTopDecks: (cards: string[]) =>
+
+    request<ConstructorTopMatchData>("/api/decks/constructor/top-match", {
+
+      method: "POST",
+
+      body: JSON.stringify({ cards }),
 
     }),
 

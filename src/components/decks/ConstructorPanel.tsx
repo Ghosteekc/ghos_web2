@@ -9,6 +9,7 @@ import { CardTile } from "@/components/cards";
 import { useCardCatalog } from "@/hooks";
 import {
   fetchConstructorDecks,
+  fetchConstructorTopMatches,
   constructorApiErrorMessage,
 } from "@/services/constructorAdapter";
 import { WIN_CONDITIONS } from "@/services/deckBuilder/constants";
@@ -246,6 +247,10 @@ function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
             улучшений.
           </li>
           <li>Когда все 4 карты на месте, Ghosteek соберёт полные колоды.</li>
+          <li>
+            Включи «Колоды топ-игроков», чтобы сразу видеть готовые колоды из
+            топ-100 с винрейтом и числом боёв.
+          </li>
         </ul>
         <Button variant="primary" className="w-full mt-4" onClick={onClose}>
           Понятно
@@ -271,6 +276,8 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const [browserTab, setBrowserTab] = useState<BrowserTab>("all");
   /** Если true — в браузере только карты, подходящие под активный слот (evo/hero/…). */
   const [slotFilterOnly, setSlotFilterOnly] = useState(false);
+  /** Если true — показываем готовые колоды топ-игроков вместо генерации. */
+  const [topDeckFilter, setTopDeckFilter] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [catalog, setCatalog] = useState<CatalogCard[]>([]);
   const [decks, setDecks] = useState<Deck[]>([]);
@@ -336,6 +343,37 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   }, [catalog, deferredSearch, browserTab]);
 
   const buildRequestRef = useRef(0);
+  const matchTopDecks = useCallback(async (names: string[]) => {
+    if (names.length === 0) {
+      setDecks([]);
+      setAlternativeDeck(null);
+      setCoreConflict(null);
+      return;
+    }
+
+    const requestId = ++buildRequestRef.current;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const matched = await fetchConstructorTopMatches(names);
+      if (requestId !== buildRequestRef.current) return;
+      setDecks(matched);
+      setAlternativeDeck(null);
+      setCoreConflict(null);
+    } catch (e) {
+      if (requestId !== buildRequestRef.current) return;
+      setDecks([]);
+      setAlternativeDeck(null);
+      setCoreConflict(null);
+      setError(constructorApiErrorMessage(e));
+    } finally {
+      if (requestId === buildRequestRef.current) {
+        setLoading(false);
+      }
+    }
+  }, []);
+
   const buildDecks = useCallback(async (current: (SlotPick)[]) => {
     const picks = current.filter((s): s is NonNullable<SlotPick> => Boolean(s));
     if (picks.length !== 4) {
@@ -373,6 +411,22 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   }, []);
 
   useEffect(() => {
+    if (topDeckFilter) {
+      if (selectedNames.length === 0) {
+        setDecks([]);
+        setAlternativeDeck(null);
+        setCoreConflict(null);
+        setError(null);
+        return;
+      }
+
+      const timer = setTimeout(() => {
+        void matchTopDecks(selectedNames);
+      }, 200);
+
+      return () => clearTimeout(timer);
+    }
+
     if (filledCount !== 4) {
       setDecks([]);
       setAlternativeDeck(null);
@@ -386,7 +440,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
     }, 200);
 
     return () => clearTimeout(timer);
-  }, [slots, filledCount, buildDecks]);
+  }, [topDeckFilter, selectedNames, slots, filledCount, buildDecks, matchTopDecks]);
 
   const placeCard = (card: CatalogCard) => {
     haptic.light();
@@ -423,6 +477,11 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
       /* ignore */
     }
   };
+
+  const showBrowser = filledCount < 4;
+  const showTopResults = topDeckFilter && selectedNames.length > 0;
+  const showConstructorResults = !topDeckFilter && filledCount === 4;
+  const loadingLabel = topDeckFilter ? "Ищем колоды топ-игроков…" : "Собираем колоды…";
 
   if (!ready && !catalog.length) {
     return <Loader variant="section" />;
@@ -534,13 +593,29 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           <span>{tip}</span>
         </p>
 
+        <label className="ctor-slot-filter">
+          <input
+            type="checkbox"
+            checked={topDeckFilter}
+            onChange={(e) => {
+              haptic.selection();
+              setTopDeckFilter(e.target.checked);
+              setDecks([]);
+              setAlternativeDeck(null);
+              setCoreConflict(null);
+              setError(null);
+            }}
+          />
+          <span>Колоды топ-игроков</span>
+        </label>
+
         <div className="ctor-stage">
         {loading ? (
-          <p className="ctor-loading-hint">Собираем колоды…</p>
+          <p className="ctor-loading-hint">{loadingLabel}</p>
         ) : null}
 
         {/* 3. Card Browser */}
-        {filledCount < 4 ? (
+        {showBrowser ? (
           <section className="ctor-browser">
             <div className="ctor-search">
               <Search className="ctor-search-icon" aria-hidden />
@@ -636,10 +711,27 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           </section>
         ) : null}
 
-        {loading ? <Loader variant="section" compact label="Собираем колоды…" /> : null}
+        {loading ? <Loader variant="section" compact label={loadingLabel} /> : null}
         {error ? <ErrorState title={error} /> : null}
 
-        {!loading && filledCount === 4 && decks.length > 0 && !alternativeDeck ? (
+        {!loading && showTopResults && decks.length > 0 ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-cr-gold" />
+              <h3 className="text-base font-semibold text-cr-text">
+                Колоды топ-игроков ({decks.length})
+              </h3>
+            </div>
+            <p className="text-sm text-cr-muted">
+              Готовые колоды из топ-100, где есть выбранные карты
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {decks.map((deck, i) => renderDeckCard(deck, i))}
+            </div>
+          </div>
+        ) : null}
+
+        {!loading && showConstructorResults && decks.length > 0 && !alternativeDeck ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-cr-gold" />
@@ -653,7 +745,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           </div>
         ) : null}
 
-        {!loading && filledCount === 4 && coreConflict ? (
+        {!loading && showConstructorResults && coreConflict ? (
           <Card className="border border-cr-gold/30 bg-cr-gold/5 space-y-3">
             <h3 className="text-base font-semibold text-cr-text">Конфликт в ядре</h3>
             <p className="text-sm text-cr-text/90 whitespace-pre-line leading-relaxed">
@@ -671,7 +763,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           </Card>
         ) : null}
 
-        {!loading && filledCount === 4 && alternativeDeck ? (
+        {!loading && showConstructorResults && alternativeDeck ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-cr-accent" />
@@ -687,12 +779,20 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         ) : null}
 
         {!loading &&
-        filledCount === 4 &&
-        !error &&
-        decks.length === 0 &&
-        !alternativeDeck &&
-        !coreConflict ? (
-          <EmptyState title="Не удалось подобрать колоды для этой комбинации" className="py-6" />
+        ((showTopResults && !error && decks.length === 0) ||
+          (showConstructorResults &&
+            !error &&
+            decks.length === 0 &&
+            !alternativeDeck &&
+            !coreConflict)) ? (
+          <EmptyState
+            title={
+              topDeckFilter
+                ? "Нет колод топ-игроков с такими картами"
+                : "Не удалось подобрать колоды для этой комбинации"
+            }
+            className="py-6"
+          />
         ) : null}
         </div>
         </div>

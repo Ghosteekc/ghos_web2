@@ -886,6 +886,25 @@ export interface ConstructorData {
   alternative_deck?: ConstructorDeckEntry | null;
 }
 
+export interface ConstructorTopMatchDeck {
+  id: number;
+  name: string;
+  cards: DeckCard[];
+  winrate: number;
+  total_games: number;
+  avg_elixir: number;
+  deck_link?: string | null;
+  description: string;
+  best_rank: number;
+  player_count: number;
+  matched_cards: string[];
+}
+
+export interface ConstructorTopMatchData {
+  decks: ConstructorTopMatchDeck[];
+  updated_at: string | null;
+}
+
 export type TabType =
   | "home"
   | "profile"
