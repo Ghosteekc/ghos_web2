@@ -11,7 +11,7 @@ import { Card, PageHeader } from "@/components/ui";
 const links = [
   { to: "/search", icon: Search, label: "Поиск", hint: "Игрок по тегу" },
   { to: "/favorites", icon: Star, label: "Избранное", hint: "Сохранённые колоды" },
-  { to: "/settings", icon: Settings, label: "Настройки", hint: "Синхронизация и кеш" },
+  { to: "/settings", icon: Settings, label: "Настройки", hint: "Синхронизация и данные" },
 ] as const;
 
 export function MorePage() {

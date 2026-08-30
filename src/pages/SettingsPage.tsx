@@ -94,7 +94,7 @@ export function SettingsPage() {
 
   const handleClearCache = async () => {
     const ok = await showConfirm?.(
-      "Сбросить временный кеш приложения?\n\nИстория боёв на сервере не удаляется. Данные в интерфейсе обновятся при следующем открытии разделов или синхронизации.",
+      "Сбросить сохранённые данные в приложении?\n\nИстория боёв в Ghosteek не удаляется. Списки и статистика обновятся при следующем открытии разделов или синхронизации.",
     );
     if (!ok) return;
 
@@ -103,11 +103,11 @@ export function SettingsPage() {
       await api.clearCache();
       haptic.success();
       await showAlert?.(
-        "Кеш приложения сброшен. Чтобы обновить списки, откройте разделы заново или нажмите «Синхронизировать».",
+        "Данные приложения сброшены. Чтобы обновить списки, открой разделы заново или нажми «Синхронизировать».",
       );
     } catch (e) {
       haptic.error();
-      await showAlert?.(e instanceof Error ? e.message : "Не удалось сбросить кеш");
+      await showAlert?.(e instanceof Error ? e.message : "Не удалось сбросить данные");
     } finally {
       setClearing(false);
     }
@@ -115,13 +115,13 @@ export function SettingsPage() {
 
   const handleClearBattleHistory = async () => {
     if (!profile?.player_tag) {
-      void showAlert?.("Сначала привяжите аккаунт Clash Royale в боте: /link #ТЕГ");
+      void showAlert?.("Сначала привяжи аккаунт Clash Royale в боте: /link #ТЕГ");
       return;
     }
 
     const tagLabel = profile.player_tag.replace(/^#/, "");
     const ok = await showConfirm?.(
-      "Внимание: все ваши бои будут удалены из проекта!\n\n"
+      "Внимание: все твои бои будут удалены из проекта!\n\n"
         + `Аккаунт #${tagLabel} — удаляются только его сохранённые матчи.\n\n`
         + "Отменить действие нельзя.\n"
         + "Новые бои будут продолжать появляться после синхронизации с Clash Royale.\n\n"
@@ -137,7 +137,7 @@ export function SettingsPage() {
       await showAlert?.(
         res.deleted_count > 0
           ? `История боёв очищена. Удалено записей: ${res.deleted_count}. Новые бои появятся после синхронизации с Clash Royale.`
-          : "Сохранённая история уже пуста. Нажмите «Синхронизировать», чтобы загрузить бои из Clash Royale.",
+          : "Сохранённая история уже пуста. Нажми «Синхронизировать», чтобы загрузить бои из Clash Royale.",
       );
     } catch (e) {
       haptic.error();
@@ -151,7 +151,7 @@ export function SettingsPage() {
     if (!profile?.player_tag) {
       void showAlert?.(
         "Аккаунт Clash Royale уже не привязан.\n\n"
-          + "Чтобы снова войти в профиль, зарегистрируйтесь в боте: /link #ВАШТЕГ",
+          + "Чтобы снова войти в профиль, зарегистрируйся в боте: /link #ТЕГ",
       );
       return;
     }
@@ -160,8 +160,8 @@ export function SettingsPage() {
     const ok = await showConfirm?.(
       "Выйти и отвязать аккаунт?\n\n"
         + `Аккаунт Clash Royale ${tagLabel} будет отвязан от текущего аккаунта Telegram.\n\n`
-        + "Выход произойдёт и в боте, и в Mini App.\n"
-        + "Чтобы снова пользоваться профилем, зарегистрируйтесь в боте под своим тегом: /link #ТЕГ\n\n"
+        + "Выход произойдёт и в боте, и в приложении.\n"
+        + "Чтобы снова пользоваться профилем, зарегистрируйся в боте под своим тегом: /link #ТЕГ\n\n"
         + "Отвязать аккаунт?",
     );
     if (!ok) return;
@@ -192,7 +192,7 @@ export function SettingsPage() {
       haptic.success();
       await showAlert?.(
         `Аккаунт Clash Royale ${tagLabel} отвязан от этого Telegram.\n\n`
-          + "Вы вышли из профиля. Чтобы вернуться — /link #ВАШТЕГ в боте.",
+          + "Ты вышел из профиля. Чтобы вернуться — /link #ТЕГ в боте.",
       );
     } catch (e) {
       haptic.error();
@@ -204,7 +204,7 @@ export function SettingsPage() {
 
   const handleSyncData = async () => {
     if (!profile?.player_tag) {
-      void showAlert?.("Сначала привяжите аккаунт Clash Royale в боте: /link #ТЕГ");
+      void showAlert?.("Сначала привяжи аккаунт Clash Royale в боте: /link #ТЕГ");
       return;
     }
 
@@ -322,7 +322,7 @@ export function SettingsPage() {
                   <>
                     <p className="text-base font-semibold text-cr-muted">Аккаунт CR</p>
                     <p className="text-cr-text font-semibold">Не привязан</p>
-                    <p className="text-sm text-cr-muted mt-1">Привяжите тег в боте: /link #ТЕГ</p>
+                    <p className="text-sm text-cr-muted mt-1">Привяжи тег в боте: /link #ТЕГ</p>
                   </>
                 )}
               </div>
@@ -395,7 +395,7 @@ export function SettingsPage() {
               <span className="pixel-btn-icon-slot" aria-hidden>
                 <Eraser className="w-5 h-5 text-cr-gold" />
               </span>
-              <span>{clearing ? "Сброс…" : "Сбросить кеш"}</span>
+              <span>{clearing ? "Сброс…" : "Сбросить данные"}</span>
             </button>
             <button
               type="button"

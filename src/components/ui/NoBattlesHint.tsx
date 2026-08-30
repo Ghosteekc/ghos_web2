@@ -7,7 +7,7 @@ import { ApiError } from "@/api/client";
 const NO_BATTLES_CODE = "E025";
 
 const NO_BATTLES_RE =
-  /нет данных о боях|сыграйте несколько|для ведения статистики|пару (рейтинговых )?бо[её]в/i;
+  /нет данных о боях|сыграй(те)? несколько|для ведения статистики|пару (рейтинговых )?бо[её]в/i;
 
 export function isNoBattlesError(error: unknown): boolean {
   if (error instanceof ApiError && error.code === NO_BATTLES_CODE) return true;
@@ -33,7 +33,7 @@ type NoBattlesHintProps = {
 export function NoBattlesHint({
   className,
   title = "Пока нет боёв для статистики",
-  description = "Если давно не играли, журнал боёв в API пуст. Сыграйте пару рейтинговых матчей в Clash Royale — статистика подтянется сама.",
+  description = "Если давно не играл, журнал боёв пока пуст. Сыграй пару рейтинговых матчей в Clash Royale — статистика подтянется сама.",
 }: NoBattlesHintProps) {
   const { openLink } = useTelegram();
 

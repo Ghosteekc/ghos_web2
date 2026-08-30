@@ -25,7 +25,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.error) {
       const { message, code } = toUserFacingError(
         this.state.error,
-        "Нет соединения с ботом, попробуйте позже",
+        "Нет соединения с ботом, попробуй позже",
       );
       return (
         <ErrorState

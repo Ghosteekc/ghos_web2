@@ -107,7 +107,7 @@ export function ProReferralCard() {
               Приглашай друзей — получай Credits
             </h3>
             <p className="text-sm text-cr-muted leading-snug mt-1">
-              За каждого приведённого друга вы и ваш друг получаете по +{reward} Credits. Credits
+              За каждого приведённого друга — +{reward} Credits тебе и твоему другу. Credits
               хранятся без ограничений по времени.
             </p>
           </div>

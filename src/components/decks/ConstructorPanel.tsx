@@ -190,13 +190,13 @@ function ghosteekRecommendation(names: string[]): string {
   ).length;
 
   if (names.length === 1 && hasWin) {
-    return "Отличное начало. Попробуй добавить вторую win condition.";
+    return "Отличное начало. Попробуй добавить вторую вин-карту.";
   }
   if (names.length === 1 && !hasWin) {
-    return "Сильный старт. Добавь win condition — карту, которая ломает башни.";
+    return "Сильный старт. Добавь вин-карту — карту, которая ломает башни.";
   }
   if (names.length >= 2 && !hasWin) {
-    return "Добавь win condition — основу атаки колоды.";
+    return "Добавь вин-карту — основу атаки колоды.";
   }
   if (winCount >= 2 && !hasAir) {
     return "Добавь карту защиты от воздуха.";
@@ -434,7 +434,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         <header className="ctor-header">
           <div className="ctor-header-copy">
             <h2 className="ctor-title">Основа колоды</h2>
-            <p className="ctor-subtitle">Выберите 4 ключевые карты</p>
+            <p className="ctor-subtitle">Выбери 4 ключевые карты</p>
           </div>
           <button
             type="button"

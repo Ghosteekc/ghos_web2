@@ -149,7 +149,7 @@ export function FavoritesPanel({ onAnalyze, onCompare }: FavoritesPanelProps) {
         <EmptyState
           icon={<Star className="h-12 w-12 opacity-50" />}
           title="Нет избранных колод"
-          description="Добавляйте колоды из других вкладок раздела «Колоды»"
+          description="Добавляй колоды из других вкладок раздела «Колоды»"
         />
       )}
     </div>

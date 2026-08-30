@@ -42,7 +42,7 @@ export const ChatBubble = memo(function ChatBubble({ message, onAnalyzeAnotherRe
         "ai-msg-enter",
       )}
     >
-      {!isUser ? <AiIdentity detail={hasAnalysis ? "· Replay analysis" : undefined} /> : null}
+      {!isUser ? <AiIdentity detail={hasAnalysis ? "· разбор реплея" : undefined} /> : null}
       <div
         className={cn(
           "ai-bubble",

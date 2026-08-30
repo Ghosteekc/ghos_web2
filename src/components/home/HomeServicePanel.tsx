@@ -38,7 +38,7 @@ export function HomeServicePanel({ profile, onNavigate }: HomeServicePanelProps)
             <div className="min-w-0">
               <p className="text-base font-semibold text-cr-text">Настройка сервиса</p>
               <p className="mt-2 text-sm text-cr-muted">
-                Привяжите аккаунт в боте: <span className="text-cr-gold font-mono">/link #ТЕГ</span>
+                Привяжи аккаунт в боте: <span className="text-cr-gold font-mono">/link #ТЕГ</span>
               </p>
             </div>
           </div>

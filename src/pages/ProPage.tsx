@@ -83,7 +83,7 @@ export function ProPage() {
         const webApp = window.Telegram?.WebApp;
         if (!webApp?.openInvoice) {
           setPayError(
-            "Оплата Telegram Stars доступна только внутри Telegram. Откройте Mini App из бота.",
+            "Оплата Telegram Stars доступна только внутри Telegram. Открой приложение из бота.",
           );
           return;
         }
@@ -101,12 +101,12 @@ export function ProPage() {
             return;
           }
           if (status === "failed") {
-            setPayError("Платёж не прошёл. Попробуйте ещё раз.");
+            setPayError("Платёж не прошёл. Попробуй ещё раз.");
           }
         });
       } catch (e) {
         setPayError(
-          e instanceof ApiError ? e.message : "Не удалось создать счёт. Попробуйте позже.",
+          e instanceof ApiError ? e.message : "Не удалось создать счёт. Попробуй позже.",
         );
         setPaying(null);
       }

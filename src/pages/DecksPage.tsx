@@ -174,11 +174,11 @@ export function DecksPage() {
             ) : filter === "top" ? (
               "Топ-10 игроков из глобального списка лидеров (Легендарный путь): колода, винрейт на ней и кубки."
             ) : filter === "arena" ? (
-              "Колоды соперников с вашей арены: винрейт и число боёв, когда данные доступны."
+              "Колоды соперников с твоей арены: винрейт и число боёв, когда данные доступны."
             ) : filter === "constructor" ? (
               "Собери основу — Ghosteek достроит колоду."
             ) : filter === "mine" ? (
-              "Ваши колоды из истории боёв. Нажмите «Статистика» для разбора матчапов и советов."
+              "Твои колоды из истории боёв. Нажми «Статистика» для разбора матчапов и советов."
             ) : filter === "favorites" ? (
               "Сохранённые колоды — быстрый доступ к избранным сборкам."
             ) : (
@@ -380,7 +380,7 @@ export function DecksPage() {
             <EmptyState
               icon={<SlidersHorizontal className="h-12 w-12 opacity-50" />}
               title="Колоды не найдены"
-              description="Сыграйте бои для раздела «Мои»"
+              description="Сыграй бои для раздела «Мои»"
               className="col-span-full"
             />
           ) : null}
@@ -449,7 +449,7 @@ function TopPlayersPanel({
       await navigator.clipboard.writeText(deckLink);
       onCopied("Ссылка на колоду скопирована");
     } catch {
-      onCopied("Откройте приложение из Telegram для импорта колоды");
+      onCopied("Открой приложение из Telegram для импорта колоды");
     }
   };
 
@@ -466,7 +466,7 @@ function TopPlayersPanel({
       <EmptyState
         icon={<Users className="h-12 w-12 opacity-50" />}
         title="Рейтинг временно недоступен"
-        description="Попробуйте позже"
+        description="Попробуй позже"
       />
     );
   }
@@ -711,7 +711,7 @@ function RandomDeckPanel({
       await navigator.clipboard.writeText(deck.deck_link);
       onCopied("Ссылка на колоду скопирована");
     } catch {
-      onCopied("Откройте приложение из Telegram для импорта колоды");
+      onCopied("Открой приложение из Telegram для импорта колоды");
     }
   };
 
@@ -762,7 +762,7 @@ function RandomDeckPanel({
         <p className="text-sm text-cr-muted mb-4">
           {deck.rofl
             ? (deck.rofl_tagline ?? "не задавай вопросов")
-            : "8 случайных карт, как в игре. Нажмите «Заново», если колода не нравится."}
+            : "8 случайных карт, как в игре. Нажми «Заново», если колода не нравится."}
         </p>
 
         <div className="grid grid-cols-4 grid-rows-2 gap-x-2 gap-y-3 mb-4">
@@ -904,7 +904,7 @@ export function DeckCard({
       await navigator.clipboard.writeText(deck.deck_link);
       onCopied("Ссылка на колоду скопирована");
     } catch {
-      onCopied("Откройте приложение из Telegram для импорта колоды");
+      onCopied("Открой приложение из Telegram для импорта колоды");
     }
   };
 

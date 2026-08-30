@@ -13,9 +13,9 @@ function formatArenaSubtitle(arenaName: string, trophies: number, source?: strin
   const base =
     arenaName && trophies > 0 && !arenaName.replace(/\s/g, "").includes(String(trophies))
       ? `${arenaName} · ${trophies.toLocaleString("ru-RU")} 🏆`
-      : arenaName || (trophies > 0 ? `${trophies.toLocaleString("ru-RU")} 🏆` : "Ваша арена");
+      : arenaName || (trophies > 0 ? `${trophies.toLocaleString("ru-RU")} 🏆` : "Твоя арена");
   if (source === "arena_live" || source === "arena_battles" || source === "arena_pool") {
-    return `${base} · колоды игроков вашей арены`;
+    return `${base} · колоды игроков твоей арены`;
   }
   return base;
 }
@@ -78,8 +78,8 @@ export function ArenaDecksPanel({ renderDeck }: ArenaDecksPanelProps) {
   if (!decks.length) {
     return (
       <EmptyState
-        title="Нет данных по колодам вашей арены"
-        description="Сыграйте несколько рейтинговых боёв или обновите страницу через минуту."
+        title="Нет данных по колодам твоей арены"
+        description="Сыграй несколько рейтинговых боёв или обнови страницу через минуту."
         button="Обновить"
         onAction={() => void load()}
       />

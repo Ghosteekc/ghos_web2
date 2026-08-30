@@ -18,9 +18,9 @@ export function ReplayAcceptedCard({ card }: Props) {
     status === "cr_replay"
       ? "✓ Похоже на Clash Royale"
       : status === "uncertain"
-        ? "Не уверен — мало HUD-сигналов"
+        ? "Не уверен — мало деталей в кадре"
         : status === "not_cr_replay"
-          ? "HUD Clash Royale не найден"
+          ? "Интерфейс Clash Royale в кадре не распознан"
           : card.accepted
             ? "✓ Видео принято"
             : null;
@@ -32,7 +32,7 @@ export function ReplayAcceptedCard({ card }: Props) {
     <div className="ai-deck-card ai-replay-card">
       <div className="ai-deck-card-head">
         <div className="min-w-0 flex-1">
-          <p className="ai-deck-card-title">Replay</p>
+          <p className="ai-deck-card-title">Реплей</p>
           <p className="ai-replay-filename truncate">{card.filename}</p>
           <div className="ai-deck-card-tags">
             <span className="ai-deck-card-tag">{formatReplayDuration(card.durationSeconds)}</span>

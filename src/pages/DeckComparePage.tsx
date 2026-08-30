@@ -148,7 +148,7 @@ export function DeckComparePage() {
 
   const userScore = data.matchup_score ?? 50;
   const refScore = data.opponent_matchup_score ?? 50;
-  const refLabel = fromTab === "arena" ? "Колода вашей арены" : "Колода соперника";
+  const refLabel = fromTab === "arena" ? "Колода твоей арены" : "Колода соперника";
 
   return (
     <div className="space-y-5 pb-8">
@@ -173,7 +173,7 @@ export function DeckComparePage() {
         </div>
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="rounded-xl border border-cr-win/30 bg-cr-win/10 p-3 text-center">
-            <p className="text-xs text-cr-muted">Ваша колода</p>
+            <p className="text-xs text-cr-muted">Твоя колода</p>
             <p className="text-2xl font-bold text-cr-win tabular-nums">{userScore.toFixed(0)}%</p>
             {data.user_synergy_score != null && (
               <p className="text-2xs text-cr-muted mt-1">Синергия: {data.user_synergy_score.toFixed(0)}%</p>
@@ -189,7 +189,7 @@ export function DeckComparePage() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <p className="text-xs text-cr-muted mb-2">Ваша колода</p>
+            <p className="text-xs text-cr-muted mb-2">Твоя колода</p>
             <DeckGrid cards={data.user_deck} />
           </div>
           <div>
@@ -219,7 +219,7 @@ export function DeckComparePage() {
       <div className="flex gap-2 overflow-x-auto pb-1">
         {([
           ["overview", "Обзор"],
-          ["user", "Ваша колода"],
+          ["user", "Твоя колода"],
           ["reference", refLabel],
         ] as const).map(([id, label]) => (
           <button
@@ -243,7 +243,7 @@ export function DeckComparePage() {
           <Card className="!p-4">
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="w-4 h-4 text-cr-win" />
-              <p className="text-base font-semibold text-cr-text">Ваши преимущества</p>
+              <p className="text-base font-semibold text-cr-text">Твои преимущества</p>
             </div>
             <SummaryList title="Сильнее" items={data.user_better} tone="win" />
             <div className="mt-3">
@@ -260,9 +260,9 @@ export function DeckComparePage() {
               <TrendingDown className="w-4 h-4 text-cr-loss" />
               <p className="text-base font-semibold text-cr-text">{refLabel}</p>
             </div>
-            <SummaryList title="Сильнее вашей" items={data.reference_better} tone="win" />
+            <SummaryList title="Сильнее твоей" items={data.reference_better} tone="win" />
             <div className="mt-3">
-              <SummaryList title="Слабее вашей" items={data.reference_worse} tone="loss" />
+              <SummaryList title="Слабее твоей" items={data.reference_worse} tone="loss" />
             </div>
           </Card>
         </div>
@@ -270,7 +270,7 @@ export function DeckComparePage() {
 
       {tab === "user" && (
         <Card className="!p-4 space-y-4">
-          <p className="text-base font-semibold text-cr-text">Ваша колода — карта за картой</p>
+          <p className="text-base font-semibold text-cr-text">Твоя колода — карта за картой</p>
           <ul className="space-y-2">
             {(data.user_card_notes ?? []).map((note) => (
               <CompareNoteRow key={note.card} note={note} icon={userIcons.get(note.card)} />
@@ -279,7 +279,7 @@ export function DeckComparePage() {
           <DecisionExplanationView
             explanation={data.user_recommendation?.decision_explanation}
             showSwaps={false}
-            title="Рекомендации по вашей колоде"
+            title="Рекомендации по твоей колоде"
           />
         </Card>
       )}

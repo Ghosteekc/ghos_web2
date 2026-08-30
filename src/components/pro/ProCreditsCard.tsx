@@ -47,8 +47,7 @@ export function ProCreditsCard({
 
         {open ? (
           <p className="mt-3 text-sm text-cr-muted leading-snug">
-            Приглашай друзей в Ghosteek. За каждого приведённого друга вы и ваш друг получаете по +
-            {rewardAmount} Credits.
+            Приглашай друзей в Ghosteek. За каждого приведённого друга — +{rewardAmount} Credits тебе и твоему другу.
           </p>
         ) : null}
       </Card>

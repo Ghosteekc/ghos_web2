@@ -45,7 +45,7 @@ export function HomePage() {
     return (
       <ErrorState
         title={error ?? "Ошибка загрузки"}
-        description="Нет связи с сервером. Потяните вниз для обновления."
+        description="Не удалось загрузить данные. Потяни вниз для обновления."
         button="Повторить"
         onAction={() => void load()}
       />

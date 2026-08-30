@@ -27,7 +27,7 @@ function DeckImportButton({ deckLink, label }: { deckLink?: string | null; label
       await navigator.clipboard.writeText(deckLink);
       showAlert?.("Ссылка на колоду скопирована");
     } catch {
-      showAlert?.("Откройте приложение из Telegram для импорта колоды");
+      showAlert?.("Открой приложение из Telegram для импорта колоды");
     }
   };
 
@@ -87,7 +87,7 @@ export function DeckWinratesPanel({ onAnalyze }: { onAnalyze?: (deck: Deck) => v
   if (loading) return <Loader variant="section" />;
   if (error) return <ErrorState title={error} />;
   if (!rows.length) {
-    return <EmptyState title="Сыграйте бои — появится статистика по колодам" />;
+    return <EmptyState title="Сыграй бои — появится статистика по колодам" />;
   }
 
   return (
@@ -260,7 +260,7 @@ export function OpponentsPanel() {
                   {opp.name}
                 </p>
                 <p className="text-sm text-cr-muted mt-0.5">
-                  {opp.won_against ? "Вы побеждали эту колоду" : "Проигрывали этой колоде"} · эликсир {opp.avg_elixir.toFixed(1)}
+                  {opp.won_against ? "Ты побеждал эту колоду" : "Ты проигрывал этой колоде"} · эликсир {opp.avg_elixir.toFixed(1)}
                 </p>
               </div>
               <Button
@@ -300,7 +300,7 @@ export function OpponentsPanel() {
                     <h3 className="text-base font-semibold text-cr-text mb-1">
                       Контр-колода vs {counter.opponent_name}
                     </h3>
-                    <p className="text-sm text-cr-muted mb-3">Под ваш арсенал и арену</p>
+                    <p className="text-sm text-cr-muted mb-3">Под твой арсенал и арену</p>
                     <CardDeckGrid cards={counter.counter_deck} size="lg" showLabels maxVisible={8} />
                   </>
                 ) : null}
@@ -498,7 +498,7 @@ export function DeckToolsPanel() {
 
           {balanced ? (
             <p className="text-sm text-cr-muted mt-4">
-              Колода подходит для вашей арены — обязательных замен нет
+              Колода подходит для твоей арены — обязательных замен нет
             </p>
           ) : null}
 
@@ -576,11 +576,11 @@ export function LossAnalysisPanel() {
   if (loading) return <Loader variant="section" />;
   if (error) return <ErrorState title={error} />;
   if (!insights) {
-    return <EmptyState title="Сыграйте бои — здесь появится разбор ваших поражений" />;
+    return <EmptyState title="Сыграй бои — здесь появится разбор твоих поражений" />;
   }
 
   if (!insights.patterns.length && !lossInsights.length) {
-    return <EmptyState title="Сыграйте бои — здесь появится разбор ваших поражений" />;
+    return <EmptyState title="Сыграй бои — здесь появится разбор твоих поражений" />;
   }
 
   return (

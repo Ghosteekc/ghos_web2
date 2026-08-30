@@ -246,7 +246,7 @@ export function AnalyticsPage() {
             <Card className="lg:col-span-2">
               <h3 className="chart-section-title text-base font-semibold text-cr-text mb-2">Винрейт по дням</h3>
               <p className="text-xs text-cr-muted mb-3">
-                Фиолетовая линия — процент побед · ведите пальцем, тап — закрепить
+                Фиолетовая линия — процент побед · веди пальцем, тап — закрепить
               </p>
               <ChartTooltipAnchor className="h-[220px]" pointCount={winrateByDay.length}>
                 {winrateByDay.length > 0 ? (
@@ -268,7 +268,7 @@ export function AnalyticsPage() {
                 ) : null}
               </div>
               <p className="text-xs text-cr-muted mb-3">
-                Рейтинговые 1v1 · до 40 последних · ведите пальцем, тап — закрепить
+                Рейтинговые 1v1 · до 40 последних · веди пальцем, тап — закрепить
               </p>
               <ChartTooltipAnchor className="h-[190px]" pointCount={lastResults.length}>
                 {lastResults.length > 0 ? (

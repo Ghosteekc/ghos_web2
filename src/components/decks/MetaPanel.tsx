@@ -119,7 +119,7 @@ function MetaDeckActions({
       await navigator.clipboard.writeText(deckLink);
       onMessage("Ссылка на колоду скопирована");
     } catch {
-      onMessage("Откройте приложение из Telegram для импорта колоды");
+      onMessage("Открой приложение из Telegram для импорта колоды");
     }
   };
 
@@ -259,7 +259,7 @@ function MetaProCta({ lockedCount }: { lockedCount: number }) {
             <ProBadge />
           </div>
           <p className="text-sm text-cr-muted leading-snug mt-0.5">
-            Без Pro показываем топ-5. Откройте полный список с историей популярности.
+            Без Pro показываем топ-5. Открой полный список с историей популярности.
           </p>
         </div>
       </div>

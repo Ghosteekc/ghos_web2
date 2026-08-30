@@ -1,10 +1,10 @@
 /** Map any thrown value to a short user-facing message + error code. */
 
 const FRIENDLY_CONNECTION =
-  "Нет соединения с ботом, попробуйте позже";
+  "Нет соединения с ботом, попробуй позже";
 
 const FRIENDLY_PAGE =
-  "Не удалось показать страницу. Попробуйте ещё раз";
+  "Не удалось показать страницу. Попробуй ещё раз";
 
 const TECHNICAL_RE =
   /failed to fetch|dynamically imported|loading chunk|chunkloaderror|networkerror|load failed|importing a module|unexpected token|module script|typeerror|referenceerror|syntaxerror|internal error|stack trace|https?:\/\/|\/assets\/|\.js\b|at\s+\S+\s+\(/i;

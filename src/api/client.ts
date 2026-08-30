@@ -58,7 +58,7 @@ import {
 const API_BASE = (import.meta.env.VITE_API_URL ?? "").trim();
 
 const DEFAULT_UNAVAILABLE =
-  "Нет соединения с ботом, попробуйте позже";
+  "Нет соединения с ботом, попробуй позже";
 
 const PRO_STATUS_KEY = "pro-status-v1";
 const META_CACHE_KEYS = ["meta-league-v2", "meta-trophies-v2", "meta-clan-wars-v1"] as const;
@@ -223,7 +223,7 @@ async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
   if (isTelegramMiniApp() && !getTelegramInitData()) {
     throw new ApiError(
       formatApiError(
-        "Не удалось войти в приложение. Перезапустите Mini App из Telegram.",
+        "Не удалось войти в приложение. Перезапусти приложение из Telegram.",
         "E090",
       ),
       401,
@@ -1065,7 +1065,7 @@ export const api = {
   fetchReplayEvidence: async (evidenceId: string): Promise<Blob> => {
     const safeId = evidenceId.trim();
     if (!safeId || /[/\\]/.test(safeId) || safeId.includes("..") || safeId.length > 64) {
-      throw new ApiError(formatApiError("Evidence not found", "E404"), 404, "E404");
+      throw new ApiError(formatApiError("Кадр разбора не найден", "E404"), 404, "E404");
     }
     await waitForTelegramInitData({ maxWaitMs: 10_000, forceReady: true });
     const headers: Record<string, string> = {
@@ -1079,7 +1079,7 @@ export const api = {
       headers,
     });
     if (!res.ok) {
-      throw new ApiError(formatApiError("Evidence not found", "E404"), res.status, "E404");
+      throw new ApiError(formatApiError("Кадр разбора не найден", "E404"), res.status, "E404");
     }
     return res.blob();
   },

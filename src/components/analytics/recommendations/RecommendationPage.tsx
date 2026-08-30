@@ -21,7 +21,7 @@ function ArenaProgressHeader({ summary }: { summary: ArenaProgressSummary }) {
       <h3 className="text-base font-semibold text-cr-text">Приоритет прокачки аккаунта</h3>
       <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <p className="text-xs text-cr-muted">Ваш прогресс</p>
+          <p className="text-xs text-cr-muted">Твой прогресс</p>
           <p className="text-xl font-bold text-cr-gold tabular-nums recommendation-accent">{summary.progressPercent}%</p>
         </div>
         <div>
@@ -176,7 +176,7 @@ export function RecommendationsPanel() {
   if (error) return <ErrorState title={error} />;
   if (!profile?.player_tag) {
     return (
-      <EmptyState title="Привяжите аккаунт Clash Royale в настройках, чтобы получить рекомендации по прокачке." />
+      <EmptyState title="Привяжи аккаунт Clash Royale в настройках, чтобы получить рекомендации по прокачке." />
     );
   }
   if (!collection?.cards?.length) {
@@ -190,11 +190,11 @@ export function RecommendationsPanel() {
           <div>
             <p className="text-base font-semibold text-cr-text">Рекомендации по прокачке</p>
             <p className="text-sm text-cr-muted mt-1 leading-relaxed">
-              Приоритетные карты для каждой арены с учётом вашей коллекции
+              Приоритетные карты для каждой арены с учётом твоей коллекции
             </p>
             {playerArena != null && myArenaSummary ? (
               <p className="text-sm text-cr-gold mt-2 recommendation-accent">
-                Ваша арена: {myArenaSummary.arenaName} · {profile.trophies?.toLocaleString("ru-RU") ?? "—"} 🏆
+                Твоя арена: {myArenaSummary.arenaName} · {profile.trophies?.toLocaleString("ru-RU") ?? "—"} 🏆
               </p>
             ) : null}
           </div>

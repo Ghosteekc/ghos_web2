@@ -125,11 +125,11 @@ function BattleCoachBlock({ data }: { data: BattleCoach }) {
     <Card className="tint-glass-card">
       <div className="flex items-center gap-2 mb-2">
         <Sparkles className="w-5 h-5 text-cr-gold" />
-        <h3 className="font-semibold text-cr-text">Battle Coach</h3>
+        <h3 className="font-semibold text-cr-text">Тренер боя</h3>
       </div>
       <p className="text-xs text-cr-muted mb-4">
         То, чего нет в тактике и плане: перелом по длительности/счёту и гипотеза замены карты.
-        Реплей API не отдаёт.
+        Запись боя из игры для этого раздела недоступна.
       </p>
 
       <div className="space-y-3">
@@ -266,7 +266,7 @@ const ELIXIR_PROFILE_RU: Record<string, string> = {
   "Fast Cycle": "Быстрый цикл",
   "Medium Cycle": "Средний цикл",
   "Heavy Control": "Тяжёлый контроль",
-  "Heavy Beatdown": "Тяжёлый beatdown",
+  "Heavy Beatdown": "Тяжёлый битдаун",
   "Bridge Pressure": "Давление на мосту",
   "Split Pressure": "Сплит-давление",
 };
@@ -428,14 +428,14 @@ function MatchPlanBlock({
       <p className="text-xs text-cr-muted mb-4">
         {hidePhases || hideAvoid
           ? "Окно атаки и карты, которые лучше беречь — без повтора фаз и запретов из тактики."
-          : "План из состава колод, GamePlan и тактических взаимодействий."}
+          : "План из состава колод и тактических взаимодействий."}
       </p>
       <div className="space-y-4">
         {showPhases ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <TipList title="Phase 1 — начало" items={gp.phase_1} />
-            <TipList title="Phase 2 — преимущество" items={gp.phase_2} />
-            <TipList title="Phase 3 — финиш" items={gp.phase_3} />
+            <TipList title="Фаза 1 — начало" items={gp.phase_1} />
+            <TipList title="Фаза 2 — преимущество" items={gp.phase_2} />
+            <TipList title="Фаза 3 — финиш" items={gp.phase_3} />
           </div>
         ) : null}
         {data.win_condition_window ? (
@@ -761,7 +761,7 @@ export function BattleDetailPage() {
       {hasElixirProfiles ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {battle.user_elixir ? (
-            <ElixirEfficiencyCard title="Ваш эликсир-профиль" data={battle.user_elixir} />
+            <ElixirEfficiencyCard title="Твой эликсир-профиль" data={battle.user_elixir} />
           ) : null}
           {battle.opponent_elixir ? (
             <ElixirEfficiencyCard title="Эликсир соперника" data={battle.opponent_elixir} />
@@ -787,7 +787,7 @@ export function BattleDetailPage() {
       )}
 
       <KeyCardsBlock
-        title="Ваш урон по башням (оценка)"
+        title="Твой урон по башням (оценка)"
         items={battle.user_key_cards ?? []}
         accent="win"
       />
@@ -843,7 +843,7 @@ export function BattleDetailPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Card>
-          <h3 className="font-semibold text-cr-text mb-4">Ваша колода</h3>
+          <h3 className="font-semibold text-cr-text mb-4">Твоя колода</h3>
           <PlayerDeckGrid
             cards={battle.user_deck_cards?.length ? battle.user_deck_cards : battle.user_deck}
             size="lg"

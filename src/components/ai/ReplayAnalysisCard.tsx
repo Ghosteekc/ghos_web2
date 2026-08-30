@@ -77,8 +77,8 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
     <div className="ai-deck-card ai-replay-analysis ai-replay-analysis-enter">
       <div className="ai-replay-analysis-head">
         <div className="min-w-0 flex-1">
-          <p className="ai-deck-card-title">Replay analysis</p>
-          <p className="ai-replay-filename truncate">Clash Royale replay</p>
+          <p className="ai-deck-card-title">Разбор реплея</p>
+          <p className="ai-replay-filename truncate">Запись боя Clash Royale</p>
           <div className="ai-deck-card-tags">
             <span className="ai-deck-card-tag">{formatReplayDuration(card.durationSeconds)}</span>
             {framesLabel ? <span className="ai-deck-card-tag">{framesLabel}</span> : null}

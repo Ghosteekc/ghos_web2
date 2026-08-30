@@ -56,7 +56,7 @@ export function ProHero({
                 <p className="pro-hero__title pro-hero__title--second">Анализируй больше.</p>
                 <p className="pro-hero__subtitle">
                   {expired && until
-                    ? `Подписка закончилась ${until}. Продлите доступ к премиальным инструментам.`
+                    ? `Подписка закончилась ${until}. Продли доступ к премиальным инструментам.`
                     : "Полный доступ к премиальным инструментам Ghosteek для Clash Royale."}
                 </p>
               </>
@@ -94,7 +94,7 @@ export function ProHero({
         ) : isPro ? (
           <p className="text-xs text-cr-muted leading-snug">
             {isTrial
-              ? "После пробного периода оформите подписку ниже, чтобы сохранить доступ."
+              ? "После пробного периода оформи подписку ниже, чтобы сохранить доступ."
               : "Любая покупка ниже продлевает подписку с текущей даты окончания."}
           </p>
         ) : null}

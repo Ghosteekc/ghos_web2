@@ -72,7 +72,7 @@ export function PlayerPreviewPage() {
       await navigator.clipboard.writeText(deckLink);
       setHint("Ссылка на колоду скопирована");
     } catch {
-      setHint("Откройте приложение из Telegram для импорта колоды");
+      setHint("Открой приложение из Telegram для импорта колоды");
     }
     setTimeout(() => setHint(null), 3000);
   };

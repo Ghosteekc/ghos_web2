@@ -692,7 +692,7 @@ function ChartTooltipBubbleShell({
             style={{ opacity: pinned ? 1 : 0 }}
             aria-hidden={!pinned}
           >
-            Нажмите,
+            Нажми,
             <br />
             чтобы закрыть
           </p>
@@ -810,7 +810,7 @@ function ChartTooltipLegacyShell({
         style={{ opacity: pinned ? 1 : 0 }}
         aria-hidden={!pinned}
       >
-        Нажмите, чтобы закрыть
+        Нажми, чтобы закрыть
       </p>
     </div>,
     document.body,

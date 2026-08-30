@@ -4,7 +4,7 @@ export function SupercellDisclaimer() {
   return (
     <footer className="supercell-disclaimer pt-2 pb-4 px-1">
       <p className="text-2xs leading-relaxed text-center">
-        Статистика, колоды и изображения карт загружаются из игровых данных Clash Royale по вашему
+        Статистика, колоды и изображения карт загружаются из игровых данных Clash Royale по твоему
         игровому тегу — те же данные, что доступны любому игроку в игре.
       </p>
       <p className="text-2xs leading-relaxed text-center mt-2">
