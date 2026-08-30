@@ -860,6 +860,37 @@
     cursor: pointer;
   }
 
+  .ctor-top-filter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0.35rem 0 0.5rem;
+    padding: 0.75rem 0.9rem;
+    border-radius: 0.85rem;
+    border: 1px solid rgb(var(--cr-gold) / 0.22);
+    background: rgb(var(--cr-surface) / 0.45);
+  }
+
+  .ctor-top-filter-copy {
+    min-width: 0;
+  }
+
+  .ctor-top-filter-title {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: rgb(var(--cr-text));
+    letter-spacing: 0.01em;
+  }
+
+  .ctor-top-filter-hint {
+    margin: 0.15rem 0 0;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: rgb(var(--cr-muted));
+  }
+
   .ctor-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

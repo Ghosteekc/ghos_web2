@@ -4,7 +4,7 @@ import { motionTween } from "@/motion";
 import { HelpCircle, Search, Sparkles, X } from "lucide-react";
 
 import { api } from "@/api/client";
-import { Card, Button, Loader, ErrorState, EmptyState } from "@/components/ui";
+import { Card, Button, Loader, ErrorState, EmptyState, Toggle } from "@/components/ui";
 import { CardTile } from "@/components/cards";
 import { useCardCatalog } from "@/hooks";
 import {
@@ -249,7 +249,7 @@ function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
           <li>Когда все 4 карты на месте, Ghosteek соберёт полные колоды.</li>
           <li>
             Включи «Колоды топ-игроков», чтобы сразу видеть готовые колоды из
-            топ-100 с винрейтом и числом боёв.
+            топ-500 с винрейтом и числом боёв.
           </li>
         </ul>
         <Button variant="primary" className="w-full mt-4" onClick={onClose}>
@@ -593,21 +593,24 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           <span>{tip}</span>
         </p>
 
-        <label className="ctor-slot-filter">
-          <input
-            type="checkbox"
+        <div className="ctor-top-filter">
+          <div className="ctor-top-filter-copy">
+            <p className="ctor-top-filter-title">Колоды топ-игроков</p>
+            <p className="ctor-top-filter-hint">Сопоставление с топ-500</p>
+          </div>
+          <Toggle
             checked={topDeckFilter}
-            onChange={(e) => {
+            aria-label="Колоды топ-игроков"
+            onChange={(checked) => {
               haptic.selection();
-              setTopDeckFilter(e.target.checked);
+              setTopDeckFilter(checked);
               setDecks([]);
               setAlternativeDeck(null);
               setCoreConflict(null);
               setError(null);
             }}
           />
-          <span>Колоды топ-игроков</span>
-        </label>
+        </div>
 
         <div className="ctor-stage">
         {loading ? (
@@ -723,7 +726,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
               </h3>
             </div>
             <p className="text-sm text-cr-muted">
-              Готовые колоды из топ-100, где есть выбранные карты
+              Готовые колоды из топ-500, где есть выбранные карты
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {decks.map((deck, i) => renderDeckCard(deck, i))}
