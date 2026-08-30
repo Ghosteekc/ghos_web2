@@ -153,6 +153,11 @@ export function bindTelegramViewportListeners(): () => void {
     reapplySoon();
   };
   const onActivated = () => {
+    try {
+      webApp.ready();
+    } catch {
+      /* ignore */
+    }
     requestFullscreenSafe(webApp);
     applyTelegramSafeArea();
     reapplySoon();

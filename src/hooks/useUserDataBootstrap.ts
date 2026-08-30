@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { api } from "@/api/client";
 import { cacheHas } from "@/api/cache";
+import { getTelegramInitData, isTelegramMiniApp, waitForTelegramInitData } from "@/utils/telegramAuth";
 
 const BOOTSTRAP_KEY = "ghosteek-data-bootstrap-tag";
 
@@ -17,7 +18,12 @@ export function useUserDataBootstrap() {
 
     void (async () => {
       try {
-        const profile = await api.getProfile({ fresh: true });
+        if (isTelegramMiniApp()) {
+          await waitForTelegramInitData({ maxWaitMs: 10_000, forceReady: true });
+          if (!getTelegramInitData()) return;
+        }
+
+        const profile = await api.getProfile();
         const tag = (profile.player_tag || "").trim();
         if (!tag) return;
 

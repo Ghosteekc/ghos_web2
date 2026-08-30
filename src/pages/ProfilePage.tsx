@@ -12,6 +12,7 @@ import { Profile } from "@/types";
 import { formatPlayerTag } from "@/utils";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 import { cacheHas } from "@/api/cache";
+import { onTelegramAuthReady } from "@/utils/telegramAuth";
 
 export function ProfilePage() {
   const { nameRu } = useCardCatalog();
@@ -36,6 +37,14 @@ export function ProfilePage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!error) return;
+    if (!/\bE09[01]\b/.test(error)) return;
+    return onTelegramAuthReady(() => {
+      void load();
+    });
+  }, [error, load]);
 
   if (loading) {
     return (

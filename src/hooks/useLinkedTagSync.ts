@@ -1,5 +1,11 @@
 import { useEffect, useRef } from "react";
 import { api } from "@/api/client";
+import {
+  getTelegramInitData,
+  isTelegramMiniApp,
+  onTelegramAuthReady,
+  waitForTelegramInitData,
+} from "@/utils/telegramAuth";
 
 /**
  * After bot /link (or Settings unlink + re-link), Mini App may still hold
@@ -13,16 +19,26 @@ export function useLinkedTagSync() {
     const check = () => {
       if (busy.current) return;
       if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
-      busy.current = true;
-      void api
-        .getProfile({ fresh: true })
-        .catch(() => undefined)
-        .finally(() => {
+
+      void (async () => {
+        if (isTelegramMiniApp() && !getTelegramInitData()) {
+          await waitForTelegramInitData({ maxWaitMs: 5000, forceReady: true });
+          if (!getTelegramInitData()) return;
+        }
+        if (busy.current) return;
+        busy.current = true;
+        try {
+          await api.getProfile({ fresh: true });
+        } catch {
+          /* keep cached profile */
+        } finally {
           busy.current = false;
-        });
+        }
+      })();
     };
 
     check();
+    const offAuth = onTelegramAuthReady(check);
     const onFocus = () => check();
     const onVis = () => {
       if (document.visibilityState === "visible") check();
@@ -30,6 +46,7 @@ export function useLinkedTagSync() {
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVis);
     return () => {
+      offAuth();
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVis);
     };

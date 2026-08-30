@@ -18,6 +18,7 @@ import {
   bindTelegramViewportListeners,
   bootstrapTelegramViewport,
 } from "@/utils/telegramViewport";
+import { bindTelegramAuthListeners } from "@/utils/telegramAuth";
 
 export function Layout() {
   useGlobalButtonHaptics();
@@ -28,7 +29,12 @@ export function Layout() {
 
   useEffect(() => {
     bootstrapTelegramViewport();
-    return bindTelegramViewportListeners();
+    const offViewport = bindTelegramViewportListeners();
+    const offAuth = bindTelegramAuthListeners();
+    return () => {
+      offViewport();
+      offAuth();
+    };
   }, []);
 
   return (

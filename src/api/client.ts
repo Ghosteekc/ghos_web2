@@ -49,6 +49,11 @@ import {
 import { cacheGet, cacheSet, cacheInvalidate, cacheHas, inflight, TTL, sleep, lsGet, lsSet, lsClearAll, applyLinkedPlayerTag } from "./cache";
 import { setLastSyncAt } from "@/utils/lastSync";
 import { toUserFacingError } from "@/utils/userError";
+import {
+  getTelegramInitData,
+  isTelegramMiniApp,
+  waitForTelegramInitData,
+} from "@/utils/telegramAuth";
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? "").trim();
 
@@ -66,6 +71,9 @@ function invalidateMetaCache(): void {
 const STATS_MEM_KEY = "stats-v8";
 const STATS_LS_KEY = "stats-overview-v4";
 const STATS_STALE_GRACE_MS = 7 * 24 * 60 * 60_000;
+const PROFILE_MEM_KEY = "profile-v8";
+const PROFILE_LS_KEY = "profile-me-v1";
+const PROFILE_STALE_GRACE_MS = 7 * 24 * 60 * 60_000;
 
 function apiUrl(path: string): string {
   return `${API_BASE}${path}`;
@@ -144,26 +152,9 @@ export function isProRequiredError(err: unknown): err is ApiError {
 
 
 
-function getInitData(): string {
-
-  return typeof window !== "undefined" ? window.Telegram?.WebApp?.initData ?? "" : "";
-
+function isAuthErrorCode(code: string): boolean {
+  return code === "E090" || code === "E091";
 }
-
-
-
-/** Telegram sometimes fills initData shortly after WebApp.ready — avoid racing the first fetch. */
-async function waitForInitData(maxWaitMs = 3000): Promise<void> {
-  if (getInitData()) return;
-  if (typeof window === "undefined" || !window.Telegram?.WebApp) return;
-  const deadline = Date.now() + maxWaitMs;
-  while (Date.now() < deadline) {
-    await sleep(50);
-    if (getInitData()) return;
-  }
-}
-
-
 
 function isTransientErrorCode(code: string): boolean {
   return code === "E100" || code === "E101" || code === "E102" || code === "E103";
@@ -189,7 +180,7 @@ function buildRequestHeaders(extra?: HeadersInit): HeadersInit {
 
   const headers: Record<string, string> = {
 
-    "X-Telegram-Init-Data": getInitData(),
+    "X-Telegram-Init-Data": getTelegramInitData(),
 
     "Content-Type": "application/json",
 
@@ -228,7 +219,17 @@ function isRetryable(status: number) {
 
 
 async function requestOnce<T>(path: string, options?: RequestInit): Promise<T> {
-  await waitForInitData();
+  await waitForTelegramInitData({ maxWaitMs: 10_000, forceReady: true });
+  if (isTelegramMiniApp() && !getTelegramInitData()) {
+    throw new ApiError(
+      formatApiError(
+        "Не удалось войти в приложение. Перезапустите Mini App из Telegram.",
+        "E090",
+      ),
+      401,
+      "E090",
+    );
+  }
 
   let res: Response;
 
@@ -340,6 +341,18 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     } catch (e) {
 
       lastError = e instanceof ApiError ? e : new ApiError(formatApiError(DEFAULT_UNAVAILABLE, "E099"), 0, "E099");
+
+      if (
+        isAuthErrorCode(lastError.code) &&
+        isTelegramMiniApp() &&
+        attempt < maxAttempts - 1
+      ) {
+        await waitForTelegramInitData({
+          maxWaitMs: 4000 + attempt * 2000,
+          forceReady: true,
+        });
+        continue;
+      }
 
       if (isRetryableError(lastError) && attempt < maxAttempts - 1) {
 
@@ -620,13 +633,13 @@ export type ReplayAnalyzeSuccess = {
 };
 
 async function uploadReplayVideo(file: File): Promise<ReplayAnalyzeSuccess> {
-  await waitForInitData();
+  await waitForTelegramInitData({ maxWaitMs: 10_000, forceReady: true });
 
   const form = new FormData();
   form.append("file", file, file.name);
 
   const headers: Record<string, string> = {
-    "X-Telegram-Init-Data": getInitData(),
+    "X-Telegram-Init-Data": getTelegramInitData(),
   };
   if (usesDirectTunnel()) {
     headers["Bypass-Tunnel-Reminder"] = "true";
@@ -667,8 +680,14 @@ export const api = {
 
 
   getProfile: async (opts?: { fresh?: boolean }) => {
-    if (opts?.fresh) cacheInvalidate("profile-v8");
-    const profile = await cachedGet<Profile>("profile-v8", "/api/me", TTL.profile);
+    if (opts?.fresh) cacheInvalidate(PROFILE_MEM_KEY);
+    const profile = await cachedGetPersisted<Profile>(
+      PROFILE_MEM_KEY,
+      PROFILE_LS_KEY,
+      "/api/me",
+      TTL.profile,
+      PROFILE_STALE_GRACE_MS,
+    );
     applyLinkedPlayerTag(profile.player_tag);
     return profile;
   },
@@ -1048,9 +1067,9 @@ export const api = {
     if (!safeId || /[/\\]/.test(safeId) || safeId.includes("..") || safeId.length > 64) {
       throw new ApiError(formatApiError("Evidence not found", "E404"), 404, "E404");
     }
-    await waitForInitData();
+    await waitForTelegramInitData({ maxWaitMs: 10_000, forceReady: true });
     const headers: Record<string, string> = {
-      "X-Telegram-Init-Data": getInitData(),
+      "X-Telegram-Init-Data": getTelegramInitData(),
     };
     if (usesDirectTunnel()) {
       headers["Bypass-Tunnel-Reminder"] = "true";
