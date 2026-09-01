@@ -219,19 +219,21 @@
     color: #f0c766;
     background: linear-gradient(145deg, rgb(32 62 114 / 0.9), rgb(4 12 36 / 0.9));
     box-shadow: 0 0 24px rgb(72 129 255 / 0.18);
-    font-family: var(--font-cr, sans-serif);
-    font-size: 3rem;
-    font-weight: 800;
-    line-height: 1;
     text-shadow: none;
+  }
+
+  .startup-screen__mark svg {
+    width: 2.35rem;
+    height: 2.35rem;
   }
 
   .startup-screen__title {
     margin: 0;
-    font-family: var(--font-cr, sans-serif);
-    font-size: 1rem;
-    font-weight: 800;
-    letter-spacing: 0.12em;
+    font-family: "Supercell Magic", "SC CCBackBeat", sans-serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    letter-spacing: 0.055em;
+    font-synthesis: none;
     text-shadow: none;
     will-change: transform, opacity;
   }

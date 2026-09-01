@@ -12,7 +12,7 @@ interface TabTransitionProps {
 
 /** Fade при смене вкладки внутри страницы (Framer — надёжный restart на mobile WebView). */
 export function TabTransition({ tabKey, children, className }: TabTransitionProps) {
-  const motionConfig = useEnterMotionConfig();
+  const motionConfig = useEnterMotionConfig("tab");
 
   return (
     <motion.div
@@ -29,7 +29,7 @@ export function TabTransition({ tabKey, children, className }: TabTransitionProp
 
 /** Enter после lazy/Suspense — монтируется вместе с контентом панели. */
 export function TabContentEnter({ children, className }: { children: ReactNode; className?: string }) {
-  const motionConfig = useEnterMotionConfig();
+  const motionConfig = useEnterMotionConfig("tab");
 
   return (
     <motion.div

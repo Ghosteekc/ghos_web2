@@ -22,8 +22,8 @@ export const MOTION_EASE = {
 
 export const MOTION_ENTER = {
   /** Page / tab soft slide from bottom (px) */
-  pageY: 12,
-  tabY: 12,
+  pageY: 14,
+  tabY: 10,
   pressScale: 0.98,
   pressScaleDeep: 0.97,
   cardScaleFrom: 0.96,

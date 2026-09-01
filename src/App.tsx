@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState } from "react";
-import { AnimatePresence, MotionConfig, motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/layout/Layout";
 import { Loader } from "@/components/ui";
@@ -42,7 +42,7 @@ export default function App() {
   const [startupVisible, setStartupVisible] = useState(true);
 
   return (
-    <MotionConfig reducedMotion="user">
+    <>
     <motion.div
       className="app-boot-content"
       initial={false}
@@ -169,6 +169,6 @@ export default function App() {
     <AnimatePresence>
       {startupVisible ? <StartupScreen onComplete={() => setStartupVisible(false)} /> : null}
     </AnimatePresence>
-    </MotionConfig>
+    </>
   );
 }

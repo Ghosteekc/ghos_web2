@@ -10,7 +10,7 @@ import { useEnterMotionConfig } from "./useEnterMotionConfig";
 export function PageEnter() {
   const location = useLocation();
   const outlet = useOutlet();
-  const motionConfig = useEnterMotionConfig();
+  const motionConfig = useEnterMotionConfig("page");
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
@@ -22,7 +22,7 @@ export function PageEnter() {
   return (
     <div className="page-motion-stage">
       <motion.div
-        key={location.pathname}
+        key={`${location.pathname}${location.search}`}
         className="page-motion-panel"
         initial={motionConfig.initial}
         animate={motionConfig.animate}
