@@ -22,6 +22,7 @@ import { haptic } from "@/utils/hapticManager";
 import { translate } from "@/i18n";
 import { formatLastSyncLabel, getLastSyncAt, LAST_SYNC_EVENT } from "@/utils/lastSync";
 import { formatPlayerTag } from "@/utils";
+import { ContentReveal } from "@/motion";
 
 export function SettingsPage() {
   const { tg, showAlert, showConfirm } = useTelegram();
@@ -226,16 +227,7 @@ export function SettingsPage() {
     }
   };
 
-  if (settingsLoading || profileLoading) {
-    return (
-      <div className="space-y-6">
-        <PageHeader title="Настройки" />
-        <Loader variant="section" />
-      </div>
-    );
-  }
-
-  return (
+  const content = (
     <div className="space-y-6">
       <PageHeader title="Настройки" />
 
@@ -430,6 +422,15 @@ export function SettingsPage() {
         Ghosteek CR Assistant v1.0
       </p>
     </div>
+  );
+
+  return (
+    <ContentReveal
+      loading={settingsLoading || profileLoading}
+      loader={<div className="space-y-6"><PageHeader title="Настройки" /><Loader variant="section" /></div>}
+    >
+      {content}
+    </ContentReveal>
   );
 }
 

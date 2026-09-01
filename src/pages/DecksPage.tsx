@@ -23,7 +23,7 @@ import type { Deck, DeckCard as DeckCardData, RandomDeck, TopPlayer, TopPlayersD
 import { usePageRefresh, useTelegram } from "@/hooks";
 import { deckFromCardNames, deckToComparePath } from "@/utils/deckActions";
 import { contextFromConstructor, openGhosteekAi } from "@/utils/aiPageContext";
-import { TabTransition, TabContentEnter } from "@/motion";
+import { ContentReveal, TabTransition, TabContentEnter } from "@/motion";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
 
 import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
@@ -215,17 +215,6 @@ export function DecksPage() {
 
       {error && filter !== "meta" && <ErrorState title={error} />}
 
-      {loading &&
-      filter !== DECK_HOME &&
-      filter !== "random" &&
-      filter !== "top" &&
-      filter !== "arena" &&
-      filter !== "constructor" &&
-      filter !== "favorites" &&
-      filter !== "meta" ? (
-        <Loader variant="section" />
-      ) : null}
-
       {filter === DECK_HOME ? (
         <TabTransition tabKey={DECK_HOME}>
           <DeckWinratesPanel onAnalyze={setPassportDeck} />
@@ -341,6 +330,7 @@ export function DecksPage() {
       ) : null}
 
       {filter === "mine" ? (
+        <ContentReveal loading={loading} loader={<Loader variant="section" />} contentMotion="none">
         <TabTransition tabKey="mine">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
           {decks.map((deck, i) => {
@@ -386,6 +376,7 @@ export function DecksPage() {
           ) : null}
         </div>
         </TabTransition>
+        </ContentReveal>
       ) : null}
 
       <DeckPassport deck={passportDeck} onClose={() => setPassportDeck(null)} />

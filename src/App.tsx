@@ -1,10 +1,11 @@
-import { lazy, Suspense } from "react";
-import { MotionConfig } from "framer-motion";
+import { lazy, Suspense, useState } from "react";
+import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/layout/Layout";
 import { Loader } from "@/components/ui";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { StartupScreen } from "@/components/startup/StartupScreen";
 
 const AnalyticsPage = lazy(() =>
   import("@/pages/AnalyticsPage").then((m) => ({ default: m.AnalyticsPage })),
@@ -38,8 +39,16 @@ function LazyPage({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  const [startupVisible, setStartupVisible] = useState(true);
+
   return (
-    <MotionConfig reducedMotion="never">
+    <MotionConfig reducedMotion="user">
+    <motion.div
+      className="app-boot-content"
+      initial={false}
+      animate={{ opacity: startupVisible ? 0 : 1 }}
+      transition={{ duration: 0.22, ease: [0.22, 0.08, 0.24, 1] }}
+    >
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
@@ -156,6 +165,10 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    </motion.div>
+    <AnimatePresence>
+      {startupVisible ? <StartupScreen onComplete={() => setStartupVisible(false)} /> : null}
+    </AnimatePresence>
     </MotionConfig>
   );
 }

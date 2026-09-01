@@ -3,5 +3,6 @@ export { motionTween, navBubbleTween, navPressSpring } from "./framer";
 export { applyMotionTokens } from "./bootstrap";
 export { PageEnter } from "./PageEnter";
 export { TabTransition, TabContentEnter } from "./TabTransition";
+export { ContentReveal } from "./ContentReveal";
 export { useEnterMotionConfig } from "./useEnterMotionConfig";
 export { usePageMotionConfig } from "./usePageMotionConfig";

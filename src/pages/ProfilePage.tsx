@@ -13,6 +13,7 @@ import { formatPlayerTag } from "@/utils";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
 import { cacheHas } from "@/api/cache";
 import { onTelegramAuthReady } from "@/utils/telegramAuth";
+import { ContentReveal } from "@/motion";
 
 export function ProfilePage() {
   const { nameRu } = useCardCatalog();
@@ -46,21 +47,12 @@ export function ProfilePage() {
     });
   }, [error, load]);
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <PageHeader title="Профиль" />
-        <Loader variant="section" />
-      </div>
-    );
-  }
-
   const league =
     profile?.player_tag != null
       ? resolveLeagueInfo(profile.league, profile.trophies)
       : null;
 
-  return (
+  const content = (
     <div className="space-y-6">
       <PageHeader
         title="Профиль"
@@ -137,6 +129,15 @@ export function ProfilePage() {
 
       <SupercellDisclaimer />
     </div>
+  );
+
+  return (
+    <ContentReveal
+      loading={loading}
+      loader={<div className="space-y-6"><PageHeader title="Профиль" /><Loader variant="section" /></div>}
+    >
+      {content}
+    </ContentReveal>
   );
 }
 

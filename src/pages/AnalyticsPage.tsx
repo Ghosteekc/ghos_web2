@@ -27,7 +27,7 @@ function bootstrapStats(): StatsOverview | null {
   return cacheGet<StatsOverview>(STATS_MEM_KEY) ?? lsGet<StatsOverview>(STATS_LS_KEY, TTL.stats, STATS_STALE_GRACE_MS);
 }
 import { usePageRefresh } from "@/hooks";
-import { TabTransition } from "@/motion";
+import { ContentReveal, TabTransition } from "@/motion";
 import { OpponentsPanel, DeckToolsPanel, LossAnalysisPanel } from "@/components/analytics/AnalyticsExtras";
 import { RecommendationsPanel } from "@/components/analytics/recommendations";
 import { ChartGlassTooltipShell, ChartTooltipAnchor, useChartScrub } from "@/components/charts/ChartGlassTooltip";
@@ -172,16 +172,7 @@ export function AnalyticsPage() {
     }
   };
 
-  if (loading && section === null) {
-    return (
-      <div className="space-y-6">
-        <PageHeader title="Аналитика" />
-        <Loader variant="section" />
-      </div>
-    );
-  }
-
-  if ((error || !stats) && section === null) {
+  if (!loading && (error || !stats) && section === null) {
     if (isNoBattlesError(errorCode ? { code: errorCode, message: error ?? "" } : error)) {
       return <NoBattlesHint />;
     }
@@ -194,7 +185,7 @@ export function AnalyticsPage() {
     );
   }
 
-  return (
+  const content = (
     <div className="space-y-6">
       <PageHeader
         title="Аналитика"
@@ -305,6 +296,18 @@ export function AnalyticsPage() {
 
       {section !== null && <ScrollToTopButton />}
     </div>
+  );
+
+  if (section !== null) return content;
+
+  return (
+    <ContentReveal
+      loading={loading}
+      loader={<div className="space-y-6"><PageHeader title="Аналитика" /><Loader variant="section" /></div>}
+      contentMotion="none"
+    >
+      {content}
+    </ContentReveal>
   );
 }
 

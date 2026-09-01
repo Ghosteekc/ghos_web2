@@ -11,7 +11,7 @@ import { cacheGet, cacheHas } from "@/api/cache";
 import { BattleSummary } from "@/types";
 import { battleDetailPath, cn } from "@/utils";
 import { usePageRefresh } from "@/hooks";
-import { TabTransition } from "@/motion";
+import { ContentReveal, TabTransition } from "@/motion";
 
 type BattlesPayload = {
   battles: BattleSummary[];
@@ -127,9 +127,7 @@ export function BattlesPage() {
 
       {error && <ErrorState title={error} />}
 
-      {loading ? (
-        <Loader variant="section" />
-      ) : (
+      <ContentReveal loading={loading} loader={<Loader variant="section" />} contentMotion="none">
         <TabTransition tabKey={filter} className="space-y-4 battles-list">
           {filtered.map((battle) => (
             <BattleCardSimple
@@ -157,7 +155,7 @@ export function BattlesPage() {
             )
           )}
         </TabTransition>
-      )}
+      </ContentReveal>
 
       {!loading && filtered.length > 0 && <ScrollToTopButton />}
     </div>
