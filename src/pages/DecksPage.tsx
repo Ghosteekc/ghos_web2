@@ -49,6 +49,7 @@ function TabSuspense({ children }: { children: React.ReactNode }) {
 }
 
 const DECK_HOME = "stats";
+const TOP_PLAYERS_PAGE_SIZE = 8;
 
 const DECK_NAV = [
   { id: "top", label: DECK_FILTER_LABELS.top, emoji: "👑" },
@@ -407,6 +408,7 @@ function TopPlayersPanel({
   );
   const [loading, setLoading] = useState(() => !cacheHas("top-players-v4"));
   const [error, setError] = useState<string | null>(null);
+  const [visiblePlayerCount, setVisiblePlayerCount] = useState(TOP_PLAYERS_PAGE_SIZE);
 
   const load = useCallback(async () => {
     if (!cacheHas("top-players-v4")) {
@@ -417,6 +419,7 @@ function TopPlayersPanel({
       const data = await api.getTopPlayers();
       setPlayers(data.players ?? []);
       setUpdatedAt(data.updated_at ?? null);
+      setVisiblePlayerCount(TOP_PLAYERS_PAGE_SIZE);
     } catch (e) {
       setPlayers([]);
       setError(e instanceof ApiError ? e.message : "Не удалось загрузить топ игроков");
@@ -463,14 +466,16 @@ function TopPlayersPanel({
   }
 
   const updatedLabel = formatUpdatedAt(updatedAt);
+  const visiblePlayers = players.slice(0, visiblePlayerCount);
+  const hasMorePlayers = visiblePlayerCount < players.length;
 
   return (
     <div className="space-y-4">
       {updatedLabel && (
         <p className="text-sm text-cr-muted text-center">Обновлено: {updatedLabel}</p>
       )}
-      {players.map((player, i) => (
-        <div key={player.player_tag} className="ui-enter" style={{ animationDelay: `${i * 40}ms` }}>
+      {visiblePlayers.map((player) => (
+        <div key={player.player_tag}>
           <Card noMotion>
             <div className="flex items-start justify-between gap-2 mb-2">
               <div className="min-w-0">
@@ -586,6 +591,20 @@ function TopPlayersPanel({
           </Card>
         </div>
       ))}
+      {hasMorePlayers ? (
+        <div className="pt-1 text-center">
+          <Button
+            variant="secondary"
+            className="!px-5"
+            onClick={() => setVisiblePlayerCount((count) => Math.min(count + TOP_PLAYERS_PAGE_SIZE, players.length))}
+          >
+            Показать ещё {Math.min(TOP_PLAYERS_PAGE_SIZE, players.length - visiblePlayerCount)}
+          </Button>
+          <p className="mt-2 text-xs text-cr-muted">
+            Показано {visiblePlayers.length} из {players.length}
+          </p>
+        </div>
+      ) : null}
     </div>
   );
 }
