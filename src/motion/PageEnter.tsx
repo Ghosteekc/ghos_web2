@@ -19,7 +19,8 @@ export function PageEnter() {
   return (
     <div className="page-motion-stage">
       <div
-        key={location.key}
+        // Query params switch tabs in-place; only a pathname change is a page transition.
+        key={location.pathname}
         className="page-motion-panel page-enter"
       >
         {outlet}
