@@ -49,7 +49,7 @@ function TabSuspense({ children }: { children: React.ReactNode }) {
 }
 
 const DECK_HOME = "stats";
-const TOP_PLAYERS_PAGE_SIZE = 8;
+const TOP_PLAYERS_BATCH_SIZE = 10;
 
 const DECK_NAV = [
   { id: "top", label: DECK_FILTER_LABELS.top, emoji: "👑" },
@@ -408,7 +408,8 @@ function TopPlayersPanel({
   );
   const [loading, setLoading] = useState(() => !cacheHas("top-players-v4"));
   const [error, setError] = useState<string | null>(null);
-  const [visiblePlayerCount, setVisiblePlayerCount] = useState(TOP_PLAYERS_PAGE_SIZE);
+  const [visiblePlayerCount, setVisiblePlayerCount] = useState(TOP_PLAYERS_BATCH_SIZE);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const load = useCallback(async () => {
     if (!cacheHas("top-players-v4")) {
@@ -419,7 +420,7 @@ function TopPlayersPanel({
       const data = await api.getTopPlayers();
       setPlayers(data.players ?? []);
       setUpdatedAt(data.updated_at ?? null);
-      setVisiblePlayerCount(TOP_PLAYERS_PAGE_SIZE);
+      setVisiblePlayerCount(TOP_PLAYERS_BATCH_SIZE);
     } catch (e) {
       setPlayers([]);
       setError(e instanceof ApiError ? e.message : "Не удалось загрузить топ игроков");
@@ -447,6 +448,33 @@ function TopPlayersPanel({
     }
   };
 
+  const updatedLabel = formatUpdatedAt(updatedAt);
+  const visiblePlayers = players.slice(0, visiblePlayerCount);
+  const hasMorePlayers = visiblePlayerCount < players.length;
+
+  useEffect(() => {
+    const sentinel = loadMoreRef.current;
+    if (!sentinel || !hasMorePlayers) return;
+
+    const loadNextBatch = () => {
+      setVisiblePlayerCount((count) => Math.min(count + TOP_PLAYERS_BATCH_SIZE, players.length));
+    };
+
+    if (!("IntersectionObserver" in window)) {
+      loadNextBatch();
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) loadNextBatch();
+      },
+      { rootMargin: "600px 0px", threshold: 0.01 },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMorePlayers, players.length, visiblePlayerCount]);
+
   if (loading) return <Loader variant="section" />;
 
   if (error) {
@@ -464,10 +492,6 @@ function TopPlayersPanel({
       />
     );
   }
-
-  const updatedLabel = formatUpdatedAt(updatedAt);
-  const visiblePlayers = players.slice(0, visiblePlayerCount);
-  const hasMorePlayers = visiblePlayerCount < players.length;
 
   return (
     <div className="space-y-4">
@@ -591,20 +615,7 @@ function TopPlayersPanel({
           </Card>
         </div>
       ))}
-      {hasMorePlayers ? (
-        <div className="pt-1 text-center">
-          <Button
-            variant="secondary"
-            className="!px-5"
-            onClick={() => setVisiblePlayerCount((count) => Math.min(count + TOP_PLAYERS_PAGE_SIZE, players.length))}
-          >
-            Показать ещё {Math.min(TOP_PLAYERS_PAGE_SIZE, players.length - visiblePlayerCount)}
-          </Button>
-          <p className="mt-2 text-xs text-cr-muted">
-            Показано {visiblePlayers.length} из {players.length}
-          </p>
-        </div>
-      ) : null}
+      {hasMorePlayers ? <div ref={loadMoreRef} className="h-px" aria-hidden /> : null}
     </div>
   );
 }
