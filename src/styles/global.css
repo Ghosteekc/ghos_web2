@@ -2888,7 +2888,7 @@
   @keyframes page-enter {
     from {
       opacity: 0;
-      transform: translate3d(0, var(--perf-enter-y, 8px), 0);
+      transform: translate3d(0, 14px, 0);
     }
     to {
       opacity: 1;
@@ -2903,7 +2903,7 @@
   @keyframes tab-enter {
     from {
       opacity: 0;
-      transform: translate3d(0, 6px, 0);
+      transform: translate3d(0, 10px, 0);
     }
     to {
       opacity: 1;
@@ -2912,7 +2912,7 @@
   }
 
   .tab-enter {
-    animation: tab-enter var(--ui-duration-fast) var(--ui-ease-out) both;
+    animation: tab-enter var(--ui-duration) var(--ui-ease-out) both;
   }
 
   /* Framer tab/page panels — не дублировать ui-enter на Card внутри */

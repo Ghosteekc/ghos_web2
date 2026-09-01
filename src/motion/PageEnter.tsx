@@ -1,7 +1,5 @@
-import { motion } from "framer-motion";
 import { useLayoutEffect } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
-import { useEnterMotionConfig } from "./useEnterMotionConfig";
 
 /**
  * Плавное появление при смене route (bottom nav и вложенные страницы).
@@ -10,7 +8,6 @@ import { useEnterMotionConfig } from "./useEnterMotionConfig";
 export function PageEnter() {
   const location = useLocation();
   const outlet = useOutlet();
-  const motionConfig = useEnterMotionConfig("page");
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
@@ -21,15 +18,12 @@ export function PageEnter() {
 
   return (
     <div className="page-motion-stage">
-      <motion.div
-        key={`${location.pathname}${location.search}`}
-        className="page-motion-panel"
-        initial={motionConfig.initial}
-        animate={motionConfig.animate}
-        transition={motionConfig.transition}
+      <div
+        key={location.key}
+        className="page-motion-panel page-enter"
       >
         {outlet}
-      </motion.div>
+      </div>
     </div>
   );
 }
