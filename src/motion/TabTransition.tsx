@@ -36,4 +36,3 @@ export function TabTransition({ tabKey, children, className }: TabTransitionProp
     </AnimatePresence>
   );
 }
-
