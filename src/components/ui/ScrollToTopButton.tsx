@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { ArrowUp } from "lucide-react";
 import { cn } from "@/utils";
 
@@ -32,7 +33,7 @@ export function ScrollToTopButton({ threshold = 320, className }: ScrollToTopBut
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  return (
+  return createPortal(
     <button
       type="button"
       aria-label="Наверх"
@@ -45,6 +46,7 @@ export function ScrollToTopButton({ threshold = 320, className }: ScrollToTopBut
       )}
     >
       <ArrowUp className="h-5 w-5" aria-hidden />
-    </button>
+    </button>,
+    document.body,
   );
 }
