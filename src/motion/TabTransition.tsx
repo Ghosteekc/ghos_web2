@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { cn } from "@/utils";
+import { isForceMotionEnabled } from "@/perf/bootstrap";
 import { MOTION_EASE, MOTION_MS } from "./tokens";
 
 interface TabTransitionProps {
@@ -17,7 +18,7 @@ const easeOut = [...MOTION_EASE.out] as [number, number, number, number];
  * then reveals the new panel. The parent must remain mounted across tab keys.
  */
 export function TabTransition({ tabKey, children, className }: TabTransitionProps) {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useReducedMotion() && !isForceMotionEnabled();
   const duration = (reducedMotion ? MOTION_MS.fast : MOTION_MS.normal) / 1000;
 
   return (

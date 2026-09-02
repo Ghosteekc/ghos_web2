@@ -23,7 +23,7 @@ import type { Deck, DeckCard as DeckCardData, RandomDeck, TopPlayer, TopPlayersD
 import { usePageRefresh, useTelegram } from "@/hooks";
 import { deckFromCardNames, deckToComparePath } from "@/utils/deckActions";
 import { contextFromConstructor, openGhosteekAi } from "@/utils/aiPageContext";
-import { ContentReveal, TabTransition, TabContentEnter } from "@/motion";
+import { ContentReveal, TabTransition } from "@/motion";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
 
 import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
@@ -225,15 +225,13 @@ export function DecksPage() {
 
       {filter === "favorites" ? (
         <TabSuspense>
-          <TabContentEnter>
-            <FavoritesPanel
-              onAnalyze={setPassportDeck}
-              onCompare={(deck) => {
-                const path = deckToComparePath(deck, "favorites");
-                if (path) navigate(path);
-              }}
-            />
-          </TabContentEnter>
+          <FavoritesPanel
+            onAnalyze={setPassportDeck}
+            onCompare={(deck) => {
+              const path = deckToComparePath(deck, "favorites");
+              if (path) navigate(path);
+            }}
+          />
         </TabSuspense>
       ) : null}
 
@@ -271,8 +269,7 @@ export function DecksPage() {
 
       {filter === "constructor" ? (
         <TabSuspense>
-          <TabContentEnter>
-            <ConstructorPanel
+          <ConstructorPanel
               renderDeckCard={(deck, i) => (
                 <div key={`${deck.id}-${deck.name}`} className="w-full">
                   <DeckCard
@@ -296,15 +293,13 @@ export function DecksPage() {
                   />
                 </div>
               )}
-            />
-          </TabContentEnter>
+          />
         </TabSuspense>
       ) : null}
 
       {filter === "arena" ? (
         <TabSuspense>
-          <TabContentEnter>
-            <ArenaDecksPanel
+          <ArenaDecksPanel
               renderDeck={(deck, i, onCompare) => (
                 <DeckCard
                   deck={deck}
@@ -318,16 +313,13 @@ export function DecksPage() {
                   onAnalyze={() => setPassportDeck(deck)}
                 />
               )}
-            />
-          </TabContentEnter>
+          />
         </TabSuspense>
       ) : null}
 
       {filter === "meta" ? (
         <TabSuspense>
-          <TabContentEnter>
-            <MetaPanel />
-          </TabContentEnter>
+          <MetaPanel />
         </TabSuspense>
       ) : null}
 

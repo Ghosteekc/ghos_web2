@@ -11,6 +11,7 @@ import { derivePopularityTrend, type PopularityTrend } from "@/utils/metaTrend";
 import { usePageRefresh, useTelegram } from "@/hooks";
 import type { DeckCard, MetaLadderData, MetaLadderDeck, MetaWarData, MetaWarDeck } from "@/types";
 import { MetaSparkline } from "./MetaSparkline";
+import { ContentReveal, TabTransition } from "@/motion";
 
 type MetaTab = "league" | "trophies" | "clan-wars";
 
@@ -280,6 +281,15 @@ export function MetaPanel() {
     window.setTimeout(() => setActionHint(null), 3000);
   }, []);
 
+  const selectTab = (nextTab: MetaTab) => {
+    if (nextTab === tab) return;
+    // Start the local handoff synchronously so an old category never flashes
+    // while the request for the newly selected category is beginning.
+    setLoading(true);
+    setError(null);
+    setTab(nextTab);
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -319,7 +329,7 @@ export function MetaPanel() {
           <button
             key={item.id}
             type="button"
-            onClick={() => setTab(item.id)}
+            onClick={() => selectTab(item.id)}
             className={cn("filter-tab", tab === item.id && "filter-tab--active pixel-btn--active")}
             aria-pressed={tab === item.id}
           >
@@ -328,50 +338,53 @@ export function MetaPanel() {
         ))}
       </div>
 
-      {sampleNote ? <p className="text-xs text-cr-muted leading-snug">{sampleNote}</p> : null}
-      {updatedLabel ? <p className="text-xs text-cr-muted">Обновлено: {updatedLabel}</p> : null}
-      {actionHint ? (
-        <Card className="text-center text-cr-win text-sm py-2">{actionHint}</Card>
-      ) : null}
-      {!loading && !error && statusMessage && tab !== "clan-wars" && ladder && ladder.decks.length ? (
-        <p className="text-xs text-cr-muted">{statusMessage}</p>
-      ) : null}
+      <TabTransition tabKey={tab} className="space-y-4">
+        {!loading && sampleNote ? <p className="text-xs text-cr-muted leading-snug">{sampleNote}</p> : null}
+        {!loading && updatedLabel ? <p className="text-xs text-cr-muted">Обновлено: {updatedLabel}</p> : null}
+        {actionHint ? (
+          <Card className="text-center text-cr-win text-sm py-2">{actionHint}</Card>
+        ) : null}
+        {!loading && !error && statusMessage && tab !== "clan-wars" && ladder && ladder.decks.length ? (
+          <p className="text-xs text-cr-muted">{statusMessage}</p>
+        ) : null}
 
-      {loading ? <Loader variant="section" /> : null}
-      {error ? <ErrorState title={error} /> : null}
+        <ContentReveal loading={loading} loader={<Loader variant="section" />}>
+          {error ? <ErrorState title={error} /> : null}
 
-      {!loading && !error && tab !== "clan-wars" && ladder ? (
-        ladder.decks.length ? (
-          <div className="space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {ladder.decks.map((deck, index) => (
-                <LadderCard key={deck.deck_hash} deck={deck} index={index} onMessage={showActionHint} />
-              ))}
-            </div>
-            <MetaProCta lockedCount={ladder.pro_locked_count ?? 0} />
-          </div>
-        ) : (
-          <EmptyState title={statusMessage || ladder?.message || "Недостаточно данных для формирования актуальной меты."} />
-        )
-      ) : null}
+          {!error && tab !== "clan-wars" && ladder ? (
+            ladder.decks.length ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {ladder.decks.map((deck, index) => (
+                    <LadderCard key={deck.deck_hash} deck={deck} index={index} onMessage={showActionHint} />
+                  ))}
+                </div>
+                <MetaProCta lockedCount={ladder.pro_locked_count ?? 0} />
+              </div>
+            ) : (
+              <EmptyState title={statusMessage || ladder?.message || "Недостаточно данных для формирования актуальной меты."} />
+            )
+          ) : null}
 
-      {!loading && !error && tab === "clan-wars" && wars ? (
-        wars.decks.length ? (
-          <div className="space-y-3">
-            {wars.source ? (
-              <p className="text-xs text-cr-muted">Источник: {wars.source}</p>
-            ) : null}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {wars.decks.map((deck, index) => (
-                <WarCard key={`${deck.rank}-${deck.name}`} deck={deck} index={index} onMessage={showActionHint} />
-              ))}
-            </div>
-            <MetaProCta lockedCount={wars.pro_locked_count ?? 0} />
-          </div>
-        ) : (
-          <EmptyState title={statusMessage || "Готовые колоды КВ пока не загружены."} />
-        )
-      ) : null}
+          {!error && tab === "clan-wars" && wars ? (
+            wars.decks.length ? (
+              <div className="space-y-3">
+                {wars.source ? (
+                  <p className="text-xs text-cr-muted">Источник: {wars.source}</p>
+                ) : null}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {wars.decks.map((deck, index) => (
+                    <WarCard key={`${deck.rank}-${deck.name}`} deck={deck} index={index} onMessage={showActionHint} />
+                  ))}
+                </div>
+                <MetaProCta lockedCount={wars.pro_locked_count ?? 0} />
+              </div>
+            ) : (
+              <EmptyState title={statusMessage || "Готовые колоды КВ пока не загружены."} />
+            )
+          ) : null}
+        </ContentReveal>
+      </TabTransition>
     </div>
   );
 }

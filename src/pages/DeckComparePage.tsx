@@ -8,6 +8,7 @@ import type { DeckCompareCardNote, DeckCompareResult } from "@/types";
 import { usePageRefresh } from "@/hooks";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
 import { contextFromMatchup, openGhosteekAi } from "@/utils/aiPageContext";
+import { TabTransition } from "@/motion";
 
 type TabId = "overview" | "user" | "reference";
 
@@ -238,6 +239,7 @@ export function DeckComparePage() {
         ))}
       </div>
 
+      <TabTransition tabKey={tab}>
       {tab === "overview" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Card className="!p-4">
@@ -299,6 +301,7 @@ export function DeckComparePage() {
           />
         </Card>
       )}
+      </TabTransition>
     </div>
   );
 }

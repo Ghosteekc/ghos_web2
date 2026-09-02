@@ -300,13 +300,10 @@ export function AnalyticsPage() {
     </div>
   );
 
-  if (section !== null) return content;
-
   return (
     <ContentReveal
       loading={loading}
       loader={<div className="space-y-6"><PageHeader title="Аналитика" /><Loader variant="section" /></div>}
-      revealOnMount
     >
       {content}
     </ContentReveal>
