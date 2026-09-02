@@ -237,6 +237,11 @@
     object-fit: contain;
   }
 
+  .startup-screen__robot-image {
+    animation: robot-float 2.9s var(--ui-ease-out) infinite alternate;
+    will-change: transform;
+  }
+
   .startup-screen__title {
     margin: 0;
     font-family: "Supercell Magic", "SC CCBackBeat", sans-serif;
@@ -3044,6 +3049,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .loading-robot,
+    .startup-screen__robot-image,
     .startup-screen__robot-glow,
     .loading-robot__glow {
       animation: none !important;

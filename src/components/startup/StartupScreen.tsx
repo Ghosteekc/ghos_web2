@@ -8,7 +8,7 @@ const easeOut: [number, number, number, number] = [0.22, 0.08, 0.24, 1];
 /** App-local state makes this run once for each newly created WebApp document. */
 export function StartupScreen({ onComplete }: StartupScreenProps) {
   const reducedMotion = useReducedMotion();
-  const duration = reducedMotion ? 220 : 1800;
+  const duration = reducedMotion ? 220 : 3000;
 
   useEffect(() => {
     const timer = window.setTimeout(onComplete, duration);

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/layout/Layout";
@@ -7,15 +7,16 @@ import { ProfilePage } from "@/pages/ProfilePage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { StartupScreen } from "@/components/startup/StartupScreen";
 
-const AnalyticsPage = lazy(() =>
-  import("@/pages/AnalyticsPage").then((m) => ({ default: m.AnalyticsPage })),
-);
-const DecksPage = lazy(() =>
-  import("@/pages/DecksPage").then((m) => ({ default: m.DecksPage })),
-);
-const BattlesPage = lazy(() =>
-  import("@/pages/BattlesPage").then((m) => ({ default: m.BattlesPage })),
-);
+const loadAnalyticsPage = () =>
+  import("@/pages/AnalyticsPage").then((m) => ({ default: m.AnalyticsPage }));
+const loadDecksPage = () =>
+  import("@/pages/DecksPage").then((m) => ({ default: m.DecksPage }));
+const loadBattlesPage = () =>
+  import("@/pages/BattlesPage").then((m) => ({ default: m.BattlesPage }));
+
+const AnalyticsPage = lazy(loadAnalyticsPage);
+const DecksPage = lazy(loadDecksPage);
+const BattlesPage = lazy(loadBattlesPage);
 const ProfileCardsPage = lazy(() => import("@/pages/ProfileCardsPage"));
 const ProfileMasteryPage = lazy(() => import("@/pages/ProfileMasteryPage"));
 const DeckComparePage = lazy(() => import("@/pages/DeckComparePage"));
@@ -40,6 +41,17 @@ function LazyPage({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const [startupVisible, setStartupVisible] = useState(true);
+
+  useEffect(() => {
+    // ProfilePage is already mounted beneath the startup overlay and starts its
+    // data request immediately. Warm the primary route chunks shortly after
+    // that first paint, so their first navigation does not wait on code-split JS.
+    const timer = window.setTimeout(() => {
+      void Promise.all([loadAnalyticsPage(), loadDecksPage(), loadBattlesPage()]).catch(() => undefined);
+    }, 180);
+
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
     <>
