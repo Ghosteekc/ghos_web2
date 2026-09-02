@@ -1,5 +1,6 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect } from "react";
+import { isForceMotionEnabled } from "@/perf/bootstrap";
 
 type StartupScreenProps = { onComplete: () => void };
 
@@ -7,7 +8,7 @@ const easeOut: [number, number, number, number] = [0.22, 0.08, 0.24, 1];
 
 /** App-local state makes this run once for each newly created WebApp document. */
 export function StartupScreen({ onComplete }: StartupScreenProps) {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useReducedMotion() && !isForceMotionEnabled();
   // Reduced motion simplifies the entrance only; it must not skip the
   // three-second preload window.
   const duration = 3000;

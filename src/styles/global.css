@@ -226,7 +226,7 @@
     border-radius: 9999px;
     background: radial-gradient(circle, rgb(81 168 255 / 0.5), rgb(40 103 255 / 0.15) 45%, transparent 72%);
     animation: robot-glow 2.4s ease-in-out infinite alternate;
-    will-change: opacity;
+    will-change: transform, opacity;
   }
 
   .startup-screen__robot-image,
@@ -249,6 +249,7 @@
     font-weight: 400;
     letter-spacing: 0.055em;
     font-synthesis: none;
+    color: rgb(var(--cr-gold));
     text-shadow: none;
     will-change: transform, opacity;
   }
@@ -2972,6 +2973,15 @@
     place-items: center;
   }
 
+  [data-theme="light"] .startup-screen {
+    color: rgb(var(--cr-text));
+    background-color: #eef2fb;
+  }
+
+  [data-theme="light"] .startup-screen__title {
+    color: rgb(var(--cr-gold));
+  }
+
   .loading-robot {
     --loading-robot-size: 3.4rem;
     position: relative;
@@ -2997,16 +3007,16 @@
 
   @keyframes robot-float {
     from {
-      transform: translate3d(0, 1px, 0) rotate(-1deg) scale(0.98);
+      transform: translate3d(0, 2px, 0) rotate(-1.25deg) scale(0.985);
     }
     to {
-      transform: translate3d(0, -3px, 0) rotate(1deg) scale(1);
+      transform: translate3d(0, -5px, 0) rotate(1.25deg) scale(1);
     }
   }
 
   @keyframes robot-glow {
-    from { opacity: 0.38; }
-    to { opacity: 0.72; }
+    from { opacity: 0.38; transform: scale(0.96); }
+    to { opacity: 0.72; transform: scale(1.06); }
   }
 
   .section-loader {
@@ -3048,9 +3058,13 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    html:not([data-force-motion="1"])
     .loading-robot,
+    html:not([data-force-motion="1"])
     .startup-screen__robot-image,
+    html:not([data-force-motion="1"])
     .startup-screen__robot-glow,
+    html:not([data-force-motion="1"])
     .loading-robot__glow {
       animation: none !important;
     }
