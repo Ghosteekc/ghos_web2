@@ -2,12 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MapPin, ChevronRight } from "lucide-react";
 import { api, ApiError } from "@/api/client";
 import { cacheGet, cacheHas } from "@/api/cache";
-import { Card, Button, Loader, ErrorState, EmptyState } from "@/components/ui";
+import { Card, Button, ErrorState, EmptyState } from "@/components/ui";
 import { usePageRefresh } from "@/hooks";
 import type { ArenaDecksData, PlayerCollectionData, Profile } from "@/types";
 import { cn } from "@/utils";
 import { ARENA_RECOMMENDATIONS } from "./arenaRecommendations";
 import { RecommendationCard } from "./RecommendationCard";
+import { AnalyticsPanelReveal } from "../AnalyticsPanelReveal";
 import {
   evaluateAllArenas,
   evaluateArenaProgress,
@@ -172,19 +173,22 @@ export function RecommendationsPanel() {
     scrollToArena(playerArena);
   }, [playerArena, scrollToArena]);
 
-  if (loading) return <Loader variant="section" />;
-  if (error) return <ErrorState title={error} />;
+  if (loading) return <AnalyticsPanelReveal loading />;
+  if (error) return <AnalyticsPanelReveal loading={false}><ErrorState title={error} /></AnalyticsPanelReveal>;
   if (!profile?.player_tag) {
     return (
-      <EmptyState title="Привяжи аккаунт Clash Royale в настройках, чтобы получить рекомендации по прокачке." />
+      <AnalyticsPanelReveal loading={false}>
+        <EmptyState title="Привяжи аккаунт Clash Royale в настройках, чтобы получить рекомендации по прокачке." />
+      </AnalyticsPanelReveal>
     );
   }
   if (!collection?.cards?.length) {
-    return <EmptyState title="Коллекция карт недоступна" />;
+    return <AnalyticsPanelReveal loading={false}><EmptyState title="Коллекция карт недоступна" /></AnalyticsPanelReveal>;
   }
 
   return (
-    <div className="space-y-5 recommendations-panel">
+    <AnalyticsPanelReveal loading={false}>
+      <div className="space-y-5 recommendations-panel">
       <Card className="border-cr-border">
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
           <div>
@@ -246,6 +250,7 @@ export function RecommendationsPanel() {
           />
         ))}
       </div>
-    </div>
+      </div>
+    </AnalyticsPanelReveal>
   );
 }

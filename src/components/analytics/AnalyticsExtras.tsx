@@ -4,6 +4,7 @@ import { Shield, Swords, Wand2, ChevronDown, ChevronUp, RefreshCw, ExternalLink,
 import { api, ApiError, isProRequiredError } from "@/api/client";
 import { cacheGet, cacheHas, cacheInvalidate } from "@/api/cache";
 import { Card, Button, Loader, ErrorState, EmptyState } from "@/components/ui";
+import { AnalyticsPanelReveal } from "./AnalyticsPanelReveal";
 import { CardDeckGrid, CardTile, PlayerDeckGrid } from "@/components/cards";
 import { ProGate } from "@/components/pro";
 import { useCardCatalog, useGhosteekPro, usePageRefresh, useTelegram } from "@/hooks";
@@ -238,14 +239,15 @@ export function OpponentsPanel() {
     }
   };
 
-  if (loading) return <Loader variant="section" />;
-  if (error) return <ErrorState title={error} />;
+  if (loading) return <AnalyticsPanelReveal loading />;
+  if (error) return <AnalyticsPanelReveal loading={false}><ErrorState title={error} /></AnalyticsPanelReveal>;
   if (!opponents.length) {
-    return <EmptyState title="Нет данных о колодах соперников" />;
+    return <AnalyticsPanelReveal loading={false}><EmptyState title="Нет данных о колодах соперников" /></AnalyticsPanelReveal>;
   }
 
   return (
-    <div className="space-y-4">
+    <AnalyticsPanelReveal loading={false}>
+      <div className="space-y-4">
       {opponents.map((opp) => {
         const isOpen = activeIndex === opp.index;
         const counter = counters[opp.index];
@@ -309,7 +311,8 @@ export function OpponentsPanel() {
           </Card>
         );
       })}
-    </div>
+      </div>
+    </AnalyticsPanelReveal>
   );
 }
 
@@ -380,20 +383,23 @@ export function DeckToolsPanel() {
       (customize && !synergyNeeded && !levelAltNeeded && upgrades.length === 0),
   );
 
-  if (proLoading || loading) return <Loader variant="section" />;
+  if (proLoading || loading) return <AnalyticsPanelReveal loading />;
   if (proLocked) {
     return (
-      <ProGate
-        feature="deck_improve"
-        title="Улучшение колоды"
-        description="Подбор замен и улучшений для твоей колоды доступен в Ghosteek Pro."
-      />
+      <AnalyticsPanelReveal loading={false}>
+        <ProGate
+          feature="deck_improve"
+          title="Улучшение колоды"
+          description="Подбор замен и улучшений для твоей колоды доступен в Ghosteek Pro."
+        />
+      </AnalyticsPanelReveal>
     );
   }
-  if (error && !customize) return <ErrorState title={error} />;
+  if (error && !customize) return <AnalyticsPanelReveal loading={false}><ErrorState title={error} /></AnalyticsPanelReveal>;
 
   return (
-    <div className="space-y-4">
+    <AnalyticsPanelReveal loading={false}>
+      <div className="space-y-4">
       <div className="flex justify-end">
         <Button
           variant="ghost"
@@ -536,7 +542,8 @@ export function DeckToolsPanel() {
           )}
         </Card>
       )}
-    </div>
+      </div>
+    </AnalyticsPanelReveal>
   );
 }
 
@@ -573,18 +580,19 @@ export function LossAnalysisPanel() {
     [insights?.insights],
   );
 
-  if (loading) return <Loader variant="section" />;
-  if (error) return <ErrorState title={error} />;
+  if (loading) return <AnalyticsPanelReveal loading />;
+  if (error) return <AnalyticsPanelReveal loading={false}><ErrorState title={error} /></AnalyticsPanelReveal>;
   if (!insights) {
-    return <EmptyState title="Сыграй бои — здесь появится разбор твоих поражений" />;
+    return <AnalyticsPanelReveal loading={false}><EmptyState title="Сыграй бои — здесь появится разбор твоих поражений" /></AnalyticsPanelReveal>;
   }
 
   if (!insights.patterns.length && !lossInsights.length) {
-    return <EmptyState title="Сыграй бои — здесь появится разбор твоих поражений" />;
+    return <AnalyticsPanelReveal loading={false}><EmptyState title="Сыграй бои — здесь появится разбор твоих поражений" /></AnalyticsPanelReveal>;
   }
 
   return (
-    <Card>
+    <AnalyticsPanelReveal loading={false}>
+      <Card>
       <div className="flex items-center gap-2 mb-4">
         <Brain className="w-5 h-5 text-cr-blue" />
         <h3 className="text-base font-semibold text-cr-text">Разбор поражений</h3>
@@ -638,6 +646,7 @@ export function LossAnalysisPanel() {
           </button>
         ))}
       </div>
-    </Card>
+      </Card>
+    </AnalyticsPanelReveal>
   );
 }
