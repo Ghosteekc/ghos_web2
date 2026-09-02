@@ -216,10 +216,11 @@ export function DecksPage() {
 
       {error && filter !== "meta" && <ErrorState title={error} />}
 
+      <TabTransition tabKey={filter}>
       {filter === DECK_HOME ? (
-        <TabTransition tabKey={DECK_HOME}>
+        <>
           <DeckWinratesPanel onAnalyze={setPassportDeck} />
-        </TabTransition>
+        </>
       ) : null}
 
       {filter === "favorites" ? (
@@ -237,7 +238,7 @@ export function DecksPage() {
       ) : null}
 
       {filter === "random" ? (
-        <TabTransition tabKey="random">
+        <>
           <RandomDeckPanel
             onCopied={(msg) => {
               setCopyHint(msg);
@@ -249,11 +250,11 @@ export function DecksPage() {
               if (path) navigate(path);
             }}
           />
-        </TabTransition>
+        </>
       ) : null}
 
       {filter === "top" ? (
-        <TabTransition tabKey="top">
+        <>
           <TopPlayersPanel
             onCopied={(msg) => {
               setCopyHint(msg);
@@ -265,7 +266,7 @@ export function DecksPage() {
               if (path) navigate(path);
             }}
           />
-        </TabTransition>
+        </>
       ) : null}
 
       {filter === "constructor" ? (
@@ -331,8 +332,7 @@ export function DecksPage() {
       ) : null}
 
       {filter === "mine" ? (
-        <ContentReveal loading={loading} loader={<Loader variant="section" />} contentMotion="none">
-        <TabTransition tabKey="mine">
+        <ContentReveal loading={loading} loader={<Loader variant="section" />}>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
           {decks.map((deck, i) => {
             const canCompare = deck.type !== "mine" && (deck.cards?.length ?? 0) === 8;
@@ -376,9 +376,9 @@ export function DecksPage() {
             />
           ) : null}
         </div>
-        </TabTransition>
         </ContentReveal>
       ) : null}
+      </TabTransition>
 
       <DeckPassport deck={passportDeck} onClose={() => setPassportDeck(null)} />
 

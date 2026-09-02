@@ -210,8 +210,9 @@ export function AnalyticsPage() {
         onSelect={handleNavSelect}
       />
 
+      <TabTransition tabKey={section ?? "overview"}>
       {section === null && stats ? (
-        <TabTransition tabKey="overview" className="space-y-6">
+        <div className="space-y-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { label: "Всего боёв", value: stats.total_battles, icon: Swords, color: "text-cr-gold" },
@@ -270,29 +271,30 @@ export function AnalyticsPage() {
               </ChartTooltipAnchor>
             </Card>
           </div>
-        </TabTransition>
+        </div>
       ) : null}
 
       {section === "recommendations" ? (
-        <TabTransition tabKey="recommendations">
+        <>
           <RecommendationsPanel />
-        </TabTransition>
+        </>
       ) : null}
       {section === "losses" ? (
-        <TabTransition tabKey="losses">
+        <>
           <LossAnalysisPanel />
-        </TabTransition>
+        </>
       ) : null}
       {section === "opponents" ? (
-        <TabTransition tabKey="opponents">
+        <>
           <OpponentsPanel />
-        </TabTransition>
+        </>
       ) : null}
       {section === "tools" ? (
-        <TabTransition tabKey="tools">
+        <>
           <DeckToolsPanel />
-        </TabTransition>
+        </>
       ) : null}
+      </TabTransition>
 
       {section !== null && <ScrollToTopButton />}
     </div>
