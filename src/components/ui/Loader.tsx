@@ -14,7 +14,7 @@ const DEFAULT_LOADING_ITEMS = [
 export type LoaderVariant = "page" | "section";
 
 interface LoaderProps {
-  /** page — полный экран с GIF; section — лёгкая анимация вкладок/блоков */
+  /** page — крупный робот; section — компактная загрузка вкладок/блоков */
   variant?: LoaderVariant;
   compact?: boolean;
   /** Ещё компактнее: только точки, для инпутов и мелких слотов */
@@ -22,11 +22,27 @@ interface LoaderProps {
   showLabel?: boolean;
   className?: string;
   /** Что загружается — слова по очереди под «Загрузка» (только page) */
-  items?: string[];
+  items?: readonly string[];
   /** Интервал смены подписи, мс */
   intervalMs?: number;
   /** Короткая подпись для section-лоадера */
   label?: string;
+}
+
+type LoadingRobotSize = "page" | "section" | "compact" | "inline";
+
+function LoadingRobot({ size }: { size: LoadingRobotSize }) {
+  return (
+    <div className={`loading-robot loading-robot--${size}`} aria-hidden>
+      <span className="loading-robot__glow" />
+      <img
+        src="/ghosteek-robot.png"
+        alt=""
+        className="loading-robot__image"
+        draggable={false}
+      />
+    </div>
+  );
 }
 
 function SectionLoader({
@@ -49,10 +65,7 @@ function SectionLoader({
       aria-busy="true"
       aria-label={showLabel ? label : "Загрузка"}
     >
-      <div className="cr-spinner" aria-hidden>
-        <span className="cr-spinner__track" />
-        <span className="cr-spinner__arc" />
-      </div>
+      <LoadingRobot size={inline ? "inline" : compact ? "compact" : "section"} />
       {showLabel && !inline ? <p className="section-loader__label">{label}</p> : null}
     </div>
   );
@@ -64,7 +77,7 @@ const Loader = ({
   inline = false,
   showLabel = true,
   className = "",
-  items = [...DEFAULT_LOADING_ITEMS],
+  items = DEFAULT_LOADING_ITEMS,
   intervalMs = 1200,
   label = "Загрузка",
 }: LoaderProps) => {
@@ -102,12 +115,8 @@ const Loader = ({
       aria-busy="true"
       aria-label={showLabel ? `Загрузка ${current}` : "Загрузка"}
     >
-      <div className="page-loader__hero" aria-hidden>
-        <img
-          src="/pekka-butterfly.gif"
-          alt=""
-          className="page-loader__gif object-contain w-36 h-36"
-        />
+      <div className="page-loader__hero">
+        <LoadingRobot size="page" />
       </div>
       {showLabel && (
         <div className="text-center mt-5">
@@ -126,5 +135,5 @@ const Loader = ({
   );
 };
 
-export { Loader, SectionLoader, DEFAULT_LOADING_ITEMS };
+export { Loader, SectionLoader, LoadingRobot, DEFAULT_LOADING_ITEMS };
 export default Loader;

@@ -206,25 +206,35 @@
     justify-items: center;
     gap: 0.85rem;
     text-align: center;
+  }
+
+  .startup-screen__robot {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: min(11rem, 48vw);
+    aspect-ratio: 1;
+    isolation: isolate;
     will-change: transform, opacity;
   }
 
-  .startup-screen__mark {
-    display: grid;
-    place-items: center;
-    width: 4.75rem;
-    height: 4.75rem;
-    border: 1px solid rgb(188 214 255 / 0.54);
-    border-radius: 1.15rem;
-    color: #f0c766;
-    background: linear-gradient(145deg, rgb(32 62 114 / 0.9), rgb(4 12 36 / 0.9));
-    box-shadow: 0 0 24px rgb(72 129 255 / 0.18);
-    text-shadow: none;
+  .startup-screen__robot-glow,
+  .loading-robot__glow {
+    position: absolute;
+    inset: 18%;
+    z-index: -1;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgb(81 168 255 / 0.5), rgb(40 103 255 / 0.15) 45%, transparent 72%);
+    animation: robot-glow 2.4s ease-in-out infinite alternate;
+    will-change: opacity;
   }
 
-  .startup-screen__mark svg {
-    width: 2.35rem;
-    height: 2.35rem;
+  .startup-screen__robot-image,
+  .loading-robot__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   .startup-screen__title {
@@ -2951,49 +2961,47 @@
     animation: ui-fade var(--ui-duration) var(--ui-ease-out) both;
   }
 
-  /*
-   * Minimal circular spinner — soft edges, no glow / spark / dual rings.
-   * Rotate the whole arc node (mobile WebView safe). Always animates.
-   */
-  .cr-spinner {
-    --cr-spinner-size: 2.75rem;
-    --cr-spinner-border: 2.5px;
-    position: relative;
-    width: var(--cr-spinner-size);
-    height: var(--cr-spinner-size);
+  .page-loader__hero,
+  .loading-robot {
     display: grid;
     place-items: center;
+  }
+
+  .loading-robot {
+    --loading-robot-size: 3.4rem;
+    position: relative;
+    width: var(--loading-robot-size);
+    height: var(--loading-robot-size);
     flex-shrink: 0;
-  }
-
-  .cr-spinner__track,
-  .cr-spinner__arc {
-    position: absolute;
-    inset: 0;
-    border-radius: 9999px;
-    box-sizing: border-box;
-  }
-
-  /* Dark: yellow gold ring. Light: blue (override below). */
-  .cr-spinner__track {
-    border: var(--cr-spinner-border) solid rgb(var(--cr-gold) / 0.22);
-  }
-
-  .cr-spinner__arc {
-    border: var(--cr-spinner-border) solid transparent;
-    border-top-color: rgb(var(--cr-gold) / 0.92);
-    border-right-color: rgb(var(--cr-gold) / 0.35);
-    animation: cr-spinner-spin 0.9s linear infinite;
+    isolation: isolate;
+    animation: robot-float 2.8s var(--ui-ease-out) infinite alternate;
     will-change: transform;
   }
 
-  .page-loader__hero {
-    display: grid;
-    place-items: center;
+  .loading-robot--page {
+    --loading-robot-size: 9rem;
   }
 
-  .page-loader__gif {
-    display: block;
+  .loading-robot--compact {
+    --loading-robot-size: 2.5rem;
+  }
+
+  .loading-robot--inline {
+    --loading-robot-size: 1.25rem;
+  }
+
+  @keyframes robot-float {
+    from {
+      transform: translate3d(0, 1px, 0) rotate(-1deg) scale(0.98);
+    }
+    to {
+      transform: translate3d(0, -3px, 0) rotate(1deg) scale(1);
+    }
+  }
+
+  @keyframes robot-glow {
+    from { opacity: 0.38; }
+    to { opacity: 0.72; }
   }
 
   .section-loader {
@@ -3012,20 +3020,10 @@
     gap: 0.5rem;
   }
 
-  .section-loader--compact .cr-spinner {
-    --cr-spinner-size: 2.1rem;
-    --cr-spinner-border: 2px;
-  }
-
   .section-loader--inline {
     padding: 0;
     min-height: 0;
     gap: 0;
-  }
-
-  .section-loader--inline .cr-spinner {
-    --cr-spinner-size: 1.15rem;
-    --cr-spinner-border: 1.75px;
   }
 
   .section-loader__label {
@@ -3044,24 +3042,11 @@
     color: rgb(var(--cr-muted));
   }
 
-  [data-theme="light"] .cr-spinner__track {
-    border-color: rgb(var(--cr-blue) / 0.22);
-  }
-
-  [data-theme="light"] .cr-spinner__arc {
-    border-top-color: rgb(var(--cr-blue) / 0.9);
-    border-right-color: rgb(var(--cr-blue) / 0.35);
-  }
-
-  @keyframes cr-spinner-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .cr-spinner__arc {
-      animation: cr-spinner-spin 1.2s linear infinite !important;
+    .loading-robot,
+    .startup-screen__robot-glow,
+    .loading-robot__glow {
+      animation: none !important;
     }
   }
 

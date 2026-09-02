@@ -1,6 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect } from "react";
-import { Trophy } from "lucide-react";
 
 type StartupScreenProps = { onComplete: () => void };
 
@@ -24,24 +23,35 @@ export function StartupScreen({ onComplete }: StartupScreenProps) {
       exit={{ opacity: 0 }}
       transition={{ duration: reducedMotion ? 0.16 : 0.24, ease: easeOut }}
     >
-      <motion.div
-        className="startup-screen__brand"
-        initial={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: reducedMotion ? 0.16 : 0.46, ease: easeOut }}
-      >
-        <div className="startup-screen__mark" aria-hidden>
-          <Trophy strokeWidth={2.1} />
-        </div>
+      <div className="startup-screen__brand">
+        <motion.div
+          className="startup-screen__robot"
+          initial={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 5 }}
+          animate={reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: [0, -3, 0] }}
+          transition={
+            reducedMotion
+              ? { duration: 0.16, ease: easeOut }
+              : { duration: 0.62, ease: easeOut, times: [0, 0.62, 1] }
+          }
+          aria-hidden
+        >
+          <span className="startup-screen__robot-glow" />
+          <img
+            src="/ghosteek-robot.png"
+            alt=""
+            className="startup-screen__robot-image"
+            draggable={false}
+          />
+        </motion.div>
         <motion.p
           className="startup-screen__title"
           initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reducedMotion ? 0.16 : 0.36, delay: reducedMotion ? 0.04 : 0.48, ease: easeOut }}
+          transition={{ duration: reducedMotion ? 0.16 : 0.36, delay: reducedMotion ? 0.04 : 0.62, ease: easeOut }}
         >
           GHOSTEEK ROYALE
         </motion.p>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
