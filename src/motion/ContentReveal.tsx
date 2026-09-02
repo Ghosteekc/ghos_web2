@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import type { ReactNode } from "react";
 import { useRef } from "react";
-import { MOTION_EASE, MOTION_MS } from "./tokens";
+import { MOTION_EASE, MOTION_ENTER, MOTION_MS } from "./tokens";
 
 type ContentRevealProps = {
   loading: boolean;
@@ -33,7 +33,7 @@ export function ContentReveal({
 
   const shouldReveal = revealOnMount || hasLoadedRef.current;
   const contentInitial =
-    contentMotion === "reveal" && shouldReveal ? { opacity: 0, y: 8 } : false;
+    contentMotion === "reveal" && shouldReveal ? { opacity: 0, y: MOTION_ENTER.tabY } : false;
 
   return (
     <div className={className}>

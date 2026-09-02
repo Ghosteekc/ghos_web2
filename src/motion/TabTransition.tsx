@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { cn } from "@/utils";
 import { isForceMotionEnabled } from "@/perf/bootstrap";
-import { MOTION_EASE, MOTION_MS } from "./tokens";
+import { MOTION_EASE, MOTION_ENTER, MOTION_MS } from "./tokens";
 
 interface TabTransitionProps {
   /** Уникальный ключ вкладки — remount + enter animation. */
@@ -26,7 +26,7 @@ export function TabTransition({ tabKey, children, className }: TabTransitionProp
       <motion.div
         key={tabKey}
         className={cn("tab-motion-panel", className)}
-        initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 10 }}
+        initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: MOTION_ENTER.tabY }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: reducedMotion ? 0 : -2 }}
         transition={{ duration, ease: easeOut }}
@@ -37,13 +37,3 @@ export function TabTransition({ tabKey, children, className }: TabTransitionProp
   );
 }
 
-/** Enter после lazy/Suspense — монтируется вместе с контентом панели. */
-export function TabContentEnter({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <div
-      className={cn("tab-motion-panel", "tab-enter", className)}
-    >
-      {children}
-    </div>
-  );
-}
