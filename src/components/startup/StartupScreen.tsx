@@ -6,7 +6,7 @@ type StartupScreenProps = { onComplete: () => void };
 
 const easeOut: [number, number, number, number] = [0.22, 0.08, 0.24, 1];
 
-/** App-local state makes this run once for each newly created WebApp document. */
+/** The app decides when the initial screen is ready; this owns the 3s minimum. */
 export function StartupScreen({ onComplete }: StartupScreenProps) {
   const reducedMotion = useReducedMotion() && !isForceMotionEnabled();
   // Reduced motion simplifies the entrance only; it must not skip the

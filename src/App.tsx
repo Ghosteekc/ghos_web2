@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "@/layout/Layout";
@@ -41,6 +41,11 @@ function LazyPage({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const [startupVisible, setStartupVisible] = useState(true);
+  const [startupMinimumElapsed, setStartupMinimumElapsed] = useState(false);
+  const [profileReady, setProfileReady] = useState(false);
+
+  const markStartupMinimumElapsed = useCallback(() => setStartupMinimumElapsed(true), []);
+  const markProfileReady = useCallback(() => setProfileReady(true), []);
 
   useEffect(() => {
     // ProfilePage is already mounted beneath the startup overlay and starts its
@@ -53,6 +58,11 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (!startupMinimumElapsed || !profileReady) return;
+    setStartupVisible(false);
+  }, [profileReady, startupMinimumElapsed]);
+
   return (
     <>
     <motion.div
@@ -64,7 +74,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
-          <Route index element={<ProfilePage />} />
+          <Route index element={<ProfilePage onInitialLoadComplete={markProfileReady} />} />
           <Route path="profile" element={<Navigate to="/" replace />} />
           <Route path="search" element={<Navigate to="/profile/search" replace />} />
           <Route
@@ -179,7 +189,7 @@ export default function App() {
     </BrowserRouter>
     </motion.div>
     <AnimatePresence>
-      {startupVisible ? <StartupScreen onComplete={() => setStartupVisible(false)} /> : null}
+      {startupVisible ? <StartupScreen onComplete={markStartupMinimumElapsed} /> : null}
     </AnimatePresence>
     </>
   );

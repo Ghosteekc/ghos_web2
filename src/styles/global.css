@@ -239,6 +239,7 @@
 
   .startup-screen__robot-image {
     animation: robot-float 2.9s var(--ui-ease-out) infinite alternate;
+    animation-delay: 0.52s;
     will-change: transform;
   }
 

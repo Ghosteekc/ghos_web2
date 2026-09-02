@@ -15,7 +15,11 @@ import { cacheHas } from "@/api/cache";
 import { onTelegramAuthReady } from "@/utils/telegramAuth";
 import { ContentReveal } from "@/motion";
 
-export function ProfilePage() {
+type ProfilePageProps = {
+  onInitialLoadComplete?: () => void;
+};
+
+export function ProfilePage({ onInitialLoadComplete }: ProfilePageProps) {
   const { nameRu } = useCardCatalog();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(() => !cacheHas("profile-v8"));
@@ -30,8 +34,9 @@ export function ProfilePage() {
       setError(e instanceof Error ? e.message : "Ошибка загрузки профиля");
     } finally {
       setLoading(false);
+      onInitialLoadComplete?.();
     }
-  }, []);
+  }, [onInitialLoadComplete]);
 
   usePageRefresh(load);
 
