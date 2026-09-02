@@ -10,6 +10,8 @@ type ContentRevealProps = {
   className?: string;
   /** Use when the child is already a TabTransition and owns its enter motion. */
   contentMotion?: "reveal" | "none";
+  /** Reveal cached content when this component first mounts after a lazy route fallback. */
+  revealOnMount?: boolean;
 };
 
 const easeOut = [...MOTION_EASE.out] as [number, number, number, number];
@@ -24,11 +26,12 @@ export function ContentReveal({
   children,
   className,
   contentMotion = "reveal",
+  revealOnMount = false,
 }: ContentRevealProps) {
   const hasLoadedRef = useRef(loading);
   if (loading) hasLoadedRef.current = true;
 
-  const shouldReveal = hasLoadedRef.current;
+  const shouldReveal = revealOnMount || hasLoadedRef.current;
   const contentInitial =
     contentMotion === "reveal" && shouldReveal ? { opacity: 0, y: 8 } : false;
 

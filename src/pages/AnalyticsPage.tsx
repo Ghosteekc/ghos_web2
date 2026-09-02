@@ -306,7 +306,7 @@ export function AnalyticsPage() {
     <ContentReveal
       loading={loading}
       loader={<div className="space-y-6"><PageHeader title="Аналитика" /><Loader variant="section" /></div>}
-      contentMotion="none"
+      revealOnMount
     >
       {content}
     </ContentReveal>
