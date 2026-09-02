@@ -95,7 +95,7 @@ export function SettingsPage() {
 
   const handleClearCache = async () => {
     const ok = await showConfirm?.(
-      "Сбросить сохранённые данные в приложении?\n\nИстория боёв в Ghosteek не удаляется. Списки и статистика обновятся при следующем открытии разделов или синхронизации.",
+      "Сбросить кэш приложения?\n\nИстория боёв в Ghosteek не удаляется. Списки и статистика обновятся при следующем открытии разделов или синхронизации.",
     );
     if (!ok) return;
 
@@ -104,11 +104,11 @@ export function SettingsPage() {
       await api.clearCache();
       haptic.success();
       await showAlert?.(
-        "Данные приложения сброшены. Чтобы обновить списки, открой разделы заново или нажми «Синхронизировать».",
+        "Кэш приложения сброшен. Чтобы обновить списки, открой разделы заново или нажми «Синхронизировать».",
       );
     } catch (e) {
       haptic.error();
-      await showAlert?.(e instanceof Error ? e.message : "Не удалось сбросить данные");
+      await showAlert?.(e instanceof Error ? e.message : "Не удалось сбросить кэш");
     } finally {
       setClearing(false);
     }
@@ -387,7 +387,7 @@ export function SettingsPage() {
               <span className="pixel-btn-icon-slot" aria-hidden>
                 <Eraser className="w-5 h-5 text-cr-gold" />
               </span>
-              <span>{clearing ? "Сброс…" : "Сбросить данные"}</span>
+              <span>{clearing ? "Сброс…" : "Сбросить кэш"}</span>
             </button>
             <button
               type="button"
