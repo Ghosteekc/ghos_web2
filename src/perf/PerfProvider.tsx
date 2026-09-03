@@ -11,6 +11,7 @@ import {
 } from "react";
 import { applyRenderProfile, readCurrentProfile } from "./applyProfile";
 import { detectInitialProfile, downgradeProfile } from "./detectProfile";
+import { PERF_TRANSITION_EVENT } from "./motionSample";
 import type { PerfSnapshot, RenderProfile } from "./types";
 import { PROFILE_TOKENS } from "./types";
 
@@ -47,6 +48,8 @@ export function PerfProvider({ children }: { children: ReactNode }) {
     return applyRenderProfile(profile, null);
   });
   const lockedRef = useRef(false);
+  const initialSampleCompleteRef = useRef(false);
+  const transitionSampledRef = useRef(false);
 
   const setProfile = useCallback((profile: RenderProfile) => {
     lockedRef.current = true;
@@ -68,12 +71,32 @@ export function PerfProvider({ children }: { children: ReactNode }) {
       } else if (fps < 50 && next === "high") {
         next = "medium";
       }
+      initialSampleCompleteRef.current = true;
       setSnapshot(applyRenderProfile(next, Math.round(fps)));
     };
     void run();
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    const onTransitionStart = () => {
+      if (lockedRef.current || !initialSampleCompleteRef.current || transitionSampledRef.current) return;
+      transitionSampledRef.current = true;
+
+      void sampleFps(420).then((fps) => {
+        if (lockedRef.current) return;
+        const profile = readCurrentProfile();
+        // Measure an actual card/list handoff once. Degrade only when it is
+        // visibly below a smooth mobile frame budget; never upgrade mid-session.
+        const next = fps < 46 && profile !== "low" ? downgradeProfile(profile) : profile;
+        setSnapshot(applyRenderProfile(next, Math.round(fps)));
+      });
+    };
+
+    document.addEventListener(PERF_TRANSITION_EVENT, onTransitionStart);
+    return () => document.removeEventListener(PERF_TRANSITION_EVENT, onTransitionStart);
   }, []);
 
   const value = useMemo(() => ({ snapshot, setProfile }), [snapshot, setProfile]);

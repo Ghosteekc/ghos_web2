@@ -1,5 +1,6 @@
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
+import { notifyPerfTransitionStart } from "@/perf/motionSample";
 
 /**
  * Плавное появление при смене route (bottom nav и вложенные страницы).
@@ -8,10 +9,16 @@ import { useLocation, useOutlet } from "react-router-dom";
 export function PageEnter() {
   const location = useLocation();
   const outlet = useOutlet();
+  const initialPathRef = useRef(location.pathname);
 
   useLayoutEffect(() => {
     window.scrollTo(0, 0);
     document.querySelector(".app-main")?.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (initialPathRef.current === location.pathname) return;
+    notifyPerfTransitionStart();
   }, [location.pathname]);
 
   if (!outlet) return null;

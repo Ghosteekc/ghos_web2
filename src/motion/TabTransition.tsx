@@ -1,7 +1,9 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
+import { useEffect, useRef } from "react";
 import { cn } from "@/utils";
 import { isForceMotionEnabled } from "@/perf/bootstrap";
+import { notifyPerfTransitionStart } from "@/perf/motionSample";
 import { MOTION_EASE, MOTION_ENTER, MOTION_MS } from "./tokens";
 
 interface TabTransitionProps {
@@ -19,7 +21,13 @@ const easeOut = [...MOTION_EASE.out] as [number, number, number, number];
  */
 export function TabTransition({ tabKey, children, className }: TabTransitionProps) {
   const reducedMotion = useReducedMotion() && !isForceMotionEnabled();
+  const initialTabRef = useRef(tabKey);
   const duration = (reducedMotion ? MOTION_MS.fast : MOTION_MS.normal) / 1000;
+
+  useEffect(() => {
+    if (initialTabRef.current === tabKey) return;
+    notifyPerfTransitionStart();
+  }, [tabKey]);
 
   return (
     <AnimatePresence initial={false} mode="wait">
