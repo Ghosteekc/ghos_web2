@@ -505,6 +505,23 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           </button>
         </header>
 
+        <div className="ctor-below">
+          <Button
+            type="button"
+            variant="secondary"
+            className="ctor-reset w-full"
+            onClick={resetAll}
+            disabled={filledCount === 0}
+          >
+            Сбросить выбор карт
+          </Button>
+
+          <p className="ctor-tip glass-card">
+            <Sparkles className="ctor-tip-icon" aria-hidden />
+            <span>{tip}</span>
+          </p>
+        </div>
+
         {/* 2. Core Builder */}
         <section className="ctor-core constructor-seed-card glass-card">
           <div className="ctor-slots">
@@ -576,22 +593,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
             })}
           </div>
         </section>
-
-        <div className="ctor-below">
-        <Button
-          type="button"
-          variant="secondary"
-          className="ctor-reset w-full"
-          onClick={resetAll}
-          disabled={filledCount === 0}
-        >
-          Сбросить выбор карт
-        </Button>
-
-        <p className="ctor-tip glass-card">
-          <Sparkles className="ctor-tip-icon" aria-hidden />
-          <span>{tip}</span>
-        </p>
 
         <div className="ctor-top-filter">
           <div className="ctor-top-filter-copy">
@@ -797,7 +798,6 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
             className="py-6"
           />
         ) : null}
-        </div>
         </div>
 
         <AnimatePresence>
