@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { motion, useReducedMotion } from "framer-motion";
 import { X } from "lucide-react";
 import type { Deck, RecommendationResult } from "@/types";
 import { Card, Button } from "@/components/ui";
@@ -11,6 +13,7 @@ import { ProLockCard } from "@/components/pro";
 import { analyzeDeckPassport, getMetricDisplayList } from "./DeckAnalyzer";
 import { collectCardNames } from "./DeckStatistics";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
+import { isForceMotionEnabled } from "@/perf/bootstrap";
 
 interface DeckPassportProps {
   deck: Deck | null;
@@ -40,6 +43,7 @@ function MetricBar({ label, value }: { label: string; value: number }) {
 export function DeckPassport({ deck, onClose }: DeckPassportProps) {
   const { nameRu } = useCardCatalog();
   const open = deck != null && (deck.cards?.length ?? 0) === 8;
+  const reducedMotion = useReducedMotion() && !isForceMotionEnabled();
   const { isPro, loading: proLoading } = useGhosteekPro();
   const [recommendation, setRecommendation] = useState<RecommendationResult | null>(null);
   const [recError, setRecError] = useState<string | null>(null);
@@ -120,22 +124,28 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
 
   const metrics = analysis ? getMetricDisplayList(analysis.metrics) : [];
 
-  return (
+  const passport = (
     <div className="deck-passport-overlay fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <button
+      <motion.button
         type="button"
         aria-label="Закрыть"
         className="deck-passport-backdrop absolute inset-0"
         onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.18, ease: [0.22, 0.08, 0.24, 1] }}
       />
 
-      <div
+      <motion.div
         className={cn(
           "deck-passport-sheet relative w-full sm:max-w-lg",
           "max-h-[calc(100dvh-var(--device-safe-top)-1.75rem)] sm:max-h-[86vh]",
           "border border-cr-border rounded-t-2xl sm:rounded-2xl",
           "shadow-2xl flex flex-col overflow-hidden transition-opacity duration-[220ms]",
         )}
+        initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reducedMotion ? 0.16 : 0.24, ease: [0.22, 0.08, 0.24, 1] }}
       >
         <div className="flex items-center justify-between gap-3 px-4 pt-4 pb-3 border-b border-cr-border shrink-0">
           <div className="min-w-0">
@@ -320,7 +330,11 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
             </>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
+
+  // The decks tab uses transform for smooth handoffs. A portal prevents that
+  // ancestor from becoming the containing block for this full-screen layer.
+  return createPortal(passport, document.body);
 }
