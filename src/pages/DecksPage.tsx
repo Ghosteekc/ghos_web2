@@ -23,7 +23,7 @@ import type { Deck, DeckCard as DeckCardData, RandomDeck, TopPlayer, TopPlayersD
 import { usePageRefresh, useTelegram } from "@/hooks";
 import { deckFromCardNames, deckToComparePath } from "@/utils/deckActions";
 import { contextFromConstructor, openGhosteekAi } from "@/utils/aiPageContext";
-import { ContentReveal, TabTransition } from "@/motion";
+import { TabTransition } from "@/motion";
 import { DecisionExplanationView } from "@/components/recommendations/DecisionExplanationView";
 
 import { DECK_CATEGORY_LABELS, DECK_FILTER_LABELS, UI } from "@/constants/labels";
@@ -216,7 +216,7 @@ export function DecksPage() {
 
       {error && filter !== "meta" && <ErrorState title={error} />}
 
-      <TabTransition tabKey={filter}>
+      <TabTransition tabKey={filter} loading={filter === "mine" && loading}>
       {filter === DECK_HOME ? (
         <>
           <DeckWinratesPanel onAnalyze={setPassportDeck} />
@@ -324,7 +324,6 @@ export function DecksPage() {
       ) : null}
 
       {filter === "mine" ? (
-        <ContentReveal loading={loading} loader={<Loader variant="section" />}>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full overflow-x-hidden">
           {decks.map((deck, i) => {
             const canCompare = deck.type !== "mine" && (deck.cards?.length ?? 0) === 8;
@@ -368,7 +367,6 @@ export function DecksPage() {
             />
           ) : null}
         </div>
-        </ContentReveal>
       ) : null}
       </TabTransition>
 

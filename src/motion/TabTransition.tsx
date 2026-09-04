@@ -10,6 +10,8 @@ import { MOTION_EASE, MOTION_ENTER, MOTION_MS } from "./tokens";
 interface TabTransitionProps {
   /** Уникальный ключ вкладки — remount + enter animation. */
   tabKey: string;
+  /** Keep the same handoff loader visible while this tab's data is resolving. */
+  loading?: boolean;
   children: ReactNode;
   className?: string;
 }
@@ -21,7 +23,7 @@ const MINIMUM_LOADER_MS = 220;
  * Stable tab slot: keeps the previous panel visible through its short exit,
  * then reveals the new panel. The parent must remain mounted across tab keys.
  */
-export function TabTransition({ tabKey, children, className }: TabTransitionProps) {
+export function TabTransition({ tabKey, loading = false, children, className }: TabTransitionProps) {
   const reducedMotion = useReducedMotion() && !isForceMotionEnabled();
   const stageRef = useRef<HTMLDivElement>(null);
   const previousTabRef = useRef(tabKey);
@@ -33,7 +35,7 @@ export function TabTransition({ tabKey, children, className }: TabTransitionProp
   const duration = (reducedMotion ? MOTION_MS.fast : MOTION_MS.normal) / 1000;
   const tabChanged = previousTabRef.current !== tabKey;
   if (tabChanged) previousTabRef.current = tabKey;
-  const showingLoader = tabChanged || loaderKey === tabKey;
+  const showingLoader = tabChanged || loading || loaderKey === tabKey;
 
   useEffect(() => {
     if (!mountedRef.current) {
@@ -52,6 +54,10 @@ export function TabTransition({ tabKey, children, className }: TabTransitionProp
       }
     };
   }, [tabKey]);
+
+  useEffect(() => {
+    if (loading) setLoaderKey(tabKey);
+  }, [loading, tabKey]);
 
   const finishLoaderAfterMinimum = () => {
     if (loaderTimerRef.current !== null) return;

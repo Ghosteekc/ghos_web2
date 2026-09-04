@@ -11,7 +11,7 @@ import { derivePopularityTrend, type PopularityTrend } from "@/utils/metaTrend";
 import { usePageRefresh, useTelegram } from "@/hooks";
 import type { DeckCard, MetaLadderData, MetaLadderDeck, MetaWarData, MetaWarDeck } from "@/types";
 import { MetaSparkline } from "./MetaSparkline";
-import { ContentReveal, TabTransition } from "@/motion";
+import { TabTransition } from "@/motion";
 
 type MetaTab = "league" | "trophies" | "clan-wars";
 
@@ -338,7 +338,7 @@ export function MetaPanel() {
         ))}
       </div>
 
-      <TabTransition tabKey={tab} className="space-y-4">
+      <TabTransition tabKey={tab} loading={loading} className="space-y-4">
         {!loading && sampleNote ? <p className="text-xs text-cr-muted leading-snug">{sampleNote}</p> : null}
         {!loading && updatedLabel ? <p className="text-xs text-cr-muted">Обновлено: {updatedLabel}</p> : null}
         {actionHint ? (
@@ -348,42 +348,40 @@ export function MetaPanel() {
           <p className="text-xs text-cr-muted">{statusMessage}</p>
         ) : null}
 
-        <ContentReveal loading={loading} loader={<Loader variant="section" />}>
-          {error ? <ErrorState title={error} /> : null}
+        {error ? <ErrorState title={error} /> : null}
 
-          {!error && tab !== "clan-wars" && ladder ? (
-            ladder.decks.length ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {ladder.decks.map((deck, index) => (
-                    <LadderCard key={deck.deck_hash} deck={deck} index={index} onMessage={showActionHint} />
-                  ))}
-                </div>
-                <MetaProCta lockedCount={ladder.pro_locked_count ?? 0} />
+        {!error && tab !== "clan-wars" && ladder ? (
+          ladder.decks.length ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {ladder.decks.map((deck, index) => (
+                  <LadderCard key={deck.deck_hash} deck={deck} index={index} onMessage={showActionHint} />
+                ))}
               </div>
-            ) : (
-              <EmptyState title={statusMessage || ladder?.message || "Недостаточно данных для формирования актуальной меты."} />
-            )
-          ) : null}
+              <MetaProCta lockedCount={ladder.pro_locked_count ?? 0} />
+            </div>
+          ) : (
+            <EmptyState title={statusMessage || ladder?.message || "Недостаточно данных для формирования актуальной меты."} />
+          )
+        ) : null}
 
-          {!error && tab === "clan-wars" && wars ? (
-            wars.decks.length ? (
-              <div className="space-y-3">
-                {wars.source ? (
-                  <p className="text-xs text-cr-muted">Источник: {wars.source}</p>
-                ) : null}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {wars.decks.map((deck, index) => (
-                    <WarCard key={`${deck.rank}-${deck.name}`} deck={deck} index={index} onMessage={showActionHint} />
-                  ))}
-                </div>
-                <MetaProCta lockedCount={wars.pro_locked_count ?? 0} />
+        {!error && tab === "clan-wars" && wars ? (
+          wars.decks.length ? (
+            <div className="space-y-3">
+              {wars.source ? (
+                <p className="text-xs text-cr-muted">Источник: {wars.source}</p>
+              ) : null}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {wars.decks.map((deck, index) => (
+                  <WarCard key={`${deck.rank}-${deck.name}`} deck={deck} index={index} onMessage={showActionHint} />
+                ))}
               </div>
-            ) : (
-              <EmptyState title={statusMessage || "Готовые колоды КВ пока не загружены."} />
-            )
-          ) : null}
-        </ContentReveal>
+              <MetaProCta lockedCount={wars.pro_locked_count ?? 0} />
+            </div>
+          ) : (
+            <EmptyState title={statusMessage || "Готовые колоды КВ пока не загружены."} />
+          )
+        ) : null}
       </TabTransition>
     </div>
   );

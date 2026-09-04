@@ -2888,6 +2888,15 @@
     min-height: 10rem;
   }
 
+  /* Tab handoff is one calm appearance/disappearance. The ambient floating
+     animation remains available for standalone page loaders. */
+  .tab-motion-loader .loading-robot,
+  .tab-motion-panel .content-reveal-loader .loading-robot {
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
+
   .page-motion-panel,
   .tab-motion-panel {
     @apply w-full min-w-0;
