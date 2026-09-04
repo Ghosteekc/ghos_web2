@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/utils";
+import { useTabLoaderRegistration } from "@/motion/TabLoadingContext";
 
 const DEFAULT_LOADING_ITEMS = [
   "колод",
@@ -52,6 +53,8 @@ function SectionLoader({
   compact = false,
   inline = false,
 }: Pick<LoaderProps, "showLabel" | "className" | "label" | "compact" | "inline">) {
+  useTabLoaderRegistration();
+
   return (
     <div
       className={cn(

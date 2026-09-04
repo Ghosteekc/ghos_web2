@@ -1,11 +1,12 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 import { cn } from "@/utils";
 import { isForceMotionEnabled } from "@/perf/bootstrap";
 import { notifyPerfTransitionStart } from "@/perf/motionSample";
 import { MOTION_EASE, MOTION_ENTER, MOTION_MS } from "./tokens";
+import { TabLoadingContext } from "./TabLoadingContext";
 
 interface TabTransitionProps {
   /** Уникальный ключ вкладки — remount + enter animation. */
@@ -34,12 +35,23 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
   const mountedRef = useRef(false);
   const hasHandoffRef = useRef(false);
   const loaderTimerRef = useRef<number | null>(null);
+  const nestedLoaderIdsRef = useRef(new Set<string>());
   const [loaderKey, setLoaderKey] = useState<string | null>(null);
   const [reservedHeight, setReservedHeight] = useState(0);
+  const [, setNestedLoaderVersion] = useState(0);
   const duration = (reducedMotion ? MOTION_MS.fast : MOTION_MS.normal) / 1000;
   const tabChanged = previousTabRef.current !== tabKey;
   if (tabChanged) previousTabRef.current = tabKey;
-  const showingLoader = tabChanged || loading || loaderKey === tabKey;
+  const nestedLoading = hasHandoffRef.current && nestedLoaderIdsRef.current.size > 0;
+  const showingLoader = tabChanged || loading || loaderKey === tabKey || nestedLoading;
+
+  const registerNestedLoader = useCallback((id: string, active: boolean) => {
+    const loaders = nestedLoaderIdsRef.current;
+    const changed = active ? !loaders.has(id) : loaders.delete(id);
+    if (!changed) return;
+    if (active) loaders.add(id);
+    setNestedLoaderVersion((version) => version + 1);
+  }, []);
 
   const scheduleLoaderRelease = (key: string) => {
     if (loaderTimerRef.current !== null) {
@@ -105,7 +117,32 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
       className="tab-motion-stage"
       style={{ minHeight: reservedHeight || (showingLoader ? previousContentHeightRef.current : undefined) || undefined }}
     >
-      <AnimatePresence initial={false} mode="wait">
+      <TabLoadingContext.Provider value={registerNestedLoader}>
+        <motion.div
+          key={tabKey}
+          className={cn(
+            "tab-motion-panel",
+            hasHandoffRef.current && "tab-motion-panel--handoff",
+            className,
+          )}
+          initial={false}
+          animate={
+            showingLoader
+              ? { opacity: 0, y: reducedMotion ? 0 : MOTION_ENTER.tabY }
+              : { opacity: 1, y: 0 }
+          }
+          transition={{
+            duration,
+            delay: showingLoader ? 0 : MOTION_MS.fast / 1000,
+            ease: easeOut,
+          }}
+          style={{ visibility: showingLoader ? "hidden" : undefined }}
+        >
+          {children}
+        </motion.div>
+      </TabLoadingContext.Provider>
+
+      <AnimatePresence initial={false}>
         {showingLoader ? (
           <motion.div
             key={`loader:${tabKey}`}
@@ -115,24 +152,11 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
             exit={{ opacity: 0 }}
             transition={{ duration: MOTION_MS.fast / 1000, ease: easeOut }}
           >
-            <Loader variant="section" />
+            <TabLoadingContext.Provider value={null}>
+              <Loader variant="section" />
+            </TabLoadingContext.Provider>
           </motion.div>
-        ) : (
-          <motion.div
-            key={tabKey}
-            className={cn(
-              "tab-motion-panel",
-              hasHandoffRef.current && "tab-motion-panel--handoff",
-              className,
-            )}
-            initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: MOTION_ENTER.tabY }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: reducedMotion ? 0 : -2 }}
-            transition={{ duration, ease: easeOut }}
-          >
-            {children}
-          </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   );

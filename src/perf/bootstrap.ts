@@ -19,6 +19,5 @@ export function isForceMotionEnabled(): boolean {
 /** Синхронно до первого paint — без вспышки blur:none. */
 export function bootstrapPerfProfile(): void {
   if (typeof document === "undefined") return;
-  enableForceMotionIfNeeded();
   applyRenderProfile(detectInitialProfile(), null);
 }

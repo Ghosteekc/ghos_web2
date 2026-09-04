@@ -1,7 +1,8 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { MOTION_EASE, MOTION_ENTER, MOTION_MS } from "./tokens";
+import { isForceMotionEnabled } from "@/perf/bootstrap";
 
 type ContentRevealProps = {
   loading: boolean;
@@ -29,6 +30,7 @@ export function ContentReveal({
   contentMotion = "reveal",
   revealOnMount = false,
 }: ContentRevealProps) {
+  const reducedMotion = useReducedMotion() && !isForceMotionEnabled();
   const hasLoadedRef = useRef(loading);
   const loadingStartedAtRef = useRef<number | null>(loading ? performance.now() : null);
   const [holdingLoader, setHoldingLoader] = useState(loading);
@@ -56,7 +58,9 @@ export function ContentReveal({
 
   const shouldReveal = revealOnMount || hasLoadedRef.current;
   const contentInitial =
-    contentMotion === "reveal" && shouldReveal ? { opacity: 0, y: MOTION_ENTER.tabY } : false;
+    contentMotion === "reveal" && shouldReveal
+      ? reducedMotion ? { opacity: 0 } : { opacity: 0, y: MOTION_ENTER.tabY }
+      : false;
 
   return (
     <div className={className}>

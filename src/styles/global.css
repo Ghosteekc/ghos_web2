@@ -2841,8 +2841,8 @@
 
   .deck-passport-backdrop {
     background: rgb(0 0 0 / 0.48);
-    backdrop-filter: blur(22px) saturate(150%);
-    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    backdrop-filter: blur(var(--perf-blur-px, 10px)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--perf-blur-px, 10px)) saturate(140%);
   }
 
   .deck-passport-sheet {
@@ -2884,7 +2884,7 @@
   }
 
   .tab-motion-loader {
-    @apply w-full min-w-0;
+    @apply absolute inset-0 z-10 grid w-full min-w-0 place-items-center;
     min-height: 10rem;
   }
 
@@ -5151,6 +5151,14 @@ html[data-perf="medium"] .chart-tooltip-glass,
 html[data-perf="low"] .chart-tooltip-glass {
   backdrop-filter: blur(var(--perf-blur-px, 10px)) saturate(140%);
   -webkit-backdrop-filter: blur(var(--perf-blur-px, 10px)) saturate(140%);
+}
+
+/* These layers move with a finger or the active nav item. On mobile, a solid
+   tint composites more reliably than moving backdrop-filter pixels. */
+html:is([data-perf="medium"], [data-perf="low"]) .chart-tooltip-bubble,
+html:is([data-perf="medium"], [data-perf="low"]) .bottom-nav-liquid-bubble-glass {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
