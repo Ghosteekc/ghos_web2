@@ -32,6 +32,7 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
   const previousTabRef = useRef(tabKey);
   const previousContentHeightRef = useRef(0);
   const mountedRef = useRef(false);
+  const hasHandoffRef = useRef(false);
   const loaderTimerRef = useRef<number | null>(null);
   const [loaderKey, setLoaderKey] = useState<string | null>(null);
   const [reservedHeight, setReservedHeight] = useState(0);
@@ -57,6 +58,7 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
       return;
     }
 
+    hasHandoffRef.current = true;
     notifyPerfTransitionStart();
     setReservedHeight(previousContentHeightRef.current);
     setLoaderKey(tabKey);
@@ -118,7 +120,11 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
         ) : (
           <motion.div
             key={tabKey}
-            className={cn("tab-motion-panel", className)}
+            className={cn(
+              "tab-motion-panel",
+              hasHandoffRef.current && "tab-motion-panel--handoff",
+              className,
+            )}
             initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: MOTION_ENTER.tabY }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: reducedMotion ? 0 : -2 }}

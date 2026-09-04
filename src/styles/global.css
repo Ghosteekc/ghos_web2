@@ -2888,13 +2888,18 @@
     min-height: 10rem;
   }
 
-  /* Tab handoff is one calm appearance/disappearance. The ambient floating
-     animation remains available for standalone page loaders. */
+  /* A tab handoff owns exactly one mascot. Lazy panel code and data can still
+     report their loading state after it mounts, but must not start a second
+     robot entrance once the handoff loader has faded out. */
   .tab-motion-loader .loading-robot,
   .tab-motion-panel .content-reveal-loader .loading-robot {
     animation: none;
     transform: none;
     will-change: auto;
+  }
+
+  .tab-motion-panel--handoff .section-loader .loading-robot {
+    display: none;
   }
 
   .page-motion-panel,
