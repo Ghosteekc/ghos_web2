@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Loader } from "@/components/ui/Loader";
 import { cn } from "@/utils";
 import { isForceMotionEnabled } from "@/perf/bootstrap";
 import { notifyPerfTransitionStart } from "@/perf/motionSample";
@@ -14,6 +15,7 @@ interface TabTransitionProps {
 }
 
 const easeOut = [...MOTION_EASE.out] as [number, number, number, number];
+const MINIMUM_LOADER_MS = 220;
 
 /**
  * Stable tab slot: keeps the previous panel visible through its short exit,
@@ -21,26 +23,97 @@ const easeOut = [...MOTION_EASE.out] as [number, number, number, number];
  */
 export function TabTransition({ tabKey, children, className }: TabTransitionProps) {
   const reducedMotion = useReducedMotion() && !isForceMotionEnabled();
-  const initialTabRef = useRef(tabKey);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const previousTabRef = useRef(tabKey);
+  const previousContentHeightRef = useRef(0);
+  const mountedRef = useRef(false);
+  const loaderTimerRef = useRef<number | null>(null);
+  const [loaderKey, setLoaderKey] = useState<string | null>(null);
+  const [reservedHeight, setReservedHeight] = useState(0);
   const duration = (reducedMotion ? MOTION_MS.fast : MOTION_MS.normal) / 1000;
+  const tabChanged = previousTabRef.current !== tabKey;
+  if (tabChanged) previousTabRef.current = tabKey;
+  const showingLoader = tabChanged || loaderKey === tabKey;
 
   useEffect(() => {
-    if (initialTabRef.current === tabKey) return;
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+
     notifyPerfTransitionStart();
+    setReservedHeight(previousContentHeightRef.current);
+    setLoaderKey(tabKey);
+
+    return () => {
+      if (loaderTimerRef.current !== null) {
+        window.clearTimeout(loaderTimerRef.current);
+        loaderTimerRef.current = null;
+      }
+    };
   }, [tabKey]);
 
+  const finishLoaderAfterMinimum = () => {
+    if (loaderTimerRef.current !== null) return;
+    loaderTimerRef.current = window.setTimeout(() => {
+      loaderTimerRef.current = null;
+      setLoaderKey((current) => (current === tabKey ? null : current));
+    }, MINIMUM_LOADER_MS);
+  };
+
+  useLayoutEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    // Store the last finished panel height. On the next tab change it is used
+    // synchronously by the loader render, before the browser can clamp scrollY.
+    if (!showingLoader) {
+      previousContentHeightRef.current = Math.ceil(stage.getBoundingClientRect().height);
+    }
+  }, [showingLoader, tabKey]);
+
+  useEffect(() => {
+    if (showingLoader) return;
+    const stage = stageRef.current;
+    if (!stage) return;
+    const timer = window.setTimeout(() => {
+      setReservedHeight(0);
+    }, MOTION_MS.normal);
+    return () => window.clearTimeout(timer);
+  }, [showingLoader, tabKey]);
+
   return (
-    <AnimatePresence initial={false} mode="wait">
-      <motion.div
-        key={tabKey}
-        className={cn("tab-motion-panel", className)}
-        initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: MOTION_ENTER.tabY }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: reducedMotion ? 0 : -2 }}
-        transition={{ duration, ease: easeOut }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <div
+      ref={stageRef}
+      className="tab-motion-stage"
+      style={{ minHeight: reservedHeight || (showingLoader ? previousContentHeightRef.current : undefined) || undefined }}
+    >
+      <AnimatePresence initial={false} mode="wait">
+        {showingLoader ? (
+          <motion.div
+            key={`loader:${tabKey}`}
+            className="tab-motion-loader"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onAnimationStart={finishLoaderAfterMinimum}
+            transition={{ duration: MOTION_MS.fast / 1000, ease: easeOut }}
+          >
+            <Loader variant="section" />
+          </motion.div>
+        ) : (
+          <motion.div
+            key={tabKey}
+            className={cn("tab-motion-panel", className)}
+            initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: MOTION_ENTER.tabY }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: reducedMotion ? 0 : -2 }}
+            transition={{ duration, ease: easeOut }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

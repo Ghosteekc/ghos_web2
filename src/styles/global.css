@@ -2879,6 +2879,15 @@
     min-height: 12rem;
   }
 
+  .tab-motion-stage {
+    @apply relative w-full min-w-0;
+  }
+
+  .tab-motion-loader {
+    @apply w-full min-w-0;
+    min-height: 10rem;
+  }
+
   .page-motion-panel,
   .tab-motion-panel {
     @apply w-full min-w-0;
