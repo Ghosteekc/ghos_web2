@@ -1,7 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { Loader } from "@/components/ui/Loader";
 import { cn } from "@/utils";
 import { isForceMotionEnabled } from "@/perf/bootstrap";
@@ -143,27 +142,22 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
         </motion.div>
       </TabLoadingContext.Provider>
 
-      {typeof document !== "undefined"
-        ? createPortal(
-            <AnimatePresence initial={false}>
-              {showingLoader ? (
-                <motion.div
-                  key={`loader:${tabKey}`}
-                  className="tab-motion-loader"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: MOTION_MS.fast / 1000, ease: easeOut }}
-                >
-                  <TabLoadingContext.Provider value={null}>
-                    <Loader variant="section" />
-                  </TabLoadingContext.Provider>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>,
-            document.body,
-          )
-        : null}
+      <AnimatePresence initial={false}>
+        {showingLoader ? (
+          <motion.div
+            key={`loader:${tabKey}`}
+            className="tab-motion-loader"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: MOTION_MS.fast / 1000, ease: easeOut }}
+          >
+            <TabLoadingContext.Provider value={null}>
+              <Loader variant="section" />
+            </TabLoadingContext.Provider>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
