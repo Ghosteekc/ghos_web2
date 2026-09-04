@@ -1,5 +1,6 @@
 import { MOTION_EASE, MOTION_ENTER, MOTION_MS } from "./tokens";
 import { useReducedMotion } from "framer-motion";
+import { isForceMotionEnabled } from "@/perf/bootstrap";
 
 const easeOut = [...MOTION_EASE.out] as [number, number, number, number];
 
@@ -8,7 +9,7 @@ const easeOut = [...MOTION_EASE.out] as [number, number, number, number];
  * Opacity + небольшой translateY — GPU-friendly, без тяжёлого exit.
  */
 export function useEnterMotionConfig(kind: "page" | "tab" = "page") {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = useReducedMotion() && !isForceMotionEnabled();
   const y = kind === "page" ? MOTION_ENTER.pageY : MOTION_ENTER.tabY;
 
   return {

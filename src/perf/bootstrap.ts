@@ -19,5 +19,8 @@ export function isForceMotionEnabled(): boolean {
 /** Синхронно до первого paint — без вспышки blur:none. */
 export function bootstrapPerfProfile(): void {
   if (typeof document === "undefined") return;
+  // Telegram WebView may expose reduce on ordinary devices. Ghosteek keeps
+  // one deliberate, lightweight motion language across desktop and mobile.
+  enableForceMotionIfNeeded();
   applyRenderProfile(detectInitialProfile(), null);
 }
