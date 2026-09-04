@@ -2884,8 +2884,10 @@
   }
 
   .tab-motion-loader {
-    @apply absolute inset-0 z-10 grid w-full min-w-0 place-items-center;
+    @apply fixed inset-0 z-[1000] grid w-full min-w-0 place-items-center;
     min-height: 10rem;
+    pointer-events: none;
+    padding-bottom: 4.5rem;
   }
 
   /* A tab handoff owns exactly one mascot. Lazy panel code and data can still

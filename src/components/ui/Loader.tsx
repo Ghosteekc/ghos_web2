@@ -28,6 +28,8 @@ interface LoaderProps {
   intervalMs?: number;
   /** Короткая подпись для section-лоадера */
   label?: string;
+  /** Сообщать родительскому переходу вкладки о локальной загрузке. */
+  registerTabLoader?: boolean;
 }
 
 type LoadingRobotSize = "page" | "section" | "compact" | "inline";
@@ -52,8 +54,9 @@ function SectionLoader({
   label = "Загрузка",
   compact = false,
   inline = false,
-}: Pick<LoaderProps, "showLabel" | "className" | "label" | "compact" | "inline">) {
-  useTabLoaderRegistration();
+  registerTabLoader = true,
+}: Pick<LoaderProps, "showLabel" | "className" | "label" | "compact" | "inline" | "registerTabLoader">) {
+  useTabLoaderRegistration(registerTabLoader);
 
   return (
     <div
@@ -83,6 +86,7 @@ const Loader = ({
   items = DEFAULT_LOADING_ITEMS,
   intervalMs = 1200,
   label = "Загрузка",
+  registerTabLoader = true,
 }: LoaderProps) => {
   const [index, setIndex] = useState(0);
 
@@ -104,6 +108,7 @@ const Loader = ({
         label={label}
         compact={compact || inline}
         inline={inline}
+        registerTabLoader={registerTabLoader}
       />
     );
   }

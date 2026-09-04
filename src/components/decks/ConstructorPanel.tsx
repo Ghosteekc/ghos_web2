@@ -715,11 +715,23 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           </section>
         ) : null}
 
-        {loading ? <Loader variant="section" compact label={loadingLabel} /> : null}
+        {loading ? (
+          <Loader
+            variant="section"
+            compact
+            label={loadingLabel}
+            registerTabLoader={false}
+          />
+        ) : null}
         {error ? <ErrorState title={error} /> : null}
 
         {!loading && showTopResults && decks.length > 0 ? (
-          <div className="space-y-3">
+          <motion.div
+            className="space-y-3"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={motionTween.normal}
+          >
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-cr-gold" />
               <h3 className="text-base font-semibold text-cr-text">
@@ -732,11 +744,16 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {decks.map((deck, i) => renderDeckCard(deck, i))}
             </div>
-          </div>
+          </motion.div>
         ) : null}
 
         {!loading && showConstructorResults && decks.length > 0 && !alternativeDeck ? (
-          <div className="space-y-3">
+          <motion.div
+            className="space-y-3"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={motionTween.normal}
+          >
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-cr-gold" />
               <h3 className="text-base font-semibold text-cr-text">
@@ -746,7 +763,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {decks.map((deck, i) => renderDeckCard(deck, i))}
             </div>
-          </div>
+          </motion.div>
         ) : null}
 
         {!loading && showConstructorResults && coreConflict ? (
@@ -768,7 +785,12 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
         ) : null}
 
         {!loading && showConstructorResults && alternativeDeck ? (
-          <div className="space-y-3">
+          <motion.div
+            className="space-y-3"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={motionTween.normal}
+          >
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-cr-accent" />
               <h3 className="text-base font-semibold text-cr-text">Альтернативный вариант</h3>
@@ -779,7 +801,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {renderDeckCard(alternativeDeck, 0)}
             </div>
-          </div>
+          </motion.div>
         ) : null}
 
         {!loading &&
