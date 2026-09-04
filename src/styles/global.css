@@ -3088,6 +3088,15 @@
     }
   }
 
+  /* A handoff loader must be a single stable visual anchor. Keeping the
+     ambient float for full-page loading only prevents a second perceived
+     entrance while the tab content is being prepared. */
+  .section-loader .loading-robot {
+    animation: none;
+    transform: none;
+    will-change: auto;
+  }
+
   .ptr-spinner-spin {
     animation: ptr-spin 0.75s linear infinite;
   }

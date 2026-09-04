@@ -17,7 +17,10 @@ interface TabTransitionProps {
 }
 
 const easeOut = [...MOTION_EASE.out] as [number, number, number, number];
-const MINIMUM_LOADER_MS = 220;
+// The outgoing panel takes about one normal motion duration to leave. Hold the
+// handoff for that exit plus one short loader beat, rather than relying on a
+// Framer callback that can be skipped with AnimatePresence initial={false}.
+const HANDOFF_HOLD_MS = MOTION_MS.normal + MOTION_MS.fast;
 
 /**
  * Stable tab slot: keeps the previous panel visible through its short exit,
@@ -37,6 +40,17 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
   if (tabChanged) previousTabRef.current = tabKey;
   const showingLoader = tabChanged || loading || loaderKey === tabKey;
 
+  const scheduleLoaderRelease = (key: string) => {
+    if (loaderTimerRef.current !== null) {
+      window.clearTimeout(loaderTimerRef.current);
+    }
+
+    loaderTimerRef.current = window.setTimeout(() => {
+      loaderTimerRef.current = null;
+      setLoaderKey((current) => (current === key ? null : current));
+    }, HANDOFF_HOLD_MS);
+  };
+
   useEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true;
@@ -46,6 +60,7 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
     notifyPerfTransitionStart();
     setReservedHeight(previousContentHeightRef.current);
     setLoaderKey(tabKey);
+    scheduleLoaderRelease(tabKey);
 
     return () => {
       if (loaderTimerRef.current !== null) {
@@ -56,16 +71,10 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
   }, [tabKey]);
 
   useEffect(() => {
-    if (loading) setLoaderKey(tabKey);
+    if (!loading) return;
+    setLoaderKey(tabKey);
+    scheduleLoaderRelease(tabKey);
   }, [loading, tabKey]);
-
-  const finishLoaderAfterMinimum = () => {
-    if (loaderTimerRef.current !== null) return;
-    loaderTimerRef.current = window.setTimeout(() => {
-      loaderTimerRef.current = null;
-      setLoaderKey((current) => (current === tabKey ? null : current));
-    }, MINIMUM_LOADER_MS);
-  };
 
   useLayoutEffect(() => {
     const stage = stageRef.current;
@@ -102,7 +111,6 @@ export function TabTransition({ tabKey, loading = false, children, className }: 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onAnimationStart={finishLoaderAfterMinimum}
             transition={{ duration: MOTION_MS.fast / 1000, ease: easeOut }}
           >
             <Loader variant="section" />
