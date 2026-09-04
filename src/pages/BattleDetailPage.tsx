@@ -19,7 +19,13 @@ import {
 } from "lucide-react";
 import { Card, Button, Loader, LinearProgress, ErrorState, PageHeader, ElixirIcon } from "@/components/ui";
 import { CardTile, PlayerDeckGrid } from "@/components/cards";
-import { BattleLeagueBadgeLabel, BattleLeaguePair, formatLeagueStepChange, leagueStepDelta } from "@/components/battles/BattleLeagueMark";
+import {
+  BattleLeagueBadgeLabel,
+  BattleLeaguePair,
+  formatRankedProgressChange,
+  isAbsoluteChampionLeague,
+  rankedProgressDelta,
+} from "@/components/battles/BattleLeagueMark";
 import { api, ApiError } from "@/api/client";
 import { cacheGet, cacheHas } from "@/api/cache";
 import {
@@ -576,6 +582,7 @@ export function BattleDetailPage() {
   const detailedLocked = battle.detailed_unlocked === false || battle.pro_required === true;
   const hasElixirProfiles = Boolean(battle.user_elixir || battle.opponent_elixir);
   const showMatchupChip = !battle.match_difficulty;
+  const absoluteChampion = isAbsoluteChampionLeague(battle.user_league);
 
   // reasons[0] = outcome_summary; дальше — только контры (compact API) или старый полный список.
   // Не показываем строки, которые уже в summary / сложности матчапа.
@@ -692,15 +699,20 @@ export function BattleDetailPage() {
           {battle.is_ranked ? <BattleLeagueBadgeLabel className="text-xs" /> : null}
           <div
             className={cn(
-              "text-base font-bold",
+              "inline-flex items-center gap-1 text-base font-bold",
               getTrophyChangeColor(
-                battle.is_ranked ? leagueStepDelta(battle.won) : battle.trophy_change,
+                battle.is_ranked
+                  ? rankedProgressDelta(battle.won, battle.trophy_change, battle.user_league)
+                  : battle.trophy_change,
               ),
             )}
           >
             {battle.is_ranked
-              ? formatLeagueStepChange(battle.won)
+              ? formatRankedProgressChange(battle.won, battle.trophy_change, battle.user_league)
               : `${battle.trophy_change >= 0 ? "+" : ""}${battle.trophy_change} 🏆`}
+            {absoluteChampion ? (
+              <Trophy className="h-4 w-4 shrink-0 text-violet-400" aria-label="Кубки абсолютного чемпиона" />
+            ) : null}
           </div>
           {battle.crown_score ? (
             <div className="text-base text-cr-text font-semibold">Короны: {battle.crown_score}</div>

@@ -9,7 +9,13 @@ import type { BattleSummary, DeckCard } from "@/types";
 import { Card, ElixirIcon } from "@/components/ui";
 import { toDeckCards } from "@/components/cards/PlayerDeckGrid";
 import { useCardCatalog } from "@/hooks/CardCatalogProvider";
-import { BattleLeagueBadgeLabel, BattleLeaguePair, formatLeagueStepChange, leagueStepDelta } from "@/components/battles/BattleLeagueMark";
+import {
+  BattleLeagueBadgeLabel,
+  BattleLeaguePair,
+  formatRankedProgressChange,
+  isAbsoluteChampionLeague,
+  rankedProgressDelta,
+} from "@/components/battles/BattleLeagueMark";
 
 interface BattleCardSimpleProps {
   summary: BattleSummary;
@@ -123,6 +129,7 @@ function BattleCardSimpleInner({ summary, onOpen }: BattleCardSimpleProps) {
     [opponentCards, getCard],
   );
   const fallbackAvg = summary.avg_elixir != null && summary.avg_elixir > 0 ? summary.avg_elixir : null;
+  const absoluteChampion = isAbsoluteChampionLeague(summary.user_league);
 
   return (
     <Card
@@ -151,15 +158,20 @@ function BattleCardSimpleInner({ summary, onOpen }: BattleCardSimpleProps) {
           </div>
           <span
             className={cn(
-              "text-base font-bold",
+              "inline-flex items-center gap-1 text-base font-bold",
               getTrophyChangeColor(
-                summary.is_ranked ? leagueStepDelta(summary.won) : summary.trophy_change,
+                summary.is_ranked
+                  ? rankedProgressDelta(summary.won, summary.trophy_change, summary.user_league)
+                  : summary.trophy_change,
               ),
             )}
           >
             {summary.is_ranked
-              ? formatLeagueStepChange(summary.won)
+              ? formatRankedProgressChange(summary.won, summary.trophy_change, summary.user_league)
               : `${summary.trophy_change >= 0 ? "+" : ""}${summary.trophy_change} 🏆`}
+            {absoluteChampion ? (
+              <Trophy className="h-4 w-4 shrink-0 text-violet-400" aria-label="Кубки абсолютного чемпиона" />
+            ) : null}
           </span>
         </div>
 

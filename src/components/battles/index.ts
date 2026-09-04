@@ -1,2 +1,10 @@
 export { BattleCardSimple } from "./BattleCard";
-export { BattleLeagueBadgeLabel, BattleLeaguePair, formatLeagueStepChange, leagueStepDelta } from "./BattleLeagueMark";
+export {
+  BattleLeagueBadgeLabel,
+  BattleLeaguePair,
+  formatRankedProgressChange,
+  formatLeagueStepChange,
+  isAbsoluteChampionLeague,
+  leagueStepDelta,
+  rankedProgressDelta,
+} from "./BattleLeagueMark";

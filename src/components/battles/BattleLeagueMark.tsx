@@ -65,13 +65,41 @@ export function BattleLeaguePair({ user, opponent, compact = false, className }:
   );
 }
 
-/** В Path of Legends считаются ступени, не кубки. */
+/** В абсолютном чемпионе Ranked продолжает начислять сезонные кубки. */
+export function isAbsoluteChampionLeague(league: BattleLeagueBadge | null | undefined): boolean {
+  return league?.league_number === 7;
+}
+
+/** До абсолютного чемпиона в Path of Legends считаются ступени. */
 export function formatLeagueStepChange(won: boolean): string {
   return won ? "+1 ступень" : "−1 ступень";
 }
 
 export function leagueStepDelta(won: boolean): number {
   return won ? 1 : -1;
+}
+
+/** Формат и величина прогресса в Ranked: в абсолютном чемпионе — кубки. */
+export function formatRankedProgressChange(
+  won: boolean,
+  trophyChange: number,
+  league: BattleLeagueBadge | null | undefined,
+): string {
+  if (!isAbsoluteChampionLeague(league)) {
+    return formatLeagueStepChange(won);
+  }
+
+  const value = Number.isFinite(trophyChange) ? trophyChange : 0;
+  const sign = value > 0 ? "+" : value < 0 ? "−" : "";
+  return `${sign}${Math.abs(value)}`;
+}
+
+export function rankedProgressDelta(
+  won: boolean,
+  trophyChange: number,
+  league: BattleLeagueBadge | null | undefined,
+): number {
+  return isAbsoluteChampionLeague(league) ? trophyChange : leagueStepDelta(won);
 }
 
 export function BattleLeagueBadgeLabel({ className }: { className?: string }) {
