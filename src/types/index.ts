@@ -41,6 +41,18 @@ export interface CollectionCardEntry {
   icon_hero: string;
 }
 
+export interface CardCounterEntry {
+  name: string;
+  name_ru: string;
+}
+
+export interface CardCountersData {
+  card: string;
+  card_ru: string;
+  counters: CardCounterEntry[];
+  countered_by: CardCounterEntry[];
+}
+
 export interface CollectionMasteryEntry {
   card_name: string;
   card_name_ru: string;

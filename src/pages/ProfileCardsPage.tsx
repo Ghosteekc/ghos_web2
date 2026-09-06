@@ -2,12 +2,11 @@ import { useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowDown, ArrowLeft, ArrowUp } from "lucide-react";
 import { Card, Button, Loader, ErrorState, PageHeader } from "@/components/ui";
-import { CardTile } from "@/components/cards";
+import { CardCountersDialog, CardTile } from "@/components/cards";
 import { CollectionStatsGrid, type CollectionRarityFilter } from "@/components/profile/CollectionStatsGrid";
 import { usePlayerCollection } from "@/hooks/usePlayerCollection";
 import { usePageRefresh, useCardCatalog } from "@/hooks";
 import type { CollectionCardEntry } from "@/types";
-import { contextFromCard, openGhosteekAi } from "@/utils/aiPageContext";
 
 type SortMode = "rarity" | "level" | "elixir";
 type SortDirection = "asc" | "desc";
@@ -106,6 +105,7 @@ export function ProfileCardsPage() {
   const [rarityFilter, setRarityFilter] = useState<CollectionRarityFilter>("all");
   const [sortMode, setSortMode] = useState<SortMode>("rarity");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [selectedCard, setSelectedCard] = useState<CollectionCardEntry | null>(null);
 
   usePageRefresh(reload);
 
@@ -261,10 +261,8 @@ export function ProfileCardsPage() {
                   key={card.name}
                   type="button"
                   className={cnCardCell(card.owned) + " text-left"}
-                  title={`${card.name_ru} — инфо у Ghosteek`}
-                  onClick={() =>
-                    openGhosteekAi(navigate, contextFromCard(card.name, card.name_ru))
-                  }
+                  title={`${card.name_ru} — посмотреть контры`}
+                  onClick={() => setSelectedCard(card)}
                 >
                   <CardTile
                     name={card.name}
@@ -279,7 +277,7 @@ export function ProfileCardsPage() {
                     elixirCost={elixir < 99 ? elixir : undefined}
                   />
                   <span className="mt-1 block text-center text-2xs font-semibold text-cr-gold/90">
-                    Инфо
+                    Контры
                   </span>
                 </button>
               );
@@ -287,6 +285,7 @@ export function ProfileCardsPage() {
           )}
         </div>
       </Card>
+      <CardCountersDialog card={selectedCard} onClose={() => setSelectedCard(null)} />
     </div>
   );
 }

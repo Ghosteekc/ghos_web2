@@ -4,6 +4,8 @@ import {
 
   PlayerCollectionData,
 
+  CardCountersData,
+
   BattleSummary,
 
   BattleDetail,
@@ -697,6 +699,13 @@ export const api = {
 
   getPlayerCollection: () =>
     cachedGet<PlayerCollectionData>("player-collection-v13", "/api/profile/collection", TTL.profile),
+
+  getCardCounters: (cardName: string) =>
+    cachedGet<CardCountersData>(
+      `card-counters-v1:${cardName.toLowerCase()}`,
+      `/api/cards/${encodeURIComponent(cardName)}/counters`,
+      TTL.stats,
+    ),
 
   getProStatus: (opts?: { fresh?: boolean }) => {
     if (opts?.fresh) cacheInvalidate(PRO_STATUS_KEY);
