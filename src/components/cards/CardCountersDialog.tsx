@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { api, ApiError } from "@/api/client";
@@ -58,7 +59,16 @@ export function CardCountersDialog({ card, onClose }: CardCountersDialogProps) {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [card, onClose]);
 
-  return (
+  useEffect(() => {
+    if (!card) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [card]);
+
+  const dialog = (
     <AnimatePresence>
       {card ? (
         <motion.div
@@ -113,4 +123,8 @@ export function CardCountersDialog({ card, onClose }: CardCountersDialogProps) {
       ) : null}
     </AnimatePresence>
   );
+
+  // Страница анимируется через transform, поэтому диалог должен жить вне
+  // её дерева: иначе fixed-позиционирование привязывается к низу страницы.
+  return createPortal(dialog, document.body);
 }
