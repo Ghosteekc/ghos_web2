@@ -702,7 +702,7 @@ export const api = {
 
   getCardCounters: (cardName: string) =>
     cachedGet<CardCountersData>(
-      `card-counters-v1:${cardName.toLowerCase()}`,
+      `card-counters-v2:${cardName.toLowerCase()}`,
       `/api/cards/${encodeURIComponent(cardName)}/counters`,
       TTL.stats,
     ),
