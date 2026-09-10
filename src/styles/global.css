@@ -3009,7 +3009,7 @@
   }
 
   .loading-robot {
-    --loading-robot-size: 3.8rem;
+    --loading-robot-size: 4.1rem;
     position: relative;
     width: var(--loading-robot-size);
     height: var(--loading-robot-size);
