@@ -200,9 +200,8 @@ export function AnalyticsPage() {
             Ghosteek AI
           </Button>
         }
-      >
-        {refreshing ? <p className="text-xs text-cr-muted">Обновление данных…</p> : null}
-      </PageHeader>
+      />
+      {refreshing ? <span className="sr-only" role="status">Обновление данных…</span> : null}
 
       <FeatureNavGrid
         items={[...ANALYTICS_NAV]}
