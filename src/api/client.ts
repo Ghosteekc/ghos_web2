@@ -3,6 +3,7 @@ import {
   Profile,
 
   PlayerCollectionData,
+  MetaUpgradeRecommendationsData,
 
   CardCountersData,
 
@@ -698,7 +699,14 @@ export const api = {
   },
 
   getPlayerCollection: () =>
-    cachedGet<PlayerCollectionData>("player-collection-v13", "/api/profile/collection", TTL.profile),
+    cachedGet<PlayerCollectionData>("player-collection-v14", "/api/profile/collection", TTL.profile),
+
+  getMetaUpgradePriorities: () =>
+    cachedGet<MetaUpgradeRecommendationsData>(
+      "meta-upgrade-priorities-v1",
+      "/api/profile/upgrade-priorities",
+      TTL.stats,
+    ),
 
   getCardCounters: (cardName: string) =>
     cachedGet<CardCountersData>(

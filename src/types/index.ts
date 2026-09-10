@@ -1,5 +1,7 @@
 export interface PlayerCollectionData {
   cards: CollectionCardEntry[];
+  /** Exact card names from the player's equipped Clash Royale currentDeck. */
+  current_deck: string[];
   cards_owned: number;
   cards_total: number;
   masteries: CollectionMasteryEntry[];
@@ -12,6 +14,28 @@ export interface PlayerCollectionData {
   rare_count: number;
   common_count: number;
   cards_by_level: CardLevelCount[];
+}
+
+export interface MetaUpgradePriorityCard {
+  name: string;
+  name_ru: string;
+  icon: string;
+  level: number;
+  recommended_level: number;
+  deficit: number;
+  meta_deck_count: number;
+  observed_games: number;
+  meta_win_rate: number | null;
+}
+
+export interface MetaUpgradeRecommendationsData {
+  status: "ok" | "meta_unavailable" | "deck_unavailable" | "no_matching_cards";
+  message: string | null;
+  arena: number;
+  recommended_level: number;
+  updated_at: string | null;
+  sample_note: string;
+  cards: MetaUpgradePriorityCard[];
 }
 
 export interface CardLevelCount {
