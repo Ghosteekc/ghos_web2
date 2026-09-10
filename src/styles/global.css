@@ -238,9 +238,10 @@
   }
 
   .startup-screen__robot-image {
-    animation: robot-float 2.9s var(--ui-ease-out) infinite alternate;
-    animation-delay: 0.52s;
-    will-change: transform;
+    /* The entrance is owned by the wrapper. A second float here used to begin
+       midway through it and made the mascot look as if it jumped twice. */
+    animation: none;
+    will-change: auto;
   }
 
   .startup-screen__title {
@@ -3008,7 +3009,7 @@
   }
 
   .loading-robot {
-    --loading-robot-size: 3.4rem;
+    --loading-robot-size: 3.8rem;
     position: relative;
     width: var(--loading-robot-size);
     height: var(--loading-robot-size);

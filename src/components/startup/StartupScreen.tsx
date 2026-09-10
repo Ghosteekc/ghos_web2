@@ -30,11 +30,11 @@ export function StartupScreen({ onComplete }: StartupScreenProps) {
         <motion.div
           className="startup-screen__robot"
           initial={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: 5 }}
-          animate={reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: [0, -3, 0] }}
+          animate={reducedMotion ? { opacity: 1 } : { opacity: 1, scale: 1, y: 0 }}
           transition={
             reducedMotion
               ? { duration: 0.16, ease: easeOut }
-              : { duration: 0.62, ease: easeOut, times: [0, 0.62, 1] }
+              : { duration: 0.62, ease: easeOut }
           }
           aria-hidden
         >
