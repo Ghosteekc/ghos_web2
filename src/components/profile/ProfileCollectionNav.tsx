@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Layers, Sparkles, Search } from "lucide-react";
+import { Layers, Sparkles, Search, Users } from "lucide-react";
 import { NavRowButton } from "@/components/ui";
 
 const ITEMS = [
@@ -23,12 +23,23 @@ const ITEMS = [
   },
 ] as const;
 
-export function ProfileCollectionNav() {
+export function ProfileCollectionNav({ hasLinkedPlayer }: { hasLinkedPlayer: boolean }) {
   const navigate = useNavigate();
+  const items = hasLinkedPlayer
+    ? [
+        {
+          to: "/profile/clan",
+          label: "Мой клан",
+          hint: "Состав и донаты за текущую неделю",
+          icon: Users,
+        },
+        ...ITEMS,
+      ]
+    : ITEMS;
 
   return (
     <div className="space-y-2">
-      {ITEMS.map((item) => (
+      {items.map((item) => (
         <NavRowButton
           key={item.to}
           icon={item.icon}

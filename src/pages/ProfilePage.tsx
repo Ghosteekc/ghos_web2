@@ -130,7 +130,7 @@ export function ProfilePage({ onInitialLoadComplete }: ProfilePageProps) {
         </Card>
       )}
 
-      <ProfileCollectionNav />
+      <ProfileCollectionNav hasLinkedPlayer={profile?.player_tag != null} />
 
       <SupercellDisclaimer />
     </div>

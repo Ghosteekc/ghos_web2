@@ -228,6 +228,35 @@ export interface BattleLeagueBadge {
   starting_trophies?: number | null;
 }
 
+export type ClanMemberSort = "rank" | "activity_desc" | "activity_asc";
+
+export interface ClanMember {
+  tag: string;
+  name: string;
+  role: string;
+  trophies: number;
+  donations: number;
+  donations_received: number;
+  clan_rank: number | null;
+  previous_clan_rank: number | null;
+}
+
+export interface ClanProfile {
+  status: "available" | "no_clan";
+  clan: {
+    tag: string;
+    name: string;
+    description: string | null;
+    members: number | null;
+    clan_score: number | null;
+    clan_war_trophies: number | null;
+    required_trophies: number | null;
+    donations_per_week: number | null;
+  } | null;
+  members: ClanMember[];
+  activity_basis: string | null;
+}
+
 export interface BattleSummary {
   index: number;
   opponent_name: string;

@@ -48,6 +48,8 @@ import {
   SynergyData,
   ConstructorData,
   ConstructorTopMatchData,
+  ClanMemberSort,
+  ClanProfile,
 } from "@/types";
 
 import { cacheGet, cacheSet, cacheInvalidate, cacheHas, inflight, TTL, sleep, lsGet, lsSet, lsClearAll, applyLinkedPlayerTag } from "./cache";
@@ -698,6 +700,13 @@ export const api = {
     return profile;
   },
 
+  getMyClan: (sort: ClanMemberSort = "rank") =>
+    cachedGet<ClanProfile>(
+      `clan-profile-v1:${sort}`,
+      `/api/profile/clan?sort=${sort}`,
+      TTL.profile,
+    ),
+
   getPlayerCollection: () =>
     cachedGet<PlayerCollectionData>("player-collection-v14", "/api/profile/collection", TTL.profile),
 
@@ -1116,5 +1125,4 @@ export const api = {
     return res.blob();
   },
 };
-
 

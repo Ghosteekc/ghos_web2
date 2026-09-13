@@ -19,6 +19,7 @@ const DecksPage = lazy(loadDecksPage);
 const BattlesPage = lazy(loadBattlesPage);
 const ProfileCardsPage = lazy(() => import("@/pages/ProfileCardsPage"));
 const ProfileMasteryPage = lazy(() => import("@/pages/ProfileMasteryPage"));
+const ClanPage = lazy(() => import("@/pages/ClanPage"));
 const DeckComparePage = lazy(() => import("@/pages/DeckComparePage"));
 const MineDeckStatsPage = lazy(() => import("@/pages/MineDeckStatsPage"));
 const BattleDetailPage = lazy(() => import("@/pages/BattleDetailPage"));
@@ -90,6 +91,14 @@ export default function App() {
             element={
               <LazyPage>
                 <ProfileMasteryPage />
+              </LazyPage>
+            }
+          />
+          <Route
+            path="profile/clan"
+            element={
+              <LazyPage>
+                <ClanPage />
               </LazyPage>
             }
           />
