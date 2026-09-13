@@ -97,7 +97,7 @@ export function ClanPage() {
         iconTone: "bg-violet-500/15 text-violet-300 border-violet-400/25",
       },
       {
-        label: "Донаты за неделю",
+        label: "Пожертвования",
         value: clan.donations_per_week != null ? formatNumber(clan.donations_per_week) : "—",
         icon: Gift,
         tone: "border-cr-win/30 from-cr-win/15 to-cr-win/5",
