@@ -79,50 +79,64 @@ export function ClanPage() {
         label: "Участники",
         value: clan.members != null ? `${clan.members} / 50` : `${data.members.length} / 50`,
         icon: Users,
+        tone: "border-cr-blue/30 from-cr-blue/20 to-cr-blue/5",
+        iconTone: "bg-cr-blue/15 text-cr-blue border-cr-blue/25",
       },
       {
         label: "Clan Score",
         value: clan.clan_score != null ? formatNumber(clan.clan_score) : "—",
         icon: Trophy,
+        tone: "border-cr-gold/30 from-cr-gold/20 to-cr-gold/5",
+        iconTone: "bg-cr-gold/15 text-cr-gold border-cr-gold/25",
       },
       {
-        label: "Кубки клановой войны",
+        label: "Кубки войны",
         value: clan.clan_war_trophies != null ? formatNumber(clan.clan_war_trophies) : "—",
         icon: Shield,
+        tone: "border-violet-400/25 from-violet-500/15 to-violet-500/5",
+        iconTone: "bg-violet-500/15 text-violet-300 border-violet-400/25",
       },
       {
         label: "Донаты за неделю",
         value: clan.donations_per_week != null ? formatNumber(clan.donations_per_week) : "—",
         icon: Gift,
+        tone: "border-cr-win/30 from-cr-win/15 to-cr-win/5",
+        iconTone: "bg-cr-win/15 text-cr-win border-cr-win/25",
       },
     ];
 
     content = (
       <div className="space-y-5">
-        <Card>
-          <div className="flex items-start gap-3">
-            <div className="w-12 h-12 shrink-0 rounded-xl bg-cr-blue/15 border border-cr-blue/30 flex items-center justify-center">
+        <Card className="relative overflow-hidden border-cr-blue/30 shadow-glow">
+          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-br from-cr-blue/25 via-cr-blue/5 to-cr-gold/10 pointer-events-none" />
+          <div className="absolute -right-10 -top-12 w-36 h-36 rounded-full bg-cr-gold/10 blur-2xl pointer-events-none" />
+          <div className="relative flex items-start gap-3">
+            <div className="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br from-cr-blue/30 to-cr-blue/5 border border-cr-blue/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_7px_16px_rgba(0,0,0,0.2)] flex items-center justify-center">
               <Shield className="w-6 h-6 text-cr-blue" />
             </div>
             <div className="min-w-0">
               <h2 className="text-xl font-extrabold text-cr-text truncate">{clan.name}</h2>
-              <p className="text-xs text-cr-accent font-bold font-mono mt-1">{clan.tag}</p>
+              <p className="inline-flex mt-1 px-2 py-0.5 rounded-md bg-cr-blue/10 border border-cr-blue/20 text-xs text-cr-accent font-bold font-mono">{clan.tag}</p>
             </div>
           </div>
-          {clan.description ? <p className="text-sm text-cr-muted mt-4">{clan.description}</p> : null}
-          <div className="grid grid-cols-2 gap-3 mt-5">
-            {overview.map(({ label, value, icon: Icon }) => (
-              <div key={label} className="rounded-xl bg-cr-bg/50 border border-cr-border px-3 py-2.5 min-w-0">
-                <div className="flex items-center gap-1.5 text-cr-muted">
-                  <Icon className="w-3.5 h-3.5" />
+          {clan.description ? <p className="relative text-sm text-cr-muted mt-4 leading-relaxed">{clan.description}</p> : null}
+          <div className="relative grid grid-cols-2 gap-3 mt-5">
+            {overview.map(({ label, value, icon: Icon, tone, iconTone }) => (
+              <div key={label} className={`rounded-2xl bg-gradient-to-br ${tone} border px-3 py-3 min-w-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_7px_16px_rgba(0,0,0,0.16)]`}>
+                <div className="flex items-center gap-2 text-cr-muted">
+                  <span className={`w-6 h-6 shrink-0 rounded-lg border flex items-center justify-center ${iconTone}`}>
+                    <Icon className="w-3.5 h-3.5" />
+                  </span>
                   <span className="text-xs truncate">{label}</span>
                 </div>
-                <p className="text-base font-bold text-cr-text mt-1 truncate">{value}</p>
+                <p className="text-lg font-extrabold text-cr-text mt-2 truncate">{value}</p>
               </div>
             ))}
           </div>
           {clan.required_trophies != null ? (
-            <p className="text-xs text-cr-muted mt-4">Вход от {formatNumber(clan.required_trophies)} трофеев</p>
+            <p className="relative inline-flex items-center gap-1.5 text-xs text-cr-muted mt-4 px-2.5 py-1.5 rounded-lg bg-cr-bg/35 border border-cr-border">
+              <Trophy className="w-3.5 h-3.5 text-cr-gold" /> Вход от {formatNumber(clan.required_trophies)} трофеев
+            </p>
           ) : null}
         </Card>
 
@@ -151,17 +165,28 @@ export function ClanPage() {
             ))}
           </div>
 
-          <Card className="!p-0 mt-2" noMotion>
+          <Card className="!p-0 mt-2 border-cr-blue/20 shadow-[0_10px_24px_rgba(0,0,0,0.14)]" noMotion>
             {data.members.map((member, index) => (
               <div
                 key={member.tag}
-                className={"flex items-center gap-3 px-4 py-3 " + (index > 0 ? "border-t border-cr-border" : "")}
+                className={
+                  "flex items-center gap-3 px-4 py-3 " +
+                  (index > 0 ? "border-t border-cr-border" : "") +
+                  (member.tag === data.current_player_tag
+                    ? " bg-gradient-to-r from-cr-blue/20 via-cr-blue/10 to-transparent shadow-[inset_3px_0_0_rgb(var(--cr-blue))]"
+                    : "")
+                }
               >
                 <span className="w-6 text-center text-xs font-mono text-cr-muted shrink-0">
                   {member.clan_rank ?? "—"}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-cr-text truncate">{member.name}</p>
+                  <p className="text-sm font-bold text-cr-text truncate">
+                    {member.name}
+                    {member.tag === data.current_player_tag ? (
+                      <span className="ml-2 text-xs font-semibold text-cr-blue">Вы</span>
+                    ) : null}
+                  </p>
                   <p className="text-xs text-cr-muted truncate">{ROLE_LABELS[member.role] ?? member.role}</p>
                 </div>
                 <div className="text-right shrink-0">

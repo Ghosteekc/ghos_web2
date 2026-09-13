@@ -243,6 +243,7 @@ export interface ClanMember {
 
 export interface ClanProfile {
   status: "available" | "no_clan";
+  current_player_tag: string | null;
   clan: {
     tag: string;
     name: string;
