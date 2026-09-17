@@ -248,8 +248,8 @@ function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
           </li>
           <li>Когда все 4 карты на месте, Ghosteek соберёт полные колоды.</li>
           <li>
-            Включи «Колоды топ-игроков», чтобы сразу видеть готовые колоды из
-            топ-500 с винрейтом и числом боёв.
+            Включи «Только метовые колоды», чтобы видеть готовые колоды топ-500
+            и актуальной меты с винрейтом и числом боёв.
           </li>
         </ul>
         <Button variant="primary" className="w-full mt-4" onClick={onClose}>
@@ -276,7 +276,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const [browserTab, setBrowserTab] = useState<BrowserTab>("all");
   /** Если true — в браузере только карты, подходящие под активный слот (evo/hero/…). */
   const [slotFilterOnly, setSlotFilterOnly] = useState(false);
-  /** Если true — показываем готовые колоды топ-игроков вместо генерации. */
+  /** Если true — показываем готовые колоды из топ-500 и меты вместо генерации. */
   const [topDeckFilter, setTopDeckFilter] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [catalog, setCatalog] = useState<CatalogCard[]>([]);
@@ -481,7 +481,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
   const showBrowser = filledCount < 4;
   const showTopResults = topDeckFilter && selectedNames.length > 0;
   const showConstructorResults = !topDeckFilter && filledCount === 4;
-  const loadingLabel = topDeckFilter ? "Ищем колоды топ-игроков…" : "Собираем колоды…";
+  const loadingLabel = topDeckFilter ? "Ищем метовые колоды…" : "Собираем колоды…";
 
   if (!ready && !catalog.length) {
     return <Loader variant="section" />;
@@ -596,12 +596,12 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
 
         <div className="ctor-top-filter">
           <div className="ctor-top-filter-copy">
-            <p className="ctor-top-filter-title">Колоды топ-игроков</p>
-            <p className="ctor-top-filter-hint">Сопоставление с топ-500</p>
+            <p className="ctor-top-filter-title">Только метовые колоды</p>
+            <p className="ctor-top-filter-hint">Топ-игроки и мета</p>
           </div>
           <Toggle
             checked={topDeckFilter}
-            aria-label="Колоды топ-игроков"
+            aria-label="Только метовые колоды"
             onChange={(checked) => {
               haptic.selection();
               setTopDeckFilter(checked);
@@ -735,11 +735,11 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-cr-gold" />
               <h3 className="text-base font-semibold text-cr-text">
-                Колоды топ-игроков ({decks.length})
+                Метовые колоды ({decks.length})
               </h3>
             </div>
             <p className="text-sm text-cr-muted">
-              Готовые колоды из топ-500, где есть выбранные карты
+              Колоды топ-500 и актуальной меты, где есть выбранные карты
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
               {decks.map((deck, i) => renderDeckCard(deck, i))}
@@ -814,7 +814,7 @@ export function ConstructorPanel({ renderDeckCard }: ConstructorPanelProps) {
           <EmptyState
             title={
               topDeckFilter
-                ? "Нет колод топ-игроков с такими картами"
+                ? "Нет метовых колод с такими картами"
                 : "Не удалось подобрать колоды для этой комбинации"
             }
             className="py-6"
