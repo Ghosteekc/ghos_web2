@@ -772,9 +772,21 @@ export interface BattleInsight {
 export interface InsightsData {
   insights: BattleInsight[];
   patterns: string[];
+  threats: LossThreatInsight[];
   sample_size: number;
   wins: number;
   losses: number;
+}
+
+export interface LossThreatInsight {
+  card: string;
+  card_ru: string;
+  losses: number;
+  counter_status: "strong" | "partial" | "missing";
+  strong_counters: string[];
+  partial_counters: string[];
+  win_conditions: string[];
+  tactics: string[];
 }
 
 export interface SearchResult {

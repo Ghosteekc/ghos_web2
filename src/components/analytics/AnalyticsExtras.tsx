@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, Swords, Wand2, ChevronDown, ChevronUp, RefreshCw, ExternalLink, Brain, ChevronRight, ScanSearch, BarChart3 } from "lucide-react";
+import { Shield, Swords, Wand2, ChevronDown, ChevronUp, RefreshCw, ExternalLink, Brain, ChevronRight, ScanSearch, BarChart3, Target } from "lucide-react";
 import { api, ApiError, isProRequiredError } from "@/api/client";
 import { cacheGet, cacheHas, cacheInvalidate } from "@/api/cache";
 import { Card, Button, Loader, ErrorState, EmptyState } from "@/components/ui";
@@ -586,7 +586,7 @@ export function LossAnalysisPanel() {
     return <AnalyticsPanelReveal loading={false}><EmptyState title="Сыграй бои — здесь появится разбор твоих поражений" /></AnalyticsPanelReveal>;
   }
 
-  if (!insights.patterns.length && !lossInsights.length) {
+  if (!insights.patterns.length && !insights.threats.length && !lossInsights.length) {
     return <AnalyticsPanelReveal loading={false}><EmptyState title="Сыграй бои — здесь появится разбор твоих поражений" /></AnalyticsPanelReveal>;
   }
 
@@ -609,6 +609,62 @@ export function LossAnalysisPanel() {
             </p>
           ))}
         </div>
+      ) : null}
+
+      {insights.threats.length ? (
+        <section className="mb-4" aria-labelledby="loss-threats-heading">
+          <div className="flex items-center gap-2 mb-2">
+            <Target className="w-4 h-4 text-cr-gold" />
+            <h4 id="loss-threats-heading" className="text-sm font-semibold text-cr-text">
+              Частые угрозы
+            </h4>
+          </div>
+          <div className="space-y-2">
+            {insights.threats.map((threat) => {
+              const counters = threat.strong_counters.length
+                ? threat.strong_counters
+                : threat.partial_counters;
+              const counterText = threat.counter_status === "strong"
+                ? `Сильный ответ в этой колоде: ${counters.join(", ")}`
+                : threat.counter_status === "partial"
+                  ? `Частичный ответ в этой колоде: ${counters.join(", ")}`
+                  : "В этой колоде нет подтверждённого ответа.";
+              const tone = threat.counter_status === "strong"
+                ? "text-cr-win bg-cr-win/10 border-cr-win/20"
+                : threat.counter_status === "partial"
+                  ? "text-cr-gold bg-cr-gold/10 border-cr-gold/20"
+                  : "text-cr-loss bg-cr-loss/10 border-cr-loss/20";
+              return (
+                <article key={threat.card} className="rounded-xl border border-cr-border bg-cr-surface/50 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-cr-text">{threat.card_ru}</p>
+                      <p className="text-xs text-cr-muted mt-0.5">
+                        Встречалась в {threat.losses} {threat.losses === 1 ? "поражении" : "поражениях"}
+                      </p>
+                    </div>
+                    <span className={`shrink-0 rounded-full border px-2 py-1 text-[11px] font-semibold ${tone}`}>
+                      {threat.counter_status === "strong" ? "Ответ есть" : threat.counter_status === "partial" ? "Слабый ответ" : "Нет ответа"}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xs leading-snug text-cr-accent">{counterText}</p>
+                  {threat.win_conditions.length ? (
+                    <p className="mt-1 text-xs text-cr-muted">
+                      Игра от: {threat.win_conditions.join(", ")}
+                    </p>
+                  ) : null}
+                  {threat.tactics.length ? (
+                    <ul className="mt-2 space-y-1 border-t border-cr-border/70 pt-2">
+                      {threat.tactics.map((tip) => (
+                        <li key={tip} className="text-xs leading-snug text-cr-accent/90">• {tip}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+        </section>
       ) : null}
 
       <div className="space-y-3">
