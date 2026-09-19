@@ -142,6 +142,31 @@ export function AnalyticsPage() {
     return { gained, lost };
   }, [lastResults]);
 
+  const leagueResults = useMemo(() => {
+    const items = stats?.league_results ?? [];
+    return items.map((r, index) => {
+      const trophyChange = Number(r.trophy_change) || 0;
+      return {
+        index,
+        trophyChange,
+        won: r.won,
+        opponentName: r.opponent_name ?? "Соперник",
+        playedDate: r.played_date ?? "",
+        playedTime: r.played_time ?? "",
+      };
+    });
+  }, [stats?.league_results]);
+
+  const leagueTotals = useMemo(() => {
+    let gained = 0;
+    let lost = 0;
+    for (const point of leagueResults) {
+      if (point.trophyChange > 0) gained += point.trophyChange;
+      else if (point.trophyChange < 0) lost += -point.trophyChange;
+    }
+    return { gained, lost };
+  }, [leagueResults]);
+
   const winrateByDay = useMemo(() => {
     const items = stats?.winrate_by_day ?? [];
     return [...items]
@@ -248,27 +273,30 @@ export function AnalyticsPage() {
               </ChartTooltipAnchor>
             </Card>
 
-            <Card>
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <h3 className="chart-section-title text-base font-semibold text-cr-text">Рост трофеев</h3>
-                {lastResults.length > 0 ? (
-                  <div className="text-right shrink-0 leading-tight">
-                    <p className="text-sm font-bold text-cr-win">+{trophyTotals.gained}</p>
-                    <p className="text-sm font-bold text-cr-loss">−{trophyTotals.lost}</p>
-                  </div>
-                ) : null}
+            {stats.is_absolute_champion ? (
+              <div className="lg:col-span-2 space-y-5">
+                <ProgressChartCard
+                  title="Рост трофеев"
+                  subtitle="Trophy Road · до 40 последних · веди пальцем, тап — закрепить"
+                  data={lastResults}
+                  totals={trophyTotals}
+                />
+                <ProgressChartCard
+                  title="Рост кубков лиги"
+                  subtitle="Легендарный путь · до 40 последних · веди пальцем, тап — закрепить"
+                  data={leagueResults}
+                  totals={leagueTotals}
+                  league
+                />
               </div>
-              <p className="text-xs text-cr-muted mb-3">
-                Рейтинговые 1v1 · до 40 последних · веди пальцем, тап — закрепить
-              </p>
-              <ChartTooltipAnchor className="h-[190px]" pointCount={lastResults.length}>
-                {lastResults.length > 0 ? (
-                  <TrophyGrowthChart data={lastResults} />
-                ) : (
-                  <p className="text-cr-muted text-base text-center pt-10">Недостаточно рейтинговых боёв</p>
-                )}
-              </ChartTooltipAnchor>
-            </Card>
+            ) : (
+              <ProgressChartCard
+                title="Рост трофеев"
+                subtitle="Trophy Road · до 40 последних · веди пальцем, тап — закрепить"
+                data={lastResults}
+                totals={trophyTotals}
+              />
+            )}
           </div>
         </div>
       ) : null}
@@ -311,7 +339,45 @@ export function AnalyticsPage() {
 
 export { AnalyticsPage as default };
 
-function TrophyGrowthChart({ data }: { data: TrophyChartPoint[] }) {
+function ProgressChartCard({
+  title,
+  subtitle,
+  data,
+  totals,
+  league = false,
+}: {
+  title: string;
+  subtitle: string;
+  data: TrophyChartPoint[];
+  totals: { gained: number; lost: number };
+  league?: boolean;
+}) {
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-3 mb-2">
+        <h3 className="chart-section-title text-base font-semibold text-cr-text">{title}</h3>
+        {data.length > 0 ? (
+          <div className="text-right shrink-0 leading-tight">
+            <p className="text-sm font-bold text-cr-win">+{totals.gained}</p>
+            <p className="text-sm font-bold text-cr-loss">−{totals.lost}</p>
+          </div>
+        ) : null}
+      </div>
+      <p className="text-xs text-cr-muted mb-3">{subtitle}</p>
+      <ChartTooltipAnchor className="h-[190px]" pointCount={data.length}>
+        {data.length > 0 ? (
+          <TrophyGrowthChart data={data} league={league} />
+        ) : (
+          <p className="text-cr-muted text-base text-center pt-10">
+            {league ? "Нет боёв в Легендарном пути" : "Недостаточно боёв на Trophy Road"}
+          </p>
+        )}
+      </ChartTooltipAnchor>
+    </Card>
+  );
+}
+
+function TrophyGrowthChart({ data, league = false }: { data: TrophyChartPoint[]; league?: boolean }) {
   const scrub = useChartScrub();
   const gridStroke = useChartGridStroke();
   const point = scrub.activeIndex != null ? data[scrub.activeIndex] : null;
@@ -322,6 +388,8 @@ function TrophyGrowthChart({ data }: { data: TrophyChartPoint[] }) {
   if (scrub.coordinate) stickyCoordRef.current = scrub.coordinate;
   const tipPoint = point ?? stickyPointRef.current;
   const tipCoord = scrub.coordinate ?? stickyCoordRef.current;
+  const color = league ? "#a78bfa" : "#fbbf24";
+  const label = league ? "кубков лиги" : "кубков";
 
   return (
     <>
@@ -341,11 +409,11 @@ function TrophyGrowthChart({ data }: { data: TrophyChartPoint[] }) {
           <Line
             type="monotone"
             dataKey="trophyChange"
-            name="Кубки"
-            stroke="#fbbf24"
+            name={league ? "Кубки лиги" : "Кубки"}
+            stroke={color}
             strokeWidth={2}
             isAnimationActive={false}
-            dot={{ fill: "#fbbf24", r: 3 }}
+            dot={{ fill: color, r: 3 }}
             activeDot={false}
           />
         </LineChart>
@@ -368,7 +436,7 @@ function TrophyGrowthChart({ data }: { data: TrophyChartPoint[] }) {
           </p>
           <p className={tipPoint.trophyChange >= 0 ? "text-cr-win font-bold mt-1" : "text-cr-loss font-bold mt-1"}>
             {tipPoint.trophyChange > 0 ? "+" : ""}
-            {tipPoint.trophyChange} кубков
+            {tipPoint.trophyChange} {label}
           </p>
           <p className="text-cr-muted mt-0.5">{tipPoint.won ? "Победа" : "Поражение"}</p>
         </ChartGlassTooltipShell>

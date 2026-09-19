@@ -468,6 +468,14 @@ export interface StatsOverview {
     played_date?: string;
     played_time?: string;
   }[];
+  league_results: {
+    won: boolean;
+    trophy_change: number;
+    opponent_name?: string;
+    played_date?: string;
+    played_time?: string;
+  }[];
+  is_absolute_champion: boolean;
   activity_heatmap: number[][];
   avg_time?: number;
 }
