@@ -697,6 +697,11 @@ export function BattleDetailPage() {
             <span className="font-bold">{battle.won ? "Победа" : "Поражение"}</span>
           </div>
           {battle.is_ranked ? <BattleLeagueBadgeLabel className="text-xs" /> : null}
+          {!battle.is_ranked && battle.mode_label ? (
+            <span className="inline-flex items-center rounded-md bg-cr-accent/15 px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wide text-cr-accent">
+              {battle.mode_label}
+            </span>
+          ) : null}
           <div
             className={cn(
               "inline-flex items-center gap-1 text-base font-bold",

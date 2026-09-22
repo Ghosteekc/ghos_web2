@@ -276,6 +276,8 @@ export interface BattleSummary {
   timestamp: string;
   played_at?: string;
   is_ranked?: boolean;
+  /** Omitted for league battles: the league mark is more specific. */
+  mode_label?: string | null;
   user_league?: BattleLeagueBadge | null;
   opponent_league?: BattleLeagueBadge | null;
 }
@@ -388,6 +390,7 @@ export interface BattleDetail {
   match_plan?: MatchPlan | null;
   battle_coach?: BattleCoach | null;
   is_ranked?: boolean;
+  mode_label?: string | null;
   user_league?: BattleLeagueBadge | null;
   opponent_league?: BattleLeagueBadge | null;
   /** false when Ghosteek Pro is required for the deep analysis blocks. */

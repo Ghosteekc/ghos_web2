@@ -155,6 +155,11 @@ function BattleCardSimpleInner({ summary, onOpen }: BattleCardSimpleProps) {
               {summary.won ? "Победа" : "Поражение"}
             </span>
             {summary.is_ranked ? <BattleLeagueBadgeLabel /> : null}
+            {!summary.is_ranked && summary.mode_label ? (
+              <span className="inline-flex items-center rounded-md bg-cr-accent/15 px-1.5 py-0.5 text-3xs font-bold uppercase tracking-wide text-cr-accent">
+                {summary.mode_label}
+              </span>
+            ) : null}
           </div>
           <span
             className={cn(
