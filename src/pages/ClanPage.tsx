@@ -108,8 +108,6 @@ export function ClanPage() {
     content = (
       <div className="space-y-5">
         <Card className="relative overflow-hidden border-cr-blue/30 shadow-glow">
-          <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-br from-cr-blue/25 via-cr-blue/5 to-cr-gold/10 pointer-events-none" />
-          <div className="absolute -right-10 -top-12 w-36 h-36 rounded-full bg-cr-gold/10 blur-2xl pointer-events-none" />
           <div className="relative flex items-start gap-3">
             <div className="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br from-cr-blue/30 to-cr-blue/5 border border-cr-blue/40 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_7px_16px_rgba(0,0,0,0.2)] flex items-center justify-center">
               <Shield className="w-6 h-6 text-cr-blue" />
