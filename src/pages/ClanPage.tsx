@@ -165,10 +165,13 @@ export function ClanPage() {
 
           <Card className="!p-0 mt-2 border-cr-blue/20 shadow-[0_10px_24px_rgba(0,0,0,0.14)]" noMotion>
             {data.members.map((member, index) => (
-              <div
+              <button
                 key={member.tag}
+                type="button"
+                onClick={() => navigate(`/player/${encodeURIComponent(member.tag.replace(/^#/, ""))}`)}
+                aria-label={`Открыть профиль игрока ${member.name}`}
                 className={
-                  "flex items-center gap-3 px-4 py-3 " +
+                  "flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-cr-surface/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-cr-blue " +
                   (index > 0 ? "border-t border-cr-border" : "") +
                   (member.tag === data.current_player_tag
                     ? " bg-gradient-to-r from-cr-blue/20 via-cr-blue/10 to-transparent shadow-[inset_3px_0_0_rgb(var(--cr-blue))]"
@@ -193,7 +196,7 @@ export function ClanPage() {
                     <Zap className="w-3 h-3 text-cr-gold" /> {member.donations}
                   </p>
                 </div>
-              </div>
+              </button>
             ))}
             {data.members.length === 0 ? (
               <p className="px-4 py-10 text-center text-sm text-cr-muted">Состав клана пока недоступен.</p>
