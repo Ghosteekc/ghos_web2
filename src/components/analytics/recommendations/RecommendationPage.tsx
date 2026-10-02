@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { api, ApiError } from "@/api/client";
+import { api } from "@/api/client";
 import { cacheGet, cacheHas } from "@/api/cache";
 import { Card, ErrorState, EmptyState } from "@/components/ui";
 import { usePageRefresh } from "@/hooks";
@@ -21,8 +21,8 @@ export function RecommendationsPanel() {
     setError(null);
     try {
       setData(await api.getMetaUpgradePriorities());
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Не удалось загрузить рекомендации по прокачке");
+    } catch {
+      setError("Не удалось загрузить рекомендации по прокачке. Попробуй обновить страницу позже.");
     } finally {
       setLoading(false);
     }
