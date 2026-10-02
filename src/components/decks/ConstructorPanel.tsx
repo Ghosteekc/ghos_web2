@@ -1,4 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { motionTween } from "@/motion";
 import { HelpCircle, Search, Sparkles, X } from "lucide-react";
@@ -215,7 +216,7 @@ function ghosteekRecommendation(names: string[]): string {
 }
 
 function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
-  return (
+  return createPortal(
     <motion.div
       className="ctor-sheet-root"
       role="dialog"
@@ -236,27 +237,37 @@ function ConstructorHelpSheet({ onClose }: { onClose: () => void }) {
       >
         <div className="ctor-sheet-handle" aria-hidden />
         <h2 id="ctor-help-title" className="ctor-sheet-title">
-          Как пользоваться
+          Как собрать колоду
         </h2>
-        <ul className="ctor-sheet-list">
-          <li>Нажми слот — он станет активным.</li>
-          <li>Выбери карту внизу — она встанет в этот слот.</li>
-          <li>
-            Слот 1 — только эволюция, слот 2 — только герой или чемпион, слот 3 —
-            гибрид (эволюция / героизм / чемпион), слот 4 — обычная карта без
-            улучшений.
-          </li>
-          <li>Когда все 4 карты на месте, Ghosteek соберёт полные колоды.</li>
-          <li>
-            Включи «Только метовые колоды», чтобы видеть готовые колоды топ-500
-            и актуальной меты с винрейтом и числом боёв.
-          </li>
-        </ul>
+        <div className="ctor-sheet-content">
+          <section className="ctor-sheet-section">
+            <h3>1. Выбери основу</h3>
+            <p>Нажми на слот, затем выбери карту из списка ниже.</p>
+          </section>
+          <section className="ctor-sheet-section">
+            <h3>2. Учитывай тип слота</h3>
+            <ul className="ctor-sheet-slot-rules">
+              <li><strong>Слот 1</strong><span>Эволюция</span></li>
+              <li><strong>Слот 2</strong><span>Герой или чемпион</span></li>
+              <li><strong>Слот 3</strong><span>Эволюция, герой или чемпион</span></li>
+              <li><strong>Слот 4</strong><span>Обычная карта</span></li>
+            </ul>
+          </section>
+          <section className="ctor-sheet-section">
+            <h3>3. Получи варианты</h3>
+            <p>После выбора 4 карт Ghosteek соберёт полные колоды.</p>
+          </section>
+          <section className="ctor-sheet-note">
+            <strong>Только метовые колоды</strong>
+            <p>Показывает совпадения из топ-500 и актуальной меты.</p>
+          </section>
+        </div>
         <Button variant="primary" className="w-full mt-4" onClick={onClose}>
           Понятно
         </Button>
       </motion.div>
-    </motion.div>
+    </motion.div>,
+    document.body,
   );
 }
 

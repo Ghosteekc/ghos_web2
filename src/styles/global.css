@@ -1052,7 +1052,7 @@
   .ctor-sheet-root {
     position: fixed;
     inset: 0;
-    z-index: 80;
+    z-index: 100;
     display: flex;
     align-items: flex-end;
     justify-content: center;
@@ -1068,11 +1068,11 @@
   .ctor-sheet {
     position: relative;
     z-index: 1;
-    width: min(100%, 32rem);
-    max-height: min(78vh, 34rem);
+    width: min(100%, 34rem);
+    max-height: min(86dvh, 38rem);
     overflow-y: auto;
-    padding: 0.65rem 1.15rem 1.35rem;
-    border-radius: 1.4rem 1.4rem 0 0;
+    padding: 0.65rem 1.25rem calc(1.25rem + var(--device-safe-bottom));
+    border-radius: 1.5rem 1.5rem 0 0;
     background: rgb(var(--cr-card));
     border: 1px solid rgb(var(--cr-border) / 0.4);
     border-bottom: none;
@@ -1088,21 +1088,75 @@
   }
 
   .ctor-sheet-title {
-    margin: 0 0 0.75rem;
+    margin: 0 0 1rem;
     font-family: "Supercell Magic", "SC CCBackBeat", sans-serif;
     font-size: 1.15rem;
     color: rgb(var(--cr-text));
   }
 
-  .ctor-sheet-list {
-    margin: 0;
-    padding-left: 1.1rem;
+  .ctor-sheet-content {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 0.9rem;
+  }
+
+  .ctor-sheet-section h3,
+  .ctor-sheet-note strong {
+    display: block;
+    margin: 0 0 0.3rem;
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: rgb(var(--cr-text));
+  }
+
+  .ctor-sheet-section p,
+  .ctor-sheet-note p {
+    margin: 0;
     color: rgb(var(--cr-text) / 0.92);
-    font-size: 0.92rem;
-    line-height: 1.4;
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+
+  .ctor-sheet-slot-rules {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ctor-sheet-slot-rules li {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.45rem 0.5rem;
+    border: 1px solid rgb(var(--cr-border) / 0.42);
+    border-radius: 0.65rem;
+    background: rgb(var(--cr-bg) / 0.35);
+  }
+
+  .ctor-sheet-slot-rules strong {
+    font-size: 0.76rem;
+    color: rgb(var(--cr-gold));
+  }
+
+  .ctor-sheet-slot-rules span {
+    font-size: 0.76rem;
+    line-height: 1.2;
+    color: rgb(var(--cr-text) / 0.9);
+  }
+
+  .ctor-sheet-note {
+    padding: 0.65rem 0.75rem;
+    border-radius: 0.75rem;
+    background: rgb(var(--cr-gold) / 0.1);
+    border: 1px solid rgb(var(--cr-gold) / 0.25);
+  }
+
+  .ctor-sheet-note strong {
+    color: rgb(var(--cr-gold));
   }
 
   [data-theme="light"] .ctor-title,
