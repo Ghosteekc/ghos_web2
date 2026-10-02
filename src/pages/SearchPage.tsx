@@ -9,26 +9,18 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Card, Button, ErrorState, EmptyState, Loader, PageHeader } from "@/components/ui";
-import { api, ApiError, isProRequiredError } from "@/api/client";
+import { api, ApiError } from "@/api/client";
 import { SearchResult } from "@/types";
 import { usePageRefresh } from "@/hooks";
-import { useGhosteekPro } from "@/hooks/useGhosteekPro";
-import { ProGate } from "@/components/pro";
 
 export function SearchPage() {
   const navigate = useNavigate();
-  const { isPro, loading: proLoading } = useGhosteekPro();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [history, setHistory] = useState<string[]>([]);
-  const [locked, setLocked] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isPro) setLocked(false);
-  }, [isPro]);
 
   const search = useCallback(async (q: string) => {
     const trimmed = q.trim();
@@ -41,10 +33,7 @@ export function SearchPage() {
       setHistory((prev) => [trimmed, ...prev.filter((h) => h !== trimmed)].slice(0, 8));
     } catch (e) {
       setResults([]);
-      if (isProRequiredError(e)) {
-        setLocked(true);
-        setError(null);
-      } else if (e instanceof ApiError) {
+      if (e instanceof ApiError) {
         setError(e.message);
       } else {
         setError("Не удалось найти игрока");
@@ -88,23 +77,6 @@ export function SearchPage() {
       <ArrowLeft className="w-5 h-5" />
     </Button>
   );
-
-  if (proLoading) {
-    return (
-      <div className="flex justify-center py-16">
-        <Loader />
-      </div>
-    );
-  }
-
-  if (!isPro || locked) {
-    return (
-      <div className="space-y-4">
-        <PageHeader title="Поиск игроков" action={backButton} />
-        <ProGate feature="player_search" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">

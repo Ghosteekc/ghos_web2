@@ -1,9 +1,8 @@
-import { Bot, LineChart, Search, Swords, Wand2 } from "lucide-react";
+import { Bot, LineChart, Swords, Wand2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type ProFeatureId =
   | "ai_coach"
-  | "player_search"
   | "deck_improve"
   | "battle_detail"
   | "meta"
@@ -45,13 +44,6 @@ export const PRO_FEATURES: ProFeature[] = [
     title: "Полная мета",
     description:
       "Открывай весь актуальный список метовых колод, а не только первые пять.",
-  },
-  {
-    id: "player_search",
-    icon: Search,
-    title: "Поиск игроков",
-    description:
-      "Позволяет находить игроков и просматривать доступную игровую статистику.",
   },
 ];
 
