@@ -11,7 +11,7 @@ import { formatNumber } from "@/utils";
 const ACTIVITY_FILTERS: { value: ClanMemberSort; label: string }[] = [
   { value: "rank", label: "Все" },
   { value: "activity_desc", label: "Активные" },
-  { value: "activity_asc", label: "Малоактивные" },
+  { value: "activity_asc", label: "Неактивные" },
 ];
 
 const ROLE_LABELS: Record<string, string> = {
