@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { api } from "@/api/client";
 import { lsGet, lsSet, TTL } from "@/api/cache";
 
-const CATALOG_LS_KEY = "card-catalog-v9";
+const CATALOG_LS_KEY = "card-catalog-v10";
 
 /** Local season arts when official CDN lags (served from /public/cards). */
 const LOCAL_CARD_ART: Record<

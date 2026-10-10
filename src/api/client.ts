@@ -885,7 +885,7 @@ export const api = {
         icon_evo?: string;
         icon_hero?: string;
       }[];
-    }>("catalog-v4", "/api/cards/catalog", TTL.stats),
+    }>("catalog-v5", "/api/cards/catalog", TTL.stats),
 
 
 
