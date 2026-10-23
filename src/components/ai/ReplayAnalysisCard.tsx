@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Clapperboard, X } from "lucide-react";
+import { Clapperboard, LockKeyhole, X } from "lucide-react";
 import { api } from "@/api/client";
 import { CardTile } from "@/components/cards";
 import {
@@ -7,6 +7,7 @@ import {
   formatReplayDuration,
   formatReplayFramesLabel,
   formatReplayMomentTime,
+  REPLAY_ANALYSIS_AVAILABLE,
   type AiReplayCardData,
   type ReplayVisualMomentView,
 } from "@/components/ai/replay";
@@ -222,16 +223,18 @@ export function ReplayAnalysisCard({ card, onAnalyzeAnother }: Props) {
             {expanded ? "Свернуть" : "Подробнее"}
           </Button>
         ) : null}
-        {onAnalyzeAnother ? (
-          <Button
-            type="button"
-            variant="secondary"
-            className="ai-replay-action-btn"
-            onClick={onAnalyzeAnother}
-          >
-            Разобрать другой реплей
-          </Button>
-        ) : null}
+        <Button
+          type="button"
+          variant="secondary"
+          className="ai-replay-action-btn"
+          disabled={!REPLAY_ANALYSIS_AVAILABLE || !onAnalyzeAnother}
+          onClick={onAnalyzeAnother}
+          aria-label={REPLAY_ANALYSIS_AVAILABLE ? "Разобрать другой реплей" : "Разобрать другой реплей — пока недоступно"}
+        >
+          {!REPLAY_ANALYSIS_AVAILABLE ? <LockKeyhole className="w-4 h-4" aria-hidden /> : null}
+          Разобрать другой реплей
+          {!REPLAY_ANALYSIS_AVAILABLE ? " · скоро" : null}
+        </Button>
       </div>
 
       {lightbox ? (

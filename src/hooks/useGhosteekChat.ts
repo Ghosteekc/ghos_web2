@@ -14,6 +14,7 @@ import {
   buildReplayAnalysis,
   isAllowedReplayVideo,
   isReplayBusyStatus,
+  REPLAY_ANALYSIS_AVAILABLE,
   REPLAY_CLIENT_COMPRESS_OVER_BYTES,
   REPLAY_MAX_SIZE_BYTES,
   REPLAY_MSG,
@@ -285,7 +286,7 @@ export function useGhosteekChat() {
   );
 
   const beginReplaySelect = useCallback(() => {
-    if (loading) return;
+    if (!REPLAY_ANALYSIS_AVAILABLE || loading) return;
     setReplayStatus("selecting");
     setError(null);
   }, [loading]);
@@ -296,6 +297,7 @@ export function useGhosteekChat() {
 
   const submitReplayFile = useCallback(
     async (file: File | null) => {
+      if (!REPLAY_ANALYSIS_AVAILABLE) return;
       if (!file) {
         setReplayStatus((current) => (current === "selecting" ? "idle" : current));
         return;

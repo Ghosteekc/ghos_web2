@@ -1,10 +1,10 @@
 import { useEffect, useRef, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Bot, RotateCcw, Send, X } from "lucide-react";
+import { ArrowLeft, Bot, LockKeyhole, RotateCcw, Send, X } from "lucide-react";
 import { Button, EmptyState, Loader, PageHeader } from "@/components/ui";
 import { ChatBubble, ChatTypingRow } from "@/components/ai/ChatBubble";
 import { CHAT_PRESETS } from "@/components/ai/chatTypes";
-import { isReplayBusyStatus, REPLAY_MSG } from "@/components/ai/replay";
+import { isReplayBusyStatus, REPLAY_ANALYSIS_AVAILABLE, REPLAY_MSG } from "@/components/ai/replay";
 import { useGhosteekChat } from "@/hooks/useGhosteekChat";
 import { cn } from "@/utils";
 import { internalPressableProps } from "@/utils/nativeCallout";
@@ -96,7 +96,7 @@ function AiCoachChat() {
   };
 
   const onReplayButtonClick = () => {
-    if (busy) return;
+    if (!REPLAY_ANALYSIS_AVAILABLE || busy) return;
     beginReplaySelect();
     replayInputRef.current?.click();
   };
@@ -104,6 +104,7 @@ function AiCoachChat() {
   const onReplayFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
     e.target.value = "";
+    if (!REPLAY_ANALYSIS_AVAILABLE) return;
     void submitReplayFile(file);
   };
 
@@ -222,6 +223,7 @@ function AiCoachChat() {
           ref={replayInputRef}
           type="file"
           accept="video/*"
+          disabled={!REPLAY_ANALYSIS_AVAILABLE}
           className="hidden"
           tabIndex={-1}
           aria-hidden
@@ -231,11 +233,14 @@ function AiCoachChat() {
           <Button
             type="button"
             variant="secondary"
-            disabled={busy}
+            disabled={!REPLAY_ANALYSIS_AVAILABLE || busy}
             onClick={onReplayButtonClick}
             className="ai-replay-btn"
+            aria-label={REPLAY_ANALYSIS_AVAILABLE ? "Разобрать реплей" : "Разобрать реплей — пока недоступно"}
           >
+            {!REPLAY_ANALYSIS_AVAILABLE ? <LockKeyhole className="w-4 h-4" aria-hidden /> : null}
             Разобрать реплей
+            {!REPLAY_ANALYSIS_AVAILABLE ? " · скоро" : null}
           </Button>
         </div>
         <div className="ai-composer-box glass-card !p-0">

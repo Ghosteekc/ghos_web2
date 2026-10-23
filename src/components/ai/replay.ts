@@ -3,6 +3,7 @@
 import type { ReplayAnalyzeSuccess } from "@/api/client";
 
 export const REPLAY_MAX_SIZE_BYTES = 250 * 1024 * 1024;
+export const REPLAY_ANALYSIS_AVAILABLE = false;
 export const REPLAY_CLIENT_COMPRESS_OVER_BYTES = 32 * 1024 * 1024;
 export const REPLAY_MAX_DURATION_SECONDS = 8 * 60;
 
