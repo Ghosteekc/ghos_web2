@@ -5,6 +5,7 @@ import { cn } from "@/utils";
 import { internalPressableProps } from "@/utils/nativeCallout";
 import type { ProPlan } from "@/types";
 import { ProStarPrice } from "./ProStarPrice";
+import { approvedLegalUrl, purchaseInfo } from "./purchaseInfo";
 
 function monthsWord(n: number): string {
   if (n === 1) return "месяц";
@@ -52,6 +53,9 @@ export function ProPlanPicker({
   );
 
   const untilLabel = formatDiscountUntil(referralDiscountExpiresAt);
+  const selectedInfo = selected ? purchaseInfo(selected) : null;
+  const termsUrl = approvedLegalUrl(import.meta.env.VITE_PRO_TERMS_URL);
+  const refundUrl = approvedLegalUrl(import.meta.env.VITE_PRO_REFUND_POLICY_URL);
 
   if (!plans.length) return null;
 
@@ -137,6 +141,20 @@ export function ProPlanPicker({
       {selected ? (
         <Card className="!p-3 ui-enter space-y-3" delay={0.12}>
           <CheckoutBreakdown plan={selected} />
+          <div className="rounded-xl border border-cr-border/40 px-3 py-2.5 text-sm leading-snug text-cr-text space-y-1.5" aria-label="Условия покупки Ghosteek Pro">
+            <p>
+              К оплате сейчас: <span className="font-semibold tabular-nums">{selectedInfo?.stars} Stars (XTR)</span>
+            </p>
+            <p>Срок выбранного тарифа: <span className="font-semibold">{selectedInfo?.duration}</span>.</p>
+            <p>Разовый платёж внутри Telegram. Автосписаний нет.</p>
+            <p>Вопрос по оплате? Напиши боту <span className="font-semibold">/paysupport</span>.</p>
+            {termsUrl || refundUrl ? (
+              <p className="flex flex-wrap gap-x-3 gap-y-1 text-cr-muted">
+                {termsUrl ? <a className="underline underline-offset-2" href={termsUrl} target="_blank" rel="noopener noreferrer">Условия использования</a> : null}
+                {refundUrl ? <a className="underline underline-offset-2" href={refundUrl} target="_blank" rel="noopener noreferrer">Условия возврата</a> : null}
+              </p>
+            ) : null}
+          </div>
           <Button
             variant="primary"
             className="pro-plan-cta w-full !py-3 text-base flex items-center justify-center gap-2"
@@ -167,8 +185,7 @@ export function ProPlanPicker({
       ) : null}
 
       <p className="text-xs text-cr-muted leading-snug">
-        Оплата проходит внутри Telegram через Stars (XTR). Подписка продлевается вручную —
-        автосписаний нет. Credits покрывают не больше половины стоимости.
+        Credits покрывают не больше половины стоимости.
       </p>
     </section>
   );

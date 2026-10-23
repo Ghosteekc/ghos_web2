@@ -8,6 +8,7 @@ import { usePageRefresh } from "@/hooks";
 import { api, ApiError } from "@/api/client";
 import { haptic } from "@/utils/hapticManager";
 import type { ProPlan } from "@/types";
+import { invoiceOutcome } from "@/components/pro/purchaseInfo";
 
 function defaultPlanId(plans: ProPlan[]): string | null {
   if (!plans.length) return null;
@@ -89,20 +90,13 @@ export function ProPage() {
         }
         webApp.openInvoice(invoice.invoice_link, (status) => {
           setPaying(null);
+          const outcome = invoiceOutcome(status);
           if (status === "paid") {
             haptic.heavy();
-            setNotice("Оплата прошла. Активируем Ghosteek Pro…");
-            void refresh();
-            return;
           }
-          if (status === "pending") {
-            setNotice("Платёж обрабатывается. Статус обновится автоматически.");
-            void refresh();
-            return;
-          }
-          if (status === "failed") {
-            setPayError("Платёж не прошёл. Попробуй ещё раз.");
-          }
+          if (outcome.notice) setNotice(outcome.notice);
+          if (outcome.error) setPayError(outcome.error);
+          if (outcome.refresh) void refresh();
         });
       } catch (e) {
         setPayError(
