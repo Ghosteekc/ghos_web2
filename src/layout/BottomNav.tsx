@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { animate, motion, useMotionValue, useTransform } from "framer-motion";
+import { animate, motion, useMotionValue } from "framer-motion";
 import { navBubbleTween, navPressSpring } from "@/motion";
 import { haptic } from "@/utils/hapticManager";
 import { MAIN_NAV_ITEMS, getActiveNavId, type MainNavItem } from "./navigation";
@@ -203,7 +203,6 @@ export function BottomNav() {
   const previewIndexRef = useRef<number | null>(null);
   const bubbleX = useMotionValue(0);
   const pressScale = useMotionValue(1);
-  const pressLift = useTransform(pressScale, [1, PRESS_SCALE], [0, -4]);
   const scaleX = useMotionValue(1);
   const scaleY = useMotionValue(1);
   const skipAnimateRef = useRef(true);
@@ -635,7 +634,6 @@ export function BottomNav() {
               className="bottom-nav-liquid-bubble"
               style={{
                 x: bubbleX,
-                y: pressLift,
                 scale: pressScale,
                 scaleX,
                 scaleY,
