@@ -27,6 +27,7 @@ const SearchPage = lazy(() => import("@/pages/SearchPage"));
 const PlayerPreviewPage = lazy(() => import("@/pages/PlayerPreviewPage"));
 const AiCoachPage = lazy(() => import("@/pages/AiCoachPage"));
 const ProPage = lazy(() => import("@/pages/ProPage"));
+const InformationPage = lazy(() => import("@/pages/InformationPage"));
 
 function PageLoader() {
   return (
@@ -77,6 +78,8 @@ export default function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<ProfilePage onInitialLoadComplete={markProfileReady} />} />
           <Route path="profile" element={<Navigate to="/" replace />} />
+          <Route path="information" element={<LazyPage><InformationPage /></LazyPage>} />
+          <Route path="information/:section" element={<LazyPage><InformationPage /></LazyPage>} />
           <Route path="search" element={<Navigate to="/profile/search" replace />} />
           <Route
             path="profile/cards"

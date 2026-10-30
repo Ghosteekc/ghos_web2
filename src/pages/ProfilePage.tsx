@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { Card, Button, Loader, ErrorState, PageHeader } from "@/components/ui";
+import { useNavigate } from "react-router-dom";
+import { Info } from "lucide-react";
+import { Card, Button, Loader, ErrorState, NavRowButton, PageHeader } from "@/components/ui";
 import { ProfileCollectionNav } from "@/components/profile/ProfileCollectionNav";
 import { CardLevelScale } from "@/components/profile/CardLevelScale";
 import { ProfileStatGrid } from "@/components/profile/ProfileStatGrid";
@@ -20,6 +22,7 @@ type ProfilePageProps = {
 };
 
 export function ProfilePage({ onInitialLoadComplete }: ProfilePageProps) {
+  const navigate = useNavigate();
   const { nameRu } = useCardCatalog();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(() => !cacheHas("profile-v8"));
@@ -131,6 +134,13 @@ export function ProfilePage({ onInitialLoadComplete }: ProfilePageProps) {
       )}
 
       <ProfileCollectionNav hasLinkedPlayer={profile?.player_tag != null} />
+
+      <NavRowButton
+        icon={Info}
+        label="Информация для пользователя"
+        hint="Данные, правила и оплата"
+        onClick={() => navigate("/information")}
+      />
 
       <SupercellDisclaimer />
     </div>
