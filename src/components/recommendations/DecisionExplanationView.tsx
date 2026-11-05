@@ -1,20 +1,49 @@
+import { useEffect, useState } from "react";
+import { api } from "@/api/client";
 import { useCardCatalog } from "@/hooks";
 import type { DecisionExplanation, DeckCoaching, RecommendationSwap } from "@/types";
+import { getCardCollectionAvailability } from "./collectionAvailability";
+
+type CollectionLoadState =
+  | { status: "loading" }
+  | { status: "loaded"; cards: unknown }
+  | { status: "failed" };
+
+function availabilityLabel(cardName: string, state: CollectionLoadState): string {
+  if (state.status === "loading") return "Проверяем коллекцию…";
+  if (state.status === "failed") return "Нет данных о коллекции";
+
+  const availability = getCardCollectionAvailability(cardName, state.cards);
+  if (availability.status === "missing") return "Нет в коллекции";
+  if (availability.status === "unknown") return "Нет данных о карте";
+  return availability.level == null
+    ? "В коллекции · уровень не указан"
+    : `В коллекции · уровень ${availability.level}`;
+}
 
 function SwapBlock({
   swap,
   nameRu,
+  collectionState,
 }: {
   swap: RecommendationSwap;
   nameRu: (name: string) => string;
+  collectionState: CollectionLoadState;
 }) {
-  const title = swap.drop
-    ? `${nameRu(swap.drop)} → ${nameRu(swap.pick)}`
-    : nameRu(swap.pick);
-
   return (
     <div className="rounded-xl border border-cr-border/60 bg-cr-bg/40 p-3 space-y-1.5">
-      <p className="text-sm font-semibold text-cr-text">{title}</p>
+      <p className="text-sm font-semibold text-cr-text">
+        {swap.drop ? (
+          <>
+            Убрать: {nameRu(swap.drop)} <span aria-hidden>→</span> Добавить: {nameRu(swap.pick)}
+          </>
+        ) : (
+          <>Предлагаемая карта: {nameRu(swap.pick)}</>
+        )}
+      </p>
+      <p className="text-2xs text-cr-muted" aria-live="polite">
+        {availabilityLabel(swap.pick, collectionState)}
+      </p>
       {swap.reason ? (
         <div>
           <p className="text-2xs uppercase tracking-wide text-cr-muted">Причина</p>
@@ -138,6 +167,8 @@ interface DecisionExplanationViewProps {
   coaching?: DeckCoaching | null;
   /** Swaps допустимы только в явном режиме «Улучшить мою колоду». */
   showSwaps?: boolean;
+  /** Дополнительные варианты, показанные рядом с рекомендацией. */
+  suggestedCards?: string[];
   title?: string;
   className?: string;
   /** Показывать внутренние детали (только для режима разработчика). */
@@ -149,6 +180,7 @@ export function DecisionExplanationView({
   explanation,
   coaching = null,
   showSwaps = true,
+  suggestedCards = [],
   title = "Рекомендации",
   className = "",
   debug = false,
@@ -167,6 +199,36 @@ export function DecisionExplanationView({
           }));
 
   const hasSwaps = showSwaps && swaps.length > 0;
+  const availabilityCards = [...new Set(suggestedCards.filter(Boolean))].filter(
+    (card) => !hasSwaps || !swaps.some((swap) => swap.pick === card),
+  );
+  const hasSuggestedCards = availabilityCards.length > 0;
+  const [collectionState, setCollectionState] = useState<CollectionLoadState>({
+    status: "loading",
+  });
+
+  useEffect(() => {
+    if (!hasSwaps && !hasSuggestedCards) return;
+    let cancelled = false;
+    setCollectionState({ status: "loading" });
+    api
+      .getPlayerCollection()
+      .then((collection) => {
+        if (cancelled) return;
+        if (collection && Array.isArray(collection.cards)) {
+          setCollectionState({ status: "loaded", cards: collection.cards });
+        } else {
+          setCollectionState({ status: "failed" });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setCollectionState({ status: "failed" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [hasSwaps, hasSuggestedCards]);
+
   const hasCoaching =
     !!coaching &&
     (coaching.strengths.some((s) => !/\s\+\s/.test(s)) ||
@@ -174,7 +236,7 @@ export function DecisionExplanationView({
       coaching.usage_tips.length > 0 ||
       (coaching.card_choices?.length ?? 0) > 0);
 
-  if (!hasSwaps && !hasCoaching) return null;
+  if (!hasSwaps && !hasCoaching && !hasSuggestedCards) return null;
 
   const heading = hasSwaps ? title : title || "Как играть колодой";
 
@@ -189,11 +251,27 @@ export function DecisionExplanationView({
               key={`${swap.drop ?? ""}-${swap.pick}-${swap.reason}`}
               swap={swap}
               nameRu={nameRu}
+              collectionState={collectionState}
             />
           ))
         : hasCoaching && coaching
           ? <CoachingBlock coaching={coaching} nameRu={nameRu} />
           : null}
+      {hasSuggestedCards ? (
+        <div className="rounded-xl border border-cr-border/60 bg-cr-bg/30 p-3 space-y-1.5">
+          <p className="text-2xs uppercase tracking-wide text-cr-muted">
+            Доступность других вариантов
+          </p>
+          {availabilityCards.map((card) => (
+            <div key={card} className="flex items-start justify-between gap-3 text-xs">
+              <span className="text-cr-text">{nameRu(card)}</span>
+              <span className="shrink-0 text-right text-cr-muted">
+                {availabilityLabel(card, collectionState)}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : null}
       {debug && import.meta.env.DEV ? (
         <pre className="text-3xs text-cr-muted overflow-auto max-h-40 rounded-lg bg-cr-bg/60 p-2">
           {JSON.stringify(

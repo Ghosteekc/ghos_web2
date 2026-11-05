@@ -225,6 +225,7 @@ export function MineDeckStatsPage() {
       <DecisionExplanationView
         explanation={data.recommendation?.decision_explanation}
         showSwaps={false}
+        suggestedCards={data.improvements.flatMap((item) => item.suggested_cards)}
         className="rounded-2xl border border-cr-border bg-cr-card p-4"
       />
 

@@ -277,6 +277,7 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
                     explanation={analysis.decisionExplanation}
                     coaching={recommendation?.coaching}
                     showSwaps={deck.type !== "constructor" && recommendation?.origin !== "builder"}
+                    suggestedCards={analysis.improvements.flatMap((item) => item.suggested_cards)}
                     title={recommendation?.coaching && !recommendation?.improvement_plan.needed
                       ? "Как играть колодой"
                       : "Рекомендации"}
@@ -289,14 +290,16 @@ export function DeckPassport({ deck, onClose }: DeckPassportProps) {
                     {analysis.improvements.map((item) => (
                       <li key={`${item.category}-${item.message}`} className="text-sm text-cr-text">
                         <p>{item.message}</p>
-                        {item.suggested_cards.length > 0 && (
-                          <p className="text-cr-muted text-2xs mt-0.5">
-                            {item.suggested_cards.map((c) => nameRu(c)).join(", ")}
-                          </p>
-                        )}
                       </li>
                     ))}
                   </ul>
+                  <DecisionExplanationView
+                    explanation={null}
+                    showSwaps={false}
+                    suggestedCards={analysis.improvements.flatMap((item) => item.suggested_cards)}
+                    title="Доступность предложенных карт"
+                    className="mt-3"
+                  />
                 </Card>
               ) : null}
 
