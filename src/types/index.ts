@@ -29,13 +29,22 @@ export interface MetaUpgradePriorityCard {
 }
 
 export interface MetaUpgradeRecommendationsData {
-  status: "ok" | "meta_unavailable" | "deck_unavailable" | "no_matching_cards";
+  status: "ok" | "no_current_deck" | "no_collection" | "meta_unavailable" | "no_meta_matches";
   message: string | null;
   arena: number;
-  recommended_level: number;
+  recommended_level: number | null;
   updated_at: string | null;
   sample_note: string;
+  current_deck_cards: UpgradeCurrentDeckCard[];
   cards: MetaUpgradePriorityCard[];
+}
+
+export interface UpgradeCurrentDeckCard {
+  name: string;
+  name_ru: string;
+  icon: string;
+  level: number | null;
+  max_level: number | null;
 }
 
 export interface CardLevelCount {
@@ -264,6 +273,7 @@ export interface BattleSummary {
   opponent_tag: string;
   opponent_trophies: number;
   won: boolean;
+  outcome?: "win" | "loss" | "draw" | "unknown";
   trophy_change: number;
   matchup_score: number | null;
   duration: number;
@@ -364,6 +374,7 @@ export interface BattleCoach {
 export interface BattleDetail {
   index: number;
   won: boolean;
+  outcome?: "win" | "loss" | "draw" | "unknown";
   opponent_name: string;
   opponent_tag?: string;
   trophy_change: number;
@@ -456,16 +467,19 @@ export interface StatsOverview {
   wins: number;
   losses: number;
   draws: number;
+  unknowns?: number;
+  scored_games?: number;
   winrate: number;
   avg_elixir: number;
   max_trophies: number;
-  winrate_by_day: { date: string; wins: number; losses: number; winrate: number }[];
+  winrate_by_day: { date: string; wins: number; losses: number; draws?: number; unknowns?: number; scored_games?: number; winrate: number }[];
   winrate_by_hour: { hour: number; wins: number; total: number }[];
   best_cards: { name: string; count: number }[];
   most_used_cards: { name: string; count: number; winrate: number }[];
   archetypes: { name: string; value: number }[];
   last_results: {
     won: boolean;
+    outcome?: "win" | "loss" | "draw" | "unknown";
     trophy_change: number;
     opponent_name?: string;
     played_date?: string;
@@ -473,6 +487,7 @@ export interface StatsOverview {
   }[];
   league_results: {
     won: boolean;
+    outcome?: "win" | "loss" | "draw" | "unknown";
     trophy_change: number;
     opponent_name?: string;
     played_date?: string;
@@ -545,6 +560,12 @@ export interface MetaLadderData {
   message: string | null;
   sample_note: string;
   updated_at: string | null;
+  attempted_at?: string | null;
+  collection_status?: "complete" | "no_new_data" | "partial" | "rate_limited" | "failed" | "no_data" | "legacy" | string;
+  sample_started_at?: string | null;
+  last_battle_at?: string | null;
+  is_cumulative?: boolean;
+  sample_origin?: string;
   min_games: number;
   decks: MetaLadderDeck[];
   is_pro?: boolean;
@@ -746,6 +767,9 @@ export interface MineDeckStats {
   cards: DeckCard[];
   wins: number;
   losses: number;
+  draws?: number;
+  unknowns?: number;
+  scored_games?: number;
   total_games: number;
   winrate: number;
   avg_elixir: number;
@@ -773,6 +797,7 @@ export interface RandomDeck {
 export interface BattleInsight {
   battle_index: number;
   won: boolean;
+  outcome?: "win" | "loss" | "draw" | "unknown";
   opponent_name: string;
   summary: string;
   matchup_score: number;
@@ -787,13 +812,16 @@ export interface InsightsData {
   sample_size: number;
   wins: number;
   losses: number;
+  analysis_status?: "ok" | "no_battles" | "no_losses" | "insufficient" | "error";
+  analysis_message?: string | null;
 }
 
 export interface LossThreatInsight {
   card: string;
   card_ru: string;
   losses: number;
-  counter_status: "strong" | "partial" | "missing";
+  counter_status: "strong" | "partial" | "not_found" | "unknown";
+  counter_check_performed?: boolean;
   strong_counters: string[];
   partial_counters: string[];
   win_conditions: string[];
@@ -849,6 +877,9 @@ export interface WinrateEntry {
   deck_cards?: DeckCard[];
   wins: number;
   losses: number;
+  draws?: number;
+  unknowns?: number;
+  scored_games?: number;
   total: number;
   winrate: number;
   /** ISO battle time of the most recent game with this deck (CR API format). */
@@ -863,6 +894,7 @@ export interface OpponentEntry {
   threats: string[];
   avg_elixir: number;
   won_against: boolean;
+  outcome?: "win" | "loss" | "draw" | "unknown";
 }
 
 export interface CounterDeckData {

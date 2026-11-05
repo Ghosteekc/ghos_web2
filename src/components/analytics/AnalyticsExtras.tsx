@@ -9,6 +9,7 @@ import { CardDeckGrid, CardTile, PlayerDeckGrid } from "@/components/cards";
 import { ProGate } from "@/components/pro";
 import { useCardCatalog, useGhosteekPro, usePageRefresh, useTelegram } from "@/hooks";
 import { battleDetailPath, cn } from "@/utils";
+import { lossAnalysisEmptyMessage } from "@/utils/lossAnalysisState";
 import type { CounterDeckData, CustomizeData, Deck, InsightsData, OpponentEntry, WinrateEntry } from "@/types";
 
 function decksEqual(a: string[], b: string[]) {
@@ -117,6 +118,12 @@ export function DeckWinratesPanel({ onAnalyze }: { onAnalyze?: (deck: Deck) => v
                 <span className="text-cr-win">{row.wins} побед</span>
                 <span className="text-cr-muted"> · </span>
                 <span className="text-cr-loss">{row.losses} поражений</span>
+                {(row.draws ?? 0) > 0 ? (
+                  <>
+                    <span className="text-cr-muted"> · </span>
+                    <span className="text-cr-gold">{row.draws} ничьих</span>
+                  </>
+                ) : null}
                 <span className="text-cr-muted"> · {row.total} игр</span>
               </span>
               <span className={`text-base font-bold ${row.winrate >= 50 ? "text-cr-win" : "text-cr-loss"}`}>
@@ -262,7 +269,13 @@ export function OpponentsPanel() {
                   {opp.name}
                 </p>
                 <p className="text-sm text-cr-muted mt-0.5">
-                  {opp.won_against ? "Ты побеждал эту колоду" : "Ты проигрывал этой колоде"} · эликсир {opp.avg_elixir.toFixed(1)}
+                  {opp.outcome === "draw"
+                    ? "Ничья с этой колодой"
+                    : opp.outcome === "unknown"
+                      ? "Итог не подтверждён"
+                      : opp.won_against
+                        ? "Ты побеждал эту колоду"
+                        : "Ты проигрывал этой колоде"} · эликсир {opp.avg_elixir.toFixed(1)}
                 </p>
               </div>
               <Button
@@ -576,7 +589,7 @@ export function LossAnalysisPanel() {
   }, [load]);
 
   const lossInsights = useMemo(
-    () => (insights?.insights ?? []).filter((item) => !item.won).slice(0, 7),
+    () => (insights?.insights ?? []).filter((item) => (item.outcome ?? (item.won ? "win" : "loss")) === "loss").slice(0, 7),
     [insights?.insights],
   );
 
@@ -584,6 +597,15 @@ export function LossAnalysisPanel() {
   if (error) return <AnalyticsPanelReveal loading={false}><ErrorState title={error} /></AnalyticsPanelReveal>;
   if (!insights) {
     return <AnalyticsPanelReveal loading={false}><EmptyState title="Сыграй бои — здесь появится разбор твоих поражений" /></AnalyticsPanelReveal>;
+  }
+
+  const emptyAnalysisMessage = lossAnalysisEmptyMessage(
+    insights.analysis_status,
+    insights.analysis_message,
+    Boolean(insights.patterns.length || insights.threats.length || lossInsights.length),
+  );
+  if (emptyAnalysisMessage) {
+    return <AnalyticsPanelReveal loading={false}><EmptyState title={emptyAnalysisMessage} /></AnalyticsPanelReveal>;
   }
 
   if (!insights.patterns.length && !insights.threats.length && !lossInsights.length) {
@@ -616,7 +638,7 @@ export function LossAnalysisPanel() {
           <div className="flex items-center gap-2 mb-2">
             <Target className="w-4 h-4 text-cr-gold" />
             <h4 id="loss-threats-heading" className="text-sm font-semibold text-cr-text">
-              Частые угрозы
+              Повторяющиеся потенциальные угрозы
             </h4>
           </div>
           <div className="space-y-2">
@@ -628,23 +650,25 @@ export function LossAnalysisPanel() {
                 ? `Сильный ответ в этой колоде: ${counters.join(", ")}`
                 : threat.counter_status === "partial"
                   ? `Частичный ответ в этой колоде: ${counters.join(", ")}`
-                  : "В этой колоде нет подтверждённого ответа.";
+                  : threat.counter_status === "not_found" && threat.counter_check_performed
+                    ? "Подтверждённый ответ в этой колоде не найден. Это не означает, что у карты нет игровых контр."
+                    : "Не удалось определить: проверка ответа не выполнилась или данных недостаточно.";
               const tone = threat.counter_status === "strong"
                 ? "text-cr-win bg-cr-win/10 border-cr-win/20"
                 : threat.counter_status === "partial"
                   ? "text-cr-gold bg-cr-gold/10 border-cr-gold/20"
-                  : "text-cr-loss bg-cr-loss/10 border-cr-loss/20";
+                  : "text-cr-muted bg-cr-surface/70 border-cr-border";
               return (
                 <article key={threat.card} className="rounded-xl border border-cr-border bg-cr-surface/50 p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-cr-text">{threat.card_ru}</p>
                       <p className="text-xs text-cr-muted mt-0.5">
-                        Встречалась в {threat.losses} {threat.losses === 1 ? "поражении" : "поражениях"}
+                        Была в колоде соперника в {threat.losses} {threat.losses === 1 ? "поражении" : "поражениях"}
                       </p>
                     </div>
                     <span className={`shrink-0 rounded-full border px-2 py-1 text-[11px] font-semibold ${tone}`}>
-                      {threat.counter_status === "strong" ? "Ответ есть" : threat.counter_status === "partial" ? "Слабый ответ" : "Нет ответа"}
+                      {threat.counter_status === "strong" ? "Ответ есть" : threat.counter_status === "partial" ? "Частичный ответ" : threat.counter_status === "not_found" && threat.counter_check_performed ? "Ответ не найден" : "Не удалось определить"}
                     </span>
                   </div>
                   <p className="mt-2 text-xs leading-snug text-cr-accent">{counterText}</p>

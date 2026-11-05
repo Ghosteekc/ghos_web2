@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "test:recommendations": "node --experimental-strip-types scripts/recommendationView.selftest.ts",
+    "test:loss-analysis": "node --experimental-strip-types scripts/lossAnalysisState.selftest.ts",
     "preview": "vite preview",
     "lint": "tsc --noEmit"
   },
