@@ -23,6 +23,7 @@ export function InformationPage() {
     <div className="space-y-5 pb-2">
       <PageHeader
         title={selected?.title ?? "Информация для пользователя"}
+        titleClassName={!selected ? "page-title--wrap" : undefined}
         action={<Button variant="ghost" onClick={() => navigate(back)} className="!p-2 shrink-0" aria-label="Назад"><ArrowLeft className="w-5 h-5" /></Button>}
       />
       {!section ? (

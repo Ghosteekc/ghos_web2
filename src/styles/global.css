@@ -3310,6 +3310,17 @@
     align-items: center;
   }
 
+  /* Long titles on informational pages should use the available width rather
+     than truncate behind the back action. */
+  .page-header .page-title--wrap {
+    height: auto;
+    min-height: 2rem;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
   .page-title {
     @apply text-2xl font-cr tracking-tight;
     color: rgb(var(--cr-gold-text));
